@@ -13,15 +13,18 @@
 
     <div id="loading-screen">
         <div class="loader">
+            <div class="sun-glow"></div>
             <div class="wave"></div>
-            <p>바다를 불러오는 중...</p>
+            <p>노을빛 바다를 채우는 중...</p>
         </div>
     </div>
+
+    <div class="sky-bg-overlay"></div>
 
     <div id="app">
         <header>
             <h1>수평선 너머</h1>
-            <p class="subtitle">수평선 너버 바다 속 나의 기록들</p>
+            <p class="subtitle">수평선 너머 노을빛 바다 속 나의 기록들</p>
             <div class="auth-box">
                 <button id="login-btn" onclick="openModal()">관리자 로그인</button>
                 <button id="logout-btn" onclick="logout()" style="display:none;">로그아웃</button>
@@ -38,8 +41,8 @@
 
             <section id="posts-section">
                 <h2>기록된 바다</h2>
-                <div id="posts-container">
-                    </div>
+                <div id="posts-container" class="posts-grid"></div>
+                <div id="pagination-container" class="pagination"></div>
             </section>
         </main>
     </div>
