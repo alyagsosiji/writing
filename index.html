@@ -15,20 +15,29 @@
         <div class="loader">
             <div class="sun-glow"></div>
             <div class="wave-loading"></div>
-            <p>수평선 너머 노을 빛 바다를 불러오는 중...</p>
+            <p>수평선 너머 기록의 바다를 불러오는 중...</p>
         </div>
     </div>
 
     <div class="ocean-background">
         <div class="ocean-deep-water"></div>
-        <div class="yoonseul-shimmer"></div>
-        <div class="yoonseul-wave-texture"></div>
+        <div class="yoonseul-sunlight"></div>
+        <div class="wave-ripple ripple1"></div>
+        <div class="wave-ripple ripple2"></div>
+        <div class="wave-ripple ripple3"></div>
     </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <filter id="yoonseul-glimmer">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.15" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
 
     <div id="app">
         <header>
             <h1 class="main-title">수평선 너머</h1>
-            <p class="subtitle">노을지는 수평선 바다 속 나의 기록들</p>
+            <p class="subtitle">노을지는 수평선 바다 속 기록들</p>
             <div class="auth-box">
                 <div class="auth-flex">
                     <button id="login-btn" onclick="openModal()">관리자 로그인</button>
@@ -52,7 +61,7 @@
             </section>
 
             <section id="posts-section">
-                <h2 class="centered-title">기록된 바다</h2>
+                <h2 class="centered-title">수평선에 기록된 바다</h2>
                 <div id="posts-container" class="posts-grid"></div>
                 <div id="pagination-container" class="pagination"></div>
             </section>
@@ -83,6 +92,15 @@
             <div class="modal-buttons" style="margin-top: 5px;">
                 <button onclick="closeDetailModal()">바다로 돌아가기</button>
             </div>
+        </div>
+    </div>
+
+    <div id="system-modal" class="modal">
+        <div class="modal-content system-modal-box">
+            <h3 id="system-title">안내</h3>
+            <p id="system-message">시스템 메시지 공간</p>
+            <div id="system-buttons" class="modal-buttons" style="margin-top: 20px;">
+                </div>
         </div>
     </div>
 
