@@ -136,33 +136,23 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 
 .system-modal-box p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; text-align: center; }
 
-.pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
+/* 🛠️ 유연한 가로 랩핑으로 설계된 페이지네이션 배열 구조 */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; flex-wrap: wrap; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(247, 163, 127, 0.15); color: #f7a37f; border-color: #f7a37f; }
 .page-btn.active { background: linear-gradient(135deg, #f7a37f, #d07b59); color: #090a14; border-color: #f7a37f; box-shadow: 0 0 12px rgba(247, 163, 127, 0.45); font-weight: bold; }
 .cancel-btn { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-top: 1px solid rgba(247, 163, 127, 0.12); color: #8c8288; font-size: 0.82rem; letter-spacing: 0.8px; }
+
 /* 🔍 제목 검색창 전용 스타일 */
 .search-container {
-    max-width: 450px;
-    margin: 0 auto 35px auto;
-    text-align: center;
+    max-width: 450px; margin: 0 auto 35px auto; text-align: center;
 }
 #search-input {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(247, 163, 127, 0.15);
-    border-radius: 25px;
-    padding: 12px 20px;
-    color: #fff;
-    font-size: 0.9rem;
-    outline: none;
-    text-align: center;
-    transition: all 0.3s ease;
+    width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(247, 163, 127, 0.15);
+    border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.3s ease;
 }
 #search-input:focus {
-    border-color: #f7a37f;
-    background: rgba(12, 9, 11, 0.85);
-    box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
+    border-color: #f7a37f; background: rgba(12, 9, 11, 0.85); box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
 }
