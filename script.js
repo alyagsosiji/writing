@@ -1,30 +1,20 @@
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (CSS !important 강제 해제 패치)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (CSS 클래스 제어 방식 전환 / 타임아웃 무제거 완료)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
-    if (loader && loader.style.display !== 'none') {
-        // 1단계: 부드럽게 투명화 시키면서 마우스 클릭은 즉시 관통하도록 조치
-        loader.style.setProperty('opacity', '0', 'important');
-        loader.style.setProperty('pointer-events', 'none', 'important'); 
-        
-        // 2단계: CSS !important 설정을 강제로 깨부수고 구조적으로 완벽히 숨김 처리 (0.8초 뒤)
-        setTimeout(function() {
-            loader.style.setProperty('display', 'none', 'important');
-            loader.style.setProperty('visibility', 'hidden', 'important');
-        }, 800);
+    if (loader) {
+        // 스타일을 직접 바꾸는 대신 CSS 무결성 클래스를 주입하여 충돌을 원천 차단
+        loader.classList.add('fade-out');
     }
 }
 
-// 브라우저 리소스 로드가 완료되면 즉시 실행 매커니즘
+// 브라우저의 모든 리소스 및 이미지 로드가 순수하게 100% 완료된 시점에만 화면 해제
 if (document.readyState === 'complete') {
     hideLoadingScreen();
 } else {
     window.addEventListener('load', hideLoadingScreen);
 }
-
-// ⏱️ 안전장치: 어떤 이유로든 로딩이 2초 이상 지속되면 강제로 화면 오픈
-setTimeout(hideLoadingScreen, 2000);
 
 // HTML 구조 파싱 완료 즉시 실시간 데이터 동기화 리스너 가동
 document.addEventListener('DOMContentLoaded', function() {
@@ -33,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenLetters();
     } catch (e) {
         console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
-        hideLoadingScreen(); // 예외 발생 시에도 로딩창은 강제로 치워줌
+        hideLoadingScreen(); // 시스템 에러 발생 시 최악의 갇힘 방지 방어선
     }
 });
 
@@ -56,7 +46,7 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), 
+    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
