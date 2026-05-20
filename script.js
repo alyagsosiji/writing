@@ -1,5 +1,5 @@
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (무한 로딩 절대 방지)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (이미지 지연으로 인한 무한 로딩 원천 차단)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
@@ -13,15 +13,15 @@ function hideLoadingScreen() {
     }
 }
 
-// 스크립트 로드 시점에 이미 브라우저가 준비 완료되었다면 즉시 해제, 아니라면 load 완료 즉시 해제
-if (document.readyState === 'complete') {
+// 무거운 이미지 완료 여부와 상관없이, 스크립트와 화면 구조가 준비되면 즉시 로딩창 제거!
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
     hideLoadingScreen();
 } else {
-    window.addEventListener('load', hideLoadingScreen);
+    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
 }
 
-// HTML 구조 파싱 완료 즉시 실시간 데이터 동기화 리스너 가동
-window.addEventListener('DOMContentLoaded', function() {
+// 구조 준비 완료 즉시 실시간 데이터 동기화 리스너 가동
+document.addEventListener('DOMContentLoaded', function() {
     try {
         listenPosts();
         listenLetters();
@@ -44,13 +44,13 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. Base64 데이터 해독 및 무결성 Firebase 연결 (안전망 강화)
+// 2. Base64 데이터 해독 및 무결성 Firebase 연결 (도메인 오타 정밀 수정 완료)
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), // 🛠️ 도메인 디코딩 오타 정밀 복구 완료
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
