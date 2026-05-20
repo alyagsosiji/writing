@@ -1,4 +1,4 @@
-/* 전역 기본기 세팅 및 복제 차단 보안 장치 */
+/* 전역 기본기 세팅 및 강력한 복제 차단 */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -6,43 +6,59 @@
 }
 
 body {
-    /* 하늘과 바다가 융합되는 환상적인 저녁 노을빛 그라데이션 레이아웃 */
-    background: linear-gradient(to bottom, 
-        #0b0d19 0%,    /* 상단: 밤이 찾아오는 하늘 */
-        #181534 32%,   /* 보랏빛 감도는 땅거미 */
-        #3b1a40 52%,   /* 황혼의 자줏빛 연무 */
-        #662243 64%,   /* 노을 경계선 진입 */
-        #b84343 65%,   /* [수평선 정렬 포인트] 타오르는 태양빛 */
-        #1e1338 67%,   /* 노을빛이 반사되는 잔잔한 바다 표면 */
-        #0c081a 100%   /* 하단: 깊고 신비로운 심해 */
-    );
+    background-color: #0c0919;
     color: #f1f5f9;
     min-height: 100vh;
     overflow-x: hidden;
-    background-attachment: fixed;
 }
 
-/* 감성 노을빛 입체 오버레이 */
-.sky-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 65%, rgba(255, 120, 90, 0.22) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
+/* ==========================================
+   🌅 진정한 노을빛 파도 바다 배경 시스템
+   ========================================== */
+.ocean-background {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
+}
+/* 저녁 노을 하늘 그라데이션 */
+.sky-gradient {
+    position: absolute; top: 0; left: 0; width: 100%; height: 60vh;
+    background: linear-gradient(to bottom, #0b0d1b 0%, #1c132e 40%, #4a1936 75%, #a63a3a 100%);
+}
+/* 지는 해 (노을 오렌지 광채) */
+.sun {
+    position: absolute; top: 60vh; left: 50%; transform: translate(-50%, -60%);
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, #ff7e5f 0%, #feb47b 30%, transparent 70%);
+    opacity: 0.6; filter: blur(5px);
+}
+/* 명확한 수평선 경계와 윤슬 라인 */
+.horizon {
+    position: absolute; top: 60vh; left: 0; width: 100%; height: 40vh;
+    background: linear-gradient(to bottom, #1d102b 0%, #0c071a 100%);
+    border-top: 1px solid rgba(254, 180, 123, 0.4);
+    box-shadow: 0 -2px 20px rgba(254, 180, 123, 0.3);
+}
+/* 일렁이는 실시간 파도 애니메이션 레이어 */
+.ocean-waves {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; overflow: hidden; opacity: 0.25;
+}
+.wave-layer {
+    position: absolute; bottom: 0; left: 0; width: 200%; height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,100 300,20 600,60 C900,100 900,20 1200,60 L1200,120 L0,120 Z" fill="%23ff7e5f"/></svg>');
+    background-size: 50% 100%; background-repeat: repeat-x;
+}
+.wave1 { animation: waveMove 12s linear infinite; }
+.wave2 { animation: waveMove 7s linear infinite; opacity: 0.5; bottom: 5px; transform: scaleX(-1); }
+
+@keyframes waveMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
-/* 수평선 경계선 정밀 위치 조율 */
-.horizon-line {
-    position: fixed; top: 65vh; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, #ff9e7d, #ffccd5, #ff9e7d, transparent);
-    pointer-events: none; z-index: 0; 
-    box-shadow: 0 0 15px #ff8e71, 0 0 30px #ff4545;
-    opacity: 0.55;
-}
-
-/* 로딩 스크린 (노을 무드 스핀 연출) */
+/* 로딩 스크린 */
 #loading-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0d19;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0d1b;
     display: flex; justify-content: center; align-items: center; z-index: 9999;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.8s ease;
 }
 .loader { position: relative; text-align: center; }
 .sun-glow {
@@ -50,96 +66,104 @@ body {
     width: 70px; height: 70px; background: radial-gradient(circle, #ff8e71 0%, transparent 70%);
     animation: pulse 2s infinite ease-in-out;
 }
-.wave {
+.wave-loading {
     width: 44px; height: 44px; border: 3px solid transparent;
     border-top-color: #ffb3c6; border-bottom-color: #ff8e71; border-radius: 50%;
     animation: spin 1.8s linear infinite; margin: 0 auto 20px;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(0.9); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); } }
-#loading-screen p { color: #ffb3c6; letter-spacing: 2px; font-size: 0.85rem; text-shadow: 0 0 8px rgba(255, 142, 113, 0.5); }
+#loading-screen p { color: #ffb3c6; letter-spacing: 2px; font-size: 0.85rem; }
 
-/* 메인 대칭 프레임 조율 */
+/* 메인 대칭 프레임 */
 #app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px; }
 header { text-align: center; margin-bottom: 50px; }
 header h1 {
     font-size: 2.6rem; font-weight: 300; letter-spacing: 5px; color: #ffffff;
-    text-shadow: 0 0 20px rgba(255, 179, 198, 0.5), 0 0 40px rgba(255, 142, 113, 0.3);
+    text-shadow: 0 0 20px rgba(255, 179, 198, 0.4), 0 0 40px rgba(255, 142, 113, 0.2);
     margin-bottom: 12px;
 }
 header .subtitle { color: #b9b3d9; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.85; }
 
-/* 글래스모피즘 프리미엄 버튼 인터페이스 */
+/* 🛠️ [위치 교정] 로그인 / 로그아웃 버튼 배치 균형 정렬 */
+.auth-box {
+    margin-top: 25px; display: flex; justify-content: center; align-items: center; min-height: 40px;
+}
+.auth-flex {
+    display: flex; justify-content: center; align-items: center; gap: 10px;
+}
+
+/* 프리미엄 보완 버튼 인터페이스 */
 button {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
     color: #ffe3e8; border: 1px solid rgba(255, 179, 198, 0.25);
     padding: 8px 22px; border-radius: 20px; cursor: pointer;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    transition: all 0.35s ease; font-size: 0.85rem; letter-spacing: 0.5px;
+    transition: all 0.35s ease; font-size: 0.85rem;
 }
 button:hover { border-color: #ff8e71; color: #fff; box-shadow: 0 0 12px rgba(255, 142, 113, 0.4); transform: translateY(-1.5px); }
 .danger-btn { border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
 
-/* 입출력 컴포넌트 여백 밸런싱 */
+/* 입력 영역 스타일 */
 #write-section {
-    background: rgba(18, 15, 32, 0.55); border: 1px solid rgba(255, 179, 198, 0.15);
+    background: rgba(18, 15, 32, 0.6); border: 1px solid rgba(255, 179, 198, 0.15);
     padding: 30px; border-radius: 18px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
     margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.3);
 }
-#write-section h3 { margin-bottom: 20px; color: #ffb3c6; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
+#write-section h3 { margin-bottom: 20px; color: #ffb3c6; font-weight: 400; font-size: 1.05rem; }
 .write-buttons { display: flex; gap: 10px; }
 input[type="text"], textarea {
-    width: 100%; background: rgba(10, 8, 17, 0.65); border: 1px solid rgba(255, 255, 255, 0.07);
+    width: 100%; background: rgba(10, 8, 17, 0.7); border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.3s;
 }
-input[type="text"]:focus, textarea:focus { border-color: #ff8e71; background: rgba(10, 8, 17, 0.85); box-shadow: 0 0 10px rgba(255, 142, 113, 0.15); }
+input[type="text"]:focus, textarea:focus { border-color: #ff8e71; background: rgba(10, 8, 17, 0.85); }
 
-/* 정렬선 매칭 리스트 타이틀 */
-#posts-section h2 { font-size: 1.35rem; font-weight: 400; margin-bottom: 30px; color: #ffb3c6; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255, 179, 198, 0.15); padding-bottom: 12px; }
+/* 🛠️ [정렬 교정] 기록된 바다 타이틀 완전 중앙 정렬 */
+.centered-title {
+    text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px;
+    color: #ffb3c6; letter-spacing: 2px; border-bottom: 1px solid rgba(255, 179, 198, 0.15);
+    padding-bottom: 15px; width: 100%;
+}
 
-/* 2열 구조 격자 정렬 시스템 */
+/* 2열 구조 격자 정렬 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* [긴 글 철저 대응] 엽서 타입의 카드 레이아웃 구조 */
+/* [대응성 완벽 보장] 엽서 타입의 글 카드 스펙 */
 .post-card {
-    background: linear-gradient(135deg, rgba(26, 21, 41, 0.7) 0%, rgba(16, 12, 26, 0.5) 100%);
+    background: linear-gradient(135deg, rgba(26, 21, 41, 0.75) 0%, rgba(16, 12, 26, 0.55) 100%);
     border: 1px solid rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px;
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    position: relative; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    position: relative; transition: all 0.4s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     height: 340px; display: flex; flex-direction: column; justify-content: space-between;
 }
 .post-card:hover { transform: translateY(-4px); border-color: rgba(255, 142, 113, 0.3); box-shadow: 0 12px 30px rgba(255, 142, 113, 0.15); }
-.post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.5px; }
+.post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
 
-/* 초장문 진입 시 카드 크기를 깨트리지 않고 우아한 내부 스크롤을 부여하는 안전 장치 */
+/* 장문 대응 내부 스크롤 가동 */
 .post-content-area {
     color: #cbd5e1; line-height: 1.7; font-size: 0.92rem; white-space: pre-wrap;
     overflow-y: auto; flex-grow: 1; margin-bottom: 15px; padding-right: 8px; text-align: justify;
 }
-/* 스크롤바 감성 디자인 */
 .post-content-area::-webkit-scrollbar { width: 4px; }
 .post-content-area::-webkit-scrollbar-track { background: transparent; }
 .post-content-area::-webkit-scrollbar-thumb { background: rgba(255, 142, 113, 0.25); border-radius: 10px; }
-.post-content-area::-webkit-scrollbar-thumb:hover { background: rgba(255, 142, 113, 0.5); }
 
 .post-footer { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
 .post-card .date { font-size: 0.78rem; color: #8781a3; }
 .card-mgmt-btns { display: flex; gap: 6px; }
 .mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
 
-/* 하단 페이지네이션 컨테이너 */
+/* 페이지네이션 및 모달 */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #b4aed2; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(255, 142, 113, 0.15); color: #ff8e71; border-color: #ff8e71; }
 .page-btn.active { background: linear-gradient(135deg, #ff8e71, #ffb3c6); color: #090a14; border-color: #ff8e71; box-shadow: 0 0 12px rgba(255, 142, 113, 0.45); font-weight: bold; }
 
-/* 모달 디자인 시스템 */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 3, 8, 0.88); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
-.modal-content { background: linear-gradient(145deg, #161224, #0e0a17); border: 1px solid rgba(255, 179, 198, 0.15); padding: 35px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-.modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 300; letter-spacing: 1px; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 3, 8, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
+.modal-content { background: linear-gradient(145deg, #161224, #0e0a17); border: 1px solid rgba(255, 179, 198, 0.15); padding: 35px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center; }
+.modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 300; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); color: #fff; border-radius: 6px; outline: none; }
-.modal-content input:focus { border-color: #ff8e71; }
 .modal-buttons { display: flex; justify-content: space-around; gap: 8px; }
