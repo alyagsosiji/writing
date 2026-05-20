@@ -6,57 +6,78 @@
 }
 
 body {
-    background-color: #0c0919;
+    background-color: #080612;
     color: #f1f5f9;
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 /* ==========================================
-   🌅 진정한 노을빛 파도 바다 배경 시스템
+   🌅 진짜 같은 노을빛 파도 바다 배경 시스템
    ========================================== */
 .ocean-background {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
 }
-/* 저녁 노을 하늘 그라데이션 */
+/* 실제 하늘 같은 그라데이션 */
 .sky-gradient {
-    position: absolute; top: 0; left: 0; width: 100%; height: 60vh;
-    background: linear-gradient(to bottom, #0b0d1b 0%, #1c132e 40%, #4a1936 75%, #a63a3a 100%);
+    position: absolute; top: 0; left: 0; width: 100%; height: 62vh;
+    background: linear-gradient(to bottom, #060713 0%, #110e26 40%, #35132e 70%, #83273e 93%, #b53c3c 100%);
 }
-/* 지는 해 (노을 오렌지 광채) */
+/* 수평선 뒤로 넘어가는 태양 */
 .sun {
-    position: absolute; top: 60vh; left: 50%; transform: translate(-50%, -60%);
-    width: 220px; height: 220px;
-    background: radial-gradient(circle, #ff7e5f 0%, #feb47b 30%, transparent 70%);
-    opacity: 0.6; filter: blur(5px);
+    position: absolute; top: 62vh; left: 50%; transform: translate(-50%, -75%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,140,90,0.7) 0%, rgba(254,180,123,0.3) 45%, transparent 70%);
+    filter: blur(4px);
 }
-/* 명확한 수평선 경계와 윤슬 라인 */
-.horizon {
-    position: absolute; top: 60vh; left: 0; width: 100%; height: 40vh;
-    background: linear-gradient(to bottom, #1d102b 0%, #0c071a 100%);
-    border-top: 1px solid rgba(254, 180, 123, 0.4);
-    box-shadow: 0 -2px 20px rgba(254, 180, 123, 0.3);
+/* 수평선 바다 하단부 (노을빛 반사) */
+.horizon-glow {
+    position: absolute; top: 62vh; left: 0; width: 100%; height: 38vh;
+    background: linear-gradient(to bottom, #23122b 0%, #0d0818 50%, #05030a 100%);
 }
-/* 일렁이는 실시간 파도 애니메이션 레이어 */
+/* 정밀하게 조율된 선명한 수평선 */
+.horizon-line {
+    position: absolute; top: 62vh; left: 0; width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.6), transparent);
+    box-shadow: 0 0 12px rgba(255, 142, 113, 0.5);
+}
+
+/* 🌊 일렁이는 실감형 3중 파도 시스템 */
 .ocean-waves {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; overflow: hidden; opacity: 0.25;
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 180px; overflow: hidden;
 }
 .wave-layer {
     position: absolute; bottom: 0; left: 0; width: 200%; height: 100%;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,100 300,20 600,60 C900,100 900,20 1200,60 L1200,120 L0,120 Z" fill="%23ff7e5f"/></svg>');
-    background-size: 50% 100%; background-repeat: repeat-x;
+    background-repeat: repeat-x; background-position: 0 bottom;
+    transform-origin: center bottom;
 }
-.wave1 { animation: waveMove 12s linear infinite; }
-.wave2 { animation: waveMove 7s linear infinite; opacity: 0.5; bottom: 5px; transform: scaleX(-1); }
-
+/* 깊은 심해 파도 */
+.wave1 {
+    height: 120px; opacity: 0.15;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,50 C300,90 300,10 600,50 C900,90 900,10 1200,50 L1200,120 L0,120 Z" fill="%23b53c3c"/></svg>');
+    animation: waveMove 16s linear infinite;
+}
+/* 중간 윤슬 파도 */
+.wave2 {
+    height: 140px; opacity: 0.22;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,20 300,100 600,60 C900,20 900,100 1200,60 L1200,120 L0,120 Z" fill="%23ff7e5f"/></svg>');
+    animation: waveMove 10s linear infinite; animation-delay: -2s;
+}
+/* 전면 해안 파도 */
+.wave3 {
+    height: 100px; opacity: 0.12;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,40 C300,80 450,20 600,40 C750,60 900,10 1200,40 L1200,120 L0,120 Z" fill="%23feb47b"/></svg>');
+    animation: waveMove 6s linear infinite; transform: scaleX(-1);
+}
 @keyframes waveMove {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% { transform: translateX(0) translateZ(0) scaleY(1); }
+    50% { transform: translateX(-25%) translateZ(0) scaleY(1.05); }
+    100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
 }
 
 /* 로딩 스크린 */
 #loading-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0d1b;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060713;
     display: flex; justify-content: center; align-items: center; z-index: 9999;
     transition: opacity 0.8s ease;
 }
@@ -85,15 +106,15 @@ header h1 {
 }
 header .subtitle { color: #b9b3d9; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.85; }
 
-/* 🛠️ [위치 교정] 로그인 / 로그아웃 버튼 배치 균형 정렬 */
+/* 🛠️ [위치 완전 교정] 관리자 로그인 버튼 배치 정가운데 정렬 */
 .auth-box {
-    margin-top: 25px; display: flex; justify-content: center; align-items: center; min-height: 40px;
+    margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%;
 }
 .auth-flex {
     display: flex; justify-content: center; align-items: center; gap: 10px;
 }
 
-/* 프리미엄 보완 버튼 인터페이스 */
+/* 프리미엄 버튼 인터페이스 */
 button {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
     color: #ffe3e8; border: 1px solid rgba(255, 179, 198, 0.25);
@@ -119,44 +140,60 @@ input[type="text"], textarea {
 }
 input[type="text"]:focus, textarea:focus { border-color: #ff8e71; background: rgba(10, 8, 17, 0.85); }
 
-/* 🛠️ [정렬 교정] 기록된 바다 타이틀 완전 중앙 정렬 */
+/* 🛠️ [정렬 교정] 기록된 바다 타이틀 정중앙 배치 */
 .centered-title {
     text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px;
     color: #ffb3c6; letter-spacing: 2px; border-bottom: 1px solid rgba(255, 179, 198, 0.15);
     padding-bottom: 15px; width: 100%;
 }
 
-/* 2열 구조 격자 정렬 */
+/* 2열 격자 구조 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* [대응성 완벽 보장] 엽서 타입의 글 카드 스펙 */
+/* 엽서 타입의 글 카드 스펙 */
 .post-card {
-    background: linear-gradient(135deg, rgba(26, 21, 41, 0.75) 0%, rgba(16, 12, 26, 0.55) 100%);
+    background: linear-gradient(135deg, rgba(23, 19, 38, 0.75) 0%, rgba(14, 11, 23, 0.6) 100%);
     border: 1px solid rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px;
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    position: relative; transition: all 0.4s ease;
+    position: relative; transition: all 0.35s ease;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    height: 340px; display: flex; flex-direction: column; justify-content: space-between;
+    height: 250px; display: flex; flex-direction: column; justify-content: space-between;
+    cursor: pointer; /* 클릭 가능하다는 표시 */
 }
 .post-card:hover { transform: translateY(-4px); border-color: rgba(255, 142, 113, 0.3); box-shadow: 0 12px 30px rgba(255, 142, 113, 0.15); }
 .post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
 
-/* 장문 대응 내부 스크롤 가동 */
+/* 🛠️ [글자수 제한 및 더보기 대응] CSS line-clamp 적용 */
 .post-content-area {
-    color: #cbd5e1; line-height: 1.7; font-size: 0.92rem; white-space: pre-wrap;
-    overflow-y: auto; flex-grow: 1; margin-bottom: 15px; padding-right: 8px; text-align: justify;
+    color: #cbd5e1; line-height: 1.65; font-size: 0.92rem; white-space: pre-wrap;
+    flex-grow: 1; margin-bottom: 15px; text-align: justify;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; /* 4줄 제한 */
+    overflow: hidden; text-overflow: ellipsis; /* 끝부분 더보기(...) 자동 대체 */
 }
-.post-content-area::-webkit-scrollbar { width: 4px; }
-.post-content-area::-webkit-scrollbar-track { background: transparent; }
-.post-content-area::-webkit-scrollbar-thumb { background: rgba(255, 142, 113, 0.25); border-radius: 10px; }
 
 .post-footer { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
 .post-card .date { font-size: 0.78rem; color: #8781a3; }
 .card-mgmt-btns { display: flex; gap: 6px; }
 .mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
 
-/* 페이지네이션 및 모달 */
+/* 📝 글 자세히 보기 팝업 모달창 전용 스타일 (신규) */
+.detail-content {
+    max-width: 650px !important; width: 90% !important; text-align: left !important;
+    background: linear-gradient(145deg, #181428, #0c0916) !important;
+    padding: 35px !important; border: 1px solid rgba(255, 142, 113, 0.2) !important;
+}
+.detail-content h2 { font-size: 1.6rem; color: #ffffff; font-weight: 400; line-height: 1.4; margin-bottom: 8px; }
+.detail-meta { margin-bottom: 15px; }
+.detail-divider { border: 0; height: 1px; background: linear-gradient(90deg, rgba(255,142,113,0.3), transparent); margin-bottom: 20px; }
+.detail-text-area {
+    color: #e2e8f0; line-height: 1.8; font-size: 0.98rem; white-space: pre-wrap;
+    max-height: 50vh; overflow-y: auto; padding-right: 10px; text-align: justify;
+}
+.detail-text-area::-webkit-scrollbar { width: 4px; }
+.detail-text-area::-webkit-scrollbar-thumb { background: rgba(255, 142, 113, 0.3); border-radius: 10px; }
+
+/* 페이지네이션 및 일반 모달 */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #b4aed2; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(255, 142, 113, 0.15); color: #ff8e71; border-color: #ff8e71; }
