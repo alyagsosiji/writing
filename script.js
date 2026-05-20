@@ -249,21 +249,21 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => alert("소멸 처리 오류: " + err.message));
+        }).catch(err => alert("소멸 처리 오류 : " + err.message));
     }
 }
 
 function clearDatabase() {
     if (!isAdmin) return;
-    if (confirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글이 흔적도 없이 사라집니다. 초기화할까요?')) {
-        if (confirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 글을 파괴할까요?')) {
+    if (confirm('🚨 [수평선 너버 바다의 기록 대량 소멸 경고]\n수평선 너머 모든 기록들이 흔적도 없이 사라집니다. 초기화할까요?')) {
+        if (confirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 기록을 소멸시킬까요?')) {
             database.ref('posts').remove()
                 .then(() => {
                     cancelEdit();
                     currentPage = 1;
                     alert('바다가 완전히 정화되어 공백의 수평선 상태가 되었습니다.');
                 })
-                .catch((error) => alert('초기화 실패: ' + error.message));
+                .catch((error) => alert('초기화 실패 : ' + error.message));
         }
     }
 }
