@@ -1,90 +1,3 @@
-function renderUI() {
-    const container = document.getElementById('posts-container');
-    const paginationContainer = document.getElementById('pagination-container');
-    
-    container.innerHTML = '';
-    paginationContainer.innerHTML = '';
-
-    // 비로그인 상태 보안 방어선
-    if (!isAdmin && currentView === 'letters') {
-        currentView = 'posts';
-    }
-
-    // 1. 현재 탭(기록 또는 편지) 데이터 가져오기
-    let targetArray = (currentView === 'posts') ? allPosts : allLetters;
-
-    // 2. 🔍 [포함 검색 패치] 제목에 검색어가 포함된 모든 글을 실시간으로 필터링 (대소문자 무시)
-    if (searchKeyword) {
-        targetArray = targetArray.filter(item => 
-            String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-    }
-
-    // 3. 검색 결과가 없을 때의 예외 처리 조율
-    if (targetArray.length === 0) {
-        const text = searchKeyword 
-            ? `'${searchKeyword}'가 포함된 제목의 글이 바다에 없습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 노을빛 바다입니다." : "도착한 편지가 없습니다.");
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
-        return;
-    }
-
-    // 4. 필터링된 결과를 기준으로 페이징 재연산
-    const totalPages = Math.ceil(targetArray.length / postsPerPage);
-    const startIndex = (currentPage - 1) * postsPerPage;
-    const endIndex = startIndex + postsPerPage;
-    const currentItems = targetArray.slice(startIndex, endIndex);
-
-    // 5. 카드 화면 출력
-    currentItems.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.onclick = () => openDetailModal(item.id);
-        
-        let mgmtButtonsHtml = '';
-        if (isAdmin) {
-            if (currentView === 'posts') {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button>
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button>
-                    </div>
-                `;
-            } else {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button>
-                    </div>
-                `;
-            }
-        }
-
-        card.innerHTML = `
-            <h3>${escapeHtml(item.title)}</h3>
-            <div class="post-content-area">${escapeHtml(item.content)}</div>
-            <div class="post-footer">
-                <span class="date">${item.date}</span>
-                ${mgmtButtonsHtml}
-            </div>
-        `;
-        container.appendChild(card);
-    });
-
-    // 6. 필터링된 결과 개수에 맞는 페이지 번호 생성
-    if (totalPages > 1) {
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('div');
-            btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-            btn.innerText = i;
-            btn.onclick = () => {
-                currentPage = i;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                renderUI();
-            };
-            paginationContainer.appendChild(btn);
-        }
-    }
-}
 // ==========================================
 // 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
 // ==========================================
@@ -104,7 +17,7 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -122,7 +35,7 @@ firebase.initializeApp(secureConfig);
 const database = firebase.database();
 
 let isAdmin = false;
-let currentView = 'posts'; // 'posts' 또는 'letters'
+let currentView = 'posts'; 
 let currentPage = 1;
 const postsPerPage = 6;
 
@@ -213,6 +126,7 @@ function login() {
     }
 }
 
+// 로그아웃 로직
 function logout() {
     isAdmin = false;
     cancelEdit();
@@ -326,8 +240,8 @@ function renderUI() {
 
     if (targetArray.length === 0) {
         const text = searchKeyword 
-            ? `'${searchKeyword}'가 포함된 내용이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너버 바다입니다." : "도착한 편지가 없습니다.");
+            ? `'${searchKeyword}'가 포함된 제목의 글이 바다에 없습니다.` 
+            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "도착한 편지가 없습니다.");
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
@@ -360,17 +274,21 @@ function renderUI() {
             }
         }
 
+        // 🛠️ [기능 패치] 기록된 바다 탭일 때만 날짜 문자열 앞에 '아시ㅣ ' 접두사 결합
+        const displayDate = (currentView === 'posts') ? `아시ㅣ ${item.date}` : item.date;
+
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
             <div class="post-content-area">${escapeHtml(item.content)}</div>
             <div class="post-footer">
-                <span class="date">${item.date}</span>
+                <span class="date">${displayDate}</span>
                 ${mgmtButtonsHtml}
             </div>
         `;
         container.appendChild(card);
     });
 
+    // 슬라이딩 패널 기반 유연한 페이지네이션 윈도우 컴포넌트 (화면 뚫음 방지)
     if (totalPages > 1) {
         const maxPageButtons = 5; 
         let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
@@ -434,9 +352,10 @@ function openDetailModal(key) {
 
 function closeDetailModal() { document.getElementById('detail-modal').style.display = 'none'; }
 
+// 🛠️ 연타 완벽 대응 버전 savePost
 function savePost() {
     if (!isAdmin) return;
-    if (isSubmitting) return; 
+    if (isSubmitting) return; // 통신 처리 중 클릭 차단
 
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
@@ -447,7 +366,7 @@ function savePost() {
         return;
     }
 
-    isSubmitting = true; 
+    isSubmitting = true; // 락(Lock) 세팅
 
     const postData = { title: title, content: content, date: date };
 
@@ -457,7 +376,7 @@ function savePost() {
                 showSystemAlert('기록이 수정되어 바다에 다시 새겨졌습니다.');
                 cancelEdit();
             }).catch(err => showSystemAlert("수정 오류 : " + err.message))
-            .finally(() => { isSubmitting = false; }); 
+            .finally(() => { isSubmitting = false; }); // 통신 종료 후 락 해제
     } else {
         database.ref('posts').push(postData)
             .then(() => {
@@ -466,12 +385,13 @@ function savePost() {
                 currentPage = 1;
                 showSystemAlert('바다에 새로운 기록이 성공적으로 수평선 너머에 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
-            .finally(() => { isSubmitting = false; }); 
+            .finally(() => { isSubmitting = false; }); // 통신 종료 후 락 해제
     }
 }
 
+// 🛠️ 연타 완벽 대응 버전 saveLetter
 function saveLetter() {
-    if (isSubmitting) return; 
+    if (isSubmitting) return; // 통신 처리 중 클릭 차단
 
     const title = document.getElementById('letter-title').value.trim();
     const content = document.getElementById('letter-content').value.trim();
@@ -482,7 +402,7 @@ function saveLetter() {
         return;
     }
 
-    isSubmitting = true; 
+    isSubmitting = true; // 락(Lock) 세팅
 
     const letterData = { title: title, content: content, date: date };
 
@@ -494,7 +414,7 @@ function saveLetter() {
             currentPage = 1;
             renderUI();
         }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message))
-        .finally(() => { isSubmitting = false; }); 
+        .finally(() => { isSubmitting = false; }); // 통신 종료 후 락 해제
 }
 
 function prepareEdit(key) {
@@ -529,7 +449,7 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
     });
 }
 
