@@ -302,7 +302,7 @@ function renderUI() {
             }
         }
 
-        const displayDate = (currentView === 'posts') ? `아시ㅣ ${item.date}` : item.date;
+        const displayDate = (currentView === 'posts') ? `아시ㅣ${item.date}` : item.date;
 
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
