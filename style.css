@@ -33,8 +33,20 @@ body {
     100% { transform: translate(1.5%, -1%) scale(1.04); }
 }
 
-/* 로딩 화면 */
-#loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #110c0e; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.8s ease; }
+/* 로딩 화면 기본 정의 및 호환성 크래시 무결성 패치 */
+#loading-screen { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: #110c0e; display: flex; justify-content: center; align-items: center; 
+    z-index: 9999; opacity: 1; visibility: visible; pointer-events: auto;
+    transition: opacity 0.8s ease, visibility 0.8s ease; 
+}
+/* 자바스크립트가 해제 신호를 주면 !important 스택으로 강제 소멸 처리 */
+#loading-screen.fade-out {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 .loader { position: relative; text-align: center; }
 .sun-glow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; background: radial-gradient(circle, #e68d6c 0%, transparent 70%); animation: pulse 2s infinite ease-in-out; }
 .wave-loading { width: 44px; height: 44px; border: 3px solid transparent; border-top-color: #f7a37f; border-bottom-color: #d07b59; border-radius: 50%; animation: spin 1.8s linear infinite; margin: 0 auto 20px; }
@@ -136,7 +148,7 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 
 .system-modal-box p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; text-align: center; }
 
-/* 🛠️ 유연한 가로 랩핑으로 설계된 페이지네이션 배열 구조 */
+/* 페이지네이션 배열 구조 */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; flex-wrap: wrap; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(247, 163, 127, 0.15); color: #f7a37f; border-color: #f7a37f; }
@@ -146,29 +158,11 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-top: 1px solid rgba(247, 163, 127, 0.12); color: #8c8288; font-size: 0.82rem; letter-spacing: 0.8px; }
 
 /* 🔍 제목 검색창 전용 스타일 */
-.search-container {
-    max-width: 450px; margin: 0 auto 35px auto; text-align: center;
-}
+.search-container { max-width: 450px; margin: 0 auto 35px auto; text-align: center; }
 #search-input {
     width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(247, 163, 127, 0.15);
     border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.3s ease;
 }
 #search-input:focus {
     border-color: #f7a37f; background: rgba(12, 9, 11, 0.85); box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
-}
-/* ==========================================
-   로딩 화면 충돌 해결을 위한 무결성 패치
-   ========================================== */
-#loading-screen {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transition: opacity 0.8s ease, visibility 0.8s ease;
-}
-
-/* 자바스크립트가 로딩 완료를 감지하면 아래 클래스가 주입되어 화면을 완전히 관통시킵니다 */
-#loading-screen.fade-out {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
