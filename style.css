@@ -12,7 +12,7 @@ body {
 }
 
 /* ==========================================
-   🌅 리얼 윤슬 바다 배경 레이어 (기본 PC 사양)
+   🌅 사진 동기화: 리얼 윤슬 바다 배경 레이어 (PC 사양 최적화)
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
@@ -34,7 +34,6 @@ body {
     filter: blur(4px);
 }
 
-/* PC에서는 이 강력한 SVG 노이즈 필터가 정상 작동합니다 */
 .wave-ripple {
     position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.05 0.2' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -45,7 +44,8 @@ body {
 }
 
 .ripple1 { opacity: 0.14; animation: rippleMove 24s linear infinite alternate; }
-.ripple2 { opacity: 0.08; animation: rippleMove 16s linear infinite alternate-reverse; transform: scaleX(-1); }
+/* 🛠️ 뚝뚝 끊기던 충돌 현상을 해결하기 위해 전역 역방향 전용 애니메이션 바인딩 */
+.ripple2 { opacity: 0.08; animation: rippleMoveReverse 16s linear infinite alternate-reverse; }
 .ripple3 { opacity: 0.05; animation: rippleMove 10s ease-in-out infinite alternate; }
 
 @keyframes rippleMove {
@@ -53,30 +53,31 @@ body {
     100% { transform: translate3d(1.5%, -1%, 0) scale(1.04); }
 }
 
+/* 🛠️ scaleX(-1) 병목 연산을 애니메이션 프레임 내부로 격리 통합하여 PC 프레임 드랍 완전 해결 */
+@keyframes rippleMoveReverse {
+    0% { transform: translate3d(0, 0, 0) scale(1) scaleX(-1); }
+    100% { transform: translate3d(1.5%, -1%, 0) scale(1.04) scaleX(-1); }
+}
+
 /* ==========================================
-   🛠️ [모바일 한정 배경 최적화 핵심 패치] 
-   화면 크기가 768px 이하인 모바일 기기에서는 연산 과부하를 일으키는 
-   SVG 필터 배경을 완벽하게 제거하고, 초경량 순수 CSS 일렁임 효과로 자동 전환합니다.
+   🛠️ 모바일 한정 배경 최적화 매커니즘 
    ========================================== */
 @media (max-width: 768px) {
     .wave-ripple {
-        filter: none !important; /* 모바일 GPU를 파괴하던 범인(SVG 필터) 강제 제거 */
-        background-image: none !important; /* 무거운 벡터 이미지 제거 */
-        /* 모바일 전용: 부드러운 노을빛 CSS 그라데이션 레이어로 가볍게 대체 */
+        filter: none !important; 
+        background-image: none !important; 
         background: radial-gradient(circle at 50% 20%, rgba(247, 153, 112, 0.15) 0%, transparent 60%);
         animation: mobileYoonseul 10s ease-in-out infinite alternate !important;
         will-change: transform, opacity;
     }
-    /* 불필요한 다중 레이어를 숨겨 모바일 메모리 소모량을 1/3로 절감 */
     .ripple2, .ripple3 {
         display: none !important;
     }
     .posts-grid {
-        grid-template-columns: 1fr !important; /* 모바일 가로 핏 최적화 */
+        grid-template-columns: 1fr !important; 
     }
 }
 
-/* 모바일 전용 부드러운 초경량 애니메이션 */
 @keyframes mobileYoonseul {
     0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
     100% { transform: translate3d(1%, 1%, 0) scale(1.03); opacity: 1; }
@@ -92,7 +93,6 @@ body {
     transform: translateZ(0);
 }
 
-/* 자바스크립트가 해제 신호를 주면 !important 스택으로 강제 소멸 처리 */
 #loading-screen.fade-out {
     opacity: 0 !important;
     visibility: hidden !important;
@@ -145,24 +145,26 @@ button {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
     color: #fcece7; border: 1px solid rgba(247, 163, 127, 0.2);
     padding: 8px 24px; border-radius: 20px; cursor: pointer;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    transition: all 0.35s ease; font-size: 0.85rem;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    transition: border-color 0.25s, color 0.25s, box-shadow 0.25s; font-size: 0.85rem;
 }
 button:hover { border-color: #f7a37f; color: #fff; box-shadow: 0 0 12px rgba(247, 163, 127, 0.35); transform: translateY(-1.5px); }
 .danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 일기장 / 편지함 공용 기입창 외형 */
+/* 🛠️ 일기장 / 편지함 공용 기입창 외형 (backdrop-filter 블러 최적화 및 농도 보정 완료) */
 #write-section, #letter-section {
-    background: rgba(23, 18, 21, 0.75); border: 1px solid rgba(247, 163, 127, 0.15);
-    padding: 30px; border-radius: 18px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+    background: rgba(23, 18, 21, 0.88); border: 1px solid rgba(247, 163, 127, 0.15);
+    padding: 30px; border-radius: 18px; 
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    -webkit-transform: translateZ(0); transform: translateZ(0);
 }
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #f7a37f; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
 .write-buttons { display: flex; gap: 10px; }
 input[type="text"], textarea {
     width: 100%; background: rgba(12, 9, 11, 0.75); border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.3s;
+    border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.25s;
 }
 input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rgba(12, 9, 11, 0.9); }
 .centered-title { text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px; color: #f7a37f; letter-spacing: 2px; border-bottom: 1px solid rgba(247, 163, 127, 0.15); padding-bottom: 15px; width: 100%; }
@@ -171,16 +173,16 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
+/* 🛠️ 포스트 카드 (스크롤 스무스 렌더링 최적화) */
 .post-card {
-    background: linear-gradient(135deg, rgba(23, 19, 21, 0.92) 0%, rgba(14, 11, 13, 0.85) 100%);
+    background: linear-gradient(135deg, rgba(23, 19, 21, 0.96) 0%, rgba(14, 11, 13, 0.92) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    position: relative; transition: all 0.35s ease;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    position: relative; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     height: 250px; display: flex; flex-direction: column; justify-content: space-between;
     cursor: pointer;
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
+    -webkit-transform: translateZ(0); transform: translateZ(0);
 }
 .post-card:hover { transform: translateY(-4px); border-color: rgba(247, 163, 127, 0.25); box-shadow: 0 12px 30px rgba(247, 163, 127, 0.15); }
 .post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
@@ -192,8 +194,8 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 
 /* 모달 양식 세팅 */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 3, 4, 0.88); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.modal-content { background: linear-gradient(145deg, #1d171a, #0f0b0d); border: 1px solid rgba(247, 163, 127, 0.2); padding: 35px; border-radius: 18px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popupScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-@keyframes popupScale { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.modal-content { background: linear-gradient(145deg, #1d171a, #0f0b0d); border: 1px solid rgba(247, 163, 127, 0.2); padding: 35px; border-radius: 18px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); animation: popupScale 0.25s cubic-bezier(0.25, 1, 0.5, 1); }
+@keyframes popupScale { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 .modal-buttons { display: flex; justify-content: center; gap: 10px; }
@@ -209,7 +211,7 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 
 /* 페이지네이션 배열 구조 */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; flex-wrap: wrap; }
-.page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
+.page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.25s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(247, 163, 127, 0.15); color: #f7a37f; border-color: #f7a37f; }
 .page-btn.active { background: linear-gradient(135deg, #f7a37f, #d07b59); color: #090a14; border-color: #f7a37f; box-shadow: 0 0 12px rgba(247, 163, 127, 0.45); font-weight: bold; }
 .cancel-btn { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
@@ -220,7 +222,7 @@ footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-to
 .search-container { max-width: 450px; margin: 0 auto 35px auto; text-align: center; }
 #search-input {
     width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(247, 163, 127, 0.15);
-    border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.3s ease;
+    border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.25s ease;
 }
 #search-input:focus {
     border-color: #f7a37f; background: rgba(12, 9, 11, 0.85); box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
