@@ -15,7 +15,6 @@ document.addEventListener('keydown', function(e) {
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
-// [정밀 검증 완료] Firebase 연동 무결성 키 패키지
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
@@ -42,7 +41,7 @@ let allPosts = [];
 let editTargetKey = null; 
 
 // ==========================================
-// 3. 라이프 사이클 스케줄러 
+// 3. 라이프 사이클 스케줄러
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -88,7 +87,7 @@ function updateUI() {
     if (isAdmin) {
         writeSection.style.display = 'block';
         loginBtn.style.display = 'none';
-        adminMenu.style.display = 'flex'; // 대칭 가시성 즉각 조율
+        adminMenu.style.display = 'flex'; 
     } else {
         writeSection.style.display = 'none';
         loginBtn.style.display = 'inline-block';
@@ -98,7 +97,7 @@ function updateUI() {
 }
 
 // ==========================================
-// 5. 핵심 코어 (수정/소멸/초기화 에러 완전 고정 패치 완료)
+// 5. 핵심 데이터베이스 실시간 제어 로직
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -135,13 +134,16 @@ function renderUI() {
         const card = document.createElement('div');
         card.className = 'post-card';
         
+        // 🛠️ 카드 자체를 클릭하면 팝업 상세 모달이 뜨도록 이벤트 연결
+        card.onclick = () => openDetailModal(post.id);
+        
         let mgmtButtonsHtml = '';
         if (isAdmin) {
-            // [💥 긴급 오류 패치]: 인라인 문자열 전달 방식을 전면 폐기하고 오직 ID만 넘겨 터지는 현상을 박멸함
+            // event.stopPropagation()을 걸어주어 수정/소멸 버튼을 누를 땐 팝업이 뜨지 않게 방어합니다.
             mgmtButtonsHtml = `
                 <div class="card-mgmt-btns">
-                    <button class="mgmt-btn" onclick="prepareEdit('${post.id}')">수정</button>
-                    <button class="mgmt-btn danger-btn" onclick="deletePost('${post.id}')">소멸</button>
+                    <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${post.id}')">수정</button>
+                    <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${post.id}')">소멸</button>
                 </div>
             `;
         }
@@ -172,6 +174,22 @@ function renderUI() {
     }
 }
 
+// 📝 [기능 추가] 글 자세히 보기 팝업 제어 함수
+function openDetailModal(key) {
+    const post = allPosts.find(p => p.id === key);
+    if (!post) return;
+
+    document.getElementById('detail-title').innerText = post.title;
+    document.getElementById('detail-date').innerText = post.date;
+    document.getElementById('detail-text').innerText = post.content;
+    document.getElementById('detail-modal').style.display = 'flex';
+}
+
+function closeDetailModal() {
+    document.getElementById('detail-modal').style.display = 'none';
+}
+
+// 글 저장 및 수정 분기
 function savePost() {
     if (!isAdmin) return;
 
@@ -203,7 +221,6 @@ function savePost() {
     }
 }
 
-// [안정성 업그레이드]: 인라인 파라미터 대신 내부 동적 배열에서 데이터를 직접 역추적하여 폼에 주입
 function prepareEdit(key) {
     const post = allPosts.find(p => p.id === key);
     if (!post) return;
