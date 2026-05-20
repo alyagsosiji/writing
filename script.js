@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 차단 인프라 (우클릭, 드래그, 특수 기능 단축키 무력화)
+// 1. 보안 가동 (우클릭, 드래그, 주요 디버깅 단축키 전면 통제)
 // ==========================================
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -11,15 +11,15 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. 난독 암호화(Base64) 해독 및 정밀 Firebase 기동 엔진 
+// 2. 난독 데이터(Base64) 해독 및 정밀 Firebase 기동 루프
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
-// [정밀 보정 복원 완료] 완벽한 암호 정밀 대칭 매칭 기입 부위
+// [정밀 검증 완료] Firebase 연동 무결성 키 패키지
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), // 연동 복구 완전 성공
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
@@ -42,7 +42,7 @@ let allPosts = [];
 let editTargetKey = null; 
 
 // ==========================================
-// 3. 라이프 사이클 및 관측 스케줄러 
+// 3. 라이프 사이클 스케줄러 
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -54,7 +54,7 @@ window.addEventListener('load', function() {
 });
 
 // ==========================================
-// 4. 모달 인터페이스 및 가시성 실시간 연동 처리 
+// 4. 보안 인증 제어 허브
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -80,7 +80,6 @@ function logout() {
     updateUI();
 }
 
-// [기능 수정] 로그인 성공 시에만 초기화 묶음 패널 및 쓰기폼을 inline-flex 방식으로 부드럽게 연동 활성화
 function updateUI() {
     const writeSection = document.getElementById('write-section');
     const loginBtn = document.getElementById('login-btn');
@@ -89,17 +88,17 @@ function updateUI() {
     if (isAdmin) {
         writeSection.style.display = 'block';
         loginBtn.style.display = 'none';
-        adminMenu.style.display = 'inline-flex'; 
+        adminMenu.style.display = 'flex'; // 대칭 가시성 즉각 조율
     } else {
         writeSection.style.display = 'none';
         loginBtn.style.display = 'inline-block';
-        adminMenu.style.display = 'none'; 
+        adminMenu.style.display = 'none';
     }
     renderUI();
 }
 
 // ==========================================
-// 5. 실시간 동기화 데이터베이스 핸들링 코어
+// 5. 핵심 코어 (수정/소멸/초기화 에러 완전 고정 패치 완료)
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -138,9 +137,10 @@ function renderUI() {
         
         let mgmtButtonsHtml = '';
         if (isAdmin) {
+            // [💥 긴급 오류 패치]: 인라인 문자열 전달 방식을 전면 폐기하고 오직 ID만 넘겨 터지는 현상을 박멸함
             mgmtButtonsHtml = `
                 <div class="card-mgmt-btns">
-                    <button class="mgmt-btn" onclick="prepareEdit('${post.id}', \`${escapeQuote(post.title)}\`, \`${escapeQuote(post.content)}\`)">수정</button>
+                    <button class="mgmt-btn" onclick="prepareEdit('${post.id}')">수정</button>
                     <button class="mgmt-btn danger-btn" onclick="deletePost('${post.id}')">소멸</button>
                 </div>
             `;
@@ -172,7 +172,6 @@ function renderUI() {
     }
 }
 
-// 데이터 보관 및 수정 분기 파이프라인
 function savePost() {
     if (!isAdmin) return;
 
@@ -204,11 +203,15 @@ function savePost() {
     }
 }
 
-function prepareEdit(key, title, content) {
+// [안정성 업그레이드]: 인라인 파라미터 대신 내부 동적 배열에서 데이터를 직접 역추적하여 폼에 주입
+function prepareEdit(key) {
+    const post = allPosts.find(p => p.id === key);
+    if (!post) return;
+
     editTargetKey = key;
     document.getElementById('write-title').innerText = "기록 수정하기";
-    document.getElementById('post-title').value = title;
-    document.getElementById('post-content').value = content;
+    document.getElementById('post-title').value = post.title;
+    document.getElementById('post-content').value = post.content;
     document.getElementById('submit-post-btn').innerText = "수정하기";
     document.getElementById('cancel-edit-btn').style.display = "inline-block";
     document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
@@ -232,30 +235,25 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        });
+        }).catch(err => alert("소멸 처리 오류: " + err.message));
     }
 }
 
-// [초기화 제어 인터페이스] 바다 비우기 작동 체계
 function clearDatabase() {
     if (!isAdmin) return;
-    if (confirm('🚨 [치명적 작업 경고]\n수평선 너머 모든 글이 흔적도 없이 사라집니다. 초기화할까요?')) {
+    if (confirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글이 흔적도 없이 사라집니다. 초기화할까요?')) {
         if (confirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 글을 파괴할까요?')) {
             database.ref('posts').remove()
                 .then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    alert('바다가 깨끗하게 비워져 초기 수평선 상태로 리셋되었습니다.');
+                    alert('바다가 완전히 정화되어 공백의 수평선 상태가 되었습니다.');
                 })
                 .catch((error) => alert('초기화 실패: ' + error.message));
         }
     }
 }
 
-// 특수문자 이스케이프 유틸리티
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-function escapeQuote(text) {
-    return text.replace(/`/g, "\\`").replace(/\$/g, "\\$");
 }
