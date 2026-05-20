@@ -15,22 +15,21 @@
         <div class="loader">
             <div class="sun-glow"></div>
             <div class="wave-loading"></div>
-            <p>노을빛 바다를 불러오는 중...</p>
+            <p>윤슬 빛 바다를 불러오는 중...</p>
         </div>
     </div>
 
     <div class="ocean-background">
-        <div class="sky-gradient"></div>
-        <div class="sun"></div>
-        <div class="horizon-glow"></div>
-        <div class="horizon-line"></div>
-        
-        <div class="ocean-waves">
-            <div class="wave-layer wave1"></div>
-            <div class="wave-layer wave2"></div>
-            <div class="wave-layer wave3"></div>
-        </div>
+        <div class="ocean-base-fluid"></div>
+        <div class="yoonseul-glimmer-layer"></div>
     </div>
+
+    <svg style="position: absolute; width: 0; height: 0;">
+        <filter id="yoonseul-ripple">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015 0.08" numOctaves="3" result="noise_map" />
+            <feDisplacementMap in="SourceGraphic" in2="noise_map" scale="25" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
 
     <div id="app">
         <header>
