@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 보안 가동 (우클릭, 드래그, 주요 디버깅 단축키 전면 통제)
+// 1. 보안 장치 (우클릭, 드래그, 주요 개발자 단축키 완벽 통제)
 // ==========================================
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -11,14 +11,14 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. 난독 데이터(Base64) 해독 및 정밀 Firebase 기동 루프
+// 2. Base64 데이터 해독 및 Firebase 기동 팩
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), // 연동 성공 정정 고정
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
@@ -41,7 +41,7 @@ let allPosts = [];
 let editTargetKey = null; 
 
 // ==========================================
-// 3. 라이프 사이클 스케줄러
+// 3. 라이프 사이클 매니저
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -53,7 +53,52 @@ window.addEventListener('load', function() {
 });
 
 // ==========================================
-// 4. 보안 인증 제어 허브
+// 4. 🛠️ 컴팩트 모달 다이얼로그 가동기 (alert/confirm 완전 폐기 및 전결 대체)
+// ==========================================
+function showSystemAlert(message, callback) {
+    document.getElementById('system-title').innerText = "안내";
+    document.getElementById('system-message').innerText = message;
+    const buttonContainer = document.getElementById('system-buttons');
+    buttonContainer.innerHTML = "";
+    
+    const okBtn = document.createElement('button');
+    okBtn.innerText = "확인";
+    okBtn.onclick = function() {
+        document.getElementById('system-modal').style.display = 'none';
+        if (callback) callback();
+    };
+    buttonContainer.appendChild(okBtn);
+    document.getElementById('system-modal').style.display = 'flex';
+}
+
+function showSystemConfirm(message, onConfirm, onCancel) {
+    document.getElementById('system-title').innerText = "확인";
+    document.getElementById('system-message').innerText = message;
+    const buttonContainer = document.getElementById('system-buttons');
+    buttonContainer.innerHTML = "";
+    
+    const confirmBtn = document.createElement('button');
+    confirmBtn.innerText = "확인";
+    confirmBtn.onclick = function() {
+        document.getElementById('system-modal').style.display = 'none';
+        if (onConfirm) onConfirm();
+    };
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.innerText = "취소";
+    cancelBtn.className = "cancel-btn";
+    cancelBtn.onclick = function() {
+        document.getElementById('system-modal').style.display = 'none';
+        if (onCancel) onCancel();
+    };
+    
+    buttonContainer.appendChild(confirmBtn);
+    buttonContainer.appendChild(cancelBtn);
+    document.getElementById('system-modal').style.display = 'flex';
+}
+
+// ==========================================
+// 5. 로그인 / 로그아웃 모달 게이트
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -64,19 +109,21 @@ function login() {
 
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         isAdmin = true;
-        alert('환영합니다, 아시 님.');
         closeModal();
-        updateUI();
+        showSystemAlert('환영합니다, 수평선의 기록자, 아시님.', function() {
+            updateUI();
+        });
     } else {
-        alert('올바른 접근이 아닙니다.');
+        showSystemAlert('올바른 접근이 아닙니다.');
     }
 }
 
 function logout() {
     isAdmin = false;
     cancelEdit();
-    alert('로그아웃 되었습니다.');
-    updateUI();
+    showSystemAlert('로그아웃 되었습니다.', function() {
+        updateUI();
+    });
 }
 
 function updateUI() {
@@ -97,7 +144,7 @@ function updateUI() {
 }
 
 // ==========================================
-// 5. 핵심 데이터베이스 실시간 제어 로직
+// 6. 실시간 데이터베이스 연산 제어 코어
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -121,7 +168,7 @@ function renderUI() {
     paginationContainer.innerHTML = '';
 
     if (allPosts.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 노을빛 바다입니다.</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 수평선 너머의 노을빛 바다입니다.</p>';
         return;
     }
 
@@ -171,7 +218,6 @@ function renderUI() {
     }
 }
 
-// 글 팝업 제어 루틴
 function openDetailModal(key) {
     const post = allPosts.find(p => p.id === key);
     if (!post) return;
@@ -186,7 +232,6 @@ function closeDetailModal() {
     document.getElementById('detail-modal').style.display = 'none';
 }
 
-// 기록 보관 처리 분기
 function savePost() {
     if (!isAdmin) return;
 
@@ -195,7 +240,7 @@ function savePost() {
     const date = new Date().toLocaleString('ko-KR');
 
     if (!title || !content) {
-        alert('수평선에 새길 내용을 모두 입력해주세요.');
+        showSystemAlert('수평선에 새길 내용을 모두 입력해주세요.');
         return;
     }
 
@@ -204,17 +249,17 @@ function savePost() {
     if (editTargetKey) {
         database.ref('posts/' + editTargetKey).update(postData)
             .then(() => {
-                alert('기록이 수정되어 바다에 다시 새겨졌습니다.');
+                showSystemAlert('기록이 수정되어 바다에 다시 새겨졌습니다.');
                 cancelEdit();
-            }).catch(err => alert("수정 오류: " + err.message));
+            }).catch(err => showSystemAlert("수정 오류: " + err.message));
     } else {
         database.ref('posts').push(postData)
             .then(() => {
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
                 currentPage = 1;
-                alert('바다에 새로운 기록이 성공적으로 안착했습니다.');
-            }).catch(err => alert("기록 오류: " + err.message));
+                showSystemAlert('바다에 새로운 기록이 성공적으로 수평선 너머에 기록되었습니다.');
+            }).catch(err => showSystemAlert("기록 오류: " + err.message));
     }
 }
 
@@ -242,30 +287,34 @@ function cancelEdit() {
 
 function deletePost(key) {
     if (!isAdmin) return;
-    if (confirm('이 기록을 완전히 소멸시키겠습니까?')) {
+    
+    showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
         database.ref('posts/' + key).remove().then(() => {
             const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage);
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => alert("소멸 처리 오류 : " + err.message));
-    }
+        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
+    });
 }
 
 function clearDatabase() {
     if (!isAdmin) return;
-    if (confirm('🚨 [수평선 너버 바다의 기록 대량 소멸 경고]\n수평선 너머 모든 기록들이 흔적도 없이 사라집니다. 초기화할까요?')) {
-        if (confirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 기록을 소멸시킬까요?')) {
-            database.ref('posts').remove()
-                .then(() => {
-                    cancelEdit();
-                    currentPage = 1;
-                    alert('바다가 완전히 정화되어 공백의 수평선 상태가 되었습니다.');
-                })
-                .catch((error) => alert('초기화 실패 : ' + error.message));
-        }
-    }
+    
+    showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글이 흔적도 없이 사라집니다. 초기화할까요?', function() {
+        setTimeout(function() {
+            showSystemConfirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 글을 파괴할까요?', function() {
+                database.ref('posts').remove()
+                    .then(() => {
+                        cancelEdit();
+                        currentPage = 1;
+                        showSystemAlert('바다가 완전히 정화되어 공백의 수평선 상태가 되었습니다.');
+                    })
+                    .catch((error) => showSystemAlert('초기화 실패: ' + error.message));
+            });
+        }, 150);
+    });
 }
 
 function escapeHtml(text) {
