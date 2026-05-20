@@ -1,29 +1,30 @@
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (CSS 클래스 제어 방식 전환 / 타임아웃 무제거 완료)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (무한 로딩 구조 해결 마스터본 / 타임아웃 제외)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
     if (loader) {
-        // 스타일을 직접 바꾸는 대신 CSS 무결성 클래스를 주입하여 충돌을 원천 차단
+        // 무결성 패치된 CSS 클래스 주입 방식으로 충돌 원천 상쇄
         loader.classList.add('fade-out');
     }
 }
 
-// 브라우저의 모든 리소스 및 이미지 로드가 순수하게 100% 완료된 시점에만 화면 해제
-if (document.readyState === 'complete') {
+// 💡 무한로딩 해결 마스터 Key: 무거운 외부 이미지 완료를 기다리는 complete 외에 
+// 구조 파싱과 자바스크립트가 로드되는 interactive 조건 및 DOMContentLoaded 리스너를 결합하여 화면 열림 보장
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
     hideLoadingScreen();
 } else {
-    window.addEventListener('load', hideLoadingScreen);
+    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
 }
 
-// HTML 구조 파싱 완료 즉시 실시간 데이터 동기화 리스너 가동
+// 데이터 실시간 동기화 호출
 document.addEventListener('DOMContentLoaded', function() {
     try {
         listenPosts();
         listenLetters();
     } catch (e) {
         console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
-        hideLoadingScreen(); // 시스템 에러 발생 시 최악의 갇힘 방지 방어선
+        hideLoadingScreen(); // 시스템 오류 시에도 로딩창은 치워주는 최소 방어선
     }
 });
 
@@ -82,7 +83,7 @@ let allLetters = [];
 let editTargetKey = null; 
 let searchKeyword = ''; 
 
-// 🛠️ [연타 방지 기능] 중복 발송을 원천 차단하기 위한 글로벌 제어 플래그
+// 🛠️ [연타 방지 기능] 중복 발송 차단 글로벌 잠금 플래그
 let isSubmitting = false;
 
 // ==========================================
@@ -456,6 +457,7 @@ function prepareEdit(key) {
     document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
 }
 
+// 수정 취소
 function cancelEdit() {
     editTargetKey = null;
     document.getElementById('write-title').innerText = "새로운 기록 남기기";
