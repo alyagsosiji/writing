@@ -216,18 +216,86 @@ function renderUI() {
     container.innerHTML = '';
     paginationContainer.innerHTML = '';
 
-    // 🛠️ 보안 2단계 방어선: 비로그인 상태인데 편지함을 보여달라고 요청할 시 강제 기각
+    // 비로그인 상태 보안 방어선
     if (!isAdmin && currentView === 'letters') {
         currentView = 'posts';
     }
 
-    const targetArray = (currentView === 'posts') ? allPosts : allLetters;
+    // 1. 현재 탭(기록 또는 편지) 데이터 가져오기
+    let targetArray = (currentView === 'posts') ? allPosts : allLetters;
 
+    // 2. 🔍 [포함 검색 패치] 제목에 검색어가 포함된 모든 글을 실시간으로 필터링 (대소문자 무시)
     if (searchKeyword) {
-    targetArray = targetArray.filter(item => 
-        item.title.toLowerCase().includes(searchKeyword.toLowerCase())
-    );
+        targetArray = targetArray.filter(item => 
+            String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
+        );
     }
+
+    // 3. 검색 결과가 없을 때의 예외 처리 조율
+    if (targetArray.length === 0) {
+        const text = searchKeyword 
+            ? `'${searchKeyword}'가 포함된 제목의 글이 바다에 없습니다.` 
+            : ((currentView === 'posts') ? "아직 채워지지 않은 노을빛 바다입니다." : "도착한 편지가 없습니다.");
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
+        return;
+    }
+
+    // 4. 필터링된 결과를 기준으로 페이징 재연산
+    const totalPages = Math.ceil(targetArray.length / postsPerPage);
+    const startIndex = (currentPage - 1) * postsPerPage;
+    const endIndex = startIndex + postsPerPage;
+    const currentItems = targetArray.slice(startIndex, endIndex);
+
+    // 5. 카드 화면 출력
+    currentItems.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.onclick = () => openDetailModal(item.id);
+        
+        let mgmtButtonsHtml = '';
+        if (isAdmin) {
+            if (currentView === 'posts') {
+                mgmtButtonsHtml = `
+                    <div class="card-mgmt-btns">
+                        <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button>
+                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button>
+                    </div>
+                `;
+            } else {
+                mgmtButtonsHtml = `
+                    <div class="card-mgmt-btns">
+                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button>
+                    </div>
+                `;
+            }
+        }
+
+        card.innerHTML = `
+            <h3>${escapeHtml(item.title)}</h3>
+            <div class="post-content-area">${escapeHtml(item.content)}</div>
+            <div class="post-footer">
+                <span class="date">${item.date}</span>
+                ${mgmtButtonsHtml}
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    // 6. 필터링된 결과 개수에 맞는 페이지 번호 생성
+    if (totalPages > 1) {
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('div');
+            btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+            btn.innerText = i;
+            btn.onclick = () => {
+                currentPage = i;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                renderUI();
+            };
+            paginationContainer.appendChild(btn);
+        }
+    }
+}
 
     if (targetArray.length === 0) {
         const text = (currentView === 'posts') ? "아직 채워지지 않은 수평선 너버 바다입니다." : "도착한 편지가 없습니다.";
