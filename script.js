@@ -1,90 +1,34 @@
-function renderUI() {
-    const container = document.getElementById('posts-container');
-    const paginationContainer = document.getElementById('pagination-container');
-    
-    container.innerHTML = '';
-    paginationContainer.innerHTML = '';
-
-    // 비로그인 상태 보안 방어선
-    if (!isAdmin && currentView === 'letters') {
-        currentView = 'posts';
-    }
-
-    // 1. 현재 탭(기록 또는 편지) 데이터 가져오기
-    let targetArray = (currentView === 'posts') ? allPosts : allLetters;
-
-    // 2. 🔍 [포함 검색 패치] 제목에 검색어가 포함된 모든 글을 실시간으로 필터링 (대소문자 무시)
-    if (searchKeyword) {
-        targetArray = targetArray.filter(item => 
-            String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-    }
-
-    // 3. 검색 결과가 없을 때의 예외 처리 조율
-    if (targetArray.length === 0) {
-        const text = searchKeyword 
-            ? `'${searchKeyword}'가 포함된 제목의 글이 바다에 없습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 노을빛 바다입니다." : "도착한 편지가 없습니다.");
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
-        return;
-    }
-
-    // 4. 필터링된 결과를 기준으로 페이징 재연산
-    const totalPages = Math.ceil(targetArray.length / postsPerPage);
-    const startIndex = (currentPage - 1) * postsPerPage;
-    const endIndex = startIndex + postsPerPage;
-    const currentItems = targetArray.slice(startIndex, endIndex);
-
-    // 5. 카드 화면 출력
-    currentItems.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.onclick = () => openDetailModal(item.id);
-        
-        let mgmtButtonsHtml = '';
-        if (isAdmin) {
-            if (currentView === 'posts') {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button>
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button>
-                    </div>
-                `;
-            } else {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button>
-                    </div>
-                `;
-            }
-        }
-
-        card.innerHTML = `
-            <h3>${escapeHtml(item.title)}</h3>
-            <div class="post-content-area">${escapeHtml(item.content)}</div>
-            <div class="post-footer">
-                <span class="date">${item.date}</span>
-                ${mgmtButtonsHtml}
-            </div>
-        `;
-        container.appendChild(card);
-    });
-
-    // 6. 필터링된 결과 개수에 맞는 페이지 번호 생성
-    if (totalPages > 1) {
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('div');
-            btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
-            btn.innerText = i;
-            btn.onclick = () => {
-                currentPage = i;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                renderUI();
-            };
-            paginationContainer.appendChild(btn);
-        }
+// ==========================================
+// 🛠️ 라이프 사이클 매니저 (최상단 배치로 무한 로딩 원천 차단)
+// ==========================================
+function hideLoadingScreen() {
+    const loader = document.getElementById('loading-screen');
+    if (loader && loader.style.display !== 'none') {
+        loader.style.opacity = '0';
+        // CSS 페이드아웃 애니메이션(0.8초)이 끝나는 시점을 캐치하여 display 변경
+        loader.addEventListener('transitionend', function() {
+            loader.style.display = 'none';
+        }, { once: true });
     }
 }
+
+// 스크립트가 실행된 시점에 이미 브라우저 로딩이 완료되었다면 즉시 해제, 아니라면 load 이벤트 대기
+if (document.readyState === 'complete') {
+    hideLoadingScreen();
+} else {
+    window.addEventListener('load', hideLoadingScreen);
+}
+
+// HTML 구조가 준비되면 즉시 데이터 실시간 동기화 가동
+window.addEventListener('DOMContentLoaded', function() {
+    try {
+        listenPosts();
+        listenLetters();
+    } catch (e) {
+        console.error("데이터 실시간 로드 중 예외 발생:", e);
+    }
+});
+
 // ==========================================
 // 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
 // ==========================================
@@ -133,33 +77,6 @@ let searchKeyword = '';
 
 // 🛠️ [연타 방지 기능] 중복 발송을 원천 차단하기 위한 글로벌 제어 플래그
 let isSubmitting = false;
-
-// ==========================================
-// 3. 라이프 사이클 매니저 (임의의 타임아웃 코드를 완벽히 제거한 순수 실시간 로딩 패치)
-// ==========================================
-function hideLoadingScreen() {
-    const loader = document.getElementById('loading-screen');
-    if (loader && loader.style.display !== 'none') {
-        loader.style.opacity = '0';
-        // 🛠️ 임의의 지연 타임아웃(setTimeout)을 제거하고 CSS 불투명도 페이드 아웃이 끝나는 물리적 시점을 브라우저 이벤트로 캐치해 투명화 처리
-        loader.addEventListener('transitionend', function() {
-            loader.style.display = 'none';
-        }, { once: true });
-    }
-}
-
-// HTML 구조가 준비되면 즉시 데이터 조회 가동
-window.addEventListener('DOMContentLoaded', function() {
-    try {
-        listenPosts();
-        listenLetters();
-    } catch (e) {
-        console.error("데이터 로드 중 예외 발생:", e);
-    }
-});
-
-// 모든 리소스 및 Firebase 연결 로드가 최종 완료되면 로딩 화면 해제
-window.addEventListener('load', hideLoadingScreen);
 
 // ==========================================
 // 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
