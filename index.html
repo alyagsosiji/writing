@@ -15,25 +15,19 @@
         <div class="loader">
             <div class="sun-glow"></div>
             <div class="wave-loading"></div>
-            <p>수평선 너머 바다를 불러오는 중...</p>
+            <p>수평선 너머 노을 빛 바다를 불러오는 중...</p>
         </div>
     </div>
 
     <div class="ocean-background">
-        <div class="ocean-base-fluid"></div>
-        <div class="yoonseul-glimmer-layer"></div>
+        <div class="ocean-deep-water"></div>
+        <div class="yoonseul-shimmer"></div>
+        <div class="yoonseul-wave-texture"></div>
     </div>
-
-    <svg style="position: absolute; width: 0; height: 0;">
-        <filter id="yoonseul-ripple">
-            <feTurbulence type="fractalNoise" baseFrequency="0.015 0.08" numOctaves="3" result="noise_map" />
-            <feDisplacementMap in="SourceGraphic" in2="noise_map" scale="25" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-    </svg>
 
     <div id="app">
         <header>
-            <h1>수평선 너머</h1>
+            <h1 class="main-title">수평선 너머</h1>
             <p class="subtitle">노을지는 수평선 바다 속 나의 기록들</p>
             <div class="auth-box">
                 <div class="auth-flex">
@@ -78,14 +72,15 @@
     </div>
 
     <div id="detail-modal" class="modal" onclick="closeDetailModal()">
-        <div class="modal-content detail-content" onclick="event.stopPropagation()">
-            <h2 id="detail-title"></h2>
-            <div class="detail-meta">
-                <span id="detail-date" class="date"></span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="detail-popup-header">
+                <h3 id="detail-title">글 제목</h3>
+                <span id="detail-date" class="date">날짜</span>
             </div>
-            <hr class="detail-divider">
-            <div id="detail-text" class="detail-text-area"></div>
-            <div class="modal-buttons" style="margin-top: 25px;">
+            <div class="detail-popup-body">
+                <div id="detail-text">본문 내용</div>
+            </div>
+            <div class="modal-buttons" style="margin-top: 5px;">
                 <button onclick="closeDetailModal()">바다로 돌아가기</button>
             </div>
         </div>
