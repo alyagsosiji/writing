@@ -1,4 +1,4 @@
-/* 전역 기본기 세팅 및 강력한 복제 차단 */
+/* 전역 기본기 세팅 및 복제 차단 */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -6,201 +6,169 @@
 }
 
 body {
-    background-color: #080612;
+    background-color: #120e11;
     color: #f1f5f9;
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 /* ==========================================
-   🌅 진짜 같은 노을빛 파도 바다 배경 시스템
+   🌅 이미지 동기화: 부서지는 황금빛 윤슬 바다 매트릭스
    ========================================== */
 .ocean-background {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
 }
-/* 실제 하늘 같은 그라데이션 */
-.sky-gradient {
-    position: absolute; top: 0; left: 0; width: 100%; height: 62vh;
-    background: linear-gradient(to bottom, #060713 0%, #110e26 40%, #35132e 70%, #83273e 93%, #b53c3c 100%);
-}
-/* 수평선 뒤로 넘어가는 태양 */
-.sun {
-    position: absolute; top: 62vh; left: 50%; transform: translate(-50%, -75%);
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(255,140,90,0.7) 0%, rgba(254,180,123,0.3) 45%, transparent 70%);
-    filter: blur(4px);
-}
-/* 수평선 바다 하단부 (노을빛 반사) */
-.horizon-glow {
-    position: absolute; top: 62vh; left: 0; width: 100%; height: 38vh;
-    background: linear-gradient(to bottom, #23122b 0%, #0d0818 50%, #05030a 100%);
-}
-/* 정밀하게 조율된 선명한 수평선 */
-.horizon-line {
-    position: absolute; top: 62vh; left: 0; width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 200, 150, 0.6), transparent);
-    box-shadow: 0 0 12px rgba(255, 142, 113, 0.5);
+
+/* 사진 특유의 묵직하고 깊은 어두운 바다 기저층 */
+.ocean-base-fluid {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, #1d171a 0%, #151013 50%, #0d0a0d 100%);
 }
 
-/* 🌊 일렁이는 실감형 3중 파도 시스템 */
-.ocean-waves {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 180px; overflow: hidden;
+/* 사진 중앙 상단에서부터 뿜어져 나오는 세밀한 태양 윤슬 광채층 */
+.yoonseul-glimmer-layer {
+    position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+    /* 업로드 사진 특유의 오렌지 코퍼 - 로즈골드 반사광 매핑 */
+    background: radial-gradient(circle at 50% 25%, 
+        rgba(247, 163, 127, 0.55) 0%, 
+        rgba(208, 123, 89, 0.35) 25%, 
+        rgba(74, 43, 40, 0.15) 55%, 
+        transparent 75%
+    );
+    /* HTML 내부의 물결 ripple 필터와 강제 결합 */
+    filter: url('#water-ripple') url('#yoonseul-ripple');
+    animation: yoonseulShimmer 25s ease-in-out infinite alternate;
 }
-.wave-layer {
-    position: absolute; bottom: 0; left: 0; width: 200%; height: 100%;
-    background-repeat: repeat-x; background-position: 0 bottom;
-    transform-origin: center bottom;
-}
-/* 깊은 심해 파도 */
-.wave1 {
-    height: 120px; opacity: 0.15;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,50 C300,90 300,10 600,50 C900,90 900,10 1200,50 L1200,120 L0,120 Z" fill="%23b53c3c"/></svg>');
-    animation: waveMove 16s linear infinite;
-}
-/* 중간 윤슬 파도 */
-.wave2 {
-    height: 140px; opacity: 0.22;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,20 300,100 600,60 C900,20 900,100 1200,60 L1200,120 L0,120 Z" fill="%23ff7e5f"/></svg>');
-    animation: waveMove 10s linear infinite; animation-delay: -2s;
-}
-/* 전면 해안 파도 */
-.wave3 {
-    height: 100px; opacity: 0.12;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,40 C300,80 450,20 600,40 C750,60 900,10 1200,40 L1200,120 L0,120 Z" fill="%23feb47b"/></svg>');
-    animation: waveMove 6s linear infinite; transform: scaleX(-1);
-}
-@keyframes waveMove {
-    0% { transform: translateX(0) translateZ(0) scaleY(1); }
-    50% { transform: translateX(-25%) translateZ(0) scaleY(1.05); }
-    100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
+
+/* 물결이 미세하게 상하좌우로 일렁이며 반짝임이 흐르는 듯한 애니메이션 */
+@keyframes yoonseulShimmer {
+    0% { transform: scale(1) translate(0, 0) rotate(0deg); opacity: 0.9; }
+    50% { transform: scale(1.05) translate(-1%, 1%) rotate(0.5deg); opacity: 1; }
+    100% { transform: scale(1) translate(1%, -1%) rotate(-0.5deg); opacity: 0.92; }
 }
 
 /* 로딩 스크린 */
 #loading-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #060713;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #131012;
     display: flex; justify-content: center; align-items: center; z-index: 9999;
     transition: opacity 0.8s ease;
 }
 .loader { position: relative; text-align: center; }
 .sun-glow {
     position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
-    width: 70px; height: 70px; background: radial-gradient(circle, #ff8e71 0%, transparent 70%);
+    width: 70px; height: 70px; background: radial-gradient(circle, #e68d6c 0%, transparent 70%);
     animation: pulse 2s infinite ease-in-out;
 }
 .wave-loading {
     width: 44px; height: 44px; border: 3px solid transparent;
-    border-top-color: #ffb3c6; border-bottom-color: #ff8e71; border-radius: 50%;
+    border-top-color: #f7a37f; border-bottom-color: #d07b59; border-radius: 50%;
     animation: spin 1.8s linear infinite; margin: 0 auto 20px;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(0.9); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); } }
-#loading-screen p { color: #ffb3c6; letter-spacing: 2px; font-size: 0.85rem; }
+#loading-screen p { color: #f7a37f; letter-spacing: 2px; font-size: 0.85rem; }
 
-/* 메인 대칭 프레임 */
+/* 메인 프레임 */
 #app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px; }
 header { text-align: center; margin-bottom: 50px; }
 header h1 {
     font-size: 2.6rem; font-weight: 300; letter-spacing: 5px; color: #ffffff;
-    text-shadow: 0 0 20px rgba(255, 179, 198, 0.4), 0 0 40px rgba(255, 142, 113, 0.2);
+    text-shadow: 0 0 25px rgba(247, 163, 127, 0.45);
     margin-bottom: 12px;
 }
-header .subtitle { color: #b9b3d9; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.85; }
+header .subtitle { color: #cfc7cc; font-size: 0.95rem; letter-spacing: 1.5px; opacity: 0.8; }
 
-/* 🛠️ [위치 완전 교정] 관리자 로그인 버튼 배치 정가운데 정렬 */
-.auth-box {
-    margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%;
-}
-.auth-flex {
-    display: flex; justify-content: center; align-items: center; gap: 10px;
-}
+/* 정렬 보정 완료된 제어 센터 */
+.auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
+.auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-/* 프리미엄 버튼 인터페이스 */
+/* 글래스모피즘 인터페이스 버튼 */
 button {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-    color: #ffe3e8; border: 1px solid rgba(255, 179, 198, 0.25);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
+    color: #fcece7; border: 1px solid rgba(247, 163, 127, 0.2);
     padding: 8px 22px; border-radius: 20px; cursor: pointer;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     transition: all 0.35s ease; font-size: 0.85rem;
 }
-button:hover { border-color: #ff8e71; color: #fff; box-shadow: 0 0 12px rgba(255, 142, 113, 0.4); transform: translateY(-1.5px); }
-.danger-btn { border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
-.danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+button:hover { border-color: #f7a37f; color: #fff; box-shadow: 0 0 12px rgba(247, 163, 127, 0.3); transform: translateY(-1.5px); }
+.danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
+.danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 입력 영역 스타일 */
+/* 기입 섹션 */
 #write-section {
-    background: rgba(18, 15, 32, 0.6); border: 1px solid rgba(255, 179, 198, 0.15);
+    background: rgba(23, 18, 21, 0.7); border: 1px solid rgba(247, 163, 127, 0.15);
     padding: 30px; border-radius: 18px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-    margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
 }
-#write-section h3 { margin-bottom: 20px; color: #ffb3c6; font-weight: 400; font-size: 1.05rem; }
+#write-section h3 { margin-bottom: 20px; color: #f7a37f; font-weight: 400; font-size: 1.05rem; }
 .write-buttons { display: flex; gap: 10px; }
 input[type="text"], textarea {
-    width: 100%; background: rgba(10, 8, 17, 0.7); border: 1px solid rgba(255, 255, 255, 0.07);
+    width: 100%; background: rgba(12, 9, 11, 0.75); border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.3s;
 }
-input[type="text"]:focus, textarea:focus { border-color: #ff8e71; background: rgba(10, 8, 17, 0.85); }
+input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rgba(12, 9, 11, 0.9); }
 
-/* 🛠️ [정렬 교정] 기록된 바다 타이틀 정중앙 배치 */
+/* 중앙 정렬 타이틀 */
 .centered-title {
     text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px;
-    color: #ffb3c6; letter-spacing: 2px; border-bottom: 1px solid rgba(255, 179, 198, 0.15);
+    color: #f7a37f; letter-spacing: 2px; border-bottom: 1px solid rgba(247, 163, 127, 0.15);
     padding-bottom: 15px; width: 100%;
 }
 
-/* 2열 격자 구조 */
+/* 격자 배치 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* 엽서 타입의 글 카드 스펙 */
+/* 엽서 스타일 글 카드 (배경 윤슬 대비 가독성 확보용 딥 다크 필터링 추가) */
 .post-card {
-    background: linear-gradient(135deg, rgba(23, 19, 38, 0.75) 0%, rgba(14, 11, 23, 0.6) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 16px;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, rgba(20, 16, 18, 0.88) 0%, rgba(12, 9, 11, 0.82) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     position: relative; transition: all 0.35s ease;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     height: 250px; display: flex; flex-direction: column; justify-content: space-between;
-    cursor: pointer; /* 클릭 가능하다는 표시 */
+    cursor: pointer;
 }
-.post-card:hover { transform: translateY(-4px); border-color: rgba(255, 142, 113, 0.3); box-shadow: 0 12px 30px rgba(255, 142, 113, 0.15); }
+.post-card:hover { transform: translateY(-4px); border-color: rgba(247, 163, 127, 0.25); box-shadow: 0 12px 30px rgba(247, 163, 127, 0.15); }
 .post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
 
-/* 🛠️ [글자수 제한 및 더보기 대응] CSS line-clamp 적용 */
+/* 4줄 초과 시 생략 및 더보기(...) 강제 전환 체계 */
 .post-content-area {
     color: #cbd5e1; line-height: 1.65; font-size: 0.92rem; white-space: pre-wrap;
     flex-grow: 1; margin-bottom: 15px; text-align: justify;
-    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; /* 4줄 제한 */
-    overflow: hidden; text-overflow: ellipsis; /* 끝부분 더보기(...) 자동 대체 */
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+    overflow: hidden; text-overflow: ellipsis;
 }
 
 .post-footer { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
-.post-card .date { font-size: 0.78rem; color: #8781a3; }
+.post-card .date { font-size: 0.78rem; color: #9c9197; }
 .card-mgmt-btns { display: flex; gap: 6px; }
-.mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+.mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 
-/* 📝 글 자세히 보기 팝업 모달창 전용 스타일 (신규) */
+/* 📝 글 자세히 보기 컴팩트 팝업 시스템 */
 .detail-content {
     max-width: 650px !important; width: 90% !important; text-align: left !important;
-    background: linear-gradient(145deg, #181428, #0c0916) !important;
-    padding: 35px !important; border: 1px solid rgba(255, 142, 113, 0.2) !important;
+    background: linear-gradient(145deg, #1a1417, #0e0a0c) !important;
+    padding: 35px !important; border: 1px solid rgba(247, 163, 127, 0.2) !important;
 }
 .detail-content h2 { font-size: 1.6rem; color: #ffffff; font-weight: 400; line-height: 1.4; margin-bottom: 8px; }
 .detail-meta { margin-bottom: 15px; }
-.detail-divider { border: 0; height: 1px; background: linear-gradient(90deg, rgba(255,142,113,0.3), transparent); margin-bottom: 20px; }
+.detail-divider { border: 0; height: 1px; background: linear-gradient(90deg, rgba(247,163,127,0.3), transparent); margin-bottom: 20px; }
 .detail-text-area {
     color: #e2e8f0; line-height: 1.8; font-size: 0.98rem; white-space: pre-wrap;
     max-height: 50vh; overflow-y: auto; padding-right: 10px; text-align: justify;
 }
 .detail-text-area::-webkit-scrollbar { width: 4px; }
-.detail-text-area::-webkit-scrollbar-thumb { background: rgba(255, 142, 113, 0.3); border-radius: 10px; }
+.detail-text-area::-webkit-scrollbar-thumb { background: rgba(247, 163, 127, 0.25); border-radius: 10px; }
 
-/* 페이지네이션 및 일반 모달 */
+/* 페이지네이션 및 모달 기본 */
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
-.page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: #b4aed2; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
-.page-btn:hover { background: rgba(255, 142, 113, 0.15); color: #ff8e71; border-color: #ff8e71; }
-.page-btn.active { background: linear-gradient(135deg, #ff8e71, #ffb3c6); color: #090a14; border-color: #ff8e71; box-shadow: 0 0 12px rgba(255, 142, 113, 0.45); font-weight: bold; }
+.page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
+.page-btn:hover { background: rgba(247, 163, 127, 0.15); color: #f7a37f; border-color: #f7a37f; }
+.page-btn.active { background: linear-gradient(135deg, #f7a37f, #d07b59); color: #090a14; border-color: #f7a37f; box-shadow: 0 0 12px rgba(247, 163, 127, 0.45); font-weight: bold; }
 
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4, 3, 8, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
-.modal-content { background: linear-gradient(145deg, #161224, #0e0a17); border: 1px solid rgba(255, 179, 198, 0.15); padding: 35px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center; }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 4, 5, 0.92); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(6px); }
+.modal-content { background: linear-gradient(145deg, #181315, #0f0b0d); border: 1px solid rgba(247, 163, 127, 0.15); padding: 35px; border-radius: 16px; width: 90%; max-width: 360px; text-align: center; }
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 300; }
-.modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); color: #fff; border-radius: 6px; outline: none; }
+.modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 .modal-buttons { display: flex; justify-content: space-around; gap: 8px; }
