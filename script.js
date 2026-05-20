@@ -42,6 +42,7 @@ const postsPerPage = 6;
 let allPosts = [];
 let allLetters = []; 
 let editTargetKey = null; 
+let searchKeyword = '';
 
 // ==========================================
 // 3. 라이프 사이클 매니저
@@ -221,6 +222,12 @@ function renderUI() {
     }
 
     const targetArray = (currentView === 'posts') ? allPosts : allLetters;
+
+    if (searchKeyword) {
+    targetArray = targetArray.filter(item => 
+        item.title.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+    }
 
     if (targetArray.length === 0) {
         const text = (currentView === 'posts') ? "아직 채워지지 않은 수평선 너버 바다입니다." : "도착한 편지가 없습니다.";
@@ -422,4 +429,10 @@ function clearDatabase() {
 
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+// 🔍 [여기 삽입] 실시간 제목 검색 핸들러 함수
+function handleSearch() {
+    searchKeyword = document.getElementById('search-input').value.trim();
+    currentPage = 1; // 검색 시 첫 페이지로 리셋
+    renderUI();
 }
