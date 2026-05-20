@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 보안 장치 (우클릭, 드래그, 주요 개발자 단축키 완벽 통제)
+// 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
 // ==========================================
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -11,14 +11,14 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. Base64 데이터 해독 및 Firebase 기동 팩
+// 2. Base64 데이터 해독 및 무결성 Firebase 연결
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), // 연동 성공 정정 고정
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
@@ -35,9 +35,12 @@ firebase.initializeApp(secureConfig);
 const database = firebase.database();
 
 let isAdmin = false;
+let currentView = 'posts'; // 'posts' 또는 'letters'
 let currentPage = 1;
 const postsPerPage = 6;
+
 let allPosts = [];
+let allLetters = []; 
 let editTargetKey = null; 
 
 // ==========================================
@@ -50,10 +53,11 @@ window.addEventListener('load', function() {
         setTimeout(() => loader.style.display = 'none', 800);
     }, 1200);
     listenPosts();
+    listenLetters();
 });
 
 // ==========================================
-// 4. 🛠️ 컴팩트 모달 다이얼로그 가동기 (alert/confirm 완전 폐기 및 전결 대체)
+// 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
 // ==========================================
 function showSystemAlert(message, callback) {
     document.getElementById('system-title').innerText = "안내";
@@ -98,7 +102,7 @@ function showSystemConfirm(message, onConfirm, onCancel) {
 }
 
 // ==========================================
-// 5. 로그인 / 로그아웃 모달 게이트
+// 5. 로그인 / 로그아웃 인증 매니저 (가시성 철저 제어)
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -110,7 +114,7 @@ function login() {
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         isAdmin = true;
         closeModal();
-        showSystemAlert('환영합니다, 수평선의 기록자, 아시님.', function() {
+        showSystemAlert('환영합니다, 수평선 너머 바다의 기록자, 아시님.', function() {
             updateUI();
         });
     } else {
@@ -128,23 +132,53 @@ function logout() {
 
 function updateUI() {
     const writeSection = document.getElementById('write-section');
+    const letterSection = document.getElementById('letter-section');
     const loginBtn = document.getElementById('login-btn');
     const adminMenu = document.getElementById('admin-menu');
+    const tabContainer = document.getElementById('view-tab-container');
 
     if (isAdmin) {
         writeSection.style.display = 'block';
+        letterSection.style.display = 'none'; 
         loginBtn.style.display = 'none';
         adminMenu.style.display = 'flex'; 
+        tabContainer.style.display = 'flex'; // 🛠️ 어드민 전용: 편지함 메뉴 열어주기
     } else {
         writeSection.style.display = 'none';
+        letterSection.style.display = 'block'; 
         loginBtn.style.display = 'inline-block';
         adminMenu.style.display = 'none';
+        tabContainer.style.display = 'none'; // 🛠️ 비로그인 유저: 편지함 메뉴 흔적도 없이 숨김
+        switchView('posts'); // 로그아웃 시 강제로 안전하게 '기록된 바다' 화면으로 대피
+    }
+}
+
+// 탭 스위칭 루틴 (비로그인 해킹 차단 안전장치 강화)
+function switchView(view) {
+    // 🛠️ 비로그인 상태에서 편지함 탭으로 우회 접근하려는 시도를 철저히 차단
+    if (!isAdmin && view === 'letters') {
+        currentView = 'posts';
+        return;
+    }
+
+    currentView = view;
+    currentPage = 1;
+    
+    document.getElementById('tab-posts').classList.remove('active');
+    document.getElementById('tab-letters').classList.remove('active');
+    
+    if(view === 'posts') {
+        document.getElementById('tab-posts').classList.add('active');
+        document.getElementById('section-main-title').innerText = "기록된 바다";
+    } else {
+        document.getElementById('tab-letters').classList.add('active');
+        document.getElementById('section-main-title').innerText = "도착한 편지";
     }
     renderUI();
 }
 
 // ==========================================
-// 6. 실시간 데이터베이스 연산 제어 코어
+// 6. 실시간 동기화 데이터베이스 제어 인터페이스
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -156,7 +190,21 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
-        renderUI();
+        if(currentView === 'posts') renderUI();
+    });
+}
+
+function listenLetters() {
+    database.ref('letters').on('value', (snapshot) => {
+        const lettersData = snapshot.val();
+        allLetters = [];
+        if (lettersData) {
+            Object.keys(lettersData).forEach((key) => {
+                allLetters.push({ id: key, ...lettersData[key] });
+            });
+            allLetters.reverse();
+        }
+        if(currentView === 'letters') renderUI();
     });
 }
 
@@ -167,36 +215,52 @@ function renderUI() {
     container.innerHTML = '';
     paginationContainer.innerHTML = '';
 
-    if (allPosts.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 수평선 너머의 노을빛 바다입니다.</p>';
+    // 🛠️ 보안 2단계 방어선: 비로그인 상태인데 편지함을 보여달라고 요청할 시 강제 기각
+    if (!isAdmin && currentView === 'letters') {
+        currentView = 'posts';
+    }
+
+    const targetArray = (currentView === 'posts') ? allPosts : allLetters;
+
+    if (targetArray.length === 0) {
+        const text = (currentView === 'posts') ? "아직 채워지지 않은 수평선 너버 바다입니다." : "도착한 편지가 없습니다.";
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
 
-    const totalPages = Math.ceil(allPosts.length / postsPerPage);
+    const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const startIndex = (currentPage - 1) * postsPerPage;
     const endIndex = startIndex + postsPerPage;
-    const currentItems = allPosts.slice(startIndex, endIndex);
+    const currentItems = targetArray.slice(startIndex, endIndex);
 
-    currentItems.forEach((post) => {
+    currentItems.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'post-card';
-        card.onclick = () => openDetailModal(post.id);
+        card.onclick = () => openDetailModal(item.id);
         
         let mgmtButtonsHtml = '';
         if (isAdmin) {
-            mgmtButtonsHtml = `
-                <div class="card-mgmt-btns">
-                    <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${post.id}')">수정</button>
-                    <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${post.id}')">소멸</button>
-                </div>
-            `;
+            if (currentView === 'posts') {
+                mgmtButtonsHtml = `
+                    <div class="card-mgmt-btns">
+                        <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button>
+                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button>
+                    </div>
+                `;
+            } else {
+                mgmtButtonsHtml = `
+                    <div class="card-mgmt-btns">
+                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button>
+                    </div>
+                `;
+            }
         }
 
         card.innerHTML = `
-            <h3>${escapeHtml(post.title)}</h3>
-            <div class="post-content-area">${escapeHtml(post.content)}</div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <div class="post-content-area">${escapeHtml(item.content)}</div>
             <div class="post-footer">
-                <span class="date">${post.date}</span>
+                <span class="date">${item.date}</span>
                 ${mgmtButtonsHtml}
             </div>
         `;
@@ -219,18 +283,20 @@ function renderUI() {
 }
 
 function openDetailModal(key) {
-    const post = allPosts.find(p => p.id === key);
-    if (!post) return;
+    // 🛠️ 보안 3단계 방어선: 비로그인 유저가 임의 함수 호출로 편지 팝업을 띄우려는 행위 기각
+    if (!isAdmin && currentView === 'letters') return;
 
-    document.getElementById('detail-title').innerText = post.title;
-    document.getElementById('detail-date').innerText = post.date;
-    document.getElementById('detail-text').innerText = post.content;
+    const searchPool = (currentView === 'posts') ? allPosts : allLetters;
+    const item = searchPool.find(p => p.id === key);
+    if (!item) return;
+
+    document.getElementById('detail-title').innerText = item.title;
+    document.getElementById('detail-date').innerText = item.date;
+    document.getElementById('detail-text').innerText = item.content;
     document.getElementById('detail-modal').style.display = 'flex';
 }
 
-function closeDetailModal() {
-    document.getElementById('detail-modal').style.display = 'none';
-}
+function closeDetailModal() { document.getElementById('detail-modal').style.display = 'none'; }
 
 function savePost() {
     if (!isAdmin) return;
@@ -251,16 +317,38 @@ function savePost() {
             .then(() => {
                 showSystemAlert('기록이 수정되어 바다에 다시 새겨졌습니다.');
                 cancelEdit();
-            }).catch(err => showSystemAlert("수정 오류: " + err.message));
+            }).catch(err => showSystemAlert("수정 오류 : " + err.message));
     } else {
         database.ref('posts').push(postData)
             .then(() => {
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
                 currentPage = 1;
-                showSystemAlert('바다에 새로운 기록이 성공적으로 수평선 너머에 기록되었습니다.');
+                showSystemAlert('바다에 새로운 기록이 성공적으로 수평선 너머에 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message));
     }
+}
+
+function saveLetter() {
+    const title = document.getElementById('letter-title').value.trim();
+    const content = document.getElementById('letter-content').value.trim();
+    const date = new Date().toLocaleString('ko-KR');
+
+    if (!title || !content) {
+        showSystemAlert('편지 제목과 내용을 모두 채워주세요.');
+        return;
+    }
+
+    const letterData = { title: title, content: content, date: date };
+
+    database.ref('letters').push(letterData)
+        .then(() => {
+            document.getElementById('letter-title').value = '';
+            document.getElementById('letter-content').value = '';
+            showSystemAlert('아시님에게 보낼 편지가 넓은 바다 위로 안전하게 띄워졌습니다.');
+            currentPage = 1;
+            renderUI();
+        }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message));
 }
 
 function prepareEdit(key) {
@@ -276,6 +364,7 @@ function prepareEdit(key) {
     document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
 }
 
+// 편집 초기화
 function cancelEdit() {
     editTargetKey = null;
     document.getElementById('write-title').innerText = "새로운 기록 남기기";
@@ -299,19 +388,33 @@ function deletePost(key) {
     });
 }
 
+function deleteLetter(key) {
+    if (!isAdmin) return;
+
+    showSystemConfirm('이 편지를 바다에서 완전히 소멸시키겠습니까?', function() {
+        database.ref('letters/' + key).remove().then(() => {
+            const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage);
+            if (currentPage > totalPagesAfterDelete && currentPage > 1) {
+                currentPage = totalPagesAfterDelete;
+            }
+        }).catch(err => showSystemAlert("편지 제거 오류 : " + err.message));
+    });
+}
+
 function clearDatabase() {
     if (!isAdmin) return;
     
-    showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글이 흔적도 없이 사라집니다. 초기화할까요?', function() {
+    showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글과 편지들이 흔적도 없이 사라집니다. 초기화할까요?', function() {
         setTimeout(function() {
-            showSystemConfirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 바다의 글을 파괴할까요?', function() {
-                database.ref('posts').remove()
-                    .then(() => {
-                        cancelEdit();
-                        currentPage = 1;
-                        showSystemAlert('바다가 완전히 정화되어 공백의 수평선 상태가 되었습니다.');
-                    })
-                    .catch((error) => showSystemAlert('초기화 실패: ' + error.message));
+            showSystemConfirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 기록과 편지를 영구 파괴할까요?', function() {
+                Promise.all([
+                    database.ref('posts').remove(),
+                    database.ref('letters').remove()
+                ]).then(() => {
+                    cancelEdit();
+                    currentPage = 1;
+                    showSystemAlert('바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
     });
