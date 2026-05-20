@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 보안 인프라 가동 (우클릭, 드래그, F12 전면 제어)
+// 1. 보안 가동 (우클릭, 드래그, 주요 디버깅 단축키 전면 통제)
 // ==========================================
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -11,7 +11,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. Base64 복호화 및 Firebase 기동 팩
+// 2. 난독 데이터(Base64) 해독 및 정밀 Firebase 기동 루프
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
@@ -41,7 +41,7 @@ let allPosts = [];
 let editTargetKey = null; 
 
 // ==========================================
-// 3. 라이프 사이클 매니지먼트
+// 3. 라이프 사이클 스케줄러
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -53,7 +53,7 @@ window.addEventListener('load', function() {
 });
 
 // ==========================================
-// 4. 보안 계정 핸들러
+// 4. 보안 인증 제어 허브
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -97,7 +97,7 @@ function updateUI() {
 }
 
 // ==========================================
-// 5. 핵심 코어 연산 루프
+// 5. 핵심 데이터베이스 실시간 제어 로직
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -171,6 +171,7 @@ function renderUI() {
     }
 }
 
+// 글 팝업 제어 루틴
 function openDetailModal(key) {
     const post = allPosts.find(p => p.id === key);
     if (!post) return;
@@ -181,11 +182,11 @@ function openDetailModal(key) {
     document.getElementById('detail-modal').style.display = 'flex';
 }
 
-// 팝업 모달 소멸 제어
 function closeDetailModal() {
     document.getElementById('detail-modal').style.display = 'none';
 }
 
+// 기록 보관 처리 분기
 function savePost() {
     if (!isAdmin) return;
 
