@@ -156,3 +156,19 @@ footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-to
 #search-input:focus {
     border-color: #f7a37f; background: rgba(12, 9, 11, 0.85); box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
 }
+/* ==========================================
+   로딩 화면 충돌 해결을 위한 무결성 패치
+   ========================================== */
+#loading-screen {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+
+/* 자바스크립트가 로딩 완료를 감지하면 아래 클래스가 주입되어 화면을 완전히 관통시킵니다 */
+#loading-screen.fade-out {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
