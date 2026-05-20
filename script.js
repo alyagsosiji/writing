@@ -1,48 +1,5 @@
 // ==========================================
-// 🛠️ 라이프 사이클 매니저 (최상단 배치로 무한 로딩 원천 차단)
-// ==========================================
-function hideLoadingScreen() {
-    const loader = document.getElementById('loading-screen');
-    if (loader && loader.style.display !== 'none') {
-        loader.style.opacity = '0';
-        // CSS 페이드아웃 애니메이션(0.8초)이 끝나는 시점을 캐치하여 display 변경
-        loader.addEventListener('transitionend', function() {
-            loader.style.display = 'none';
-        }, { once: true });
-    }
-}
-
-// 스크립트가 실행된 시점에 이미 브라우저 로딩이 완료되었다면 즉시 해제, 아니라면 load 이벤트 대기
-if (document.readyState === 'complete') {
-    hideLoadingScreen();
-} else {
-    window.addEventListener('load', hideLoadingScreen);
-}
-
-// HTML 구조가 준비되면 즉시 데이터 실시간 동기화 가동
-window.addEventListener('DOMContentLoaded', function() {
-    try {
-        listenPosts();
-        listenLetters();
-    } catch (e) {
-        console.error("데이터 실시간 로드 중 예외 발생:", e);
-    }
-});
-
-// ==========================================
-// 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
-// ==========================================
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('selectstart', e => e.preventDefault());
-document.addEventListener('keydown', function(e) {
-    if (e.key === "F12") { e.preventDefault(); return false; }
-    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
-    if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
-});
-
-// ==========================================
-// 2. Base64 데이터 해독 및 무결성 Firebase 연결
+// 1. 글로벌 상태 변수 및 보안 구성 선언 (최상단 배치로 에러 방지)
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
@@ -59,9 +16,10 @@ const secureConfig = {
 
 const secureAdmin = {
     id: decodeData("7JWE7Iuc"), // 아시
-    pw: atob("YXNoaSMyNjA0MTY=")        // ashi#260416 반영 완료
+    pw: atob("YXNoaSMyNjA0MTY=")        // ashi#260416
 };
 
+// 파이어베이스 커넥션 확립
 firebase.initializeApp(secureConfig);
 const database = firebase.database();
 
@@ -75,8 +33,54 @@ let allLetters = [];
 let editTargetKey = null; 
 let searchKeyword = ''; 
 
-// 🛠️ [연타 방지 기능] 중복 발송을 원천 차단하기 위한 글로벌 제어 플래그
+// 중복 발송 잠금 플래그
 let isSubmitting = false;
+
+// ==========================================
+// 2. 라이프 사이클 매니저 (무한 로딩 제로 무결성 매커니즘)
+// ==========================================
+function hideLoadingScreen() {
+    const loader = document.getElementById('loading-screen');
+    if (loader && loader.style.display !== 'none') {
+        loader.style.opacity = '0'; // 부드럽게 투명화 시작
+        
+        // 🛠️ 트래픽 씹힘 현상이 있는 transitionend 대신, CSS 애니메이션 시간(0.8초)과 동기화하여 확실하게 제거
+        setTimeout(function() {
+            loader.style.display = 'none';
+        }, 800);
+    }
+}
+
+// 스크립트 실행 시점에 이미 로드가 끝났다면 즉시 제거, 아니라면 준비되는 즉시 가동
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    hideLoadingScreen();
+} else {
+    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
+    window.addEventListener('load', hideLoadingScreen);
+}
+
+// DOM 구조 완료 즉시 실시간 데이터 베이스 리스닝 연결
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        listenPosts();
+        listenLetters();
+    } catch (e) {
+        console.error("데이터 로드 중 예외 발생:", e);
+        hideLoadingScreen(); // 에러가 발생해도 로딩창은 걷어내어 화면 확보
+    }
+});
+
+// ==========================================
+// 3. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
+// ==========================================
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.key === "F12") { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+});
 
 // ==========================================
 // 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
@@ -124,7 +128,7 @@ function showSystemConfirm(message, onConfirm, onCancel) {
 }
 
 // ==========================================
-// 5. 로그인 / 로그아웃 인증 매니저 (가시성 철저 제어)
+// 5. 로그인 / 로그아웃 인증 매니저
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -234,6 +238,9 @@ function listenLetters() {
     });
 }
 
+// ==========================================
+// 7. UI 데이터 렌더링 엔진 (페이징 및 접두사 통합본)
+// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -350,6 +357,9 @@ function renderUI() {
     }
 }
 
+// ==========================================
+// 8. 데이터 상세 조회 및 트랜잭션 관리 매니저
+// ==========================================
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
 
@@ -460,7 +470,7 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
     });
 }
 
