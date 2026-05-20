@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 보안 가동 (우클릭, 드래그, 주요 디버깅 단축키 전면 통제)
+// 1. 보안 인프라 가동 (우클릭, 드래그, F12 전면 제어)
 // ==========================================
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
@@ -11,7 +11,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. 난독 데이터(Base64) 해독 및 정밀 Firebase 기동 루프
+// 2. Base64 복호화 및 Firebase 기동 팩
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
@@ -41,7 +41,7 @@ let allPosts = [];
 let editTargetKey = null; 
 
 // ==========================================
-// 3. 라이프 사이클 스케줄러
+// 3. 라이프 사이클 매니지먼트
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -53,7 +53,7 @@ window.addEventListener('load', function() {
 });
 
 // ==========================================
-// 4. 보안 인증 제어 허브
+// 4. 보안 계정 핸들러
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -97,7 +97,7 @@ function updateUI() {
 }
 
 // ==========================================
-// 5. 핵심 데이터베이스 실시간 제어 로직
+// 5. 핵심 코어 연산 루프
 // ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
@@ -121,7 +121,7 @@ function renderUI() {
     paginationContainer.innerHTML = '';
 
     if (allPosts.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#8781a3; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 노을빛 바다입니다.</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 노을빛 바다입니다.</p>';
         return;
     }
 
@@ -133,13 +133,10 @@ function renderUI() {
     currentItems.forEach((post) => {
         const card = document.createElement('div');
         card.className = 'post-card';
-        
-        // 🛠️ 카드 자체를 클릭하면 팝업 상세 모달이 뜨도록 이벤트 연결
         card.onclick = () => openDetailModal(post.id);
         
         let mgmtButtonsHtml = '';
         if (isAdmin) {
-            // event.stopPropagation()을 걸어주어 수정/소멸 버튼을 누를 땐 팝업이 뜨지 않게 방어합니다.
             mgmtButtonsHtml = `
                 <div class="card-mgmt-btns">
                     <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${post.id}')">수정</button>
@@ -174,7 +171,6 @@ function renderUI() {
     }
 }
 
-// 📝 [기능 추가] 글 자세히 보기 팝업 제어 함수
 function openDetailModal(key) {
     const post = allPosts.find(p => p.id === key);
     if (!post) return;
@@ -185,11 +181,11 @@ function openDetailModal(key) {
     document.getElementById('detail-modal').style.display = 'flex';
 }
 
+// 팝업 모달 소멸 제어
 function closeDetailModal() {
     document.getElementById('detail-modal').style.display = 'none';
 }
 
-// 글 저장 및 수정 분기
 function savePost() {
     if (!isAdmin) return;
 
