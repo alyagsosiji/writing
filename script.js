@@ -1,10 +1,9 @@
 // ==========================================
-// 1. 보안 및 우회 방지 설정 (우클릭, 드래그, F12, 단축키 차단)
+// 1. 보안 인프라 (우클릭, 드래그, 단축키 및 디버거 완전 무력화)
 // ==========================================
-document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-document.addEventListener('selectstart', function(e) { e.preventDefault(); });
-
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
 document.addEventListener('keydown', function(e) {
     if (e.key === "F12") { e.preventDefault(); return false; }
     if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
@@ -12,27 +11,24 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. 데이터 복호화 및 Firebase 완전 무결 초기화
+// 2. 난독 암호화(Base64) 디코딩 및 정밀 연동 데이터베이스 복원
 // ==========================================
-function decodeData(str) {
-    return decodeURIComponent(escape(atob(str)));
-}
+function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
-// [정밀 보정] 오타를 완벽히 수정하고 새로 인코딩한 안전 고정형 Config
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRl9qZHk0d1ZHMzNXWVhJNTV4V0p1VjA="),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), // 오타 완전 해결 완료
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), // 연동 이상무
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXN0b3JhZ2UuYXBw"), // 오타 완전 해결 완료
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXN0b3JhZ2UuYXBw"),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWZiZDNjYTE0NA=="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
 };
 
 const secureAdmin = {
-    id: decodeData("7JWE7Iuc"), // '아시'
-    pw: atob("MjYwNDE2")        // '260416'
+    id: decodeData("7JWE7Iuc"), // 아시
+    pw: atob("MjYwNDE2")        // 260416
 };
 
 firebase.initializeApp(secureConfig);
@@ -40,11 +36,12 @@ const database = firebase.database();
 
 let isAdmin = false;
 let currentPage = 1;
-const postsPerPage = 6; // 한 페이지당 아름답게 정렬되어 보여줄 글의 수
+const postsPerPage = 6;
 let allPosts = [];
+let editTargetKey = null; // 수정 상태를 추적 및 제어하는 마스터 키
 
 // ==========================================
-// 3. 로딩 화면 제어 및 실시간 관측 엔진 기동
+// 3. 로딩 처리 및 리포지토리 활성화
 // ==========================================
 window.addEventListener('load', function() {
     setTimeout(function() {
@@ -52,13 +49,11 @@ window.addEventListener('load', function() {
         loader.style.opacity = '0';
         setTimeout(() => loader.style.display = 'none', 800);
     }, 1200);
-
-    // .once에서 실시간 동기화 방식인 .on으로 교체하여 에러 원인 제거
     listenPosts();
 });
 
 // ==========================================
-// 4. 코어 로직 제어 루프 (실시간 정렬 및 페이지네이션 연동)
+// 4. 인증 제어 및 모달 인터페이스
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -79,6 +74,7 @@ function login() {
 
 function logout() {
     isAdmin = false;
+    cancelEdit();
     alert('로그아웃 되었습니다.');
     updateUI();
 }
@@ -86,38 +82,37 @@ function logout() {
 function updateUI() {
     const writeSection = document.getElementById('write-section');
     const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    const adminMenu = document.getElementById('admin-menu');
 
     if (isAdmin) {
         writeSection.style.display = 'block';
         loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
+        adminMenu.style.display = 'inline-flex';
     } else {
         writeSection.style.display = 'none';
         loginBtn.style.display = 'inline-block';
-        logoutBtn.style.display = 'none';
+        adminMenu.style.display = 'none';
     }
-    renderUI(); // 현재 관리자 권한 상태에 맞는 UI 즉각 재배치
+    renderUI();
 }
 
-// 실시간 DB 관측 함수
+// ==========================================
+// 5. 핵심 엔진 (실시간 연산, 글 저장/수정, 소멸, 전체 초기화)
+// ==========================================
 function listenPosts() {
     database.ref('posts').on('value', (snapshot) => {
         const postsData = snapshot.val();
         allPosts = [];
-        
         if (postsData) {
             Object.keys(postsData).forEach((key) => {
                 allPosts.push({ id: key, ...postsData[key] });
             });
-            // 최신 글이 완벽히 무조건 상단에 위치하도록 정렬 보정
-            allPosts.reverse();
+            allPosts.reverse(); // 최신 기록 항상 상위 배치
         }
         renderUI();
     });
 }
 
-// 스크린 실제 렌더링 및 페이지네이션 계산 처리
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -126,11 +121,10 @@ function renderUI() {
     paginationContainer.innerHTML = '';
 
     if (allPosts.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#8a829e; margin-top:40px; font-size:0.95rem; letter-spacing:1px;">아직 채워지지 않은 노을빛 바다입니다.</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#8781a3; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">아직 채워지지 않은 노을빛 바다입니다.</p>';
         return;
     }
 
-    // 수학적 갱신구간 산출
     const totalPages = Math.ceil(allPosts.length / postsPerPage);
     const startIndex = (currentPage - 1) * postsPerPage;
     const endIndex = startIndex + postsPerPage;
@@ -140,25 +134,27 @@ function renderUI() {
         const card = document.createElement('div');
         card.className = 'post-card';
         
-        let deleteBtnHtml = '';
+        let mgmtButtonsHtml = '';
         if (isAdmin) {
-            deleteBtnHtml = `<button class="delete-btn" onclick="deletePost('${post.id}')">지우기</button>`;
+            mgmtButtonsHtml = `
+                <div class="card-mgmt-btns">
+                    <button class="mgmt-btn" onclick="prepareEdit('${post.id}', \`${escapeQuote(post.title)}\`, \`${escapeQuote(post.content)}\`)">수정</button>
+                    <button class="mgmt-btn danger-btn" onclick="deletePost('${post.id}')">소멸</button>
+                </div>
+            `;
         }
 
         card.innerHTML = `
-            <div>
-                <h3>${escapeHtml(post.title)}</h3>
-                <p>${escapeHtml(post.content)}</p>
-            </div>
-            <div>
+            <h3>${escapeHtml(post.title)}</h3>
+            <div class="post-content-area">${escapeHtml(post.content)}</div>
+            <div class="post-footer">
                 <span class="date">${post.date}</span>
-                ${deleteBtnHtml}
+                ${mgmtButtonsHtml}
             </div>
         `;
         container.appendChild(card);
     });
 
-    // 보정 로직: 전체 페이지가 2페이지 이상일 때만 하단에 번호 발생 (적을 땐 표기 안 됨)
     if (totalPages > 1) {
         for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement('div');
@@ -166,7 +162,7 @@ function renderUI() {
             btn.innerText = i;
             btn.onclick = () => {
                 currentPage = i;
-                window.scrollTo({ top: 0, behavior: 'smooth' }); // 페이지 전환 시 상단 이동 연출
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 renderUI();
             };
             paginationContainer.appendChild(btn);
@@ -174,7 +170,7 @@ function renderUI() {
     }
 }
 
-// 새 글 기록 함수
+// [기능 추가] 글 저장 & 수정 처리 병합 체계
 function savePost() {
     if (!isAdmin) return;
 
@@ -189,38 +185,82 @@ function savePost() {
 
     const postData = { title: title, content: content, date: date };
 
-    database.ref('posts').push(postData)
-        .then(() => {
-            document.getElementById('post-title').value = '';
-            document.getElementById('post-content').value = '';
-            currentPage = 1; // 새 글 등록 시 첫 페이지로 뷰 포커스 리셋
-            alert('바다에 새로운 기록이 성공적으로 안착했습니다.');
-        })
-        .catch((error) => {
-            alert('기록 저장 실패: ' + error.message);
-        });
-}
-
-// 기록 제거 함수
-function deletePost(key) {
-    if (!isAdmin) return;
-    if (confirm('이 기록을 바다에서 지우시겠습니까?')) {
-        database.ref('posts/' + key).remove()
+    if (editTargetKey) {
+        // [수정 모드] 기존 노드 덮어쓰기 업데이트
+        database.ref('posts/' + editTargetKey).update(postData)
             .then(() => {
-                // 삭제 후 현재 페이지에 남은 글이 없으면 이전 페이지로 후퇴하는 안전 제어 장치
-                const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage);
-                if (currentPage > totalPagesAfterDelete && currentPage > 1) {
-                    currentPage = totalPagesAfterDelete;
-                }
+                alert('기록이 수정되어 바다에 다시 새겨졌습니다.');
+                cancelEdit();
+            });
+    } else {
+        // [신규 모드] 새로운 노드 밀어넣기
+        database.ref('posts').push(postData)
+            .then(() => {
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                currentPage = 1;
+                alert('바다에 새로운 기록이 성공적으로 안착했습니다.');
             });
     }
 }
 
+// [기능 추가] 수정 대기 상태 전환
+function prepareEdit(key, title, content) {
+    editTargetKey = key;
+    document.getElementById('write-title').innerText = "기록 수정하기";
+    document.getElementById('post-title').value = title;
+    document.getElementById('post-content').value = content;
+    document.getElementById('submit-post-btn').innerText = "수정하기";
+    document.getElementById('cancel-edit-btn').style.display = "inline-block";
+    
+    // 입력창으로 부드럽게 화면 스크롤 이동
+    document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// [기능 추가] 수정 상태 초기화(취소)
+function cancelEdit() {
+    editTargetKey = null;
+    document.getElementById('write-title').innerText = "새로운 기록 남기기";
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-content').value = '';
+    document.getElementById('submit-post-btn').innerText = "기록하기";
+    document.getElementById('cancel-edit-btn').style.display = "none";
+}
+
+// [소멸 기능] 단일 글 파괴
+function deletePost(key) {
+    if (!isAdmin) return;
+    if (confirm('이 기록을 바다에서 완전히 소멸시키겠습니까?')) {
+        if(editTargetKey === key) cancelEdit();
+        database.ref('posts/' + key).remove().then(() => {
+            const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage);
+            if (currentPage > totalPagesAfterDelete && currentPage > 1) {
+                currentPage = totalPagesAfterDelete;
+            }
+        });
+    }
+}
+
+// [기능 추가] 데이터베이스 완전 초기화 (위험 작업 예방 확인망 가동)
+function clearDatabase() {
+    if (!isAdmin) return;
+    if (confirm('🚨 [경고] 수평선 너머의 "모든" 기록들이 흔적도 없이 사라집니다. 정말 진행할까요?')) {
+        if (confirm('정말로 모든 바다의 글을 파괴하시겠습니까? 이 작업은 절대 되돌릴 수 없습니다.')) {
+            database.ref('posts').remove()
+                .then(() => {
+                    cancelEdit();
+                    currentPage = 1;
+                    alert('바다가 깨끗하게 초기화되어 공백의 수평선이 되었습니다.');
+                })
+                .catch((error) => alert('초기화 실패: ' + error.message));
+        }
+    }
+}
+
+// 이스케이프 유틸리티
 function escapeHtml(text) {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+function escapeQuote(text) {
+    return text.replace(/`/g, "\\`").replace(/\$/g, "\\$");
 }
