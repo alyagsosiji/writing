@@ -22,10 +22,13 @@
     <div class="ocean-background">
         <div class="sky-gradient"></div>
         <div class="sun"></div>
-        <div class="horizon"></div>
+        <div class="horizon-glow"></div>
+        <div class="horizon-line"></div>
+        
         <div class="ocean-waves">
             <div class="wave-layer wave1"></div>
             <div class="wave-layer wave2"></div>
+            <div class="wave-layer wave3"></div>
         </div>
     </div>
 
@@ -71,6 +74,20 @@
             <div class="modal-buttons">
                 <button onclick="login()">로그인</button>
                 <button onclick="closeModal()" class="cancel-btn">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="detail-modal" class="modal" onclick="closeDetailModal()">
+        <div class="modal-content detail-content" onclick="event.stopPropagation()">
+            <h2 id="detail-title"></h2>
+            <div class="detail-meta">
+                <span id="detail-date" class="date"></span>
+            </div>
+            <hr class="detail-divider">
+            <div id="detail-text" class="detail-text-area"></div>
+            <div class="modal-buttons" style="margin-top: 25px;">
+                <button onclick="closeDetailModal()">바다로 돌아가기</button>
             </div>
         </div>
     </div>
