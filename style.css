@@ -7,17 +7,15 @@
 
 body {
     background-color: #0b090b; color: #f1f5f9; min-height: 100vh; overflow-x: hidden;
-    /* 모바일 페이지 바운스 시 검은 잔상 방지 및 터치 스크롤 최적화 */
     position: relative;
     -webkit-overflow-scrolling: touch;
 }
 
 /* ==========================================
-   🌅 사진 동기화: 리얼 윤슬 바다 배경 레이어 (모바일 레이어 독점화 패치)
+   🌅 리얼 윤슬 바다 배경 레이어 (기본 PC 사양)
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
-    /* GPU 독립 레이어 생성으로 본문 레이어와 완벽하게 격리 */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     -webkit-backface-visibility: hidden;
@@ -36,6 +34,7 @@ body {
     filter: blur(4px);
 }
 
+/* PC에서는 이 강력한 SVG 노이즈 필터가 정상 작동합니다 */
 .wave-ripple {
     position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.05 0.2' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -54,17 +53,33 @@ body {
     100% { transform: translate3d(1.5%, -1%, 0) scale(1.04); }
 }
 
-/* 🛠️ [모바일 최적화 핵심 핵심 패치] 
-   화면 크기가 768px 이하인 모바일 기기에서는 연산 과부하를 일으키는 SVG 필터를 경량화하여 
-   검은 네모 현상과 글자 사라짐을 완벽하게 예방하고 스크롤 속도를 60fps로 끌어올립니다. */
+/* ==========================================
+   🛠️ [모바일 한정 배경 최적화 핵심 패치] 
+   화면 크기가 768px 이하인 모바일 기기에서는 연산 과부하를 일으키는 
+   SVG 필터 배경을 완벽하게 제거하고, 초경량 순수 CSS 일렁임 효과로 자동 전환합니다.
+   ========================================== */
 @media (max-width: 768px) {
     .wave-ripple {
-        filter: blur(1px) opacity(0.4); /* 모바일용 초경량 고성능 윤슬 텍스처로 대체 */
-        will-change: auto; /* 불필요한 모바일 그래픽 메모리 점유 해제 */
+        filter: none !important; /* 모바일 GPU를 파괴하던 범인(SVG 필터) 강제 제거 */
+        background-image: none !important; /* 무거운 벡터 이미지 제거 */
+        /* 모바일 전용: 부드러운 노을빛 CSS 그라데이션 레이어로 가볍게 대체 */
+        background: radial-gradient(circle at 50% 20%, rgba(247, 153, 112, 0.15) 0%, transparent 60%);
+        animation: mobileYoonseul 10s ease-in-out infinite alternate !important;
+        will-change: transform, opacity;
+    }
+    /* 불필요한 다중 레이어를 숨겨 모바일 메모리 소모량을 1/3로 절감 */
+    .ripple2, .ripple3 {
+        display: none !important;
     }
     .posts-grid {
-        grid-template-columns: 1fr !important; /* 모바일 그리드 붕괴 및 레이아웃 깨짐 방지 */
+        grid-template-columns: 1fr !important; /* 모바일 가로 핏 최적화 */
     }
+}
+
+/* 모바일 전용 부드러운 초경량 애니메이션 */
+@keyframes mobileYoonseul {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
+    100% { transform: translate3d(1%, 1%, 0) scale(1.03); opacity: 1; }
 }
 
 /* 로딩 화면 기본 정의 및 호환성 크래시 무결성 패치 */
@@ -94,7 +109,6 @@ body {
 /* 메인 구조 레이아웃 */
 #app { 
     position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px 20px 20px; 
-    /* 🛠️ 본문 레이어 전체에 고유한 Stacking Context를 부여하여 배경에 의해 글씨가 파묻히는 현상 차단 */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
     contain: content;
@@ -165,7 +179,6 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     height: 250px; display: flex; flex-direction: column; justify-content: space-between;
     cursor: pointer;
-    /* 🛠️ 모바일 스크롤 잔상 분리 독립 컴포지팅 고정 */
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
 }
