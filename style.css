@@ -143,3 +143,26 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 .cancel-btn { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-top: 1px solid rgba(247, 163, 127, 0.12); color: #8c8288; font-size: 0.82rem; letter-spacing: 0.8px; }
+/* 🔍 제목 검색창 전용 스타일 */
+.search-container {
+    max-width: 450px;
+    margin: 0 auto 35px auto;
+    text-align: center;
+}
+#search-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(247, 163, 127, 0.15);
+    border-radius: 25px;
+    padding: 12px 20px;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+#search-input:focus {
+    border-color: #f7a37f;
+    background: rgba(12, 9, 11, 0.85);
+    box-shadow: 0 0 10px rgba(247, 163, 127, 0.2);
+}
