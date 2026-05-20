@@ -17,7 +17,7 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), 
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -48,17 +48,28 @@ let searchKeyword = '';
 let isSubmitting = false;
 
 // ==========================================
-// 3. 라이프 사이클 매니저
+// 3. 라이프 사이클 매니저 (요청에 따라 강제 종료 타이머 제거 완료)
 // ==========================================
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        const loader = document.getElementById('loading-screen');
+function hideLoadingScreen() {
+    const loader = document.getElementById('loading-screen');
+    if (loader && loader.style.display !== 'none') {
         loader.style.opacity = '0';
         setTimeout(() => loader.style.display = 'none', 800);
-    }, 1200);
-    listenPosts();
-    listenLetters();
+    }
+}
+
+// HTML 구조가 준비되면 즉시 데이터 조회 가동
+window.addEventListener('DOMContentLoaded', function() {
+    try {
+        listenPosts();
+        listenLetters();
+    } catch (e) {
+        console.error("데이터 로드 중 예외 발생:", e);
+    }
 });
+
+// 모든 리소스 및 Firebase 연결 로드가 최종 완료되면 로딩 화면 해제
+window.addEventListener('load', hideLoadingScreen);
 
 // ==========================================
 // 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
@@ -129,182 +140,4 @@ function login() {
 function logout() {
     isAdmin = false;
     cancelEdit();
-    showSystemAlert('로그아웃 되었습니다.', function() {
-        updateUI();
-    });
-}
-
-function updateUI() {
-    const writeSection = document.getElementById('write-section');
-    const letterSection = document.getElementById('letter-section');
-    const loginBtn = document.getElementById('login-btn');
-    const adminMenu = document.getElementById('admin-menu');
-    const tabContainer = document.getElementById('view-tab-container');
-
-    if (isAdmin) {
-        writeSection.style.display = 'block';
-        letterSection.style.display = 'none'; 
-        loginBtn.style.display = 'none';
-        adminMenu.style.display = 'flex'; 
-        tabContainer.style.display = 'flex'; 
-    } else {
-        writeSection.style.display = 'none';
-        letterSection.style.display = 'block'; 
-        loginBtn.style.display = 'inline-block';
-        adminMenu.style.display = 'none';
-        tabContainer.style.display = 'none'; 
-        switchView('posts'); 
-    }
-}
-
-function switchView(view) {
-    if (!isAdmin && view === 'letters') {
-        currentView = 'posts';
-        return;
-    }
-
-    currentView = view;
-    currentPage = 1;
-    
-    document.getElementById('tab-posts').classList.remove('active');
-    document.getElementById('tab-letters').classList.remove('active');
-    
-    if(view === 'posts') {
-        document.getElementById('tab-posts').classList.add('active');
-        document.getElementById('section-main-title').innerText = "기록된 바다";
-    } else {
-        document.getElementById('tab-letters').classList.add('active');
-        document.getElementById('section-main-title').innerText = "도착한 편지";
-    }
-    renderUI();
-}
-
-function handleSearch() {
-    searchKeyword = document.getElementById('search-input').value.trim();
-    currentPage = 1; 
-    renderUI();
-}
-
-// ==========================================
-// 6. 실시간 동기화 데이터베이스 제어 인터페이스
-// ==========================================
-function listenPosts() {
-    database.ref('posts').on('value', (snapshot) => {
-        const postsData = snapshot.val();
-        allPosts = [];
-        if (postsData) {
-            Object.keys(postsData).forEach((key) => {
-                allPosts.push({ id: key, ...postsData[key] });
-            });
-            allPosts.reverse(); 
-        }
-        if(currentView === 'posts') renderUI();
-    });
-}
-
-function listenLetters() {
-    database.ref('letters').on('value', (snapshot) => {
-        const lettersData = snapshot.val();
-        allLetters = [];
-        if (lettersData) {
-            Object.keys(lettersData).forEach((key) => {
-                allLetters.push({ id: key, ...lettersData[key] });
-            });
-            allLetters.reverse();
-        }
-        if(currentView === 'letters') renderUI();
-    });
-}
-
-function renderUI() {
-    const container = document.getElementById('posts-container');
-    const paginationContainer = document.getElementById('pagination-container');
-    
-    container.innerHTML = '';
-    paginationContainer.innerHTML = '';
-
-    if (!isAdmin && currentView === 'letters') {
-        currentView = 'posts';
-    }
-
-    let targetArray = (currentView === 'posts') ? allPosts : allLetters;
-
-    if (searchKeyword) {
-        targetArray = targetArray.filter(item => 
-            String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-    }
-
-    if (targetArray.length === 0) {
-        const text = searchKeyword 
-            ? `'${searchKeyword}'가 포함된 내용이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "도착한 편지가 없습니다.");
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
-        return;
-    }
-
-    const totalPages = Math.ceil(targetArray.length / postsPerPage);
-    const startIndex = (currentPage - 1) * postsPerPage;
-    const endIndex = startIndex + postsPerPage;
-    const currentItems = targetArray.slice(startIndex, endIndex);
-
-    currentItems.forEach((item) => {
-        const card = document.createElement('div');
-        card.className = 'post-card';
-        card.onclick = () => openDetailModal(item.id);
-        
-        let mgmtButtonsHtml = '';
-        if (isAdmin) {
-            if (currentView === 'posts') {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button>
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button>
-                    </div>
-                `;
-            } else {
-                mgmtButtonsHtml = `
-                    <div class="card-mgmt-btns">
-                        <button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button>
-                    </div>
-                `;
-            }
-        }
-
-        // 기록된 바다 탭일 때만 날짜 문자열 앞에 '아시ㅣ ' 접두사 결합
-        const displayDate = (currentView === 'posts') ? `아시ㅣ ${item.date}` : item.date;
-
-        card.innerHTML = `
-            <h3>${escapeHtml(item.title)}</h3>
-            <div class="post-content-area">${escapeHtml(item.content)}</div>
-            <div class="post-footer">
-                <span class="date">${displayDate}</span>
-                ${mgmtButtonsHtml}
-            </div>
-        `;
-        container.appendChild(card);
-    });
-
-    if (totalPages > 1) {
-        const maxPageButtons = 5; 
-        let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
-        let endPage = startPage + maxPageButtons - 1;
-
-        if (endPage > totalPages) {
-            endPage = totalPages;
-            startPage = Math.max(1, endPage - maxPageButtons + 1);
-        }
-
-        if (currentPage > 1) {
-            const prevBtn = document.createElement('div');
-            prevBtn.className = 'page-btn';
-            prevBtn.innerHTML = '&#139;';
-            prevBtn.onclick = () => {
-                currentPage--;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                renderUI();
-            };
-            paginationContainer.appendChild(prevBtn);
-        }
-
-        for (let i = startPage; i <= end
+    showSystemAlert('로그아웃 되었습니다.', function()
