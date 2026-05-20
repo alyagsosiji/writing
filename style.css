@@ -12,75 +12,57 @@ body {
 }
 
 /* ==========================================
-   🌅 사진 동기화: 리얼 윤슬 바다 배경 레이어 (PC 사양 최적화)
+   🌅 [성능 최적화] 순수 CSS 감성 바다 배경 레이어 (프레임 드랍 0% 타깃)
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     contain: paint;
 }
 
+/* 깊은 밤바다의 심해 컬러 베이스 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    background: linear-gradient(180deg, #181215 0%, #110c0e 45%, #070506 100%); 
+    background: linear-gradient(180deg, #161013 0%, #0d080a 50%, #050305 100%); 
 }
 
+/* 수평선 너머로 은은하게 퍼지는 노을빛 광원 */
 .yoonseul-sunlight {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 20%, rgba(247, 153, 112, 0.5) 0%, rgba(196, 107, 76, 0.25) 25%, rgba(56, 32, 34, 0.1) 55%, transparent 75%);
-    filter: blur(4px);
+    background: radial-gradient(circle at 50% 15%, rgba(247, 153, 112, 0.22) 0%, rgba(196, 107, 76, 0.06) 40%, transparent 70%);
 }
 
+/* 🛠️ 구조 유지 및 연산 부하 제로화를 위해 SVG 필터를 제거하고 부드러운 아날로그 안개 레이어로 변경 */
 .wave-ripple {
-    position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.05 0.2' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    filter: url('#yoonseul-glimmer');
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-image: none !important; /* 무거운 벡터 이미지 완전 삭제 */
+    filter: none !important;           /* 프레임 드랍의 주범인 SVG 필터 완전히 거세 */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
-    will-change: transform;
 }
 
-.ripple1 { opacity: 0.14; animation: rippleMove 24s linear infinite alternate; }
-/* 🛠️ 뚝뚝 끊기던 충돌 현상을 해결하기 위해 전역 역방향 전용 애니메이션 바인딩 */
-.ripple2 { opacity: 0.08; animation: rippleMoveReverse 16s linear infinite alternate-reverse; }
-.ripple3 { opacity: 0.05; animation: rippleMove 10s ease-in-out infinite alternate; }
+/* 바다 표면에 비치는 부드러운 빛의 일렁임만 3D 가속 애니메이션으로 가볍게 표현 */
+.ripple1 { 
+    background: radial-gradient(circle at 45% 20%, rgba(255, 212, 186, 0.04) 0%, transparent 50%);
+    animation: oceanAmbient 14s ease-in-out infinite alternate; 
+}
+.ripple2 { 
+    background: radial-gradient(circle at 55% 25%, rgba(247, 147, 102, 0.03) 0%, transparent 50%);
+    animation: oceanAmbient 18s ease-in-out infinite alternate-reverse; 
+}
+.ripple3 { display: none !important; } /* 불필요한 연산 레이어 압축 해제 */
 
-@keyframes rippleMove {
-    0% { transform: translate3d(0, 0, 0) scale(1); }
-    100% { transform: translate3d(1.5%, -1%, 0) scale(1.04); }
+@keyframes oceanAmbient {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
+    100% { transform: translate3d(1%, 0.5%, 0) scale(1.02); opacity: 1; }
 }
 
-/* 🛠️ scaleX(-1) 병목 연산을 애니메이션 프레임 내부로 격리 통합하여 PC 프레임 드랍 완전 해결 */
-@keyframes rippleMoveReverse {
-    0% { transform: translate3d(0, 0, 0) scale(1) scaleX(-1); }
-    100% { transform: translate3d(1.5%, -1%, 0) scale(1.04) scaleX(-1); }
-}
-
-/* ==========================================
-   🛠️ 모바일 한정 배경 최적화 매커니즘 
-   ========================================== */
+/* 모바일 화면 가로 핏 최적화 대응 */
 @media (max-width: 768px) {
-    .wave-ripple {
-        filter: none !important; 
-        background-image: none !important; 
-        background: radial-gradient(circle at 50% 20%, rgba(247, 153, 112, 0.15) 0%, transparent 60%);
-        animation: mobileYoonseul 10s ease-in-out infinite alternate !important;
-        will-change: transform, opacity;
-    }
-    .ripple2, .ripple3 {
-        display: none !important;
-    }
     .posts-grid {
         grid-template-columns: 1fr !important; 
     }
-}
-
-@keyframes mobileYoonseul {
-    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.7; }
-    100% { transform: translate3d(1%, 1%, 0) scale(1.03); opacity: 1; }
 }
 
 /* 로딩 화면 기본 정의 및 호환성 크래시 무결성 패치 */
@@ -152,7 +134,7 @@ button:hover { border-color: #f7a37f; color: #fff; box-shadow: 0 0 12px rgba(247
 .danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 🛠️ 일기장 / 편지함 공용 기입창 외형 (backdrop-filter 블러 최적화 및 농도 보정 완료) */
+/* 일기장 / 편지함 공용 기입창 외형 */
 #write-section, #letter-section {
     background: rgba(23, 18, 21, 0.88); border: 1px solid rgba(247, 163, 127, 0.15);
     padding: 30px; border-radius: 18px; 
@@ -173,7 +155,7 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* 🛠️ 포스트 카드 (스크롤 스무스 렌더링 최적화) */
+/* 포스트 카드 */
 .post-card {
     background: linear-gradient(135deg, rgba(23, 19, 21, 0.96) 0%, rgba(14, 11, 13, 0.92) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
