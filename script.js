@@ -173,6 +173,7 @@ function login() {
     }
 }
 
+// 로그아웃
 function logout() {
     isAdmin = false;
     cancelEdit();
@@ -250,7 +251,6 @@ function listenPosts() {
     });
 }
 
-// 편지 리스닝
 function listenLetters() {
     if (!database) return;
     database.ref('letters').on('value', (snapshot) => {
@@ -266,6 +266,9 @@ function listenLetters() {
     });
 }
 
+// ==========================================
+// 7. UI 데이터 렌더링 엔진 (소급 적용 보정 함수 강제 결합)
+// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -500,7 +503,7 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
     });
 }
 
