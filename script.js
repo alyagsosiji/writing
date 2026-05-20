@@ -1,32 +1,56 @@
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (무한 로딩 구조 해결 마스터본 / 타임아웃 제외)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (타임아웃 제외 / 무한 로딩 차단)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
     if (loader) {
-        // 무결성 패치된 CSS 클래스 주입 방식으로 충돌 원천 상쇄
         loader.classList.add('fade-out');
     }
 }
 
-// 💡 무한로딩 해결 마스터 Key: 무거운 외부 이미지 완료를 기다리는 complete 외에 
-// 구조 파싱과 자바스크립트가 로드되는 interactive 조건 및 DOMContentLoaded 리스너를 결합하여 화면 열림 보장
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     hideLoadingScreen();
 } else {
     document.addEventListener('DOMContentLoaded', hideLoadingScreen);
 }
 
-// 데이터 실시간 동기화 호출
 document.addEventListener('DOMContentLoaded', function() {
     try {
         listenPosts();
         listenLetters();
     } catch (e) {
         console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
-        hideLoadingScreen(); // 시스템 오류 시에도 로딩창은 치워주는 최소 방어선
+        hideLoadingScreen();
     }
 });
+
+// ==========================================
+// ⏱️ [신규 추가] 24시간 형식 무결성 보정 엔진 (원래 썼던 글 완벽 구출)
+// ==========================================
+function formatTo24Hour(dateStr) {
+    if (!dateStr) return '';
+    let str = String(dateStr).trim();
+    
+    // 1. 특정 브라우저에서 '24:'로 잘못 출력하는 버그성 시간 코드를 '00:'시로 강제 치환
+    str = str.replace(/\b24(?=:\d{2})/g, '00');
+    
+    // 2. 데이터베이스에 '오전/오후 12시' 등으로 저장되어 있던 과거 데이터(원래 썼던 글) 정밀 파싱
+    if (str.includes('오전') || str.includes('오후')) {
+        const isPm = str.includes('오후');
+        str = str.replace(/오전\s*|오후\s*/g, ''); // 오전/오후 글자 제거
+        
+        str = str.replace(/(\d{1,2})(?=:\d{2})/, function(match) {
+            let h = parseInt(match, 10);
+            if (isPm) {
+                if (h !== 12) h += 12;
+            } else {
+                if (h === 12) h = 0;
+            }
+            return String(h).padStart(2, '0');
+        });
+    }
+    return str;
+}
 
 // ==========================================
 // 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
@@ -245,7 +269,7 @@ function listenLetters() {
 }
 
 // ==========================================
-// 7. UI 데이터 렌더링 엔진 (페이징 및 접두사 통합본)
+// 7. UI 데이터 렌더링 엔진 (소급 적용 24시간 형식 연동)
 // ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
@@ -302,7 +326,9 @@ function renderUI() {
             }
         }
 
-        const displayDate = (currentView === 'posts') ? `아시ㅣ${item.date}` : item.date;
+        // 🛠️ 원래 썼던 기존 글과 편지에도 무조건 00시 형식이 나오도록 실시간 보정 처리
+        const formattedDate = formatTo24Hour(item.date);
+        const displayDate = (currentView === 'posts') ? `아시ㅣ${formattedDate}` : formattedDate;
 
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
@@ -374,7 +400,8 @@ function openDetailModal(key) {
     if (!item) return;
 
     document.getElementById('detail-title').innerText = item.title;
-    document.getElementById('detail-date').innerText = item.date;
+    // 🛠️ 팝업 모달창 내부의 날짜도 예외 없이 보정 함수를 통과시킵니다.
+    document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
     document.getElementById('detail-text').innerText = item.content;
     document.getElementById('detail-modal').style.display = 'flex';
 }
@@ -387,7 +414,10 @@ function savePost() {
 
     const title = document.getElementById('post-title').value.trim();
     const content = document.getElementById('post-content').value.trim();
-    const date = new Date().toLocaleString('ko-KR', { hour12: false }); 
+    
+    // 🛠️ 앞으로 작성될 신규 글은 브라우저 오차 없이 강제로 00시 표준 포맷팅으로 저장되도록 선제 조치
+    const now = new Date();
+    const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
     if (!title || !content) {
         showSystemAlert('수평선에 새길 내용을 모두 입력해주세요.');
@@ -422,7 +452,10 @@ function saveLetter() {
 
     const title = document.getElementById('letter-title').value.trim();
     const content = document.getElementById('letter-content').value.trim();
-    const date = new Date().toLocaleString('ko-KR', { hour12: false }); 
+    
+    // 🛠️ 신규 편지 발송 시에도 무조건 안전한 포맷팅 준수
+    const now = new Date();
+    const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
     if (!title || !content) {
         showSystemAlert('편지 제목과 내용을 모두 채워주세요.');
@@ -457,7 +490,6 @@ function prepareEdit(key) {
     document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// 수정 취소
 function cancelEdit() {
     editTargetKey = null;
     document.getElementById('write-title').innerText = "새로운 기록 남기기";
@@ -477,10 +509,11 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
     });
 }
 
+// 편지 제거 소멸 기능
 function deleteLetter(key) {
     if (!isAdmin || !database) return;
 
