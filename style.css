@@ -1,4 +1,4 @@
-/* 전역 기본기 세팅 및 강력한 복제 차단 */
+/* 전역 기본기 세팅 및 강력한 복제 차단 보안 */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -6,50 +6,44 @@
 }
 
 body {
-    background-color: #0d0a0c;
+    background-color: #0b090b;
     color: #f1f5f9;
     min-height: 100vh;
     overflow-x: hidden;
 }
 
 /* ==========================================
-   🌅 진짜 윤슬 바다 구현 배경 레이어 시스템
+   🌅 사진 동기화: 리얼 윤슬 바다 배경 레이어
    ========================================== */
 .ocean-background {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
 }
-/* 사진 특유의 깊고 무거운 다크 브론즈 톤의 심해 레이어 */
 .ocean-deep-water {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(180deg, #161114 0%, #100c0e 40%, #090608 100%);
+    background: linear-gradient(180deg, #181215 0%, #110c0e 45%, #070506 100%);
 }
-/* 잔잔하게 부서지는 노을빛 황금 윤슬 광채 연출 */
-.yoonseul-shimmer {
+.yoonseul-sunlight {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 30%, 
-        rgba(242, 140, 93, 0.45) 0%, 
-        rgba(200, 105, 75, 0.2) 30%, 
-        rgba(40, 25, 28, 0.1) 65%, 
-        transparent 80%
-    );
-    filter: blur(2px);
+    background: radial-gradient(circle at 50% 20%, rgba(247, 153, 112, 0.5) 0%, rgba(196, 107, 76, 0.25) 25%, rgba(56, 32, 34, 0.1) 55%, transparent 75%);
+    filter: blur(4px);
 }
-/* 물결 질감이 살아나 움직이는 미세 윤슬 패션 노이즈 레이어 */
-.yoonseul-wave-texture {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    opacity: 0.12;
-    background-image: repeat;
-    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%0' height='100%25' filter='url(%23w)'/></svg>");
-    animation: waveFloat 8s ease-in-out infinite alternate;
+.wave-ripple {
+    position: absolute; top: -10%; left: -10%; width: 120%; height: 120%;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.05 0.2' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    filter: url('#yoonseul-glimmer');
 }
-@keyframes waveFloat {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.08) translate(-1%, -0.5%); }
+.ripple1 { opacity: 0.14; animation: rippleMove 24s linear infinite alternate; }
+.ripple2 { opacity: 0.08; animation: rippleMove 16s linear infinite alternate-reverse; transform: scaleX(-1); }
+.ripple3 { opacity: 0.05; animation: rippleMove 10s ease-in-out infinite alternate; }
+
+@keyframes rippleMove {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(1.5%, -1%) scale(1.04); }
 }
 
 /* 로딩 화면 */
 #loading-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #100c0e;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #110c0e;
     display: flex; justify-content: center; align-items: center; z-index: 9999;
     transition: opacity 0.8s ease;
 }
@@ -68,31 +62,20 @@ body {
 @keyframes pulse { 0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(0.9); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); } }
 #loading-screen p { color: #f7a37f; letter-spacing: 2px; font-size: 0.85rem; }
 
-/* 메인 프레임 */
+/* 메인 구조 레이아웃 */
 #app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px; }
 header { text-align: center; margin-bottom: 50px; }
-
-/* ✨ [꾸미기 적용] 수평선 너머 글자 커스텀 아트웍 디자인 */
 header .main-title {
-    font-size: 3.2rem;
-    font-weight: 800;
-    letter-spacing: 7px;
-    margin-bottom: 15px;
-    background: linear-gradient(145deg, #ffffff 10%, #ffd0b3 50%, #f49366 90%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    /* 노을의 불타는 광채와 아득한 깊이감의 멀티 그림자 효과 효과 */
-    text-shadow: 
-        0 2px 10px rgba(244, 147, 102, 0.3),
-        0 10px 30px rgba(21, 14, 20, 0.8);
+    font-size: 3.2rem; font-weight: 800; letter-spacing: 8px; margin-bottom: 15px;
+    background: linear-gradient(135deg, #ffffff 15%, #ffd4ba 55%, #f49366 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 15px rgba(244, 147, 102, 0.35), 0 15px 35px rgba(15, 10, 14, 0.9);
 }
 header .subtitle { color: #cfc7cc; font-size: 0.95rem; letter-spacing: 2px; opacity: 0.75; }
 
-/* 정렬 보정된 제어 센터 */
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-/* 글래스모피즘 인터페이스 버튼 */
 button {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
     color: #fcece7; border: 1px solid rgba(247, 163, 127, 0.2);
@@ -104,7 +87,6 @@ button:hover { border-color: #f7a37f; color: #fff; box-shadow: 0 0 12px rgba(247
 .danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 기입 섹션 */
 #write-section {
     background: rgba(23, 18, 21, 0.75); border: 1px solid rgba(247, 163, 127, 0.15);
     padding: 30px; border-radius: 18px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
@@ -117,21 +99,13 @@ input[type="text"], textarea {
     border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.3s;
 }
 input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rgba(12, 9, 11, 0.9); }
+.centered-title { text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px; color: #f7a37f; letter-spacing: 2px; border-bottom: 1px solid rgba(247, 163, 127, 0.15); padding-bottom: 15px; width: 100%; }
 
-/* 중앙 정렬 타이틀 */
-.centered-title {
-    text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px;
-    color: #f7a37f; letter-spacing: 2px; border-bottom: 1px solid rgba(247, 163, 127, 0.15);
-    padding-bottom: 15px; width: 100%;
-}
-
-/* 격자 배치 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* 엽서 스타일 글 카드 */
 .post-card {
-    background: linear-gradient(135deg, rgba(23, 19, 21, 0.9) 0%, rgba(14, 11, 13, 0.85) 100%);
+    background: linear-gradient(135deg, rgba(23, 19, 21, 0.92) 0%, rgba(14, 11, 13, 0.88) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     position: relative; transition: all 0.35s ease;
@@ -141,22 +115,14 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
 }
 .post-card:hover { transform: translateY(-4px); border-color: rgba(247, 163, 127, 0.25); box-shadow: 0 12px 30px rgba(247, 163, 127, 0.15); }
 .post-card h3 { color: #ffffff; margin-bottom: 12px; font-size: 1.22rem; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-
-/* 4줄 글자 제한 설정 및 자동 말줄임 생략 */
-.post-content-area {
-    color: #cbd5e1; line-height: 1.65; font-size: 0.92rem; white-space: pre-wrap;
-    flex-grow: 1; margin-bottom: 15px; text-align: justify;
-    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
-    overflow: hidden; text-overflow: ellipsis;
-}
-
+.post-content-area { color: #cbd5e1; line-height: 1.65; font-size: 0.92rem; white-space: pre-wrap; flex-grow: 1; margin-bottom: 15px; text-align: justify; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
 .post-footer { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
 .post-card .date { font-size: 0.78rem; color: #9c9197; }
 .card-mgmt-btns { display: flex; gap: 6px; }
 .mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 
 /* ==========================================
-   🛠️ [구조 수정] 로그인 모달과 동일한 규격의 컴팩트 팝업 시스템
+   🛠️ 중앙 집중형 컴팩트 팝업 상자 테마 고정
    ========================================== */
 .modal { 
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -164,13 +130,11 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
     justify-content: center; align-items: center; 
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
-
-/* 관리자 모달창 및 상세 뷰 모달창 디자인 통합 고정 */
 .modal-content { 
     background: linear-gradient(145deg, #1d171a, #0f0b0d); 
     border: 1px solid rgba(247, 163, 127, 0.2); 
     padding: 35px; border-radius: 18px; 
-    width: 90%; max-width: 420px; /* 로그인창 규격에 완벽 대칭 동기화 */
+    width: 90%; max-width: 420px; 
     text-align: center; 
     box-shadow: 0 20px 50px rgba(0,0,0,0.6);
     animation: popupScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -179,30 +143,20 @@ input[type="text"]:focus, textarea:focus { border-color: #f7a37f; background: rg
     0% { transform: scale(0.9); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
-
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
-.modal-buttons { display: flex; justify-content: space-around; gap: 8px; }
+.modal-buttons { display: flex; justify-content: center; gap: 10px; }
 
-/* 📝 글 자세히 보기 컴팩트 팝업 세부 스타일 */
-.detail-popup-header {
-    text-align: left; margin-bottom: 15px; border-bottom: 1px solid rgba(247, 163, 127, 0.15); padding-bottom: 12px;
-}
-.detail-popup-header h3 {
-    margin-bottom: 6px; font-size: 1.3rem; white-space: normal; line-height: 1.4; text-align: left;
-}
-.detail-popup-body {
-    text-align: left; margin-bottom: 20px;
-}
-#detail-text {
-    color: #cbd5e1; line-height: 1.75; font-size: 0.95rem; white-space: pre-wrap;
-    max-height: 300px; overflow-y: auto; padding-right: 8px; text-align: justify;
-}
-/* 상세 본문 내부 커스텀 스크롤바 */
+.detail-popup-header { text-align: left; margin-bottom: 15px; border-bottom: 1px solid rgba(247, 163, 127, 0.15); padding-bottom: 12px; }
+.detail-popup-header h3 { margin-bottom: 6px; font-size: 1.3rem; white-space: normal; line-height: 1.4; text-align: left; color:#fff; }
+.detail-popup-body { text-align: left; margin-bottom: 20px; }
+#detail-text { color: #cbd5e1; line-height: 1.75; font-size: 0.95rem; white-space: pre-wrap; max-height: 260px; overflow-y: auto; padding-right: 8px; text-align: justify; }
 #detail-text::-webkit-scrollbar { width: 4px; }
 #detail-text::-webkit-scrollbar-thumb { background: rgba(247, 163, 127, 0.3); border-radius: 10px; }
 
-/* 페이지네이션 */
+/* 시스템 전용 알림 다이얼로그 스타일 */
+.system-modal-box p { color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; text-align: center; }
+
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cfc7cc; cursor: pointer; transition: all 0.3s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(247, 163, 127, 0.15); color: #f7a37f; border-color: #f7a37f; }
