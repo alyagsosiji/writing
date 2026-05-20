@@ -1,11 +1,56 @@
 // ==========================================
-// 1. 글로벌 상태 변수 및 보안 구성 선언 (최상단 배치로 에러 방지)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (무한 로딩 절대 방지)
+// ==========================================
+function hideLoadingScreen() {
+    const loader = document.getElementById('loading-screen');
+    if (loader && loader.style.display !== 'none') {
+        loader.style.opacity = '0'; // 부드러운 투명화 애니메이션 가동
+        
+        // CSS transition(0.8초) 시간과 연동하여 안전하게 display 레이어 제거
+        setTimeout(function() {
+            loader.style.display = 'none';
+        }, 800);
+    }
+}
+
+// 스크립트 로드 시점에 이미 브라우저가 준비 완료되었다면 즉시 해제, 아니라면 load 완료 즉시 해제
+if (document.readyState === 'complete') {
+    hideLoadingScreen();
+} else {
+    window.addEventListener('load', hideLoadingScreen);
+}
+
+// HTML 구조 파싱 완료 즉시 실시간 데이터 동기화 리스너 가동
+window.addEventListener('DOMContentLoaded', function() {
+    try {
+        listenPosts();
+        listenLetters();
+    } catch (e) {
+        console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
+        hideLoadingScreen(); // 예외가 발생하더라도 로딩창은 무조건 투명하게 치워줌
+    }
+});
+
+// ==========================================
+// 1. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
+// ==========================================
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('keydown', function(e) {
+    if (e.key === "F12") { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+});
+
+// ==========================================
+// 2. Base64 데이터 해독 및 무결성 Firebase 연결 (안전망 강화)
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), 
+    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -19,9 +64,17 @@ const secureAdmin = {
     pw: atob("YXNoaSMyNjA0MTY=")        // ashi#260416
 };
 
-// 파이어베이스 커넥션 확립
-firebase.initializeApp(secureConfig);
-const database = firebase.database();
+let database = null;
+try {
+    if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(secureConfig);
+        database = firebase.database();
+    } else {
+        console.error("Firebase SDK가 로드되지 않았습니다. 인터넷 연결이나 스크립트 태그를 확인하세요.");
+    }
+} catch (error) {
+    console.error("Firebase 초기화 중 에러 발생:", error);
+}
 
 let isAdmin = false;
 let currentView = 'posts'; 
@@ -33,54 +86,8 @@ let allLetters = [];
 let editTargetKey = null; 
 let searchKeyword = ''; 
 
-// 중복 발송 잠금 플래그
+// 🛠️ [연타 방지 기능] 중복 발송을 원천 차단하기 위한 글로벌 제어 플래그
 let isSubmitting = false;
-
-// ==========================================
-// 2. 라이프 사이클 매니저 (무한 로딩 제로 무결성 매커니즘)
-// ==========================================
-function hideLoadingScreen() {
-    const loader = document.getElementById('loading-screen');
-    if (loader && loader.style.display !== 'none') {
-        loader.style.opacity = '0'; // 부드럽게 투명화 시작
-        
-        // 🛠️ 트래픽 씹힘 현상이 있는 transitionend 대신, CSS 애니메이션 시간(0.8초)과 동기화하여 확실하게 제거
-        setTimeout(function() {
-            loader.style.display = 'none';
-        }, 800);
-    }
-}
-
-// 스크립트 실행 시점에 이미 로드가 끝났다면 즉시 제거, 아니라면 준비되는 즉시 가동
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    hideLoadingScreen();
-} else {
-    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
-    window.addEventListener('load', hideLoadingScreen);
-}
-
-// DOM 구조 완료 즉시 실시간 데이터 베이스 리스닝 연결
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        listenPosts();
-        listenLetters();
-    } catch (e) {
-        console.error("데이터 로드 중 예외 발생:", e);
-        hideLoadingScreen(); // 에러가 발생해도 로딩창은 걷어내어 화면 확보
-    }
-});
-
-// ==========================================
-// 3. 보안 인프라 (우클릭, 드래그, 개발자 단축키 차단)
-// ==========================================
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('dragstart', e => e.preventDefault());
-document.addEventListener('selectstart', e => e.preventDefault());
-document.addEventListener('keydown', function(e) {
-    if (e.key === "F12") { e.preventDefault(); return false; }
-    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) { e.preventDefault(); return false; }
-    if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
-});
 
 // ==========================================
 // 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
@@ -128,7 +135,7 @@ function showSystemConfirm(message, onConfirm, onCancel) {
 }
 
 // ==========================================
-// 5. 로그인 / 로그아웃 인증 매니저
+// 5. 로그인 / 로그아웃 인증 매니저 (가시성 철저 제어)
 // ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
@@ -211,6 +218,7 @@ function handleSearch() {
 // 6. 실시간 동기화 데이터베이스 제어 인터페이스
 // ==========================================
 function listenPosts() {
+    if (!database) return;
     database.ref('posts').on('value', (snapshot) => {
         const postsData = snapshot.val();
         allPosts = [];
@@ -225,6 +233,7 @@ function listenPosts() {
 }
 
 function listenLetters() {
+    if (!database) return;
     database.ref('letters').on('value', (snapshot) => {
         const lettersData = snapshot.val();
         allLetters = [];
@@ -238,9 +247,6 @@ function listenLetters() {
     });
 }
 
-// ==========================================
-// 7. UI 데이터 렌더링 엔진 (페이징 및 접두사 통합본)
-// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -357,9 +363,6 @@ function renderUI() {
     }
 }
 
-// ==========================================
-// 8. 데이터 상세 조회 및 트랜잭션 관리 매니저
-// ==========================================
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
 
@@ -376,7 +379,7 @@ function openDetailModal(key) {
 function closeDetailModal() { document.getElementById('detail-modal').style.display = 'none'; }
 
 function savePost() {
-    if (!isAdmin) return;
+    if (!isAdmin || !database) return;
     if (isSubmitting) return; 
 
     const title = document.getElementById('post-title').value.trim();
@@ -412,7 +415,7 @@ function savePost() {
 }
 
 function saveLetter() {
-    if (isSubmitting) return; 
+    if (!database || isSubmitting) return; 
 
     const title = document.getElementById('letter-title').value.trim();
     const content = document.getElementById('letter-content').value.trim();
@@ -461,7 +464,7 @@ function cancelEdit() {
 }
 
 function deletePost(key) {
-    if (!isAdmin) return;
+    if (!isAdmin || !database) return;
     
     showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
@@ -470,12 +473,12 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
     });
 }
 
 function deleteLetter(key) {
-    if (!isAdmin) return;
+    if (!isAdmin || !database) return;
 
     showSystemConfirm('이 편지를 바다에서 완전히 소멸시키겠습니까?', function() {
         database.ref('letters/' + key).remove().then(() => {
@@ -488,7 +491,7 @@ function deleteLetter(key) {
 }
 
 function clearDatabase() {
-    if (!isAdmin) return;
+    if (!isAdmin || !database) return;
     
     showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글과 편지들이 흔적도 없이 사라집니다. 초기화할까요?', function() {
         setTimeout(function() {
