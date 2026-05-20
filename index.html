@@ -2,148 +2,59 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#070714">
-    <title>별빛 서재</title>
-    <link rel="icon" href="starbook.png" type="image/png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="stylesheet" href="style.css?v=20260520_v3">
-</head>
-<body class="theme-night">
-
-    <div class="aurora"></div>
-    <div class="stars"></div>
-
-    <div id="maintenance-screen" class="maintenance-screen">
-        <div class="maintenance-card">
-            <div class="maintenance-orbit" aria-hidden="true">
-                <i class="fa-solid fa-star"></i>
-            </div>
-            <p class="maintenance-label">STARRY READING ROOM</p>
-            <h2 class="loading-text">별빛 서재에 들어가는 중입니다...</h2>
-        </div>
-    </div>
-
-    <div id="auth-modal" class="modal-overlay">
-        <div class="auth-card">
-            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
-            <h3 id="auth-title">별빛 서재 입장하기</h3>
-            <input type="text" id="auth-username" placeholder="이름 (아이디)" maxlength="15">
-            <input type="password" id="auth-password" placeholder="비밀번호">
-            <button class="auth-submit-btn" id="auth-action-btn" onclick="handleAuth()">로그인</button>
-            <p class="auth-switch" id="auth-switch-text" onclick="toggleAuthMode()">서재가 처음이신가요? <span>회원가입</span></p>
-        </div>
-    </div>
-
-    <div id="admin-users-modal" class="modal-overlay">
-        <div class="auth-card" style="width: 350px;">
-            <span class="close-modal" onclick="document.getElementById('admin-users-modal').classList.remove('active')">&times;</span>
-            <h3 style="color: #f1c40f; text-shadow: 0 0 10px rgba(241,196,15,0.4);"><i class="fa-solid fa-book-open-reader"></i> 서재 열람자 명부</h3>
-            <p style="text-align: center; font-size: 0.8rem; color: #bcafd0; margin-top: -5px;">가입된 회원 목록을 확인하고 관리합니다.</p>
-            <div id="admin-user-list" class="admin-user-list-container" style="max-height: 260px; overflow-y: auto; margin-top: 10px;">
-            </div>
-        </div>
-    </div>
-
-    <nav class="navbar">
-        <div class="nav-brand" onclick="scrollToTop()">
-            <i class="fa-solid fa-book-open"></i>별빛 서재
-        </div>
-        <div class="nav-controls">
-            <span class="live-presence-badge">
-                <i class="fa-solid fa-eye"></i> 서재의 별빛 <strong id="live-user-count">1</strong>명
-            </span>
-
-            <div class="auth-area">
-                <span id="user-greeting" class="user-greeting" style="display:none; margin-right: 12px; font-size: 0.88rem; font-weight: bold;"></span>
-                <button id="login-btn" class="auth-btn" onclick="openAuthModal()">로그인</button>
-                <button id="logout-btn" class="auth-btn" style="display:none;" onclick="logout()">로그아웃</button>
-            </div>
-            <div id="theme-panel" class="theme-panel" aria-label="테마 변경 패널">
-                <button type="button" class="theme-toggle-btn" onclick="toggleThemePanel()" aria-label="테마 메뉴 열기">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                </button>
-                <div class="theme-options" id="theme-options">
-                    <button type="button" data-theme="night" onclick="changeTheme('night')">밤하늘</button>
-                    <button type="button" data-theme="cherry" onclick="changeTheme('cherry')">벚꽃</button>
-                    <button type="button" data-theme="ocean" onclick="changeTheme('ocean')">바다</button>
-                    <button type="button" data-theme="letter" onclick="changeTheme('letter')">편지지</button>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div id="bgm-container" class="bgm-player">
-        <button class="bgm-main-btn" type="button" onclick="toggleBgm()" aria-label="BGM 재생 또는 일시정지">
-            <div class="bgm-disk">
-                <i class="fa-solid fa-compact-disc" id="bgm-icon"></i>
-            </div>
-        </button>
-        <div class="music-info">
-            <p>Now Playing</p>
-            <strong id="bgm-title">Night Sky City 2026 - Plum</strong>
-            <div class="bgm-controls">
-                <button id="bgm-mute-btn" type="button" onclick="toggleMute()" aria-label="BGM 음소거">
-                    <i class="fa-solid fa-volume-high" id="bgm-mute-icon"></i>
-                </button>
-                <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.4" aria-label="BGM 볼륨 조절">
-            </div>
-        </div>
-        <audio id="bgm-audio" loop preload="auto">
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
-        </audio>
-    </div>
-
-    <section class="intro-section" id="home">
-        <div class="time-greeting">빛나는 사색의 시간</div>
-        <h1 class="main-title" id="secret-title-trigger">별빛 서재</h1>
-        <p class="sub-title">마음속에 머무는 생각과 감정의 조각들을 밤하늘의 은하수처럼 조용히 새겨 내려가는 사색의 공간입니다.</p>
-        <p class="update-notice"><i class="fa-solid fa-clock-rotate-left"></i>마지막 서재 교정 : 2026. 05. 20. 15:00</p>
-        
-        <div class="scroll-down" onclick="scrollToEditor()">
-            <p>아래로 내려서 기록을 남겨보세요!</p>
-            <i class="fa-solid fa-chevron-down bouncing"></i>
-        </div>
-    </section>
-
-    <div class="main-content" id="editor-section">
-        <div class="workspace-card">
-            <h2 class="section-header-title">서재에 책 넣기</h2>
-            <input type="text" id="post-title" class="input-title" placeholder="책의 제목을 적어주세요." maxlength="60">
-            <textarea id="post-content" class="textarea-content" placeholder="이곳에 당신의 숨겨진 밤하늘 조각을 채워보세요.&#13;&#10;마음이 닿는 이야기라면 무엇이든 좋습니다.&#13;&#10;경고 : 관리자 판단하에 작성된 책들은 삭제처리 될 수 있습니다." oninput="updateWordCount()"></textarea>
-            
-            <div class="editor-footer">
-                <span class="word-counter" id="word-count-display">0 자의 소중한 마음</span>
-                <button class="save-btn" onclick="addTimelinePost()">
-                    <i class="fa-solid fa-feather-pointed"></i>서재에 꽂아두기
-                </button>
-            </div>
-        </div>
-
-        <div>
-            <h2 class="section-header-title" id="timeline-header" style="margin-bottom: 30px;">쌓여가는 밤하늘의 기억들</h2>
-            <div class="timeline-container" id="timeline-container"></div>
-        </div>
-    </div>
-
-    <footer>
-        <div class="footer-logo" id="secret-footer-trigger">별빛 서재</div>
-        <p class="copyright">언제나 밤하늘의 별처럼 밝게 빛나기를.</p>
-        <p class="copyright" style="margin-top: 5px; opacity: 0.5;">© 2026 alyagsosiji. All rights reserved.</p>
-    </footer>
-
-    <div class="toast-container" id="toast-container"></div>
-    <div class="back-to-top" id="back-to-top" onclick="scrollToTop()" title="하늘 위로 올라가기">
-        <i class="fa-solid fa-star"></i>
-    </div>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수평선 너머</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="loader">
+            <div class="wave"></div>
+            <p>바다를 불러오는 중...</p>
+        </div>
+    </div>
+
+    <div id="app">
+        <header>
+            <h1>수평선 너머</h1>
+            <p class="subtitle">수평선 너버 바다 속 나의 기록들</p>
+            <div class="auth-box">
+                <button id="login-btn" onclick="openModal()">관리자 로그인</button>
+                <button id="logout-btn" onclick="logout()" style="display:none;">로그아웃</button>
+            </div>
+        </header>
+
+        <main>
+            <section id="write-section" style="display: none;">
+                <h3>새로운 기록 남기기</h3>
+                <input type="text" id="post-title" placeholder="제목을 입력하세요...">
+                <textarea id="post-content" rows="6" placeholder="수평선 너머의 이야기를 적어주세요..."></textarea>
+                <button onclick="savePost()">기록하기</button>
+            </section>
+
+            <section id="posts-section">
+                <h2>기록된 바다</h2>
+                <div id="posts-container">
+                    </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <h3>관리자 인증</h3>
+            <input type="text" id="admin-id" placeholder="아이디">
+            <input type="password" id="admin-pw" placeholder="비밀번호">
+            <div class="modal-buttons">
+                <button onclick="login()">로그인</button>
+                <button onclick="closeModal()" class="cancel-btn">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
