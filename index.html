@@ -15,7 +15,7 @@
         <div class="loader">
             <div class="sun-glow"></div>
             <div class="wave-loading"></div>
-            <p>수평선 너머 기록의 바다를 불러오는 중...</p>
+            <p>수평선 너머 바다를 불러오는 중...</p>
         </div>
     </div>
 
@@ -37,7 +37,7 @@
     <div id="app">
         <header>
             <h1 class="main-title">수평선 너머</h1>
-            <p class="subtitle">노을지는 수평선 바다 속 기록들</p>
+            <p class="subtitle">노을지는 수평선 바다 속 나의 기록들</p>
             <div class="auth-box">
                 <div class="auth-flex">
                     <button id="login-btn" onclick="openModal()">관리자 로그인</button>
@@ -46,6 +46,11 @@
                         <button id="logout-btn" onclick="logout()">로그아웃</button>
                     </div>
                 </div>
+            </div>
+
+            <div id="view-tab-container" class="view-tab-container" style="display: none;">
+                <button id="tab-posts" class="tab-btn active" onclick="switchView('posts')">🌊 기록된 바다</button>
+                <button id="tab-letters" class="tab-btn" onclick="switchView('letters')">✉️ 도착한 편지</button>
             </div>
         </header>
 
@@ -60,12 +65,25 @@
                 </div>
             </section>
 
+            <section id="letter-section">
+                <h3>바다에 편지 띄우기</h3>
+                <input type="text" id="letter-title" placeholder="편지 제목을 입력하세요...">
+                <textarea id="letter-content" rows="5" placeholder="아시 님에게 전할 따뜻한 편지를 적어주세요..."></textarea>
+                <div class="write-buttons">
+                    <button id="submit-letter-btn" onclick="saveLetter()">편지 보내기</button>
+                </div>
+            </section>
+
             <section id="posts-section">
-                <h2 class="centered-title">수평선에 기록된 바다</h2>
+                <h2 id="section-main-title" class="centered-title">기록된 바다</h2>
                 <div id="posts-container" class="posts-grid"></div>
                 <div id="pagination-container" class="pagination"></div>
             </section>
         </main>
+
+        <footer>
+            <p>&copy; 2026. alyagsosiji. & atritime. All Rights Reserved.</p>
+        </footer>
     </div>
 
     <div id="login-modal" class="modal">
@@ -83,7 +101,7 @@
     <div id="detail-modal" class="modal" onclick="closeDetailModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="detail-popup-header">
-                <h3 id="detail-title">글 제목</h3>
+                <h3 id="detail-title">제목</h3>
                 <span id="detail-date" class="date">날짜</span>
             </div>
             <div class="detail-popup-body">
@@ -99,8 +117,7 @@
         <div class="modal-content system-modal-box">
             <h3 id="system-title">안내</h3>
             <p id="system-message">시스템 메시지 공간</p>
-            <div id="system-buttons" class="modal-buttons" style="margin-top: 20px;">
-                </div>
+            <div id="system-buttons" class="modal-buttons" style="margin-top: 20px;"></div>
         </div>
     </div>
 
