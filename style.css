@@ -12,7 +12,7 @@ body {
 }
 
 /* ==========================================
-   🌅 [성능 최적화] 순수 CSS 감성 바다 배경 레이어 (프레임 드랍 0% 타깃)
+   🌅 [성능 최적화 패치] 초경량 고품격 바다 배경 매니저
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
@@ -21,45 +21,75 @@ body {
     contain: paint;
 }
 
-/* 깊은 밤바다의 심해 컬러 베이스 */
+/* 1단계: 노을이 물든 깊은 보랏빛 밤바다의 베이스 심해 레이어 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    background: linear-gradient(180deg, #161013 0%, #0d080a 50%, #050305 100%); 
+    background: linear-gradient(180deg, #191115 0%, #0e090c 40%, #050305 100%); 
 }
 
-/* 수평선 너머로 은은하게 퍼지는 노을빛 광원 */
+/* 2단계: 수평선 뒤편에서 은은하게 뿜어져 나오는 황혼의 따뜻한 오렌지빛 광원 */
 .yoonseul-sunlight {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 15%, rgba(247, 153, 112, 0.22) 0%, rgba(196, 107, 76, 0.06) 40%, transparent 70%);
+    background: radial-gradient(circle at 50% 15%, rgba(247, 153, 112, 0.28) 0%, rgba(196, 107, 76, 0.08) 35%, transparent 65%);
 }
 
-/* 🛠️ 구조 유지 및 연산 부하 제로화를 위해 SVG 필터를 제거하고 부드러운 아날로그 안개 레이어로 변경 */
+/* 3단계: ✨ [비주얼 업그레이드 Key] 순수 CSS로 구현한 초경량 잔잔한 수평선 윤슬 크레스트 */
 .wave-ripple {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background-image: none !important; /* 무거운 벡터 이미지 완전 삭제 */
-    filter: none !important;           /* 프레임 드랍의 주범인 SVG 필터 완전히 거세 */
+    position: absolute; top: 12%; left: -10%; width: 120%; height: 50%;
+    /* 선형 그라데이션 반복 패턴을 활용해 스크롤 연산 과부하 없이 물결의 반사면을 표현 */
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 16px,
+        rgba(255, 212, 186, 0.04) 17px,
+        rgba(247, 153, 112, 0.06) 19px,
+        rgba(255, 212, 186, 0.04) 21px,
+        transparent 22px
+    );
+    /* 🎨 입체감을 배가시키는 스크린 블렌딩 모드 */
+    mix-blend-mode: screen;
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
 }
 
-/* 바다 표면에 비치는 부드러운 빛의 일렁임만 3D 가속 애니메이션으로 가볍게 표현 */
+/* 4단계: 가로 윤슬 결들이 서로 엇갈리며 유기적으로 흐르도록 3D 가속 연동 */
 .ripple1 { 
-    background: radial-gradient(circle at 45% 20%, rgba(255, 212, 186, 0.04) 0%, transparent 50%);
-    animation: oceanAmbient 14s ease-in-out infinite alternate; 
+    opacity: 0.8;
+    animation: yoonseulGlide 22s linear infinite alternate; 
 }
 .ripple2 { 
-    background: radial-gradient(circle at 55% 25%, rgba(247, 147, 102, 0.03) 0%, transparent 50%);
-    animation: oceanAmbient 18s ease-in-out infinite alternate-reverse; 
+    opacity: 0.5;
+    margin-top: 5px;
+    transform: scaleX(-1);
+    animation: yoonseulGlideReverse 16s linear infinite alternate; 
 }
-.ripple3 { display: none !important; } /* 불필요한 연산 레이어 압축 해제 */
-
-@keyframes oceanAmbient {
-    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
-    100% { transform: translate3d(1%, 0.5%, 0) scale(1.02); opacity: 1; }
+.ripple3 { 
+    opacity: 0.4;
+    margin-top: -3px;
+    background-size: 100% 120%;
+    animation: yoonseulPulse 8s ease-in-out infinite alternate;
 }
 
-/* 모바일 화면 가로 핏 최적화 대응 */
+/* GPU 메모리선에서만 부드럽게 위치를 슬라이드하여 렉을 유발하지 않는 무결성 애니메이션 */
+@keyframes yoonseulGlide {
+    0% { transform: translate3d(-1%, 0, 0) scaleY(0.95); }
+    100% { transform: translate3d(1%, 0, 0) scaleY(1.05); }
+}
+@keyframes yoonseulGlideReverse {
+    0% { transform: translate3d(1%, 0, 0) scaleX(-1) scaleY(1.05); }
+    100% { transform: translate3d(-1%, 0, 0) scaleX(-1) scaleY(0.95); }
+}
+@keyframes yoonseulPulse {
+    0% { opacity: 0.2; }
+    100% { opacity: 0.5; }
+}
+
+/* 모바일 화면 핏 대응 */
 @media (max-width: 768px) {
+    .wave-ripple {
+        height: 40%; /* 모바일 뷰포트에 맞춘 스케일 다운 */
+        opacity: 0.6;
+    }
     .posts-grid {
         grid-template-columns: 1fr !important; 
     }
