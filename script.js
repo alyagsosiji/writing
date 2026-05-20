@@ -1,33 +1,39 @@
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (이미지 지연으로 인한 무한 로딩 원천 차단)
+// 🛠️ 0. 최우선 라이프 사이클 매니저 (CSS !important 강제 해제 패치)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
     if (loader && loader.style.display !== 'none') {
-        loader.style.opacity = '0'; // 부드러운 투명화 애니메이션 가동
+        // 1단계: 부드럽게 투명화 시키면서 마우스 클릭은 즉시 관통하도록 조치
+        loader.style.setProperty('opacity', '0', 'important');
+        loader.style.setProperty('pointer-events', 'none', 'important'); 
         
-        // CSS transition(0.8초) 시간과 연동하여 안전하게 display 레이어 제거
+        // 2단계: CSS !important 설정을 강제로 깨부수고 구조적으로 완벽히 숨김 처리 (0.8초 뒤)
         setTimeout(function() {
-            loader.style.display = 'none';
+            loader.style.setProperty('display', 'none', 'important');
+            loader.style.setProperty('visibility', 'hidden', 'important');
         }, 800);
     }
 }
 
-// 무거운 이미지 완료 여부와 상관없이, 스크립트와 화면 구조가 준비되면 즉시 로딩창 제거!
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
+// 브라우저 리소스 로드가 완료되면 즉시 실행 매커니즘
+if (document.readyState === 'complete') {
     hideLoadingScreen();
 } else {
-    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
+    window.addEventListener('load', hideLoadingScreen);
 }
 
-// 구조 준비 완료 즉시 실시간 데이터 동기화 리스너 가동
+// ⏱️ 안전장치: 어떤 이유로든 로딩이 2초 이상 지속되면 강제로 화면 오픈
+setTimeout(hideLoadingScreen, 2000);
+
+// HTML 구조 파싱 완료 즉시 실시간 데이터 동기화 리스너 가동
 document.addEventListener('DOMContentLoaded', function() {
     try {
         listenPosts();
         listenLetters();
     } catch (e) {
         console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
-        hideLoadingScreen(); // 예외가 발생하더라도 로딩창은 무조건 투명하게 치워줌
+        hideLoadingScreen(); // 예외 발생 시에도 로딩창은 강제로 치워줌
     }
 });
 
@@ -44,13 +50,13 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 2. Base64 데이터 해독 및 무결성 Firebase 연결 (도메인 오타 정밀 수정 완료)
+// 2. Base64 데이터 해독 및 무결성 Firebase 연결
 // ==========================================
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), // 🛠️ 도메인 디코딩 오타 정밀 복구 완료
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="), 
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -70,7 +76,7 @@ try {
         firebase.initializeApp(secureConfig);
         database = firebase.database();
     } else {
-        console.error("Firebase SDK가 로드되지 않았습니다. 인터넷 연결이나 스크립트 태그를 확인하세요.");
+        console.error("Firebase SDK가 로드되지 않았습니다.");
     }
 } catch (error) {
     console.error("Firebase 초기화 중 에러 발생:", error);
@@ -247,6 +253,9 @@ function listenLetters() {
     });
 }
 
+// ==========================================
+// 7. UI 데이터 렌더링 엔진 (페이징 및 접두사 통합본)
+// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -363,6 +372,9 @@ function renderUI() {
     }
 }
 
+// ==========================================
+// 8. 데이터 상세 조회 및 트랜잭션 관리 매니저
+// ==========================================
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
 
