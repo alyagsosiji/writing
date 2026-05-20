@@ -15,28 +15,35 @@
         <div class="loader">
             <div class="sun-glow"></div>
             <div class="wave"></div>
-            <p>노을빛 바다를 채우는 중...</p>
+            <p>노을빛 바다를 불러오는 중...</p>
         </div>
     </div>
 
-    <div class="sky-bg-overlay"></div>
+    <div class="sky-overlay"></div>
+    <div class="horizon-line"></div>
 
     <div id="app">
         <header>
             <h1>수평선 너머</h1>
-            <p class="subtitle">수평선 너머 노을빛 바다 속 나의 기록들</p>
+            <p class="subtitle">노을지는 수평선 바다 속 나의 기록들</p>
             <div class="auth-box">
                 <button id="login-btn" onclick="openModal()">관리자 로그인</button>
-                <button id="logout-btn" onclick="logout()" style="display:none;">로그아웃</button>
+                <div id="admin-menu" style="display:none; display: inline-flex; gap: 10px;">
+                    <button id="init-btn" class="danger-btn" onclick="clearDatabase()">바다 초기화</button>
+                    <button id="logout-btn" onclick="logout()">로그아웃</button>
+                </div>
             </div>
         </header>
 
         <main>
             <section id="write-section" style="display: none;">
-                <h3>새로운 기록 남기기</h3>
+                <h3 id="write-title">새로운 기록 남기기</h3>
                 <input type="text" id="post-title" placeholder="제목을 입력하세요...">
-                <textarea id="post-content" rows="6" placeholder="수평선 너머의 이야기를 적어주세요..."></textarea>
-                <button onclick="savePost()">기록하기</button>
+                <textarea id="post-content" rows="8" placeholder="수평선 너머의 이야기를 적어주세요..."></textarea>
+                <div class="write-buttons">
+                    <button id="submit-post-btn" onclick="savePost()">기록하기</button>
+                    <button id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()" style="display:none;">수정 취소</button>
+                </div>
             </section>
 
             <section id="posts-section">
