@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenLetters();
         initMusicPlayerEngine(); 
         
-        /* 🛠️ 안전장치: 데이터 로딩 전이라도 기본 화면 틀과 플레이스홀더를 즉시 그리도록 초기화 */
+        // 안전장치: 초기 화면 즉시 드로잉
         renderUI(); 
     } catch (e) {
         console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생 : ", e);
@@ -130,7 +130,6 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
-    /* 🛠️ [주소 복구 패치] 유령 주소였던 오타를 정상적인 .firebaseio.com 주소 코드로 정상 원상복구 완료 */
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -353,9 +352,13 @@ function listenLetters() {
     });
 }
 
+// ==========================================
+// 7. UI 데이터 렌더링 엔진 (실시간 개수 동적 인젝션)
+// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
+    const subtitleElem = document.querySelector('.section-subtitle');
     
     if (!container || !paginationContainer) return;
     
@@ -364,6 +367,15 @@ function renderUI() {
 
     if (!isAdmin && currentView === 'letters') {
         currentView = 'posts';
+    }
+
+    // 🛠️ [실시간 카운터 인젝션 패치] 선택된 탭에 맞춰 황혼 테마 문구 하단에 개수 출력
+    if (subtitleElem) {
+        if (currentView === 'posts') {
+            subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(144, 224, 239, 0.3);">기록된 글 : ${allPosts.length}개</span>`;
+        } else {
+            subtitleElem.innerHTML = `아시 님에게 도착한 소중한 편지들입니다.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(255, 212, 186, 0.3);">도착한 편지 : ${allLetters.length}개</span>`;
+        }
     }
 
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
