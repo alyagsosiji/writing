@@ -12,96 +12,62 @@ body {
 }
 
 /* ==========================================
-   🌅 [애니메이션 강화] 유기적 밤바다 배경 레이어 (60fps 하드웨어 가속)
+   🌅 유기적 밤바다 배경 레이어 (60fps 하드웨어 가속)
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
-    -webkit-transform: translateZ(0);
-    transform: translateZ(0);
-    contain: paint;
+    -webkit-transform: translateZ(0); transform: translateZ(0); contain: paint;
 }
 
-/* 💙 깊고 영롱한 사파이어 블루~딥 네이비 심해 베이스 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
     background: linear-gradient(180deg, #061630 0%, #030d1e 40%, #01050d 100%); 
 }
 
-/* 🍊 [애니메이션 추가] 수평선 뒤편에서 은은하게 호흡하듯 맥박치는 황혼의 노을빛 광원 */
 .yoonseul-sunlight {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: radial-gradient(circle at 50% -5%, rgba(255, 107, 61, 0.35) 0%, rgba(247, 163, 127, 0.15) 30%, rgba(0, 180, 216, 0.04) 60%, transparent 80%);
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-    /* 🛠️ GPU 메모리선에서 빛의 농도를 유기적으로 변화시키는 초경량 애니메이션 */
+    -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0);
     animation: sunlightPulse 12s ease-in-out infinite alternate;
     will-change: opacity, transform;
 }
 
-/* 🌊 부드럽고 유기적으로 일렁이는 아날로그 물결 스웰 */
 .wave-ripple {
     position: absolute; top: -10%; left: -20%; width: 140%; height: 70%;
     background: radial-gradient(ellipse at 50% 20%, rgba(144, 224, 239, 0.09) 0%, transparent 70%),
                 radial-gradient(ellipse at 30% 40%, rgba(255, 138, 101, 0.06) 0%, transparent 60%);
-    mix-blend-mode: screen;
-    filter: blur(1px);
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
+    mix-blend-mode: screen; filter: blur(1px);
+    -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0);
     will-change: transform, opacity;
 }
 
-/* 🛠️ 파도의 속도와 스케일을 다차원적으로 엇갈리게 배정하여 프레임 드랍 없이 깊은 바다감 묘사 */
-.ripple1 { 
-    opacity: 0.85;
-    animation: waveSwell 24s ease-in-out infinite alternate; 
-}
-.ripple2 { 
-    opacity: 0.6;
-    background: radial-gradient(ellipse at 70% 30%, rgba(0, 180, 216, 0.08) 0%, transparent 60%);
-    animation: waveSwellReverse 18s ease-in-out infinite alternate; 
-}
-.ripple3 { 
-    opacity: 0.45;
-    background: radial-gradient(ellipse at 40% 15%, rgba(255, 171, 64, 0.05) 0%, transparent 50%);
-    animation: wavePulse 10s ease-in-out infinite alternate;
-}
+.ripple1 { opacity: 0.85; animation: waveSwell 24s ease-in-out infinite alternate; }
+.ripple2 { opacity: 0.6; background: radial-gradient(ellipse at 70% 30%, rgba(0, 180, 216, 0.08) 0%, transparent 60%); animation: waveSwellReverse 18s ease-in-out infinite alternate; }
+.ripple3 { opacity: 0.45; background: radial-gradient(ellipse at 40% 15%, rgba(255, 171, 64, 0.05) 0%, transparent 50%); animation: wavePulse 10s ease-in-out infinite alternate; }
 
-/* ==========================================
-   🎮 60fps 무결성 하드웨어 가속 키프레임 설계
-   ========================================== */
 @keyframes sunlightPulse {
     0% { opacity: 0.8; transform: translate3d(0, -1%, 0) scale(0.98); }
     100% { opacity: 1; transform: translate3d(0, 1%, 0) scale(1.02); }
 }
-
 @keyframes waveSwell {
     0% { transform: translate3d(-1.5%, -1%, 0) rotate(-1deg) skewX(-3deg) scaleY(0.96); }
     100% { transform: translate3d(1.5%, 1%, 0) rotate(1deg) skewX(3deg) scaleY(1.04); }
 }
-
 @keyframes waveSwellReverse {
     0% { transform: translate3d(1.5%, -0.5%, 0) rotate(1deg) skewX(2deg) scaleY(1.04); }
     100% { transform: translate3d(-1.5%, 0.5%, 0) rotate(-1deg) skewX(-2deg) scaleY(0.96); }
 }
-
 @keyframes wavePulse {
     0% { opacity: 0.3; transform: translate3d(0, 0.5%, 0) scale(0.97); }
     100% { opacity: 0.7; transform: translate3d(0, -0.5%, 0) scale(1.03); }
 }
 
-/* 모바일 화면 최적화 대응 */
 @media (max-width: 768px) {
-    .wave-ripple {
-        height: 55%;
-        opacity: 0.7;
-    }
-    .posts-grid {
-        grid-template-columns: 1fr !important; 
-    }
+    .wave-ripple { height: 55%; opacity: 0.7; }
+    .posts-grid { grid-template-columns: 1fr !important; }
 }
-/* ==========================================
-   🎵 [신규 규격] 우측 하단 플로팅 미니 음악 플레이어 디자인
-   ========================================== */
+
+/* 🎵 우측 하단 플로팅 미니 음악 플레이어 */
 .mini-audio-player {
     position: fixed; bottom: 30px; right: 30px; z-index: 9999;
     width: 56px; height: 56px; border-radius: 50%;
@@ -116,36 +82,22 @@ body {
     transform: scale(1.08) translateZ(0); border-color: #00b4d8;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 18px rgba(0, 245, 212, 0.4);
 }
-
-/* 이미지 속 레코드 음반 컴포넌트 완벽 형상화 */
 .vinyl-disc {
     width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, #b89df5 0%, #90e0ef 100%); /* 노을과 조화로운 맑은 보라-블루 시안 틴트 */
+    background: linear-gradient(135deg, #b89df5 0%, #90e0ef 100%);
     display: flex; justify-content: center; align-items: center; position: relative;
     -webkit-transform: translateZ(0); transform: translateZ(0);
 }
-.vinyl-groove {
-    width: 16px; height: 16px; border-radius: 50%;
-    border: 2px solid #030d1e; background: transparent; opacity: 0.85;
-}
-.vinyl-center-hole {
-    position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #030d1e;
-}
+.vinyl-groove { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #030d1e; background: transparent; opacity: 0.85; }
+.vinyl-center-hole { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #030d1e; }
+.mini-audio-player.playing .vinyl-disc { animation: vinylRotate 3.5s linear infinite; }
+@keyframes vinylRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* 🔄 재생 가동 시 무리가 가지 않는 고성능 3D 회전 기믹 작동 */
-.mini-audio-player.playing .vinyl-disc {
-    animation: vinylRotate 3.5s linear infinite;
-}
-@keyframes vinylRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* 모바일 전용 터치 반경 디바이스 보정 */
 @media (max-width: 768px) {
     .mini-audio-player { bottom: 20px; right: 20px; width: 52px; height: 52px; }
     .vinyl-disc { width: 32px; height: 32px; }
 }
+
 /* 로딩 화면 */
 #loading-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -154,11 +106,7 @@ body {
     transition: opacity 0.8s ease, visibility 0.8s ease; 
     -webkit-transform: translateZ(0); transform: translateZ(0);
 }
-
-#loading-screen.fade-out {
-    opacity: 0 !important; visibility: hidden !important; pointer-events: none !important;
-}
-
+#loading-screen.fade-out { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 .loader { position: relative; text-align: center; }
 .sun-glow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; background: radial-gradient(circle, #f7a37f 0%, transparent 70%); animation: pulse 2s infinite ease-in-out; }
 .wave-loading { width: 44px; height: 44px; border: 3px solid transparent; border-top-color: #00b4d8; border-bottom-color: #f7a37f; border-radius: 50%; animation: spin 1.8s linear infinite; margin: 0 auto 20px; }
@@ -169,8 +117,7 @@ body {
 /* 메인 구조 레이아웃 */
 #app { 
     position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px 20px 20px; 
-    -webkit-transform: translateZ(0); transform: translateZ(0);
-    contain: content;
+    -webkit-transform: translateZ(0); transform: translateZ(0); contain: content;
 }
 header { text-align: center; margin-bottom: 40px; }
 header .main-title {
@@ -209,11 +156,29 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 .danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 노을빛 블루 틴트가 융합된 글 상자 */
+/* ==========================================
+   ✨ [신규 디자인] 바다의 기록 타이틀 & 노을빛 서브 문구 데코레이션
+   ========================================== */
+.centered-title { 
+    text-align: center; font-size: 1.7rem !important; font-weight: 600 !important; 
+    letter-spacing: 4px; margin-bottom: 8px !important; width: 100%;
+    background: linear-gradient(135deg, #a9efff 0%, #ffd4ba 60%, #ff9e79 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 12px rgba(0, 180, 216, 0.25);
+    border-bottom: none !important; padding-bottom: 0 !important;
+}
+
+.section-subtitle {
+    text-align: center; font-size: 0.86rem; font-weight: 300; letter-spacing: 1.5px;
+    color: #ffbba2; opacity: 0.85; font-style: italic;
+    text-shadow: 0 0 8px rgba(255, 107, 61, 0.4);
+    margin-bottom: 35px; width: 100%;
+}
+
+/* 기입창 외형 */
 #write-section, #letter-section {
     background: rgba(8, 19, 38, 0.85); border: 1px solid rgba(0, 180, 216, 0.15);
-    padding: 30px; border-radius: 18px; 
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    padding: 30px; border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
     -webkit-transform: translateZ(0); transform: translateZ(0);
 }
@@ -224,13 +189,12 @@ input[type="text"], textarea {
     border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.25s;
 }
 input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rgba(3, 10, 23, 0.9); }
-.centered-title { text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px; color: #00b4d8; letter-spacing: 2px; border-bottom: 1px solid rgba(0, 180, 216, 0.15); padding-bottom: 15px; width: 100%; }
 
 /* 리스트 컴포넌트 배치 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* 오션 딥 테마 포스트 카드 */
+/* 포스트 카드 */
 .post-card {
     background: linear-gradient(135deg, rgba(8, 22, 46, 0.95) 0%, rgba(4, 12, 28, 0.9) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
