@@ -1,5 +1,5 @@
 // ==========================================
-// 🎵 0-A. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙 동기화 완료)
+// 🎵 0-A. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙)
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
+        
+        /* 🛠️ 안전장치: 데이터 로딩 전이라도 기본 화면 틀과 플레이스홀더를 즉시 그리도록 초기화 */
+        renderUI(); 
     } catch (e) {
         console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생 : ", e);
         hideLoadingScreen();
@@ -127,7 +130,8 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlbW8uY29t"), 
+    /* 🛠️ [주소 복구 패치] 유령 주소였던 오타를 정상적인 .firebaseio.com 주소 코드로 정상 원상복구 완료 */
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
@@ -223,7 +227,6 @@ function openModal() {
     if (modal) modal.style.display = 'flex'; 
 }
 
-/* 🛠️ [타깃 교정 완료] 로그인 창을 정확히 닫도록 수정 */
 function closeModal() { 
     const modal = document.getElementById('login-modal');
     if (modal) modal.style.display = 'none'; 
@@ -245,7 +248,7 @@ function login() {
 
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         isAdmin = true;
-        closeModal(); // 올바른 타깃 탐색으로 창이 정상적으로 닫힙니다.
+        closeModal();
         idElem.value = '';
         pwElem.value = '';
         showSystemAlert('환영합니다, 수평선 너머 바다의 기록자, 아시님.', function() {
