@@ -99,32 +99,53 @@ body {
         grid-template-columns: 1fr !important; 
     }
 }
-/* 🎵 음악 플레이어 독점 가속 디자인 세팅 */
-.music-player-box {
-    background: rgba(8, 22, 46, 0.7); border: 1px solid rgba(0, 180, 216, 0.2);
-    padding: 16px 22px; border-radius: 16px; margin-bottom: 35px;
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-    display: flex; flex-direction: column; gap: 12px;
+/* ==========================================
+   🎵 [신규 규격] 우측 하단 플로팅 미니 음악 플레이어 디자인
+   ========================================== */
+.mini-audio-player {
+    position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(6, 15, 31, 0.75); border: 1px solid rgba(144, 224, 239, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 180, 216, 0.15);
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
     -webkit-transform: translateZ(0); transform: translateZ(0);
 }
-.player-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
-.player-icon { font-size: 1.1rem; }
-.track-ticker { overflow: hidden; white-space: nowrap; width: 100%; }
-#track-title { display: inline-block; font-size: 0.9rem; color: #90e0ef; letter-spacing: 0.5px; font-weight: 400; }
-.player-controls { display: flex; justify-content: center; align-items: center; gap: 24px; }
-.player-btn {
-    background: none !important; border: none !important; color: #94a3b8 !important;
-    font-size: 1.05rem !important; padding: 4px 10px !important; cursor: pointer;
-    transition: color 0.2s, transform 0.2s !important; box-shadow: none !important;
+.mini-audio-player:hover {
+    transform: scale(1.08) translateZ(0); border-color: #00b4d8;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 18px rgba(0, 245, 212, 0.4);
 }
-.player-btn:hover { color: #00b4d8 !important; transform: scale(1.1); }
-#player-play-pause { font-size: 1.3rem !important; color: #f7a37f !important; }
-#player-play-pause:hover { color: #ffb796 !important; }
-.player-progress-container { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.06); border-radius: 2px; cursor: pointer; position: relative; }
-.player-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00b4d8, #f7a37f); border-radius: 2px; }
 
+/* 이미지 속 레코드 음반 컴포넌트 완벽 형상화 */
+.vinyl-disc {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #b89df5 0%, #90e0ef 100%); /* 노을과 조화로운 맑은 보라-블루 시안 틴트 */
+    display: flex; justify-content: center; align-items: center; position: relative;
+    -webkit-transform: translateZ(0); transform: translateZ(0);
+}
+.vinyl-groove {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid #030d1e; background: transparent; opacity: 0.85;
+}
+.vinyl-center-hole {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #030d1e;
+}
 
+/* 🔄 재생 가동 시 무리가 가지 않는 고성능 3D 회전 기믹 작동 */
+.mini-audio-player.playing .vinyl-disc {
+    animation: vinylRotate 3.5s linear infinite;
+}
+@keyframes vinylRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 모바일 전용 터치 반경 디바이스 보정 */
+@media (max-width: 768px) {
+    .mini-audio-player { bottom: 20px; right: 20px; width: 52px; height: 52px; }
+    .vinyl-disc { width: 32px; height: 32px; }
+}
 /* 로딩 화면 */
 #loading-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
