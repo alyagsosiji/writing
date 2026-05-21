@@ -1,3 +1,4 @@
+
 // ==========================================
 // 🛠️ 0. 최우선 라이프 사이클 매니저 (타임아웃 제외 보존형)
 // ==========================================
@@ -7,6 +8,16 @@ function hideLoadingScreen() {
         loader.classList.add('fade-out');
     }
 }
+// ==========================================
+// 🎵 0-A. 아시님 전용 음악 플레이어 재생 목록 구성 배열 (이곳에 노래를 추가하세요!)
+// ==========================================
+const MY_MUSIC_LIST = [
+    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" }
+];
+
+let currentTrackIndex = 0;
+let isTrackPlaying = false;
+let audioEngine = new Audio();
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     hideLoadingScreen();
@@ -19,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenPosts();
         listenLetters();
     } catch (e) {
-        console.error("데이터 실시간 리스닝 시작 중 예외 발생:", e);
+        console.error("데이터 실시간 리스닝 시작 중 예외 발생 :", e);
         hideLoadingScreen();
     }
 });
