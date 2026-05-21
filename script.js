@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenLetters();
         initMusicPlayerEngine(); 
     } catch (e) {
-        console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생:", e);
+        console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생 : ", e);
         hideLoadingScreen();
     }
 });
@@ -149,7 +149,7 @@ try {
         console.error("Firebase SDK가 로드되지 않았습니다.");
     }
 } catch (error) {
-    console.error("Firebase 초기화 중 에러 발생:", error);
+    console.error("Firebase 초기화 중 에러 발생 : ", error);
 }
 
 let isAdmin = false;
@@ -336,7 +336,7 @@ function renderUI() {
     if (targetArray.length === 0) {
         const text = searchKeyword 
             ? `'${searchKeyword}'가 포함된 내용이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "도착한 편지가 없습니다.");
+            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "띄워진 편지가 없습니다.");
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
@@ -469,7 +469,7 @@ function savePost() {
     if (editTargetKey) {
         database.ref('posts/' + editTargetKey).update(postData)
             .then(() => {
-                showSystemAlert('기록이 수정되어 바다에 다시 새겨졌습니다.');
+                showSystemAlert('기록이 수정되어 수평선 너머 바다에 다시 새겨졌습니다.');
                 cancelEdit();
             }).catch(err => showSystemAlert("수정 오류 : " + err.message))
             .finally(() => { isSubmitting = false; }); 
@@ -479,7 +479,7 @@ function savePost() {
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
                 currentPage = 1;
-                showSystemAlert('바다에 새로운 기록이 성공적으로 수평선 너머에 새겨졌습니다.');
+                showSystemAlert('수평선 너머 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
             .finally(() => { isSubmitting = false; }); 
     }
@@ -507,7 +507,7 @@ function saveLetter() {
         .then(() => {
             document.getElementById('letter-title').value = '';
             document.getElementById('letter-content').value = '';
-            showSystemAlert('아시님에게 보낼 편지가 넓은 바다 위로 안전하게 띄워졌습니다.');
+            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
         }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message))
@@ -546,7 +546,7 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
     });
 }
 
@@ -566,16 +566,16 @@ function deleteLetter(key) {
 function clearDatabase() {
     if (!isAdmin || !database) return;
     
-    showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 모든 글과 편지들이 흔적도 없이 사라집니다. 초기화할까요?', function() {
+    showSystemConfirm('🚨 [치명적 대량 소멸 경고]\n수평선 너머 바다에 모든 기록들이 흔적도 없이 사라집니다. 초기화할까요?', function() {
         setTimeout(function() {
-            showSystemConfirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 기록과 편지를 영구 파괴할까요?', function() {
+            showSystemConfirm('이 작업은 절대 되돌릴 수 없습니다. 정말 모든 기록과 편지를 영구 소멸시킬까요?', function() {
                 Promise.all([
                     database.ref('posts').remove(),
                     database.ref('letters').remove()
                 ]).then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    showSystemAlert('바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                    showSystemAlert('수평선 너머 바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
                 }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
