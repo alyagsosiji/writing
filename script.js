@@ -1,5 +1,5 @@
 // ==========================================
-// 🎵 0-A. 음악 재생 목록 설정 배열
+// 🎵 0-A. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙 동기화 완료)
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -127,7 +127,7 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlbW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
@@ -165,57 +165,89 @@ let searchKeyword = '';
 let isSubmitting = false;
 
 function showSystemAlert(message, callback) {
-    document.getElementById('system-title').innerText = "안내";
-    document.getElementById('system-message').innerText = message;
-    const buttonContainer = document.getElementById('system-buttons');
-    buttonContainer.innerHTML = "";
+    const titleElem = document.getElementById('system-title');
+    const msgElem = document.getElementById('system-message');
+    const btnContainer = document.getElementById('system-buttons');
+    const modalElem = document.getElementById('system-modal');
+
+    if (titleElem) titleElem.innerText = "안내";
+    if (msgElem) msgElem.innerText = message;
     
-    const okBtn = document.createElement('button');
-    okBtn.innerText = "확인";
-    okBtn.onclick = function() {
-        document.getElementById('system-modal').style.display = 'none';
-        if (callback) callback();
-    };
-    buttonContainer.appendChild(okBtn);
-    document.getElementById('system-modal').style.display = 'flex';
+    if (btnContainer) {
+        btnContainer.innerHTML = "";
+        const okBtn = document.createElement('button');
+        okBtn.innerText = "확인";
+        okBtn.onclick = function() {
+            if (modalElem) modalElem.style.display = 'none';
+            if (callback) callback();
+        };
+        btnContainer.appendChild(okBtn);
+    }
+    if (modalElem) modalElem.style.display = 'flex';
 }
 
 function showSystemConfirm(message, onConfirm, onCancel) {
-    document.getElementById('system-title').innerText = "확인";
-    document.getElementById('system-message').innerText = message;
-    const buttonContainer = document.getElementById('system-buttons');
-    buttonContainer.innerHTML = "";
+    const titleElem = document.getElementById('system-title');
+    const msgElem = document.getElementById('system-message');
+    const btnContainer = document.getElementById('system-buttons');
+    const modalElem = document.getElementById('system-modal');
+
+    if (titleElem) titleElem.innerText = "확인";
+    if (msgElem) msgElem.innerText = message;
     
-    const confirmBtn = document.createElement('button');
-    confirmBtn.innerText = "확인";
-    confirmBtn.onclick = function() {
-        document.getElementById('system-modal').style.display = 'none';
-        if (onConfirm) onConfirm();
-    };
-    
-    const cancelBtn = document.createElement('button');
-    cancelBtn.innerText = "취소";
-    cancelBtn.className = "cancel-btn";
-    cancelBtn.onclick = function() {
-        document.getElementById('system-modal').style.display = 'none';
-        if (onCancel) onCancel();
-    };
-    
-    buttonContainer.appendChild(confirmBtn);
-    buttonContainer.appendChild(cancelBtn);
-    document.getElementById('system-modal').style.display = 'flex';
+    if (btnContainer) {
+        btnContainer.innerHTML = "";
+        const confirmBtn = document.createElement('button');
+        confirmBtn.innerText = "확인";
+        confirmBtn.onclick = function() {
+            if (modalElem) modalElem.style.display = 'none';
+            if (onConfirm) onConfirm();
+        };
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.innerText = "취소";
+        cancelBtn.className = "cancel-btn";
+        cancelBtn.onclick = function() {
+            if (modalElem) modalElem.style.display = 'none';
+            if (onCancel) onCancel();
+        };
+        
+        btnContainer.appendChild(confirmBtn);
+        btnContainer.appendChild(cancelBtn);
+    }
+    if (modalElem) modalElem.style.display = 'flex';
 }
 
-function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
+function openModal() { 
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'flex'; 
+}
+
+/* 🛠️ [타깃 교정 완료] 로그인 창을 정확히 닫도록 수정 */
+function closeModal() { 
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.style.display = 'none'; 
+}
+
+function closeDetailModal() { 
+    const modal = document.getElementById('detail-modal');
+    if (modal) modal.style.display = 'none'; 
+}
 
 function login() {
-    const inputId = document.getElementById('admin-id').value;
-    const inputPw = document.getElementById('admin-pw').value;
+    const idElem = document.getElementById('admin-id');
+    const pwElem = document.getElementById('admin-pw');
+
+    if (!idElem || !pwElem) return;
+
+    const inputId = idElem.value;
+    const inputPw = pwElem.value;
 
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         isAdmin = true;
-        closeModal();
+        closeModal(); // 올바른 타깃 탐색으로 창이 정상적으로 닫힙니다.
+        idElem.value = '';
+        pwElem.value = '';
         showSystemAlert('환영합니다, 수평선 너머 바다의 기록자, 아시님.', function() {
             updateUI();
         });
@@ -240,22 +272,21 @@ function updateUI() {
     const tabContainer = document.getElementById('view-tab-container');
 
     if (isAdmin) {
-        writeSection.style.display = 'block';
-        letterSection.style.display = 'none'; 
-        loginBtn.style.display = 'none';
-        adminMenu.style.display = 'flex'; 
-        tabContainer.style.display = 'flex'; 
+        if (writeSection) writeSection.style.display = 'block';
+        if (letterSection) letterSection.style.display = 'none'; 
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (adminMenu) adminMenu.style.display = 'flex'; 
+        if (tabContainer) tabContainer.style.display = 'flex'; 
     } else {
-        writeSection.style.display = 'none';
-        letterSection.style.display = 'block'; 
-        loginBtn.style.display = 'inline-block';
-        adminMenu.style.display = 'none';
-        tabContainer.style.display = 'none'; 
+        if (writeSection) writeSection.style.display = 'none';
+        if (letterSection) letterSection.style.display = 'block'; 
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (adminMenu) adminMenu.style.display = 'none';
+        if (tabContainer) tabContainer.style.display = 'none'; 
         switchView('posts'); 
     }
 }
 
-// 🛠️ 아시님 요청에 따른 뷰 타이틀 텍스트 디자인 동기화 보정 파트
 function switchView(view) {
     if (!isAdmin && view === 'letters') {
         currentView = 'posts';
@@ -265,21 +296,26 @@ function switchView(view) {
     currentView = view;
     currentPage = 1;
     
-    document.getElementById('tab-posts').classList.remove('active');
-    document.getElementById('tab-letters').classList.remove('active');
+    const tabPosts = document.getElementById('tab-posts');
+    const tabLetters = document.getElementById('tab-letters');
+    const mainTitle = document.getElementById('section-main-title');
+
+    if (tabPosts) tabPosts.classList.remove('active');
+    if (tabLetters) tabLetters.classList.remove('active');
     
     if(view === 'posts') {
-        document.getElementById('tab-posts').classList.add('active');
-        document.getElementById('section-main-title').innerText = "바다의 기록";
+        if (tabPosts) tabPosts.classList.add('active');
+        if (mainTitle) mainTitle.innerText = "바다의 기록";
     } else {
-        document.getElementById('tab-letters').classList.add('active');
-        document.getElementById('section-main-title').innerText = "띄워진 편지";
+        if (tabLetters) tabLetters.classList.add('active');
+        if (mainTitle) mainTitle.innerText = "띄워진 편지";
     }
     renderUI();
 }
 
 function handleSearch() {
-    searchKeyword = document.getElementById('search-input').value.trim();
+    const searchInput = document.getElementById('search-input');
+    searchKeyword = searchInput ? searchInput.value.trim() : '';
     currentPage = 1; 
     renderUI();
 }
@@ -317,6 +353,8 @@ function listenLetters() {
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
+    
+    if (!container || !paginationContainer) return;
     
     container.innerHTML = '';
     paginationContainer.innerHTML = '';
@@ -438,21 +476,28 @@ function openDetailModal(key) {
     const item = searchPool.find(p => p.id === key);
     if (!item) return;
 
-    document.getElementById('detail-title').innerText = item.title;
-    document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
-    document.getElementById('detail-text').innerText = item.content;
-    document.getElementById('detail-modal').style.display = 'flex';
-}
+    const titleElem = document.getElementById('detail-title');
+    const dateElem = document.getElementById('detail-date');
+    const textElem = document.getElementById('detail-text');
+    const modalElem = document.getElementById('detail-modal');
 
-function closeModal() { document.getElementById('detail-modal').style.display = 'none'; }
-function closeDetailModal() { document.getElementById('detail-modal').style.display = 'none'; }
+    if (titleElem) titleElem.innerText = item.title;
+    if (dateElem) dateElem.innerText = formatTo24Hour(item.date);
+    if (textElem) textElem.innerText = item.content;
+    if (modalElem) modalElem.style.display = 'flex';
+}
 
 function savePost() {
     if (!isAdmin || !database) return;
     if (isSubmitting) return; 
 
-    const title = document.getElementById('post-title').value.trim();
-    const content = document.getElementById('post-content').value.trim();
+    const titleInput = document.getElementById('post-title');
+    const contentInput = document.getElementById('post-content');
+
+    if (!titleInput || !contentInput) return;
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
     
     const now = new Date();
     const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
@@ -463,7 +508,6 @@ function savePost() {
     }
 
     isSubmitting = true; 
-
     const postData = { title: title, content: content, date: date };
 
     if (editTargetKey) {
@@ -476,8 +520,8 @@ function savePost() {
     } else {
         database.ref('posts').push(postData)
             .then(() => {
-                document.getElementById('post-title').value = '';
-                document.getElementById('post-content').value = '';
+                titleInput.value = '';
+                contentInput.value = '';
                 currentPage = 1;
                 showSystemAlert('수평선 너머 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
@@ -488,8 +532,13 @@ function savePost() {
 function saveLetter() {
     if (!database || isSubmitting) return; 
 
-    const title = document.getElementById('letter-title').value.trim();
-    const content = document.getElementById('letter-content').value.trim();
+    const titleInput = document.getElementById('letter-title');
+    const contentInput = document.getElementById('letter-content');
+
+    if (!titleInput || !contentInput) return;
+
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
     
     const now = new Date();
     const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
@@ -500,13 +549,12 @@ function saveLetter() {
     }
 
     isSubmitting = true; 
-
     const letterData = { title: title, content: content, date: date };
 
     database.ref('letters').push(letterData)
         .then(() => {
-            document.getElementById('letter-title').value = '';
-            document.getElementById('letter-content').value = '';
+            titleInput.value = '';
+            contentInput.value = '';
             showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
@@ -519,21 +567,35 @@ function prepareEdit(key) {
     if (!post) return;
 
     editTargetKey = key;
-    document.getElementById('write-title').innerText = "기록 수정하기";
-    document.getElementById('post-title').value = post.title;
-    document.getElementById('post-content').value = post.content;
-    document.getElementById('submit-post-btn').innerText = "수정하기";
-    document.getElementById('cancel-edit-btn').style.display = "inline-block";
-    document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
+    
+    const writeTitle = document.getElementById('write-title');
+    const postTitle = document.getElementById('post-title');
+    const postContent = document.getElementById('post-content');
+    const submitBtn = document.getElementById('submit-post-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+    const writeSection = document.getElementById('write-section');
+
+    if (writeTitle) writeTitle.innerText = "기록 수정하기";
+    if (postTitle) postTitle.value = post.title;
+    if (postContent) postContent.value = post.content;
+    if (submitBtn) submitBtn.innerText = "수정하기";
+    if (cancelBtn) cancelBtn.style.display = "inline-block";
+    if (writeSection) writeSection.scrollIntoView({ behavior: 'smooth' });
 }
 
 function cancelEdit() {
     editTargetKey = null;
-    document.getElementById('write-title').innerText = "새로운 기록 남기기";
-    document.getElementById('post-title').value = '';
-    document.getElementById('post-content').value = '';
-    document.getElementById('submit-post-btn').innerText = "기록하기";
-    document.getElementById('cancel-edit-btn').style.display = "none";
+    const writeTitle = document.getElementById('write-title');
+    const postTitle = document.getElementById('post-title');
+    const postContent = document.getElementById('post-content');
+    const submitBtn = document.getElementById('submit-post-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+
+    if (writeTitle) writeTitle.innerText = "새로운 기록 남기기";
+    if (postTitle) postTitle.value = '';
+    if (postContent) postContent.value = '';
+    if (submitBtn) submitBtn.innerText = "기록하기";
+    if (cancelBtn) cancelBtn.style.display = "none";
 }
 
 function deletePost(key) {
