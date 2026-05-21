@@ -6,13 +6,13 @@
 }
 
 body {
-    background-color: #030712; color: #f1f5f9; min-height: 100vh; overflow-x: hidden;
+    background-color: #02050d; color: #f1f5f9; min-height: 100vh; overflow-x: hidden;
     position: relative;
     -webkit-overflow-scrolling: touch;
 }
 
 /* ==========================================
-   🌅 [색상 전면 개편] 순수 CSS 청량한 밤바다 배경 매니저
+   🌅 [비주얼 완성판] 노을 진 푸른 바다 배경 레이어 (유기적 파도 공학 적용)
    ========================================== */
 .ocean-background { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; 
@@ -21,81 +21,75 @@ body {
     contain: paint;
 }
 
-/* 💙 깊고 투명한 심해의 다크 네이비 블루 베이스 */
+/* 💙 깊고 영롱한 사파이어 블루~딥 네이비 심해 베이스 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    background: linear-gradient(180deg, #07152c 0%, #030c1b 50%, #01040a 100%); 
+    background: linear-gradient(180deg, #061630 0%, #030d1e 40%, #01050d 100%); 
 }
 
-/* 💎 수평선 너머 은은하게 차오르는 에메랄드·시안 블루의 신비로운 달빛 광원 */
+/* 🍊 수평선 뒤편에서 찬란하게 타오르는 황혼의 노을빛 아우라 광원 */
 .yoonseul-sunlight {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 15%, rgba(0, 245, 212, 0.16) 0%, rgba(0, 180, 216, 0.05) 35%, transparent 65%);
+    background: radial-gradient(circle at 50% -5%, rgba(255, 107, 61, 0.32) 0%, rgba(247, 163, 127, 0.12) 30%, rgba(0, 180, 216, 0.03) 60%, transparent 80%);
 }
 
-/* ✨ 파란 바다 빛을 머금은 초경량 잔잔한 물결 크레스트 패턴 */
+/* 🌊 [이상했던 파도 전면 교정] 부드럽고 유기적으로 흐르는 아날로그 물결 스웰 */
 .wave-ripple {
-    position: absolute; top: 12%; left: -10%; width: 120%; height: 50%;
-    background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 16px,
-        rgba(144, 224, 239, 0.04) 17px,
-        rgba(0, 180, 216, 0.06) 19px,
-        rgba(144, 224, 239, 0.04) 21px,
-        transparent 22px
-    );
+    position: absolute; top: 10%; left: -20%; width: 140%; height: 55%;
+    /* 딱딱한 선을 지우고, 흐릿하고 깊이감 있는 수중 반사 에메랄드·시안 그라데이션 레이어링 */
+    background: radial-gradient(ellipse at 50% 20%, rgba(144, 224, 239, 0.08) 0%, transparent 70%),
+                radial-gradient(ellipse at 30% 40%, rgba(255, 138, 101, 0.05) 0%, transparent 60%);
     mix-blend-mode: screen;
+    filter: blur(1px); /* 경계선을 뭉개어 인위적인 느낌 완전 제거 */
     -webkit-transform: translate3d(0, 0, 0);
     transform: translate3d(0, 0, 0);
 }
 
-/* 가로 물결결이 서로 유기적으로 교차하는 고성능 3D 애니메이션 */
+/* 🛠️ skewX(왜곡) 애니메이션을 결합하여 실제 유체가 출렁이며 파도치는 시각 효과 구현 */
 .ripple1 { 
-    opacity: 0.8;
-    animation: yoonseulGlide 22s linear infinite alternate; 
+    opacity: 0.9;
+    animation: waveSwell 16s ease-in-out infinite alternate; 
 }
 .ripple2 { 
-    opacity: 0.5;
-    margin-top: 5px;
-    transform: scaleX(-1);
-    animation: yoonseulGlideReverse 16s linear infinite alternate; 
+    opacity: 0.6;
+    background: radial-gradient(ellipse at 70% 30%, rgba(0, 180, 216, 0.07) 0%, transparent 60%);
+    animation: waveSwellReverse 20s ease-in-out infinite alternate; 
 }
 .ripple3 { 
     opacity: 0.4;
-    margin-top: -3px;
-    background-size: 100% 120%;
-    animation: yoonseulPulse 8s ease-in-out infinite alternate;
+    background: radial-gradient(ellipse at 40% 10%, rgba(255, 171, 64, 0.04) 0%, transparent 50%);
+    animation: wavePulse 10s ease-in-out infinite alternate;
 }
 
-@keyframes yoonseulGlide {
-    0% { transform: translate3d(-1%, 0, 0) scaleY(0.95); }
-    100% { transform: translate3d(1%, 0, 0) scaleY(1.05); }
+/* 하드웨어 가속 한도 내에서 파도의 입체적인 움직임을 제어하는 메커니즘 */
+@keyframes waveSwell {
+    0% { transform: translate3d(-1%, -1%, 0) skewX(-4deg) scaleY(0.95); }
+    100% { transform: translate3d(1%, 1%, 0) skewX(4deg) scaleY(1.05); }
 }
-@keyframes yoonseulGlideReverse {
-    0% { transform: translate3d(1%, 0, 0) scaleX(-1) scaleY(1.05); }
-    100% { transform: translate3d(-1%, 0, 0) scaleX(-1) scaleY(0.95); }
+@keyframes waveSwellReverse {
+    0% { transform: translate3d(1%, -0.5%, 0) skewX(3deg) scaleY(1.05); }
+    100% { transform: translate3d(-1%, 0.5%, 0) skewX(-3deg) scaleY(0.95); }
 }
-@keyframes yoonseulPulse {
-    0% { opacity: 0.2; }
-    100% { opacity: 0.5; }
+@keyframes wavePulse {
+    0% { opacity: 0.3; transform: scale(0.98); }
+    100% { opacity: 0.6; transform: scale(1.02); }
 }
 
-/* 모바일 화면 핏 대응 */
+/* 모바일 화면 최적화 대응 */
 @media (max-width: 768px) {
     .wave-ripple {
-        height: 40%;
-        opacity: 0.6;
+        height: 45%;
+        opacity: 0.7;
     }
     .posts-grid {
         grid-template-columns: 1fr !important; 
     }
 }
 
-/* 로딩 화면 (시안 블루 테마에 맞춰 매칭 완료) */
+/* 로딩 화면 (테마 싱크로율 패치) */
 #loading-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: #040a16; display: flex; justify-content: center; align-items: center; 
+    background: #030a16; display: flex; justify-content: center; align-items: center; 
     z-index: 9999; opacity: 1; visibility: visible; pointer-events: auto;
     transition: opacity 0.8s ease, visibility 0.8s ease; 
     -webkit-transform: translateZ(0); transform: translateZ(0);
@@ -106,8 +100,8 @@ body {
 }
 
 .loader { position: relative; text-align: center; }
-.sun-glow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; background: radial-gradient(circle, #00b4d8 0%, transparent 70%); animation: pulse 2s infinite ease-in-out; }
-.wave-loading { width: 44px; height: 44px; border: 3px solid transparent; border-top-color: #00f5d4; border-bottom-color: #00b4d8; border-radius: 50%; animation: spin 1.8s linear infinite; margin: 0 auto 20px; }
+.sun-glow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; background: radial-gradient(circle, #f7a37f 0%, transparent 70%); animation: pulse 2s infinite ease-in-out; }
+.wave-loading { width: 44px; height: 44px; border: 3px solid transparent; border-top-color: #00b4d8; border-bottom-color: #f7a37f; border-radius: 50%; animation: spin 1.8s linear infinite; margin: 0 auto 20px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes pulse { 0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(0.9); } 50% { opacity: 0.8; transform: translateX(-50%) scale(1.15); } }
 #loading-screen p { color: #00b4d8; letter-spacing: 2px; font-size: 0.85rem; }
@@ -121,9 +115,9 @@ body {
 header { text-align: center; margin-bottom: 40px; }
 header .main-title {
     font-size: 3.2rem; font-weight: 800; letter-spacing: 8px; margin-bottom: 15px;
-    background: linear-gradient(135deg, #ffffff 20%, #90e0ef 60%, #00b4d8 100%);
+    background: linear-gradient(135deg, #ffffff 15%, #90e0ef 50%, #f7a37f 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    text-shadow: 0 4px 15px rgba(0, 180, 216, 0.25), 0 15px 35px rgba(4, 10, 22, 0.9);
+    text-shadow: 0 4px 15px rgba(0, 180, 216, 0.2), 0 15px 35px rgba(2, 6, 15, 0.95);
 }
 header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opacity: 0.75; }
 
@@ -139,7 +133,7 @@ header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opac
 }
 .tab-btn:hover { color: #fff; border-color: rgba(0, 180, 216, 0.4); background: rgba(255,255,255,0.05); }
 .tab-btn.active {
-    background: linear-gradient(135deg, rgba(0, 180, 216, 0.2), rgba(0, 119, 182, 0.1));
+    background: linear-gradient(135deg, rgba(0, 180, 216, 0.2), rgba(247, 163, 127, 0.1));
     border-color: #00b4d8; color: #00b4d8; font-weight: bold;
     box-shadow: 0 0 15px rgba(0, 180, 216, 0.15);
 }
@@ -155,9 +149,9 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 .danger-btn { border-color: rgba(239, 68, 68, 0.25); color: #fca5a5; }
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-/* 🛠️ 블루 틴트가 들어간 투명 일기장 / 편지함 기입창 */
+/* 노을빛 블루 틴트가 융합된 글 상자 */
 #write-section, #letter-section {
-    background: rgba(11, 22, 41, 0.85); border: 1px solid rgba(0, 180, 216, 0.15);
+    background: rgba(8, 19, 38, 0.85); border: 1px solid rgba(0, 180, 216, 0.15);
     padding: 30px; border-radius: 18px; 
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
@@ -166,19 +160,19 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #00b4d8; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
 .write-buttons { display: flex; gap: 10px; }
 input[type="text"], textarea {
-    width: 100%; background: rgba(5, 12, 26, 0.75); border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 100%; background: rgba(3, 10, 23, 0.75); border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 8px; padding: 14px; color: #fff; margin-bottom: 16px; outline: none; transition: all 0.25s;
 }
-input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rgba(5, 12, 26, 0.9); }
+input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rgba(3, 10, 23, 0.9); }
 .centered-title { text-align: center; font-size: 1.4rem; font-weight: 400; margin-bottom: 35px; color: #00b4d8; letter-spacing: 2px; border-bottom: 1px solid rgba(0, 180, 216, 0.15); padding-bottom: 15px; width: 100%; }
 
 /* 리스트 컴포넌트 배치 */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 @media (max-width: 900px) { .posts-grid { grid-template-columns: 1fr; } }
 
-/* 🛠️ 심해의 은은한 감성을 품은 투명 포스트 카드 */
+/* 오션 딥 테마 포스트 카드 */
 .post-card {
-    background: linear-gradient(135deg, rgba(12, 26, 48, 0.95) 0%, rgba(6, 15, 31, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(8, 22, 46, 0.95) 0%, rgba(4, 12, 28, 0.9) 100%);
     border: 1px solid rgba(255, 255, 255, 0.04); padding: 25px; border-radius: 16px;
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     position: relative; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
@@ -196,8 +190,8 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
 .mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 
 /* 모달 양식 세팅 */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 5, 12, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.modal-content { background: linear-gradient(145deg, #0e1a2f, #060e1c); border: 1px solid rgba(0, 180, 216, 0.2); padding: 35px; border-radius: 18px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.7); animation: popupScale 0.25s cubic-bezier(0.25, 1, 0.5, 1); }
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 15, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.modal-content { background: linear-gradient(145deg, #0a1b36, #040d1c); border: 1px solid rgba(0, 180, 216, 0.2); padding: 35px; border-radius: 18px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.7); animation: popupScale 0.25s cubic-bezier(0.25, 1, 0.5, 1); }
 @keyframes popupScale { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
@@ -216,10 +210,10 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
 .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 50px; flex-wrap: wrap; }
 .page-btn { width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 50%; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); color: #cbd5e1; cursor: pointer; transition: all 0.25s; font-size: 0.85rem; }
 .page-btn:hover { background: rgba(0, 180, 216, 0.15); color: #00b4d8; border-color: #00b4d8; }
-.page-btn.active { background: linear-gradient(135deg, #00b4d8, #0077b6); color: #030712; border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.45); font-weight: bold; }
+.page-btn.active { background: linear-gradient(135deg, #00b4d8, #005f73); color: #02050d; border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.45); font-weight: bold; }
 .cancel-btn { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
-footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-top: 1px solid rgba(0, 180, 216, 0.12); color: #64748b; font-size: 0.82rem; letter-spacing: 0.8px; }
+footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-top: 1px solid rgba(0, 180, 216, 0.12); color: #475569; font-size: 0.82rem; letter-spacing: 0.8px; }
 
 /* 🔍 제목 검색창 전용 스타일 */
 .search-container { max-width: 450px; margin: 0 auto 35px auto; text-align: center; }
@@ -228,5 +222,5 @@ footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-to
     border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.25s ease;
 }
 #search-input:focus {
-    border-color: #00b4d8; background: rgba(5, 12, 26, 0.85); box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
+    border-color: #00b4d8; background: rgba(3, 10, 23, 0.85); box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
 }
