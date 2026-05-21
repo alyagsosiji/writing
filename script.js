@@ -1,6 +1,5 @@
-
 // ==========================================
-// 🎵 0-A. 음악 재생 목록 설정 배열 (수정/추가할 땐 파일명만 양식에 맞추어 바꿔주세요)
+// 🎵 0-A. 음악 재생 목록 설정 배열
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -31,27 +30,22 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         listenPosts();
         listenLetters();
-        initMusicPlayerEngine(); // 플로팅 디스크 플레이어 엔진 시동
+        initMusicPlayerEngine(); 
     } catch (e) {
         console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생:", e);
         hideLoadingScreen();
     }
 });
 
-// 🎵 미니멀 플로팅 음반 플레이어 전용 핵심 컨트롤러
 function initMusicPlayerEngine() {
     if (MY_MUSIC_LIST.length === 0) return;
-
     const playerTrigger = document.getElementById('mini-audio-trigger');
-
-    // 첫 번째 트랙 기본 로드 세팅
     loadTrack(currentTrackIndex);
 
     if (playerTrigger) {
         playerTrigger.addEventListener('click', togglePlayPause);
     }
 
-    // 한 곡의 스트리밍이 끝나면 다음 곡으로 프레임 소모 없이 순차 릴레이 자동 스위칭
     audioEngine.addEventListener('ended', () => {
         currentTrackIndex = (currentTrackIndex + 1) % MY_MUSIC_LIST.length;
         loadTrack(currentTrackIndex);
@@ -76,35 +70,19 @@ function togglePlayPause() {
     if (isTrackPlaying) {
         audioEngine.pause();
         isTrackPlaying = false;
-        playerTrigger.classList.remove('playing'); // 무한 회전 애니메이션 일시 중단
+        playerTrigger.classList.remove('playing');
     } else {
         audioEngine.play().then(() => {
             isTrackPlaying = true;
-            playerTrigger.classList.add('playing'); // 무한 회전 애니메이션 가동
+            playerTrigger.classList.add('playing');
         }).catch(err => {
-            console.log("브라우저 정책에 의한 상호작용 전 오디오 브레이크 차단 패치 작동");
+            console.log("인터랙션 보호 오디오 차단 해제 패치 가동");
         });
     }
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    hideLoadingScreen();
-} else {
-    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    try {
-        listenPosts();
-        listenLetters();
-    } catch (e) {
-        console.error("데이터 실시간 리스닝 시작 중 예외 발생 :", e);
-        hideLoadingScreen();
-    }
-});
-
 // ==========================================
-// ⏱️ 24시간 형식 무결성 보정 엔진 (과거 데이터 실시간 강제 소급 적용 연동)
+// ⏱️ 24시간 형식 무결성 보정 엔진
 // ==========================================
 function formatTo24Hour(dateStr) {
     if (!dateStr) return '';
@@ -186,9 +164,6 @@ let searchKeyword = '';
 
 let isSubmitting = false;
 
-// ==========================================
-// 4. 컴팩트 시스템 안내 / 컨펌 모달 윈도우 대체기
-// ==========================================
 function showSystemAlert(message, callback) {
     document.getElementById('system-title').innerText = "안내";
     document.getElementById('system-message').innerText = message;
@@ -231,9 +206,6 @@ function showSystemConfirm(message, onConfirm, onCancel) {
     document.getElementById('system-modal').style.display = 'flex';
 }
 
-// ==========================================
-// 5. 로그인 / 로그아웃 인증 매니저 (가시성 철저 제어)
-// ==========================================
 function openModal() { document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('login-modal').style.display = 'none'; }
 
@@ -252,7 +224,6 @@ function login() {
     }
 }
 
-// 로그아웃
 function logout() {
     isAdmin = false;
     cancelEdit();
@@ -284,6 +255,7 @@ function updateUI() {
     }
 }
 
+// 🛠️ 아시님 요청에 따른 뷰 타이틀 텍스트 디자인 동기화 보정 파트
 function switchView(view) {
     if (!isAdmin && view === 'letters') {
         currentView = 'posts';
@@ -298,10 +270,10 @@ function switchView(view) {
     
     if(view === 'posts') {
         document.getElementById('tab-posts').classList.add('active');
-        document.getElementById('section-main-title').innerText = "기록된 바다";
+        document.getElementById('section-main-title').innerText = "바다의 기록";
     } else {
         document.getElementById('tab-letters').classList.add('active');
-        document.getElementById('section-main-title').innerText = "도착한 편지";
+        document.getElementById('section-main-title').innerText = "띄워진 편지";
     }
     renderUI();
 }
@@ -312,9 +284,6 @@ function handleSearch() {
     renderUI();
 }
 
-// ==========================================
-// 6. 실시간 동기화 데이터베이스 제어 인터페이스
-// ==========================================
 function listenPosts() {
     if (!database) return;
     database.ref('posts').on('value', (snapshot) => {
@@ -345,9 +314,6 @@ function listenLetters() {
     });
 }
 
-// ==========================================
-// 7. UI 데이터 렌더링 엔진 (소급 적용 보정 함수 강제 결합)
-// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container');
     const paginationContainer = document.getElementById('pagination-container');
@@ -371,7 +337,7 @@ function renderUI() {
         const text = searchKeyword 
             ? `'${searchKeyword}'가 포함된 내용이 바다에 존재하지 않습니다.` 
             : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "도착한 편지가 없습니다.");
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#9c9197; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
 
@@ -465,9 +431,6 @@ function renderUI() {
     }
 }
 
-// ==========================================
-// 8. 데이터 상세 조회 및 트랜잭션 관리 매니저
-// ==========================================
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
 
@@ -481,6 +444,7 @@ function openDetailModal(key) {
     document.getElementById('detail-modal').style.display = 'flex';
 }
 
+function closeModal() { document.getElementById('detail-modal').style.display = 'none'; }
 function closeDetailModal() { document.getElementById('detail-modal').style.display = 'none'; }
 
 function savePost() {
@@ -582,7 +546,7 @@ function deletePost(key) {
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-        }).catch(err => showSystemAlert("소멸 처리 오류 : " + err.message));
+        }).catch(err => showSystemAlert("소멸 처리 오류: " + err.message));
     });
 }
 
