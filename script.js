@@ -1,6 +1,18 @@
 
 // ==========================================
-// 🛠️ 0. 최우선 라이프 사이클 매니저 (타임아웃 제외 보존형)
+// 🎵 0-A. 음악 재생 목록 설정 배열 (수정/추가할 땐 파일명만 양식에 맞추어 바꿔주세요)
+// ==========================================
+const MY_MUSIC_LIST = [
+    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
+    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
+];
+
+let currentTrackIndex = 0;
+let isTrackPlaying = false;
+let audioEngine = new Audio();
+
+// ==========================================
+// 🛠️ 0-B. 최우선 라이프 사이클 매니저 (타임아웃 제외 보존형)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
@@ -8,16 +20,72 @@ function hideLoadingScreen() {
         loader.classList.add('fade-out');
     }
 }
-// ==========================================
-// 🎵 0-A. 아시님 전용 음악 플레이어 재생 목록 구성 배열 (이곳에 노래를 추가하세요!)
-// ==========================================
-const MY_MUSIC_LIST = [
-    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" }
-];
 
-let currentTrackIndex = 0;
-let isTrackPlaying = false;
-let audioEngine = new Audio();
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    hideLoadingScreen();
+} else {
+    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        listenPosts();
+        listenLetters();
+        initMusicPlayerEngine(); // 플로팅 디스크 플레이어 엔진 시동
+    } catch (e) {
+        console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생:", e);
+        hideLoadingScreen();
+    }
+});
+
+// 🎵 미니멀 플로팅 음반 플레이어 전용 핵심 컨트롤러
+function initMusicPlayerEngine() {
+    if (MY_MUSIC_LIST.length === 0) return;
+
+    const playerTrigger = document.getElementById('mini-audio-trigger');
+
+    // 첫 번째 트랙 기본 로드 세팅
+    loadTrack(currentTrackIndex);
+
+    if (playerTrigger) {
+        playerTrigger.addEventListener('click', togglePlayPause);
+    }
+
+    // 한 곡의 스트리밍이 끝나면 다음 곡으로 프레임 소모 없이 순차 릴레이 자동 스위칭
+    audioEngine.addEventListener('ended', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % MY_MUSIC_LIST.length;
+        loadTrack(currentTrackIndex);
+        audioEngine.play().then(() => {
+            if (playerTrigger) playerTrigger.classList.add('playing');
+        }).catch(() => {
+            isTrackPlaying = false;
+            if (playerTrigger) playerTrigger.classList.remove('playing');
+        });
+    });
+}
+
+function loadTrack(index) {
+    if (index < 0 || index >= MY_MUSIC_LIST.length) return;
+    audioEngine.src = MY_MUSIC_LIST[index].src;
+}
+
+function togglePlayPause() {
+    const playerTrigger = document.getElementById('mini-audio-trigger');
+    if (!playerTrigger) return;
+
+    if (isTrackPlaying) {
+        audioEngine.pause();
+        isTrackPlaying = false;
+        playerTrigger.classList.remove('playing'); // 무한 회전 애니메이션 일시 중단
+    } else {
+        audioEngine.play().then(() => {
+            isTrackPlaying = true;
+            playerTrigger.classList.add('playing'); // 무한 회전 애니메이션 가동
+        }).catch(err => {
+            console.log("브라우저 정책에 의한 상호작용 전 오디오 브레이크 차단 패치 작동");
+        });
+    }
+}
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     hideLoadingScreen();
