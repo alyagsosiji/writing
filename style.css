@@ -99,6 +99,31 @@ body {
         grid-template-columns: 1fr !important; 
     }
 }
+/* 🎵 음악 플레이어 독점 가속 디자인 세팅 */
+.music-player-box {
+    background: rgba(8, 22, 46, 0.7); border: 1px solid rgba(0, 180, 216, 0.2);
+    padding: 16px 22px; border-radius: 16px; margin-bottom: 35px;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    display: flex; flex-direction: column; gap: 12px;
+    -webkit-transform: translateZ(0); transform: translateZ(0);
+}
+.player-info { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+.player-icon { font-size: 1.1rem; }
+.track-ticker { overflow: hidden; white-space: nowrap; width: 100%; }
+#track-title { display: inline-block; font-size: 0.9rem; color: #90e0ef; letter-spacing: 0.5px; font-weight: 400; }
+.player-controls { display: flex; justify-content: center; align-items: center; gap: 24px; }
+.player-btn {
+    background: none !important; border: none !important; color: #94a3b8 !important;
+    font-size: 1.05rem !important; padding: 4px 10px !important; cursor: pointer;
+    transition: color 0.2s, transform 0.2s !important; box-shadow: none !important;
+}
+.player-btn:hover { color: #00b4d8 !important; transform: scale(1.1); }
+#player-play-pause { font-size: 1.3rem !important; color: #f7a37f !important; }
+#player-play-pause:hover { color: #ffb796 !important; }
+.player-progress-container { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.06); border-radius: 2px; cursor: pointer; position: relative; }
+.player-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00b4d8, #f7a37f); border-radius: 2px; }
+
 
 /* 로딩 화면 */
 #loading-screen { 
