@@ -157,7 +157,7 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 .danger-btn:hover { border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
 /* ==========================================
-   ✨ [신규 디자인] 바다의 기록 타이틀 & 노을빛 서브 문구 데코레이션
+   ✨ 타이틀 & 수평선 안내 경계선 매니저
    ========================================== */
 .centered-title { 
     text-align: center; font-size: 1.7rem !important; font-weight: 600 !important; 
@@ -172,7 +172,10 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     text-align: center; font-size: 0.86rem; font-weight: 300; letter-spacing: 1.5px;
     color: #ffbba2; opacity: 0.85; font-style: italic;
     text-shadow: 0 0 8px rgba(255, 107, 61, 0.4);
-    margin-bottom: 35px; width: 100%;
+    width: 100%; margin-bottom: 35px;
+    /* 🛠️ [경계선 복원] 이전 코드처럼 검색창 위에 선을 은은한 수평 테바로 형성 */
+    border-bottom: 1px solid rgba(0, 180, 216, 0.15); 
+    padding-bottom: 22px;
 }
 
 /* 기입창 외형 */
