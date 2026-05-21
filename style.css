@@ -2,7 +2,7 @@
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
+    user-select: none; -webkit-select: none; -moz-user-select: none; -ms-user-select: none;
 }
 
 body {
@@ -62,9 +62,7 @@ body {
     100% { opacity: 0.7; transform: translate3d(0, -0.5%, 0) scale(1.03); }
 }
 
-/* ==========================================
-   🎵 [정렬 교정] 확장형 미니 음악 플레이어 레이아웃 수평 보정
-   ========================================== */
+/* 🎵 확장형 미니 음악 플레이어 레이아웃 수평 보정 */
 .mini-audio-player {
     position: fixed; bottom: 30px; right: 30px; z-index: 9999;
     padding: 10px 18px; border-radius: 30px;
@@ -90,15 +88,27 @@ body {
 .mini-audio-player.playing .vinyl-disc { animation: vinylRotate 3.5s linear infinite; }
 @keyframes vinylRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* 로딩 화면 */
+/* ==========================================
+   ⏳ [로딩 화면 버그 완전 수정 패치]
+   ========================================== */
 #loading-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: #030a16; display: flex; justify-content: center; align-items: center; 
-    z-index: 9999; opacity: 1; visibility: visible; pointer-events: auto;
-    transition: opacity 0.8s ease, visibility 0.8s ease; 
+    z-index: 99999; /* 메인 화면보다 무조건 최상단 고정 */
+    opacity: 1 !important; visibility: visible !important; pointer-events: auto;
     -webkit-transform: translateZ(0); transform: translateZ(0);
+    /* 🛠️ 초기 가동 딜레이를 없애기 위해 기본 상태의 transition을 완전 제거 */
+    transition: none !important; 
 }
-#loading-screen.fade-out { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+
+/* 🛠️ 로딩이 완전히 끝나고 사라지는 순간(fade-out)에만 트랜지션을 부드럽게 걸어 자연스럽게 퇴장 */
+#loading-screen.fade-out { 
+    opacity: 0 !important; 
+    visibility: hidden !important; 
+    pointer-events: none !important; 
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 .loader { position: relative; text-align: center; }
 .sun-glow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 70px; height: 70px; background: radial-gradient(circle, #f7a37f 0%, transparent 70%); animation: pulse 2s infinite ease-in-out; }
 .wave-loading { width: 44px; height: 44px; border: 3px solid transparent; border-top-color: #00b4d8; border-bottom-color: #f7a37f; border-radius: 50%; animation: spin 1.8s linear infinite; margin: 0 auto 20px; }
@@ -159,22 +169,20 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     border-bottom: none !important; padding-bottom: 0 !important;
 }
 
-/* ==========================================
-   🌅 [정렬 교정] 서브텍스트 하단 경계선과 검색창 사이 여백 균형 최적화
-   ========================================== */
+/* 서브텍스트 하단 경계선과 검색창 사이 여백 균형 최적화 */
 .section-subtitle {
     text-align: center; font-size: 0.86rem; font-weight: 300; letter-spacing: 1.5px;
     color: #ffbba2; opacity: 0.85; font-style: italic;
     text-shadow: 0 0 8px rgba(255, 107, 61, 0.4);
     width: 100%; margin-bottom: 35px;
     border-bottom: 1px solid rgba(0, 180, 216, 0.15); 
-    padding-bottom: 24px; /* 선 위쪽 간격 확보 */
+    padding-bottom: 24px;
 }
 
 /* 🔍 제목 검색창 구조 정렬 수직 오차 제어 */
 .search-container { 
     max-width: 450px; margin: 0 auto 40px auto; text-align: center; 
-    padding-top: 5px; /* 경계선 바로 정아래 균형 맞춤 마진 패딩 */
+    padding-top: 5px;
 }
 #search-input {
     width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
