@@ -63,8 +63,8 @@
         <main>
             <section id="write-section" style="display: none;">
                 <h3 id="write-title">새로운 기록 남기기</h3>
-                <input type="text" id="post-title" placeholder="제목을 입력하세요...">
-                <textarea id="post-content" rows="8" placeholder="수평선 너머의 이야기를 적어주세요..."></textarea>
+                <input type="text" id="post-title" placeholder="제목을 입력해주세요.">
+                <textarea id="post-content" rows="8" placeholder="수평선 너머의 이야기를 적어주세요!"></textarea>
                 <div class="write-buttons">
                     <button id="submit-post-btn" onclick="savePost()">기록하기</button>
                     <button id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()" style="display:none;">수정 취소</button>
@@ -81,7 +81,7 @@
             </section>
 
             <section id="posts-section">
-                <h2 id="section-main-title" class="centered-title">기록된 바다</h2>
+                <h2 id="section-main-title" class="centered-title">기록된 바다</h2><br>
                 <p class="section-subtitle">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</p>
                 <div class="search-container">
                     <input type="text" id="search-input" placeholder="기록의 제목을 검색해보세요!" oninput="handleSearch()">
