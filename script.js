@@ -374,7 +374,7 @@ function renderUI() {
         if (currentView === 'posts') {
             subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(144, 224, 239, 0.3);">기록된 글 : ${allPosts.length}개</span>`;
         } else {
-            subtitleElem.innerHTML = `아시 님에게 도착한 소중한 편지들입니다.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(255, 212, 186, 0.3);">도착한 편지 : ${allLetters.length}개</span>`;
+            subtitleElem.innerHTML = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(255, 212, 186, 0.3);">도착한 편지 : ${allLetters.length}개</span>`;
         }
     }
 
