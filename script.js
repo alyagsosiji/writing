@@ -538,7 +538,7 @@ function savePost() {
                 titleInput.value = '';
                 contentInput.value = '';
                 currentPage = 1;
-                showSystemAlert('수평선 너머 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
+                showSystemAlert('수평선 너머 바다에 새로운 기록이<br>성공적으로 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
             .finally(() => { isSubmitting = false; }); 
     }
@@ -570,7 +570,7 @@ function saveLetter() {
         .then(() => {
             titleInput.value = '';
             contentInput.value = '';
-            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머 바다 위로 안전하게 띄워졌습니다.');
+            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머<br>바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
         }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message))
