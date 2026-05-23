@@ -5,8 +5,8 @@ const ASSETS_TO_CACHE = [
     'index.html',
     'style.css',
     'script.js',
-    '하은.jpg',
-    '블라우스_하은.jpg'
+    '글_하은.jpg',
+    '멘헤라_하은.jpg'
 ];
 
 // 1. 서비스 워커 설치 및 초기 자산 캐싱
