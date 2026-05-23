@@ -162,8 +162,8 @@ const secureConfig = {
 };
 
 const secureAdmin = {
-    id: decodeData("7JWE7Iuc"), // 아시
-    pw: atob("YXNoaSMyNjA0MTY=")        // ashi#260416
+    id: decodeData("7JWE7Iuc"), 
+    pw: atob("YXNoaSMyNjA0MTY=")       
 };
 
 let database = null;
@@ -270,7 +270,7 @@ function login() {
     let loggedInUser = null;
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         loggedInUser = "아시";
-    } else if (inputId === haeunId && inputPw === atob("MjYwNDE2")) {
+    } else if (inputId === haeunId && inputPw === atob("aGFldW4jMjYwNDE2")) {
         loggedInUser = "하은";
     }
 
