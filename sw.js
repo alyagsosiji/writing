@@ -21,7 +21,6 @@ self.addEventListener('notificationclick', function(event) {
 });
 const CACHE_NAME = 'horizon-library-v3';
 const ASSETS_TO_CACHE = [
-    './',
     'index.html',
     'style.css',
     'script.js',
