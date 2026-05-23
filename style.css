@@ -93,7 +93,7 @@ body {
 @keyframes vinylRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 /* ==========================================
-   💾 좌하단 미니 백업 관리 트리거 단축 버튼 (음악 재생기와 100% 대칭)
+   💾 좌하단 미니 백업 관리 트리거 단축 버튼 (우측 음악 재생기와 완벽 대칭)
    ========================================== */
 .mini-backup-manager {
     position: fixed; bottom: 30px; left: 30px; z-index: 9999;
@@ -249,7 +249,7 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     height: 250px; display: flex; flex-direction: column; justify-content: space-between;
     cursor: pointer; word-break: break-all;
-    contain: layout paint; /* ⚡ 카드가 호버되거나 내용물이 바뀌어도 그리드 전체 정렬을 리페인트하지 않도록 가둠 */
+    contain: layout paint;
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
 }
 .post-card:hover { transform: translateY(-4px) translate3d(0,0,0); border-color: rgba(0, 180, 216, 0.25); box-shadow: 0 12px 30px rgba(0, 180, 216, 0.15); }
@@ -287,7 +287,7 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
     .mini-audio-player { bottom: 20px; right: 20px; padding: 8px 14px; }
     .vinyl-disc { width: 32px; height: 32px; }
 
-    /* 모바일 기기에서의 좌하단 버튼 패딩 및 대칭 수치 보정 */
+    /* 모바일 좌하단 대칭 정렬 레이아웃 수치 보정 */
     .mini-backup-manager { bottom: 20px; left: 20px; padding: 8px 14px; }
     .backup-core-icon { width: 32px; height: 32px; }
     
@@ -302,7 +302,7 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 .modal-buttons { display: flex; justify-content: center; gap: 10px; }
 
-/* 💾 고도화 백업 전용 디스플레이 레이아웃 내부 커스텀 */
+/* 💾 고도화 백업 디스플레이 레이아웃 내부 전용 커스텀 스타일 */
 .backup-modal-content { max-width: 520px !important; }
 .backup-timeline-wrapper { max-height: 280px; overflow-y: auto; padding-right: 5px; margin: 15px 0; }
 .backup-timeline-wrapper::-webkit-scrollbar { width: 4px; }
