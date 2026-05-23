@@ -6,9 +6,9 @@ const NOTIFICATION_CONFIG = {
     postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
     letterTitle: "수평선 너머의 서재",
     letterBody: "수평선 너머, 바다 위로 새로운 편지가 띄워졌습니다.",
-    icon: "하은.jpg",                         // 알림에 표시될 팝업 이미지 경로
-    badge: "하은.jpg",                        // 모바일 상단 상태바에 표시될 작은 아이콘 경로
-    vibrate: [200, 100, 200]                 // 모바일 알림 진동 패턴
+    icon: "하은.jpg",                         
+    badge: "하은.jpg",                        
+    vibrate: [200, 100, 200]                 
 };
 
 // ==========================================
@@ -226,7 +226,7 @@ let searchKeyword = '';
 
 let isSubmitting = false;
 
-// 실시간 자동 클라우드 분산 백업 가동 통제 스위치
+// 실시간 자동 분산 복구 백업 시스템 제어용 인터셉터 잠금 플래그
 let isInternalSyncAction = false; 
 
 function showSystemAlert(message, callback) {
@@ -428,6 +428,7 @@ function handleSearch() {
 // ==========================================
 let rawPostsSnapshot = null;
 let rawLettersSnapshot = null;
+let isInitialPostLoad = true;
 
 function listenPosts() {
     if (!database) return;
@@ -449,7 +450,7 @@ function listenPosts() {
             allPosts.reverse(); 
         }
 
-        // 데이터가 변경되었고 내부 복구 절차가 아닐 경우 클라우드 분산 백업 가동
+        // 💾 [실시간 변동 추적 무결성 자동 백업 엔진]
         if (!isInitialPostLoad && !isInternalSyncAction) {
             executeCloudBackupEngine(true);
         }
@@ -488,6 +489,7 @@ function listenLetters() {
             allLetters.reverse();
         }
 
+        // 💾 [실시간 변동 추적 무결성 자동 백업 엔진]
         if (!isInitialLetterLoad && !isInternalSyncAction) {
             executeCloudBackupEngine(true);
         }
@@ -504,9 +506,9 @@ function listenLetters() {
 }
 
 // ==========================================
-// 💾 클라우드 연동 타임라인 복구 분산 엔진 (30일 보존 정책 내장)
+// 💾 클라우드 연동 타임라인 복구 분산 엔진 (30일 보존 정책 완벽 내장)
 // ==========================================
-const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000; // 정확히 30일 환산 밀리초
+const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000; // 30일 환산 밀리초
 
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
@@ -523,27 +525,25 @@ function executeCloudBackupEngine(isAutomatic = true) {
         letters: rawLettersSnapshot || {}
     };
 
-    // 1. 실시간 클라우드 타임라인에 삽입
     database.ref('backups').push(backupPack).then(() => {
-        // 2. 상시 무결성 유지 보수를 위한 30일 만료 파편 영구 소멸 청소 가동
         cleanExpiredBackupsTimeline();
-    });
+    }).catch(err => console.error("백업 생성 처리 실패:", err));
 }
 
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
 
-    database.ref('backups').once('value', (snapshot) => {
+    database.ref('backups').once('value').then((snapshot) => {
         const backups = snapshot.val();
         if (!backups) return;
 
         Object.keys(backups).forEach((key) => {
             if (backups[key].timestamp < expirationThreshold) {
-                database.ref(`backups/${key}`).remove(); // 30일 경과 파편 제거
+                database.ref(`backups/${key}`).remove(); 
             }
         });
-    });
+    }).catch(err => console.error("만료 파편 정화 중 오류:", err));
 }
 
 function triggerManualBackup() {
@@ -553,6 +553,7 @@ function triggerManualBackup() {
     loadBackupTimelineList();
 }
 
+// 🛠️ [중요] 완벽한 예외처리(Promise) 구조로 개편된 리스트 로드 엔진 (호출 중 멈춤 버그 완전 해결)
 function loadBackupTimelineList() {
     const container = document.getElementById('backup-list-container');
     const loadingMsg = document.getElementById('backup-loading-msg');
@@ -563,59 +564,69 @@ function loadBackupTimelineList() {
 
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
 
-    database.ref('backups').once('value', (snapshot) => {
-        if (loadingMsg) loadingMsg.style.display = 'none';
-        const backups = snapshot.val();
+    // 규칙 오류 및 프리징 대지 차단을 위해 프로미스 엔진 사용
+    database.ref('backups').once('value')
+        .then((snapshot) => {
+            if (loadingMsg) loadingMsg.style.display = 'none';
+            const backups = snapshot.val();
 
-        if (!backups) {
-            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">아직 보존된 복구 타임라인 시점이 없습니다.</p>`;
-            return;
-        }
+            if (!backups) {
+                container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">아직 보존된 복구 타임라인 시점이 없습니다.</p>`;
+                return;
+            }
 
-        const timelineKeys = Object.keys(backups).reverse(); // 최신 지점순 정렬
-        let loadedItemsCount = 0;
+            const timelineKeys = Object.keys(backups).reverse(); 
+            let loadedItemsCount = 0;
 
-        timelineKeys.forEach((key) => {
-            const item = backups[key];
-            if (item.timestamp < expirationThreshold) return; // 만기 파편 배제
+            timelineKeys.forEach((key) => {
+                const item = backups[key];
+                if (item.timestamp < expirationThreshold) return; 
 
-            loadedItemsCount++;
-            const pCount = item.posts ? Object.keys(item.posts).length : 0;
-            const lCount = item.letters ? Object.keys(item.letters).length : 0;
-            const badgeClass = item.type === "자동" ? "auto" : "manual";
+                loadedItemsCount++;
+                const pCount = item.posts ? Object.keys(item.posts).length : 0;
+                const lCount = item.letters ? Object.keys(item.letters).length : 0;
+                const badgeClass = item.type === "자동" ? "auto" : "manual";
 
-            const element = document.createElement('div');
-            element.className = 'backup-item';
-            element.innerHTML = `
-                <div class="backup-meta">
-                    <div class="backup-time-title">
-                        ${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span>
+                const element = document.createElement('div');
+                element.className = 'backup-item';
+                element.innerHTML = `
+                    <div class="backup-meta">
+                        <div class="backup-time-title">
+                            ${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span>
+                        </div>
+                        <div class="backup-counts">글 기록 ${pCount}개 ㅣ 편지 데이터 ${lCount}개</div>
                     </div>
-                    <div class="backup-counts">글 기록 ${pCount}개 ㅣ 편지 데이터 ${lCount}개</div>
-                </div>
-                <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px;">복구</button>
-            `;
-            container.appendChild(element);
-        });
+                    <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px;">복구</button>
+                `;
+                container.appendChild(element);
+            });
 
-        if (loadedItemsCount === 0) {
-            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">30일 이내 유효한 복구 지점이 존재하지 않습니다.</p>`;
-        }
-    });
+            if (loadedItemsCount === 0) {
+                container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">30일 이내 유효한 복구 지점이 존재하지 않습니다.</p>`;
+            }
+        })
+        .catch((error) => {
+            if (loadingMsg) loadingMsg.style.display = 'none';
+            container.innerHTML = `
+                <p style="color:#ef4444; font-size:0.85rem; padding: 15px 0;">백업 목록 로드 실패: 권한 부족</p>
+                <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; text-align:left; padding:0 10px;">Firebase Database 규칙(Rules) 탭에서 <span style="color:#90e0ef;">"backups"</span> 노드에 대한 읽기/쓰기가 허용되어 있는지 확인해 주세요.<br>예시 규칙:<br>".read": "auth != null" 또는 true</p>
+            `;
+            console.error("타임라인 동기화 실패:", error);
+        });
 }
 
 function restoreFromTargetBackupPoint(key) {
     if (!isAdmin || !database) return;
 
     showSystemConfirm('선택하신 시점의 복구 스냅샷을 가동하여 현재 바다를 완전 동기화 복구하시겠습니까? 현재 바다 데이터는 덮어씌워집니다.', function() {
-        database.ref(`backups/${key}`).once('value', (snapshot) => {
+        database.ref(`backups/${key}`).once('value').then((snapshot) => {
             const targetBackup = snapshot.val();
             if (!targetBackup) {
                 showSystemAlert('해당 세이브 파일이 유효하지 않거나 이미 만료 소멸되었습니다.');
                 return;
             }
 
-            isInternalSyncAction = true; // 무한 백업 루프 방지 잠금 활성화
+            isInternalSyncAction = true; // 무한 자동 백업 연쇄 루프 차단락 가동
 
             Promise.all([
                 database.ref('posts').set(targetBackup.posts || null),
@@ -627,8 +638,10 @@ function restoreFromTargetBackupPoint(key) {
                 });
             }).catch(err => {
                 isInternalSyncAction = false;
-                showSystemAlert('타임라인 인젝션 주입 실패 : ' + err.message);
+                showSystemAlert('타임라인 인젝션 주입 실패: ' + err.message);
             });
+        }).catch(err => {
+            showSystemAlert('복구 데이터 스냅샷 로드 에러: ' + err.message);
         });
     });
 }
