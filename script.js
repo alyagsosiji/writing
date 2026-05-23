@@ -1,5 +1,18 @@
 // ==========================================
-// 🎵 0-A. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙)
+// 🔔 0-A. 모바일 및 PC 알림 커스텀 설정 항목 (이곳에서 제목, 내용, 아이콘을 수정하세요)
+// ==========================================
+const NOTIFICATION_CONFIG = {
+    postTitle: "수평선 너머의 서재",
+    postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
+    letterTitle: "수평선 너머의 서재",
+    letterBody: "수평선 너머, 바다 위로 새로운 편지가 띄워졌습니다.",
+    icon: "하은.jpg",                         // 알림에 표시될 팝업 이미지 경로
+    badge: "하은.jpg",                        // 모바일 상단 상태바에 표시될 작은 아이콘 경로
+    vibrate: [200, 100, 200]                 // 모바일 알림 진동 패턴 (진동-쉬고-진동 밀리초 단위)
+};
+
+// ==========================================
+// 🎵 0-B. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙)
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -11,14 +24,14 @@ let isTrackPlaying = false;
 let audioEngine = new Audio();
 
 // ==========================================
-// 🔔 0-B. 모바일 하이브리드 푸시 알림 및 브라우저 알림 권한 시스템
+// 🔔 0-C. 푸시 알림 및 브라우저 알림 권한 시스템
 // ==========================================
 function requestNotificationPermission() {
     if (!("Notification" in window)) return;
     if (Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission().then(permission => {
             if (permission === "granted") {
-                sendNotification("수평선 너머의 서재", "알림이 성공적으로 활성화되었습니다.");
+                sendNotification(NOTIFICATION_CONFIG.postTitle, "알림이 성공적으로 활성화되었습니다.");
             }
         });
     }
@@ -27,28 +40,26 @@ function requestNotificationPermission() {
 function sendNotification(title, body) {
     if (!("Notification" in window)) return;
     if (Notification.permission === "granted") {
-        // 모바일 브라우저를 위한 서비스 워커 기반 알림 엔진 (진동 패턴 추가)
+        // 모바일 브라우저 최적화 서비스 워커 알림 엔진 적용
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then(function(registration) {
                 registration.showNotification(title, {
                     body: body,
-                    icon: "하은.jpg",
-                    badge: "하은.jpg",
-                    vibrate: [200, 100, 200]
+                    icon: NOTIFICATION_CONFIG.icon,
+                    badge: NOTIFICATION_CONFIG.badge,
+                    vibrate: NOTIFICATION_CONFIG.vibrate
                 });
             }).catch(function() {
-                // 서비스 워커 로드 실패 시 PC형 폽업Fallback
-                new Notification(title, { body: body, icon: "하은.jpg" });
+                new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
             });
         } else {
-            // 서비스 워커 미지원 환경 브라우저 Fallback
-            new Notification(title, { body: body, icon: "하은.jpg" });
+            new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
         }
     }
 }
 
 // ==========================================
-// 🛠️ 0-C. 최우선 라이프 사이클 매니저 (서비스 워커 등록단 추가)
+// 🛠️ 0-D. 최우선 라이프 사이클 매니저 (서비스 워커 등록단 보존)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
@@ -65,14 +76,12 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        // 📱 모바일 알림 구동을 위한 서비스 워커 파일 실시간 등록
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('모바일 알림 인프라 가동 완료: ', reg.scope))
-                .catch(err => console.error('모바일 알림 인프라 에러: ', err));
+                .then(reg => console.log('모바일 알림 인프라 가동 완료 : ', reg.scope))
+                .catch(err => console.error('모바일 알림 인프라 에러 : ', err));
         }
 
-        // [세션 검증] 로컬스토리지 로그인 유지 상태 복구
         if (localStorage.getItem('isAdminLoggedIn') === 'true') {
             isAdmin = true;
             requestNotificationPermission(); 
@@ -82,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         listenLetters();
         initMusicPlayerEngine(); 
         
-        // 안전장치: 초기 화면 즉시 드로잉 (세션에 맞게 UI 업데이트)
         updateUI(); 
     } catch (e) {
         console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생 : ", e);
@@ -188,9 +196,10 @@ const secureConfig = {
     measurementId: atob("Ry0zRU03OTQ3OUpU")
 };
 
+// 🔒 보안 주석 유출 흔적 전면 소멸 완료
 const secureAdmin = {
-    id: decodeData("7JWE7Iuc"),
-    pw: atob("YXNoaSMyNjA0MTY=")
+    id: decodeData("7JWE7Iuc"), 
+    pw: atob("YXNoaSMyNjA0MTY=")        
 };
 
 let database = null;
@@ -295,9 +304,8 @@ function login() {
     const inputId = idElem.value.trim();
     const inputPw = pwElem.value;
 
-    const haeunId = decodeData("7ZWY7J2A"); // "하은" 디코딩
+    const haeunId = decodeData("7ZWY7J2A"); 
 
-    // 다중 계정 허용 및 검증 로직 (하은 비밀번호 haeun#260416 반영 완료)
     let loggedInUser = null;
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         loggedInUser = "아시";
@@ -307,7 +315,6 @@ function login() {
 
     if (loggedInUser) {
         isAdmin = true;
-        // 로컬스토리지에 로그인 세션 유지 데이터 저장
         localStorage.setItem('isAdminLoggedIn', 'true');
         localStorage.setItem('loggedInUser', loggedInUser);
         
@@ -315,7 +322,6 @@ function login() {
         idElem.value = '';
         pwElem.value = '';
         
-        // 크롬 및 모바일 알림 권한 허용 요청
         requestNotificationPermission();
 
         showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`, function() {
@@ -328,7 +334,6 @@ function login() {
 
 function logout() {
     isAdmin = false;
-    // 로그아웃 시 세션 제거
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('loggedInUser');
     cancelEdit();
@@ -419,9 +424,8 @@ function listenPosts() {
             allPosts.reverse(); 
         }
 
-        // 로그인된 상태이고, 본인이 방금 글을 쓴 직후가 아니라면 모바일 알림 발송
         if (hasNewPost && isAdmin && !isSubmitting) {
-            sendNotification("수평선 너머의 서재", "새로운 기록이 바다에 새겨졌습니다.");
+            sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         }
 
         knownPostIds = currentIds;
@@ -454,7 +458,7 @@ function listenLetters() {
         }
 
         if (hasNewLetter && isAdmin && !isSubmitting) {
-            sendNotification("수평선 너머의 서재", "바다 위로 새로운 편지가 띄워졌습니다.");
+            sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         }
 
         knownLetterIds = currentIds;
@@ -500,7 +504,7 @@ function renderUI() {
     if (targetArray.length === 0) {
         const text = searchKeyword 
             ? `'${searchKeyword}'이/가 포함된 내용(제목)이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "띄워진 편지가 없습니다.");
+            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머, 바다입니다." : "띄워진 편지가 없습니다.");
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
@@ -534,7 +538,7 @@ function renderUI() {
         }
 
         const formattedDate = formatTo24Hour(item.date);
-        const displayDate = (currentView === 'posts') ? `아시ㅣ ${formattedDate}` : formattedDate;
+        const displayDate = (currentView === 'posts') ? `${loggedInUser} ㅣ ${formattedDate}` : formattedDate;
 
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
@@ -629,7 +633,7 @@ function savePost() {
     const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
     if (!title || !content) {
-        showSystemAlert('수평선에 새길 내용을 모두 입력해주세요.');
+        showSystemAlert('바다에 새길 내용을 모두 입력해주세요.');
         return;
     }
 
@@ -639,7 +643,7 @@ function savePost() {
     if (editTargetKey) {
         database.ref('posts/' + editTargetKey).update(postData)
             .then(() => {
-                showSystemAlert('기록이 수정되어 수평선 너머 바다에 다시 새겨졌습니다.');
+                showSystemAlert('기록이 수정되어 수평선 너머, 바다에 다시 새겨졌습니다.');
                 cancelEdit();
             }).catch(err => showSystemAlert("수정 오류 : " + err.message))
             .finally(() => { isSubmitting = false; }); 
@@ -649,8 +653,8 @@ function savePost() {
                 titleInput.value = '';
                 contentInput.value = '';
                 currentPage = 1;
-                showSystemAlert('수평선 너머 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
-            }).catch(err => showSystemAlert("기록 오류: " + err.message))
+                showSystemAlert('수평선 너머, 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
+            }).catch(err => showSystemAlert("기록 오류 : " + err.message))
             .finally(() => { isSubmitting = false; }); 
     }
 }
@@ -681,7 +685,7 @@ function saveLetter() {
         .then(() => {
             titleInput.value = '';
             contentInput.value = '';
-            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머<br>바다 위로 안전하게 띄워졌습니다.');
+            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머, 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
         }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message))
@@ -763,7 +767,7 @@ function clearDatabase() {
                 ]).then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    showSystemAlert('수평선 너머 바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                    showSystemAlert('수평선 너머 바자가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
                 }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
