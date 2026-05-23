@@ -260,14 +260,17 @@ function login() {
 
     if (!idElem || !pwElem) return;
 
-    const inputId = idElem.value;
+  const inputId = idElem.value.trim();
     const inputPw = pwElem.value;
 
-    // 다중 계정 허용 및 검증 로직 (하은 계정 암호화 적용)
+    // "하은"의 암호화 데이터 추가
+    const haeunId = decodeData("7ZWY7J2A"); 
+
+    // 다중 계정 허용 및 검증 로직
     let loggedInUser = null;
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
         loggedInUser = "아시";
-    } else if (inputId === "하은" && inputPw === atob("MjYwNDE2")) {
+    } else if (inputId === haeunId && inputPw === atob("MjYwNDE2")) {
         loggedInUser = "하은";
     }
 
@@ -387,7 +390,7 @@ function listenPosts() {
 
         // 로그인된 상태이고, 본인이 방금 글을 쓴 직후가 아니라면 알림 발송
         if (hasNewPost && isAdmin && !isSubmitting) {
-            sendNotification("수평선 너머의 서재", "새로운 기록이 바다에 새겨졌습니다.");
+            sendNotification("수평선 너머의 서재", "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.");
         }
 
         knownPostIds = currentIds;
