@@ -958,28 +958,3 @@ function clearDatabase() {
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
-// ==========================================
-// 🛠️ [임시] 가장 오래된 62개 글 '아시' 작성자 일괄 복원 엔진
-// ==========================================
-function updateOldPostsToAsi() {
-    if (!isAdmin || !database) return;
-    
-    showSystemConfirm('가장 오래된 글 62개의 작성자를 "아시"로 일괄 변경하시겠습니까?', function() {
-        // allPosts 배열은 최신순 정렬이므로, slice(-62)를 사용해 배열 맨 뒤의 가장 오래된 62개를 추출합니다.
-        const targetPosts = allPosts.slice(-62);
-        let updatePromises = [];
-        
-        targetPosts.forEach(post => {
-            // Firebase의 각 글 데이터에 author: '아시' 항목을 주입합니다.
-            updatePromises.push(database.ref('posts/' + post.id).update({ author: '아시' }));
-        });
-        
-        Promise.all(updatePromises)
-            .then(() => {
-                showSystemAlert('✅ 가장 오래된 62개 글의 작성자가 "아시"로 완벽하게 복원되었습니다!');
-            })
-            .catch(err => {
-                showSystemAlert('업데이트 중 오류 발생: ' + err.message);
-            });
-    });
-}
