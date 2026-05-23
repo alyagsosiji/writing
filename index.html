@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>수평선 너머의 서재</title>
+    
     <link rel="icon" href="하은.jpg" type="image/jpg">
+    <link rel="apple-touch-icon" href="하은.jpg">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="수평선 서재">
+
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -41,6 +48,14 @@
                 <div class="vinyl-center-hole"></div>
             </div>
         </div>
+
+        <div class="mini-backup-manager" id="mini-backup-trigger" title="바다 타임라인 백업/복구 관리창 열기" onclick="openBackupModal()" style="display: none;">
+            <div class="backup-core-icon">
+                <div class="backup-spin-ring"></div>
+                <div class="backup-center-dot"></div>
+            </div>
+        </div>
+
         <header>
             <h1 class="main-title">수평선 너머의 서재</h1>
             <p class="subtitle">노을지는 수평선 너머 서재 그 바다 속의 기록들</p>
@@ -107,6 +122,28 @@
             <div class="modal-buttons">
                 <button onclick="login()">로그인</button>
                 <button onclick="closeModal()" class="cancel-btn">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="backup-modal" class="modal" onclick="closeBackupModal()">
+        <div class="modal-content backup-modal-content" onclick="event.stopPropagation()">
+            <div class="detail-popup-header">
+                <h3>💾 바다 백업 및 복구 타임라인</h3>
+                <span class="date" style="color: #ffbba2; display:block; margin-top:4px; font-size:0.75rem;">최근 30일 이내의 복구 지점만 보존됩니다.</span>
+            </div>
+            
+            <div class="manual-backup-action-box" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <button onclick="triggerManualBackup()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, rgba(247,163,127,0.2), rgba(0,180,216,0.1)); border-color: #f7a37f; color: #fff; font-weight: bold;">✨ 현재 바다 상태 즉시 수동 백업</button>
+            </div>
+
+            <div class="backup-timeline-wrapper">
+                <p id="backup-loading-msg" style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">클라우드 보존 목록을 호출하는 중...</p>
+                <div id="backup-list-container"></div>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 20px;">
+                <button onclick="closeBackupModal()" class="cancel-btn">닫기</button>
             </div>
         </div>
     </div>
