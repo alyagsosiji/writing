@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (localStorage.getItem('isAdminLoggedIn') === 'true') {
             isAdmin = true;
+            loggedInUser = localStorage.getItem('loggedInUser') || ''; // 복구 시 변수에 주입
             requestNotificationPermission(); 
         }
 
@@ -214,7 +215,9 @@ try {
     console.error("Firebase 초기화 중 에러 발생 : ", error);
 }
 
+// ⚠️ 글 목록이 멈추는 에러 원인 해결 (loggedInUser 전역변수 선언)
 let isAdmin = false;
+let loggedInUser = ''; 
 let currentView = 'posts'; 
 let currentPage = 1;
 const postsPerPage = 6;
@@ -306,15 +309,16 @@ function login() {
 
     const haeunId = decodeData("7ZWY7J2A"); 
 
-    let loggedInUser = null;
+    let tempUser = null;
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
-        loggedInUser = "아시";
+        tempUser = "아시";
     } else if (inputId === haeunId && inputPw === atob("aGFldW4jMjYwNDE2")) {
-        loggedInUser = "하은";
+        tempUser = "하은";
     }
 
-    if (loggedInUser) {
+    if (tempUser) {
         isAdmin = true;
+        loggedInUser = tempUser; // 전역변수 업데이트
         localStorage.setItem('isAdminLoggedIn', 'true');
         localStorage.setItem('loggedInUser', loggedInUser);
         
@@ -334,6 +338,7 @@ function login() {
 
 function logout() {
     isAdmin = false;
+    loggedInUser = ''; // 전역변수 초기화
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('loggedInUser');
     cancelEdit();
@@ -348,6 +353,7 @@ function updateUI() {
     const loginBtn = document.getElementById('login-btn');
     const adminMenu = document.getElementById('admin-menu');
     const tabContainer = document.getElementById('view-tab-container');
+    const currentUserBtn = document.getElementById('current-user-btn'); // 접속 계정 버튼 가져오기
 
     if (isAdmin) {
         if (writeSection) writeSection.style.display = 'block';
@@ -355,6 +361,7 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'none';
         if (adminMenu) adminMenu.style.display = 'flex'; 
         if (tabContainer) tabContainer.style.display = 'flex'; 
+        if (currentUserBtn) currentUserBtn.innerText = `${loggedInUser} 님 접속중`; // 버튼에 접속 계정명 주입
         switchView(currentView);
     } else {
         if (writeSection) writeSection.style.display = 'none';
@@ -538,7 +545,10 @@ function renderUI() {
         }
 
         const formattedDate = formatTo24Hour(item.date);
-        const displayDate = (currentView === 'posts') ? `${loggedInUser} ㅣ ${formattedDate}` : formattedDate;
+        
+        // ⚠️ 비로그인 유저가 접근할 때 에러가 나지 않도록 유연한 처리 반영
+        const authorName = loggedInUser ? loggedInUser : "기록자";
+        const displayDate = (currentView === 'posts') ? `${authorName} ㅣ ${formattedDate}` : formattedDate;
 
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
@@ -767,7 +777,7 @@ function clearDatabase() {
                 ]).then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    showSystemAlert('수평선 너머 바자가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                    showSystemAlert('수평선 너머 바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
                 }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
