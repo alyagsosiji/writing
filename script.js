@@ -361,7 +361,7 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'none';
         if (adminMenu) adminMenu.style.display = 'flex'; 
         if (tabContainer) tabContainer.style.display = 'flex'; 
-        if (currentUserBtn) currentUserBtn.innerText = `${loggedInUser} 님 접속중`; // 버튼에 접속 계정명 주입
+        if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; // 버튼에 접속 계정명 주입
         switchView(currentView);
     } else {
         if (writeSection) writeSection.style.display = 'none';
