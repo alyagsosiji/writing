@@ -388,7 +388,7 @@ function renderUI() {
 
     if (targetArray.length === 0) {
         const text = searchKeyword 
-            ? `'${searchKeyword}'가 포함된 내용이 바다에 존재하지 않습니다.` 
+            ? `'${searchKeyword}'이/가 포함된 내용(제목)이 바다에 존재하지 않습니다.` 
             : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머 바다입니다." : "띄워진 편지가 없습니다.");
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
@@ -538,7 +538,7 @@ function savePost() {
                 titleInput.value = '';
                 contentInput.value = '';
                 currentPage = 1;
-                showSystemAlert('수평선 너머 바다에 새로운 기록이<br>성공적으로 새겨졌습니다.');
+                showSystemAlert('수평선 너머 바다에 새로운 기록이'+\n+'성공적으로 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
             .finally(() => { isSubmitting = false; }); 
     }
