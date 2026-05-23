@@ -11,7 +11,24 @@ let isTrackPlaying = false;
 let audioEngine = new Audio();
 
 // ==========================================
-// 🛠️ 0-B. 최우선 라이프 사이클 매니저 (타임아웃 제외 보존형)
+// 🔔 0-B. 푸시 알림 및 브라우저 알림 권한 시스템
+// ==========================================
+function requestNotificationPermission() {
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+}
+
+function sendNotification(title, body) {
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "하은.jpg" });
+    }
+}
+
+// ==========================================
+// 🛠️ 0-C. 최우선 라이프 사이클 매니저 (타임아웃 제외 보존형)
 // ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
@@ -28,12 +45,18 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
+        // [세션 검증] 로컬스토리지 로그인 유지 상태 복구
+        if (localStorage.getItem('isAdminLoggedIn') === 'true') {
+            isAdmin = true;
+            requestNotificationPermission(); // 권한 체크
+        }
+
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
         
-        // 안전장치: 초기 화면 즉시 드로잉
-        renderUI(); 
+        // 안전장치: 초기 화면 즉시 드로잉 (세션에 맞게 UI 업데이트)
+        updateUI(); 
     } catch (e) {
         console.error("데이터 실시간 리스닝 및 엔진 로딩 중 예외 발생 : ", e);
         hideLoadingScreen();
@@ -231,11 +254,6 @@ function closeModal() {
     if (modal) modal.style.display = 'none'; 
 }
 
-function closeDetailModal() { 
-    const modal = document.getElementById('detail-modal');
-    if (modal) modal.style.display = 'none'; 
-}
-
 function login() {
     const idElem = document.getElementById('admin-id');
     const pwElem = document.getElementById('admin-pw');
@@ -245,12 +263,28 @@ function login() {
     const inputId = idElem.value;
     const inputPw = pwElem.value;
 
+    // 다중 계정 허용 및 검증 로직 (하은 계정 암호화 적용)
+    let loggedInUser = null;
     if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) {
+        loggedInUser = "아시";
+    } else if (inputId === "하은" && inputPw === atob("MjYwNDE2")) {
+        loggedInUser = "하은";
+    }
+
+    if (loggedInUser) {
         isAdmin = true;
+        // 로컬스토리지에 로그인 세션 유지 데이터 저장
+        localStorage.setItem('isAdminLoggedIn', 'true');
+        localStorage.setItem('loggedInUser', loggedInUser);
+        
         closeModal();
         idElem.value = '';
         pwElem.value = '';
-        showSystemAlert('환영합니다, 수평선 너머 바다의 기록자, 아시님.', function() {
+        
+        // 크롬 알림 권한 허용 (최초 로그인 시 요청)
+        requestNotificationPermission();
+
+        showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`, function() {
             updateUI();
         });
     } else {
@@ -260,6 +294,9 @@ function login() {
 
 function logout() {
     isAdmin = false;
+    // 로그아웃 시 세션 제거
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('loggedInUser');
     cancelEdit();
     showSystemAlert('로그아웃 되었습니다.', function() {
         updateUI();
@@ -279,6 +316,7 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'none';
         if (adminMenu) adminMenu.style.display = 'flex'; 
         if (tabContainer) tabContainer.style.display = 'flex'; 
+        switchView(currentView);
     } else {
         if (writeSection) writeSection.style.display = 'none';
         if (letterSection) letterSection.style.display = 'block'; 
@@ -322,32 +360,72 @@ function handleSearch() {
     renderUI();
 }
 
+// ==========================================
+// 🔥 알림 연동형 실시간 리스너 엔진 
+// ==========================================
+let knownPostIds = new Set();
+let isInitialPostLoad = true;
+
 function listenPosts() {
     if (!database) return;
     database.ref('posts').on('value', (snapshot) => {
         const postsData = snapshot.val();
         allPosts = [];
+        let currentIds = new Set();
+        let hasNewPost = false;
+
         if (postsData) {
             Object.keys(postsData).forEach((key) => {
                 allPosts.push({ id: key, ...postsData[key] });
+                currentIds.add(key);
+                if (!isInitialPostLoad && !knownPostIds.has(key)) {
+                    hasNewPost = true;
+                }
             });
             allPosts.reverse(); 
         }
+
+        // 로그인된 상태이고, 본인이 방금 글을 쓴 직후가 아니라면 알림 발송
+        if (hasNewPost && isAdmin && !isSubmitting) {
+            sendNotification("수평선 너머의 서재", "새로운 기록이 바다에 새겨졌습니다.");
+        }
+
+        knownPostIds = currentIds;
+        isInitialPostLoad = false;
+
         if(currentView === 'posts') renderUI();
     });
 }
+
+let knownLetterIds = new Set();
+let isInitialLetterLoad = true;
 
 function listenLetters() {
     if (!database) return;
     database.ref('letters').on('value', (snapshot) => {
         const lettersData = snapshot.val();
         allLetters = [];
+        let currentIds = new Set();
+        let hasNewLetter = false;
+
         if (lettersData) {
             Object.keys(lettersData).forEach((key) => {
                 allLetters.push({ id: key, ...lettersData[key] });
+                currentIds.add(key);
+                if (!isInitialLetterLoad && !knownLetterIds.has(key)) {
+                    hasNewLetter = true;
+                }
             });
             allLetters.reverse();
         }
+
+        if (hasNewLetter && isAdmin && !isSubmitting) {
+            sendNotification("수평선 너머의 서재", "바다 위로 새로운 편지가 띄워졌습니다.");
+        }
+
+        knownLetterIds = currentIds;
+        isInitialLetterLoad = false;
+
         if(currentView === 'letters') renderUI();
     });
 }
