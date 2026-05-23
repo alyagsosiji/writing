@@ -715,10 +715,11 @@ function renderUI() {
             }
         }
 
-        const formattedDate = formatTo24Hour(item.date);
-        const authorName = loggedInUser ? loggedInUser : "기록자";
-        const displayDate = (currentView === 'posts') ? `${authorName} ㅣ ${formattedDate}` : formattedDate;
-
+   const formattedDate = formatTo24Hour(item.date);
+        // 데이터베이스에 저장된 작성자 닉네임을 가져옵니다. (예전 글은 '기록자'로 표시)
+        const authorName = item.author ? item.author : "기록자";
+        // 요청하신 '닉 | 날짜. 시간.' 포맷으로 변경
+        const displayDate = (currentView === 'posts') ? `${authorName} | ${formattedDate}` : formattedDate;
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
             <div class="post-content-area">${escapeHtml(item.content)}</div>
