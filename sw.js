@@ -19,7 +19,7 @@ self.addEventListener('notificationclick', function(event) {
         })
     );
 });
-const CACHE_NAME = 'we-v2'; // 코드가 대폭 수정되었으므로 버전을 v2로 격상합니다.
+const CACHE_NAME = 'writing-v2'; // 코드가 대폭 수정되었으므로 버전을 v2로 격상합니다.
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
