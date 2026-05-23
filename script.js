@@ -538,7 +538,7 @@ function savePost() {
                 titleInput.value = '';
                 contentInput.value = '';
                 currentPage = 1;
-                showSystemAlert('수평선 너머 바다에 새로운 기록이'+\n+'성공적으로 새겨졌습니다.');
+                showSystemAlert('수평선 너머 바다에 새로운 기록이 성공적으로 새겨졌습니다.');
             }).catch(err => showSystemAlert("기록 오류: " + err.message))
             .finally(() => { isSubmitting = false; }); 
     }
