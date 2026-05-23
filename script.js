@@ -817,7 +817,8 @@ function savePost() {
     }
 
     isSubmitting = true; 
-    const postData = { title: title, content: content, date: date };
+    // 글 데이터에 로그인한 작성자의 닉네임(author)을 함께 저장합니다.
+    const postData = { title: title, content: content, date: date, author: loggedInUser };
 
     if (editTargetKey) {
         database.ref('posts/' + editTargetKey).update(postData)
