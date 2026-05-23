@@ -627,7 +627,7 @@ function restoreFromTargetBackupPoint(key) {
                 });
             }).catch(err => {
                 isInternalSyncAction = false;
-                showSystemAlert('타임라인 인젝션 주입 실패: ' + err.message);
+                showSystemAlert('타임라인 인젝션 주입 실패 : ' + err.message);
             });
         });
     });
