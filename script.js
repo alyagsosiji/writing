@@ -1,5 +1,5 @@
 // ==========================================
-// 🔔 0-A. 모바일 및 PC 알림 커스텀 설정 항목 (이곳에서 제목, 내용, 아이콘을 수정하세요)
+// 🔔 0-A. 모바일 및 PC 알림 커스텀 설정 항목
 // ==========================================
 const NOTIFICATION_CONFIG = {
     postTitle: "수평선 너머의 서재",
@@ -8,7 +8,7 @@ const NOTIFICATION_CONFIG = {
     letterBody: "수평선 너머, 바다 위로 새로운 편지가 띄워졌습니다.",
     icon: "하은.jpg",                         // 알림에 표시될 팝업 이미지 경로
     badge: "하은.jpg",                        // 모바일 상단 상태바에 표시될 작은 아이콘 경로
-    vibrate: [200, 100, 200]                 // 모바일 알림 진동 패턴 (진동-쉬고-진동 밀리초 단위)
+    vibrate: [200, 100, 200]                 // 모바일 알림 진동 패턴
 };
 
 // ==========================================
@@ -40,7 +40,6 @@ function requestNotificationPermission() {
 function sendNotification(title, body) {
     if (!("Notification" in window)) return;
     if (Notification.permission === "granted") {
-        // 모바일 브라우저 최적화 서비스 워커 알림 엔진 적용
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then(function(registration) {
                 registration.showNotification(title, {
@@ -84,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (localStorage.getItem('isAdminLoggedIn') === 'true') {
             isAdmin = true;
-            loggedInUser = localStorage.getItem('loggedInUser') || ''; // 복구 시 변수에 주입
+            loggedInUser = localStorage.getItem('loggedInUser') || ''; 
             requestNotificationPermission(); 
         }
 
@@ -197,7 +196,6 @@ const secureConfig = {
     measurementId: atob("Ry0zRU03OTQ3OUpU")
 };
 
-// 🔒 보안 주석 유출 흔적 전면 소멸 완료
 const secureAdmin = {
     id: decodeData("7JWE7Iuc"), 
     pw: atob("YXNoaSMyNjA0MTY=")        
@@ -215,7 +213,6 @@ try {
     console.error("Firebase 초기화 중 에러 발생 : ", error);
 }
 
-// ⚠️ 글 목록이 멈추는 에러 원인 해결 (loggedInUser 전역변수 선언)
 let isAdmin = false;
 let loggedInUser = ''; 
 let currentView = 'posts'; 
@@ -228,6 +225,9 @@ let editTargetKey = null;
 let searchKeyword = ''; 
 
 let isSubmitting = false;
+
+// 실시간 자동 클라우드 분산 백업 가동 통제 스위치
+let isInternalSyncAction = false; 
 
 function showSystemAlert(message, callback) {
     const titleElem = document.getElementById('system-title');
@@ -298,6 +298,20 @@ function closeDetailModal() {
     if (modal) modal.style.display = 'none'; 
 }
 
+function openBackupModal() {
+    if (!isAdmin) return;
+    const modal = document.getElementById('backup-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        loadBackupTimelineList();
+    }
+}
+
+function closeBackupModal() {
+    const modal = document.getElementById('backup-modal');
+    if (modal) modal.style.display = 'none';
+}
+
 function login() {
     const idElem = document.getElementById('admin-id');
     const pwElem = document.getElementById('admin-pw');
@@ -318,7 +332,7 @@ function login() {
 
     if (tempUser) {
         isAdmin = true;
-        loggedInUser = tempUser; // 전역변수 업데이트
+        loggedInUser = tempUser; 
         localStorage.setItem('isAdminLoggedIn', 'true');
         localStorage.setItem('loggedInUser', loggedInUser);
         
@@ -338,7 +352,7 @@ function login() {
 
 function logout() {
     isAdmin = false;
-    loggedInUser = ''; // 전역변수 초기화
+    loggedInUser = ''; 
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('loggedInUser');
     cancelEdit();
@@ -353,7 +367,8 @@ function updateUI() {
     const loginBtn = document.getElementById('login-btn');
     const adminMenu = document.getElementById('admin-menu');
     const tabContainer = document.getElementById('view-tab-container');
-    const currentUserBtn = document.getElementById('current-user-btn'); // 접속 계정 버튼 가져오기
+    const currentUserBtn = document.getElementById('current-user-btn'); 
+    const backupTrigger = document.getElementById('mini-backup-trigger');
 
     if (isAdmin) {
         if (writeSection) writeSection.style.display = 'block';
@@ -361,7 +376,8 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'none';
         if (adminMenu) adminMenu.style.display = 'flex'; 
         if (tabContainer) tabContainer.style.display = 'flex'; 
-        if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; // 버튼에 접속 계정명 주입
+        if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
+        if (backupTrigger) backupTrigger.style.display = 'flex'; 
         switchView(currentView);
     } else {
         if (writeSection) writeSection.style.display = 'none';
@@ -369,6 +385,7 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'inline-block';
         if (adminMenu) adminMenu.style.display = 'none';
         if (tabContainer) tabContainer.style.display = 'none'; 
+        if (backupTrigger) backupTrigger.style.display = 'none'; 
         switchView('posts'); 
     }
 }
@@ -407,15 +424,16 @@ function handleSearch() {
 }
 
 // ==========================================
-// 🔥 알림 연동형 실시간 리스너 엔진 
+// 🔥 백업 및 알림 통합 연동형 실시간 리스너 엔진 
 // ==========================================
-let knownPostIds = new Set();
-let isInitialPostLoad = true;
+let rawPostsSnapshot = null;
+let rawLettersSnapshot = null;
 
 function listenPosts() {
     if (!database) return;
     database.ref('posts').on('value', (snapshot) => {
-        const postsData = snapshot.val();
+        rawPostsSnapshot = snapshot.val();
+        const postsData = rawPostsSnapshot;
         allPosts = [];
         let currentIds = new Set();
         let hasNewPost = false;
@@ -429,6 +447,11 @@ function listenPosts() {
                 }
             });
             allPosts.reverse(); 
+        }
+
+        // 데이터가 변경되었고 내부 복구 절차가 아닐 경우 클라우드 분산 백업 가동
+        if (!isInitialPostLoad && !isInternalSyncAction) {
+            executeCloudBackupEngine(true);
         }
 
         if (hasNewPost && isAdmin && !isSubmitting) {
@@ -448,7 +471,8 @@ let isInitialLetterLoad = true;
 function listenLetters() {
     if (!database) return;
     database.ref('letters').on('value', (snapshot) => {
-        const lettersData = snapshot.val();
+        rawLettersSnapshot = snapshot.val();
+        const lettersData = rawLettersSnapshot;
         allLetters = [];
         let currentIds = new Set();
         let hasNewLetter = false;
@@ -464,6 +488,10 @@ function listenLetters() {
             allLetters.reverse();
         }
 
+        if (!isInitialLetterLoad && !isInternalSyncAction) {
+            executeCloudBackupEngine(true);
+        }
+
         if (hasNewLetter && isAdmin && !isSubmitting) {
             sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         }
@@ -472,6 +500,136 @@ function listenLetters() {
         isInitialLetterLoad = false;
 
         if(currentView === 'letters') renderUI();
+    });
+}
+
+// ==========================================
+// 💾 클라우드 연동 타임라인 복구 분산 엔진 (30일 보존 정책 내장)
+// ==========================================
+const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000; // 정확히 30일 환산 밀리초
+
+function executeCloudBackupEngine(isAutomatic = true) {
+    if (!database) return;
+    
+    const now = new Date();
+    const timestamp = now.getTime();
+    const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    
+    const backupPack = {
+        timestamp: timestamp,
+        date: dateString,
+        type: isAutomatic ? "자동" : "수동",
+        posts: rawPostsSnapshot || {},
+        letters: rawLettersSnapshot || {}
+    };
+
+    // 1. 실시간 클라우드 타임라인에 삽입
+    database.ref('backups').push(backupPack).then(() => {
+        // 2. 상시 무결성 유지 보수를 위한 30일 만료 파편 영구 소멸 청소 가동
+        cleanExpiredBackupsTimeline();
+    });
+}
+
+function cleanExpiredBackupsTimeline() {
+    if (!database) return;
+    const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
+
+    database.ref('backups').once('value', (snapshot) => {
+        const backups = snapshot.val();
+        if (!backups) return;
+
+        Object.keys(backups).forEach((key) => {
+            if (backups[key].timestamp < expirationThreshold) {
+                database.ref(`backups/${key}`).remove(); // 30일 경과 파편 제거
+            }
+        });
+    });
+}
+
+function triggerManualBackup() {
+    if (!isAdmin) return;
+    executeCloudBackupEngine(false);
+    showSystemAlert('현재 바다의 모든 상태 스냅샷을 안전하게 기록하여 복구 시점을 영구 보존했습니다.');
+    loadBackupTimelineList();
+}
+
+function loadBackupTimelineList() {
+    const container = document.getElementById('backup-list-container');
+    const loadingMsg = document.getElementById('backup-loading-msg');
+    if (!container || !database) return;
+
+    container.innerHTML = '';
+    if (loadingMsg) loadingMsg.style.display = 'block';
+
+    const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
+
+    database.ref('backups').once('value', (snapshot) => {
+        if (loadingMsg) loadingMsg.style.display = 'none';
+        const backups = snapshot.val();
+
+        if (!backups) {
+            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">아직 보존된 복구 타임라인 시점이 없습니다.</p>`;
+            return;
+        }
+
+        const timelineKeys = Object.keys(backups).reverse(); // 최신 지점순 정렬
+        let loadedItemsCount = 0;
+
+        timelineKeys.forEach((key) => {
+            const item = backups[key];
+            if (item.timestamp < expirationThreshold) return; // 만기 파편 배제
+
+            loadedItemsCount++;
+            const pCount = item.posts ? Object.keys(item.posts).length : 0;
+            const lCount = item.letters ? Object.keys(item.letters).length : 0;
+            const badgeClass = item.type === "자동" ? "auto" : "manual";
+
+            const element = document.createElement('div');
+            element.className = 'backup-item';
+            element.innerHTML = `
+                <div class="backup-meta">
+                    <div class="backup-time-title">
+                        ${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span>
+                    </div>
+                    <div class="backup-counts">글 기록 ${pCount}개 ㅣ 편지 데이터 ${lCount}개</div>
+                </div>
+                <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px;">복구</button>
+            `;
+            container.appendChild(element);
+        });
+
+        if (loadedItemsCount === 0) {
+            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">30일 이내 유효한 복구 지점이 존재하지 않습니다.</p>`;
+        }
+    });
+}
+
+function restoreFromTargetBackupPoint(key) {
+    if (!isAdmin || !database) return;
+
+    showSystemConfirm('선택하신 시점의 복구 스냅샷을 가동하여 현재 바다를 완전 동기화 복구하시겠습니까? 현재 바다 데이터는 덮어씌워집니다.', function() {
+        database.ref(`backups/${key}`).once('value', (snapshot) => {
+            const targetBackup = snapshot.val();
+            if (!targetBackup) {
+                showSystemAlert('해당 세이브 파일이 유효하지 않거나 이미 만료 소멸되었습니다.');
+                return;
+            }
+
+            isInternalSyncAction = true; // 무한 백업 루프 방지 잠금 활성화
+
+            Promise.all([
+                database.ref('posts').set(targetBackup.posts || null),
+                database.ref('letters').set(targetBackup.letters || null)
+            ]).then(() => {
+                showSystemAlert('수평선 너머 바다가 선택한 복구 시점 타임라인 상태로 완전 복원되었습니다.', function() {
+                    isInternalSyncAction = false;
+                    closeBackupModal();
+                });
+            }).catch(err => {
+                isInternalSyncAction = false;
+                showSystemAlert('타임라인 인젝션 주입 실패: ' + err.message);
+            });
+        });
     });
 }
 
@@ -545,8 +703,6 @@ function renderUI() {
         }
 
         const formattedDate = formatTo24Hour(item.date);
-        
-        // ⚠️ 비로그인 유저가 접근할 때 에러가 나지 않도록 유연한 처리 반영
         const authorName = loggedInUser ? loggedInUser : "기록자";
         const displayDate = (currentView === 'posts') ? `${authorName} ㅣ ${formattedDate}` : formattedDate;
 
@@ -777,7 +933,7 @@ function clearDatabase() {
                 ]).then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    showSystemAlert('수평선 너머 바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                    showSystemAlert('수평선 너머 바자가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
                 }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
