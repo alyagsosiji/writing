@@ -12,7 +12,7 @@ const NOTIFICATION_CONFIG = {
 };
 
 // ==========================================
-// 🎵 0-B. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙)
+// 🎵 0-B. 음악 재생 목록 설정 배열
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
+        checkAndTriggerDailyBackup(); // 🚨 [누락 복구] 1일 자동 백업 스케줄러 재탑재!
         updateUI(); 
     } catch (e) {
         console.error("엔진 로딩 예외 발생 : ", e);
@@ -91,10 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
 let newWorker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('firebase-messaging-sw.js').then((reg) => {
+        navigator.serviceWorker.register('firebase-messaging-sw.js', { scope: './' }).then((reg) => {
             console.log('PWA 및 모바일 알림 통합 인프라 가동 완료:', reg.scope);
             
-            // ⭐ [핵심 추가] 깃허브 하위 경로(/writing/)에서도 알림 기능이 작동하도록 우체부를 강제 매핑합니다.
             if (typeof firebase !== 'undefined' && firebase.messaging) {
                 firebase.messaging().useServiceWorker(reg);
             }
@@ -120,7 +120,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// 팝업 버튼 이벤트 리스너 세팅
 document.addEventListener('DOMContentLoaded', () => {
     const reloadBtn = document.getElementById('update-reload-btn');
     const dismissBtn = document.getElementById('update-dismiss-btn');
@@ -211,10 +210,10 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmBiYXNlc3RvcmFnZS5hcHA="),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
@@ -228,7 +227,7 @@ const secureAdmin = {
 let database = null;
 try {
     if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(secureConfig); // 🚨 [긴급 수리] 빠졌던 초기화 코드 삽입 완료!
+        firebase.initializeApp(secureConfig); 
         database = firebase.database();
     } else {
         console.error("Firebase SDK가 로드되지 않았습니다.");
@@ -435,6 +434,9 @@ function listenLetters() {
     });
 }
 
+// ==========================================
+// 💾 클라우드 연동 타임라인 복구 분산 엔진
+// ==========================================
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
 function executeCloudBackupEngine(isAutomatic = true) {
@@ -454,9 +456,28 @@ function cleanExpiredBackupsTimeline() {
     });
 }
 
+// 🚨 [누락 복구] 1일 주기 정밀 시점 대조 및 자동 백업 가동 스케줄러
+function checkAndTriggerDailyBackup() {
+    if (!database) return;
+    database.ref('backups').orderByChild('timestamp').limitToLast(1).once('value').then((snapshot) => {
+        let lastBackupTimestamp = 0;
+        if (snapshot.exists()) {
+            snapshot.forEach((child) => {
+                lastBackupTimestamp = child.val().timestamp || 0;
+            });
+        }
+        const now = new Date().getTime();
+        const ONE_DAY = 24 * 60 * 60 * 1000; // 24시간
+        
+        if (now - lastBackupTimestamp >= ONE_DAY) {
+            console.log("[스케줄러] 마지막 안전 백업 지점으로부터 1일이 경과하여 일일 자동 백업을 집행합니다.");
+            executeCloudBackupEngine(true);
+        }
+    }).catch(err => console.error("일일 정기 백업 프로세스 조회 실패:", err));
+}
+
 function triggerManualBackup() { if (!isAdmin) return; executeCloudBackupEngine(false); showSystemAlert('모든 상태 스냅샷을 안전하게 기록했습니다.'); loadBackupTimelineList(); }
 
-// [기본 UI 렌더링 소스 유지]
 function loadBackupTimelineList() {
     const container = document.getElementById('backup-list-container'); if (!container || !database) return; container.innerHTML = '';
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
