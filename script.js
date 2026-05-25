@@ -5,7 +5,7 @@ const NOTIFICATION_CONFIG = {
     postTitle: "수평선 너머의 서재",
     postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
     letterTitle: "수평선 너머의 서재",
-    letterBody: "수평선 너머, 바다 위로 새로운 편지가 띄워졌습니다.",
+    letterBody: "새로운 편기가 수평선 너머, 바다 위로 띄워졌습니다.",
     icon: "하은.jpg",                         
     badge: "하은.jpg",                        
     vibrate: [200, 100, 200]                 
