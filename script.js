@@ -24,37 +24,37 @@ let isTrackPlaying = false;
 let audioEngine = new Audio();
 
 // ==========================================
-// 🔔 0-C. 푸시 알림 및 브라우저 알림 권한 시스템
+// 🔔 0-C. 푸시 알림 및 브라우저 알림 권한 시스템 (FCM 버전)
 // ==========================================
 function requestNotificationPermission() {
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                sendNotification(NOTIFICATION_CONFIG.postTitle, "알림이 성공적으로 활성화되었습니다.");
-            }
-        });
-    }
+    if (!("Notification" in window) || !database) return;
+    
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            console.log('알림 권한 허용됨. 토큰 발급 시작...');
+            const messaging = firebase.messaging();
+            
+            // 💡 주의: '여기에_복사한_VAPID_키를_넣으세요' 부분을 1단계에서 얻은 키로 반드시 교체하세요!
+            messaging.getToken({ vapidKey: 'dfa71344db168067ec27134b0e3c8260a2d88ac0' })
+                .then((currentToken) => {
+                    if (currentToken) {
+                        console.log('발급된 기기 토큰:', currentToken);
+                        // 이 기기의 토큰을 데이터베이스에 저장하여, 나중에 서버가 이 주소로 알림을 쏠 수 있게 함
+                        database.ref('fcmTokens/' + loggedInUser).set(currentToken);
+                    } else {
+                        console.log('토큰 발급 실패: 권한이 부족합니다.');
+                    }
+                }).catch((err) => {
+                    console.log('토큰 가져오기 에러:', err);
+                });
+        }
+    });
 }
 
+// 이 함수는 화면이 켜져 있을 때(포그라운드) 처리할 용도로 남겨둡니다.
 function sendNotification(title, body) {
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "granted") {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(function(registration) {
-                registration.showNotification(title, {
-                    body: body,
-                    icon: NOTIFICATION_CONFIG.icon,
-                    badge: NOTIFICATION_CONFIG.badge,
-                    vibrate: NOTIFICATION_CONFIG.vibrate
-                });
-            }).catch(function() {
-                new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
-            });
-        } else {
-            new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
-        }
-    }
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
 }
 
 // ==========================================
