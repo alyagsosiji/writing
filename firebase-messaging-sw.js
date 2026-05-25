@@ -7,6 +7,7 @@ const ASSETS_TO_CACHE = [
     'index.html',
     'style.css',
     'script.js',
+    'manifest.json', /* 🚨 [핵심 수정] 이게 있어야 웹앱 설치가 뜹니다! */
     '글_하은.jpg',
     '멘헤라_하은.jpg'
 ];
@@ -96,12 +97,13 @@ self.addEventListener('fetch', (event) => {
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
+// 🚨 [핵심 수정] firbase 오타 완전 교정 완료 (authDomain, storageBucket)
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmBiYXNlc3RvcmFnZS5hcHA="),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
