@@ -10,7 +10,7 @@ const NOTIFICATION_CONFIG = {
     badge: "하은.jpg",                        
     vibrate: [200, 100, 200]                 
 };
-//.
+
 // ==========================================
 // 🎵 0-B. 음악 재생 목록 설정 배열 (아시님 커스텀 트랙)
 // ==========================================
@@ -97,6 +97,15 @@ document.addEventListener('DOMContentLoaded', function() {
         hideLoadingScreen();
     }
 });
+
+// PWA 서비스 워커 안전 등록 (로드 시점)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then((reg) => console.log('PWA 서비스 워커 안전 등록 완료:', reg.scope))
+            .catch((err) => console.error('서비스 워커 등록 실패:', err));
+    });
+}
 
 function initMusicPlayerEngine() {
     if (MY_MUSIC_LIST.length === 0) return;
@@ -223,7 +232,6 @@ let allPosts = [];
 let allLetters = []; 
 let editTargetKey = null; 
 let searchKeyword = ''; 
-
 let isSubmitting = false;
 
 // 실시간 자동 분산 복구 백업 시스템 제어용 인터셉터 잠금 플래그
@@ -429,6 +437,7 @@ function handleSearch() {
 let rawPostsSnapshot = null;
 let rawLettersSnapshot = null;
 let isInitialPostLoad = true;
+let knownPostIds = new Set();
 
 function listenPosts() {
     if (!database) return;
@@ -450,7 +459,6 @@ function listenPosts() {
             allPosts.reverse(); 
         }
 
-        // 💾 [실시간 변동 추적 무결성 자동 백업 엔진]
         if (!isInitialPostLoad && !isInternalSyncAction) {
             executeCloudBackupEngine(true);
         }
@@ -489,7 +497,6 @@ function listenLetters() {
             allLetters.reverse();
         }
 
-        // 💾 [실시간 변동 추적 무결성 자동 백업 엔진]
         if (!isInitialLetterLoad && !isInternalSyncAction) {
             executeCloudBackupEngine(true);
         }
@@ -506,9 +513,9 @@ function listenLetters() {
 }
 
 // ==========================================
-// 💾 클라우드 연동 타임라인 복구 분산 엔진 (30일 보존 정책 완벽 내장)
+// 💾 클라우드 연동 타임라인 복구 분산 엔진
 // ==========================================
-const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000; // 30일 환산 밀리초
+const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000; // 30일
 
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
@@ -553,7 +560,6 @@ function triggerManualBackup() {
     loadBackupTimelineList();
 }
 
-// 🛠️ [중요] 완벽한 예외처리(Promise) 구조로 개편된 리스트 로드 엔진 (호출 중 멈춤 버그 완전 해결)
 function loadBackupTimelineList() {
     const container = document.getElementById('backup-list-container');
     const loadingMsg = document.getElementById('backup-loading-msg');
@@ -564,7 +570,6 @@ function loadBackupTimelineList() {
 
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
 
-    // 규칙 오류 및 프리징 대지 차단을 위해 프로미스 엔진 사용
     database.ref('backups').once('value')
         .then((snapshot) => {
             if (loadingMsg) loadingMsg.style.display = 'none';
@@ -626,7 +631,7 @@ function restoreFromTargetBackupPoint(key) {
                 return;
             }
 
-            isInternalSyncAction = true; // 무한 자동 백업 연쇄 루프 차단락 가동
+            isInternalSyncAction = true; 
 
             Promise.all([
                 database.ref('posts').set(targetBackup.posts || null),
@@ -715,11 +720,10 @@ function renderUI() {
             }
         }
 
-   const formattedDate = formatTo24Hour(item.date);
-        // 데이터베이스에 저장된 작성자 닉네임을 가져옵니다. (예전 글은 '기록자'로 표시)
+        const formattedDate = formatTo24Hour(item.date);
         const authorName = item.author ? item.author : "기록자";
-        // 요청하신 '닉 | 날짜. 시간.' 포맷으로 변경
         const displayDate = (currentView === 'posts') ? `${authorName} | ${formattedDate}` : formattedDate;
+        
         card.innerHTML = `
             <h3>${escapeHtml(item.title)}</h3>
             <div class="post-content-area">${escapeHtml(item.content)}</div>
@@ -818,7 +822,6 @@ function savePost() {
     }
 
     isSubmitting = true; 
-    // 글 데이터에 로그인한 작성자의 닉네임(author)을 함께 저장합니다.
     const postData = { title: title, content: content, date: date, author: loggedInUser };
 
     if (editTargetKey) {
@@ -845,6 +848,7 @@ function saveLetter() {
 
     const titleInput = document.getElementById('letter-title');
     const contentInput = document.getElementById('letter-content');
+    const agreeCheckbox = document.getElementById('agree-terms'); // 추가된 체크박스 감지
 
     if (!titleInput || !contentInput) return;
 
@@ -859,6 +863,12 @@ function saveLetter() {
         return;
     }
 
+    // 약관 동의 검증
+    if (agreeCheckbox && !agreeCheckbox.checked) {
+        showSystemAlert('편지를 보내기 전, 안내 및 약관에 동의해주세요.');
+        return;
+    }
+
     isSubmitting = true; 
     const letterData = { title: title, content: content, date: date };
 
@@ -866,6 +876,7 @@ function saveLetter() {
         .then(() => {
             titleInput.value = '';
             contentInput.value = '';
+            if (agreeCheckbox) agreeCheckbox.checked = false; // 전송 완료 후 체크 해제
             showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머, 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
@@ -948,7 +959,7 @@ function clearDatabase() {
                 ]).then(() => {
                     cancelEdit();
                     currentPage = 1;
-                    showSystemAlert('수평선 너머 바자가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
+                    showSystemAlert('수평선 너머 바다가 완전히 정화되어 공백의 초기 상태가 되었습니다.');
                 }).catch((error) => showSystemAlert('초기화 실패 : ' + error.message));
             });
         }, 150);
