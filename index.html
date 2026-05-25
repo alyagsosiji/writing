@@ -66,7 +66,7 @@
 
         <header>
             <h1 class="main-title">수평선 너머의 서재</h1>
-            <p class="subtitle">노을지는 수평선 너머 서재 그 바다 속의 기록들</p>
+            <p class="subtitle">노을지는 수평선 너머의 서재 그 바다 속의 기록들</p>
             <div class="auth-box">
                 <div class="auth-flex">
                     <button id="login-btn" onclick="openModal()">기록자 로그인</button>
@@ -121,9 +121,23 @@
             <section id="posts-section">
                 <h1 id="section-main-title" class="centered-title">기록된 바다</h1><br>
                 <p class="section-subtitle">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</p><br>
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="기록의 제목을 검색해보세요!" oninput="handleSearch()">
+                
+                <div class="search-wrapper">
+                    <div id="author-stats" class="author-stats" style="display: none;"></div>
+                    
+                    <div class="search-container">
+                        <input type="text" id="search-input" placeholder="기록의 제목을 검색해보세요!" oninput="handleSearch()">
+                    </div>
+                    
+                    <div id="author-filter-container" class="author-filter-container" style="display: none;">
+                        <select id="author-filter" onchange="handleSearch()">
+                            <option value="all">전체 보기</option>
+                            <option value="아시">아시 님</option>
+                            <option value="하은">하은 님</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div id="posts-container" class="posts-grid"></div>
                 <div id="pagination-container" class="pagination"></div>
             </section>
