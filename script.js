@@ -651,6 +651,17 @@ function restoreFromTargetBackupPoint(key) {
     });
 }
 
+function scrollToPosts() {
+    const postsSection = document.getElementById('posts-section');
+    if (postsSection) {
+        // 여백 확보를 위해 타이틀보다 40px 높은 위치로 스크롤합니다.
+        const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40;
+        window.scrollTo({ top: yOffset, behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
 // ==========================================
 // 7. UI 데이터 렌더링 엔진 (실시간 개수 동적 인젝션)
 // ==========================================
@@ -751,8 +762,8 @@ function renderUI() {
             prevBtn.innerHTML = '&#139;';
             prevBtn.onclick = () => {
                 currentPage--;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 renderUI();
+                scrollToPosts(); // 변경된 스크롤 로직 적용
             };
             paginationContainer.appendChild(prevBtn);
         }
@@ -763,8 +774,8 @@ function renderUI() {
             btn.innerText = i;
             btn.onclick = () => {
                 currentPage = i;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 renderUI();
+                scrollToPosts(); // 변경된 스크롤 로직 적용
             };
             paginationContainer.appendChild(btn);
         }
@@ -775,8 +786,8 @@ function renderUI() {
             nextBtn.innerHTML = '&#155;';
             nextBtn.onclick = () => {
                 currentPage++;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
                 renderUI();
+                scrollToPosts(); // 변경된 스크롤 로직 적용
             };
             paginationContainer.appendChild(nextBtn);
         }
