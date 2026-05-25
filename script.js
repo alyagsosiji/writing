@@ -352,7 +352,10 @@ function closeModal() {
 
 function closeDetailModal() { 
     const modal = document.getElementById('detail-modal');
-    if (modal) modal.style.display = 'none'; 
+    if (modal) {
+        modal.style.display = 'none'; 
+        document.body.classList.remove('no-scroll'); // 💡 배경 스크롤 잠금 해제
+    }
 }
 
 function openBackupModal() {
@@ -900,10 +903,14 @@ function openDetailModal(key) {
     const textElem = document.getElementById('detail-text');
     const modalElem = document.getElementById('detail-modal');
 
-    if (titleElem) titleElem.innerText = item.title;
+    if (titleElem) titleElem.innerHTML = escapeHtml(item.title);
     if (dateElem) dateElem.innerText = formatTo24Hour(item.date);
-    if (textElem) textElem.innerText = item.content;
-    if (modalElem) modalElem.style.display = 'flex';
+    if (textElem) textElem.innerHTML = escapeHtml(item.content); 
+    
+    if (modalElem) {
+        modalElem.style.display = 'flex';
+        document.body.classList.add('no-scroll'); // 💡 배경 스크롤 잠금
+    }
 }
 
 function savePost() {
