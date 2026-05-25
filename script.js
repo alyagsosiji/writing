@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
-        checkAndTriggerDailyBackup(); // 🚨 [누락 복구] 1일 자동 백업 스케줄러 재탑재!
+        checkAndTriggerDailyBackup(); 
         updateUI(); 
     } catch (e) {
         console.error("엔진 로딩 예외 발생 : ", e);
@@ -434,9 +434,6 @@ function listenLetters() {
     });
 }
 
-// ==========================================
-// 💾 클라우드 연동 타임라인 복구 분산 엔진
-// ==========================================
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
 function executeCloudBackupEngine(isAutomatic = true) {
@@ -456,7 +453,6 @@ function cleanExpiredBackupsTimeline() {
     });
 }
 
-// 🚨 [누락 복구] 1일 주기 정밀 시점 대조 및 자동 백업 가동 스케줄러
 function checkAndTriggerDailyBackup() {
     if (!database) return;
     database.ref('backups').orderByChild('timestamp').limitToLast(1).once('value').then((snapshot) => {
@@ -467,7 +463,7 @@ function checkAndTriggerDailyBackup() {
             });
         }
         const now = new Date().getTime();
-        const ONE_DAY = 24 * 60 * 60 * 1000; // 24시간
+        const ONE_DAY = 24 * 60 * 60 * 1000; 
         
         if (now - lastBackupTimestamp >= ONE_DAY) {
             console.log("[스케줄러] 마지막 안전 백업 지점으로부터 1일이 경과하여 일일 자동 백업을 집행합니다.");
@@ -556,15 +552,23 @@ function renderUI() {
         container.appendChild(card);
     });
 
+    // 🚨 페이지 버튼 5개씩 노출 제한 로직 적용 
     if (totalPages > 1) {
         if (currentPage > 1) {
             const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
             prevBtn.onclick = () => { currentPage--; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(prevBtn);
         }
-        for (let i = 1; i <= totalPages; i++) {
+        
+        const maxPageButtons = 5; // 5개 묶음으로 제한!
+        const currentGroup = Math.ceil(currentPage / maxPageButtons);
+        let startPage = (currentGroup - 1) * maxPageButtons + 1;
+        let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
+        
+        for (let i = startPage; i <= endPage; i++) {
             const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i;
             btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn);
         }
+        
         if (currentPage < totalPages) {
             const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;';
             nextBtn.onclick = () => { currentPage++; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(nextBtn);
