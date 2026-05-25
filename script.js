@@ -552,26 +552,39 @@ function renderUI() {
         container.appendChild(card);
     });
 
-    // 🚨 페이지 버튼 5개씩 노출 제한 로직 적용 
+    // 🚨 화살표 클릭 시 5페이지 단위 첫 장/끝 장으로 넘어가도록 로직 업그레이드
     if (totalPages > 1) {
-        if (currentPage > 1) {
-            const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
-            prevBtn.onclick = () => { currentPage--; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(prevBtn);
-        }
-        
-        const maxPageButtons = 5; // 5개 묶음으로 제한!
+        const maxPageButtons = 5; // 5개 묶음 기준
         const currentGroup = Math.ceil(currentPage / maxPageButtons);
         let startPage = (currentGroup - 1) * maxPageButtons + 1;
         let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
         
+        // 왼쪽 화살표: 이전 5개 묶음이 있을 때만 표시 -> 클릭 시 이전 묶음의 마지막 페이지로 이동
+        if (startPage > 1) {
+            const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
+            prevBtn.onclick = () => { 
+                currentPage = startPage - 1; // 이전 그룹의 마지막 페이지 (예: 5페이지)
+                renderUI(); 
+                scrollToPosts(); 
+            }; 
+            paginationContainer.appendChild(prevBtn);
+        }
+        
+        // 현재 그룹의 페이지 번호 나열 (예: 1, 2, 3, 4, 5)
         for (let i = startPage; i <= endPage; i++) {
             const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i;
             btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn);
         }
         
-        if (currentPage < totalPages) {
+        // 오른쪽 화살표: 다음 5개 묶음이 있을 때만 표시 -> 클릭 시 다음 묶음의 첫 페이지로 이동
+        if (endPage < totalPages) {
             const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;';
-            nextBtn.onclick = () => { currentPage++; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(nextBtn);
+            nextBtn.onclick = () => { 
+                currentPage = endPage + 1; // 다음 그룹의 첫 페이지 (예: 6페이지)
+                renderUI(); 
+                scrollToPosts(); 
+            }; 
+            paginationContainer.appendChild(nextBtn);
         }
     }
 }
