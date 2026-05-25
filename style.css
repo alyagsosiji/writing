@@ -219,16 +219,20 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 .stat-badge {
     background: rgba(0, 180, 216, 0.08); border: 1px solid rgba(0, 180, 216, 0.25);
-    color: #90e0ef; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; letter-spacing: 0.5px;
+    color: #90e0ef; padding: 0 18px; border-radius: 25px; font-size: 0.85rem; letter-spacing: 0.5px;
+    height: 44px; /* 높이 완벽 통일 */
+    display: flex; align-items: center; justify-content: center; /* 텍스트 수직 중앙 정렬 */
 }
 
 /* 중앙 검색창 */
 .search-container { 
     flex-grow: 1; max-width: 450px; 
+    padding: 0; margin: 0; /* 어긋남을 유발하던 기존 여백 제거 */
 }
 #search-input {
-    width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
-    border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.25s ease;
+    width: 100%; height: 44px; /* 높이 완벽 통일 */
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
+    border-radius: 25px; padding: 0 20px; color: #fff; font-size: 0.9rem; outline: none; text-align: center; transition: all 0.25s ease;
 }
 #search-input:focus {
     border-color: #00b4d8; background: rgba(3, 10, 23, 0.85); box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
@@ -238,6 +242,14 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 .author-filter-container {
     flex-shrink: 0;
 }
+#author-filter {
+    height: 44px; /* 높이 완벽 통일 */
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
+    color: #e2e8f0; padding: 0 16px 0 20px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
+    transition: all 0.25s ease;
+}
+#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
+#author-filter option { background: #030a16; color: #fff; }
 #author-filter {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
     color: #e2e8f0; padding: 11px 16px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
