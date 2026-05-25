@@ -95,7 +95,41 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
-// 업데이트 알림창에서 '새로고침' 클릭 시 즉시 활성화
+javascript
+importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
+
+// script.js에 있던 암호화된 Firebase 접속 정보를 똑같이 가져옵니다.
+const secureConfig = {
+    apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlYXBwLmNvbQ=="),
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
+    projectId: atob("c3Rhci1ib2Nr"),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
+    messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
+    appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
+    measurementId: atob("Ry0zRU03OTQ3OUpU")
+};
+
+firebase.initializeApp(secureConfig);
+const messaging = firebase.messaging();
+
+// 💡 백그라운드 상태(앱이 꺼져있을 때)에서 알림을 수신하는 엔진
+messaging.onBackgroundMessage((payload) => {
+    console.log('[sw.js] 백그라운드 푸시 알림 수신: ', payload);
+
+    const notificationTitle = payload.notification.title || "수평선 너머의 서재";
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: "하은.jpg",
+        badge: "하은.jpg",
+        vibrate: [200, 100, 200]
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// 앞서 추가했던 업데이트 새로고침 기능 유지
 self.addEventListener('message', (event) => {
     if (event.data && event.data.action === 'skipWaiting') {
         self.skipWaiting();
