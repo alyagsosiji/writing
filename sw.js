@@ -95,3 +95,9 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
+// 업데이트 알림창에서 '새로고침' 클릭 시 즉시 활성화
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
+});
