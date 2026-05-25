@@ -330,6 +330,17 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
     .backup-core-icon { width: 32px; height: 32px; }
     
     #write-section, #letter-section { padding: 20px; }
+
+    /* 모바일 환경: 작성자 뱃지를 검색창 위로, 필터는 검색창 옆이나 아래로 재배치 */
+    .search-wrapper {
+        flex-direction: column; gap: 12px; align-items: stretch; max-width: 100%; margin-bottom: 30px;
+    }
+    .author-stats { 
+        justify-content: center; order: -1; /* 검색창보다 무조건 위로 끌어올림 */
+    }
+    .search-container { max-width: 100%; }
+    .author-filter-container { text-align: center; }
+    #author-filter { width: 100%; max-width: 250px; }
 }
 
 /* 모달 양식 세팅 */
