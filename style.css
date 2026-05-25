@@ -435,3 +435,9 @@ footer { text-align: center; margin-top: 60px; padding: 25px 0 10px 0; border-to
 .update-toast p { color: #fff; font-size: 0.9rem; line-height: 1.5; margin: 0; letter-spacing: 0.5px; }
 .update-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; }
 .update-buttons button { padding: 8px 20px; font-size: 0.85rem; width: 100%; }
+
+/* 모달 팝업 시 배경 스크롤 방지용 클래스 */
+body.no-scroll {
+    overflow: hidden;
+    touch-action: none; /* 모바일 터치 스크롤까지 완벽 차단 */
+}
