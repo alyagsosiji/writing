@@ -877,7 +877,7 @@ function saveLetter() {
             titleInput.value = '';
             contentInput.value = '';
             if (agreeCheckbox) agreeCheckbox.checked = false; // 전송 완료 후 체크 해제
-            showSystemAlert('아시님에게 보낼 편지가 넓은 수평선 너머, 바다 위로 안전하게 띄워졌습니다.');
+            showSystemAlert('기록자 분들에게 보낼 편지가 넓은 수평선 너머, 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
         }).catch(err => showSystemAlert("편지 발송 에러 : " + err.message))
