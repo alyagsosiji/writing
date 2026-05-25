@@ -207,10 +207,24 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     padding-bottom: 24px;
 }
 
-/* 🔍 제목 검색창 */
+/* 🔍 검색창 및 필터 통합 레이아웃 */
+.search-wrapper {
+    max-width: 800px; margin: 0 auto 40px auto;
+    display: flex; align-items: center; justify-content: center; gap: 15px;
+}
+
+/* 왼쪽 통계 배지 */
+.author-stats {
+    display: flex; gap: 8px; flex-shrink: 0;
+}
+.stat-badge {
+    background: rgba(0, 180, 216, 0.08); border: 1px solid rgba(0, 180, 216, 0.25);
+    color: #90e0ef; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; letter-spacing: 0.5px;
+}
+
+/* 중앙 검색창 */
 .search-container { 
-    max-width: 450px; margin: 0 auto 40px auto; text-align: center; 
-    padding-top: 5px;
+    flex-grow: 1; max-width: 450px; 
 }
 #search-input {
     width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
@@ -219,6 +233,19 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 #search-input:focus {
     border-color: #00b4d8; background: rgba(3, 10, 23, 0.85); box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
 }
+
+/* 오른쪽 필터 드롭다운 */
+.author-filter-container {
+    flex-shrink: 0;
+}
+#author-filter {
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
+    color: #e2e8f0; padding: 11px 16px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
+    transition: all 0.25s ease;
+    /* 브라우저 기본 화살표 스타일링 적용을 위한 최소한의 외형 유지 */
+}
+#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
+#author-filter option { background: #030a16; color: #fff; }
 
 /* 기입창 외형 */
 #write-section, #letter-section {
