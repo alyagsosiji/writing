@@ -121,8 +121,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title || "수평선 너머의 서재";
     const notificationOptions = {
         body: payload.notification.body,
-        icon: "하은.jpg",
-        badge: "하은.jpg",
+        icon: "글_하은.jpg",
+        badge: "글_하은.jpg",
         vibrate: [200, 100, 200]
     };
 
