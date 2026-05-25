@@ -34,18 +34,28 @@ function requestNotificationPermission() {
             console.log('알림 권한 허용됨. 토큰 발급 시작...');
             const messaging = firebase.messaging();
             
-            messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg' })
-                .then((currentToken) => {
-                    if (currentToken) {
-                        console.log('발급된 기기 토큰:', currentToken);
-                        const tokenKey = currentToken.replace(/[.#$\[\]]/g, '_');
-                        database.ref('fcmTokens/' + tokenKey).set(currentToken);
-                    } else {
-                        console.log('토큰 발급 실패: 권한이 부족합니다.');
-                    }
-                }).catch((err) => {
-                    console.log('토큰 가져오기 에러:', err);
+            // 🚨 [핵심 패치] 깃허브 하위 폴더(/writing/)에서 우체부를 찾을 수 있도록 길 강제 안내
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then((registration) => {
+                    messaging.getToken({ 
+                        vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg',
+                        serviceWorkerRegistration: registration // 이 옵션이 들어가야 길을 잃지 않습니다!
+                    })
+                    .then((currentToken) => {
+                        if (currentToken) {
+                            console.log('발급된 기기 토큰:', currentToken);
+                            const tokenKey = currentToken.replace(/[.#$\[\]]/g, '_');
+                            database.ref('fcmTokens/' + tokenKey).set(currentToken);
+                        } else {
+                            console.log('토큰 발급 실패: 권한이 부족합니다.');
+                        }
+                    }).catch((err) => {
+                        console.error('토큰 가져오기 에러 원인:', err);
+                    });
                 });
+            }
+        } else {
+            console.log('사용자가 알림 권한을 차단했거나 무시했습니다.');
         }
     });
 }
