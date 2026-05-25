@@ -99,13 +99,61 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // PWA 서비스 워커 안전 등록 (로드 시점)
+// ==========================================
+// 🔄 PWA 서비스 워커 안전 등록 및 실시간 업데이트 감지 엔진
+// ==========================================
+let newWorker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then((reg) => console.log('PWA 서비스 워커 안전 등록 완료:', reg.scope))
-            .catch((err) => console.error('서비스 워커 등록 실패:', err));
+        navigator.serviceWorker.register('sw.js').then((reg) => {
+            console.log('PWA 서비스 워커 안전 등록 완료:', reg.scope);
+            
+            // 업데이트가 발견되었을 때
+            reg.addEventListener('updatefound', () => {
+                newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    // 새로운 서비스워커가 설치 완료되었고, 기존 컨트롤러가 존재할 때 (즉, 업데이트일 때)
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        const updateToast = document.getElementById('update-toast');
+                        if (updateToast) updateToast.classList.add('show');
+                    }
+                });
+            });
+        }).catch((err) => console.error('서비스 워커 등록 실패:', err));
+    });
+
+    // 새로운 서비스 워커가 활성화되면 페이지 자동 새로고침
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
+        }
     });
 }
+
+// 팝업 버튼 이벤트 리스너 세팅
+document.addEventListener('DOMContentLoaded', () => {
+    const reloadBtn = document.getElementById('update-reload-btn');
+    const dismissBtn = document.getElementById('update-dismiss-btn');
+    const updateToast = document.getElementById('update-toast');
+
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', () => {
+            if (updateToast) updateToast.classList.remove('show');
+            // 대기 중인 새 워커에게 활성화(skipWaiting) 명령 전송
+            if (newWorker) {
+                newWorker.postMessage({ action: 'skipWaiting' });
+            }
+        });
+    }
+
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+            if (updateToast) updateToast.classList.remove('show');
+        });
+    }
+});
 
 function initMusicPlayerEngine() {
     if (MY_MUSIC_LIST.length === 0) return;
