@@ -5,9 +5,9 @@ const NOTIFICATION_CONFIG = {
     postTitle: "수평선 너머의 서재",
     postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
     letterTitle: "수평선 너머의 서재",
-    letterBody: "새로운 편기가 수평선 너머, 바다 위로 띄워졌습니다.",
-    icon: "하은.jpg",                         
-    badge: "하은.jpg",                        
+    letterBody: "새로운 편지가 수평선 너머, 바다 위로 띄워졌습니다.",
+    icon: "글_하은.jpg",                         
+    badge: "글_하은.jpg",                        
     vibrate: [200, 100, 200]                 
 };
 
@@ -34,13 +34,13 @@ function requestNotificationPermission() {
             console.log('알림 권한 허용됨. 토큰 발급 시작...');
             const messaging = firebase.messaging();
             
-            // 💡 주의: '여기에_복사한_VAPID_키를_넣으세요' 부분을 1단계에서 얻은 키로 반드시 교체하세요!
             messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg' })
                 .then((currentToken) => {
                     if (currentToken) {
                         console.log('발급된 기기 토큰:', currentToken);
-                        // 이 기기의 토큰을 데이터베이스에 저장하여, 나중에 서버가 이 주소로 알림을 쏠 수 있게 함
-                        database.ref('fcmTokens/' + loggedInUser).set(currentToken);
+                        // 다중 기기 로그인 시 주소가 덮어씌워져 한쪽이 누락되는 현상을 완벽 차단하기 위해 토큰값을 직접 키로 분리하여 보관합니다.
+                        const tokenKey = currentToken.replace(/[.#$\[\]]/g, '_');
+                        database.ref('fcmTokens/' + tokenKey).set(currentToken);
                     } else {
                         console.log('토큰 발급 실패: 권한이 부족합니다.');
                     }
@@ -75,12 +75,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('모바일 알림 인프라 가동 완료 : ', reg.scope))
-                .catch(err => console.error('모바일 알림 인프라 에러 : ', err));
-        }
-
         if (localStorage.getItem('isAdminLoggedIn') === 'true') {
             isAdmin = true;
             loggedInUser = localStorage.getItem('loggedInUser') || ''; 
@@ -98,21 +92,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// PWA 서비스 워커 안전 등록 (로드 시점)
-// ==========================================
 // 🔄 PWA 서비스 워커 안전 등록 및 실시간 업데이트 감지 엔진
-// ==========================================
 let newWorker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then((reg) => {
-            console.log('PWA 서비스 워커 안전 등록 완료:', reg.scope);
+        // 통합 조립한 전용 서비스 워커 파일명으로 연결 타겟을 매핑합니다.
+        navigator.serviceWorker.register('firebase-messaging-sw.js').then((reg) => {
+            console.log('PWA 및 모바일 알림 통합 인프라 가동 완료:', reg.scope);
             
             // 업데이트가 발견되었을 때
             reg.addEventListener('updatefound', () => {
                 newWorker = reg.installing;
                 newWorker.addEventListener('statechange', () => {
-                    // 새로운 서비스워커가 설치 완료되었고, 기존 컨트롤러가 존재할 때 (즉, 업데이트일 때)
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                         const updateToast = document.getElementById('update-toast');
                         if (updateToast) updateToast.classList.add('show');
@@ -261,7 +252,6 @@ const secureAdmin = {
 let database = null;
 try {
     if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(secureConfig);
         database = firebase.database();
     } else {
         console.error("Firebase SDK가 로드되지 않았습니다.");
@@ -280,10 +270,8 @@ let allPosts = [];
 let allLetters = []; 
 let editTargetKey = null; 
 let searchKeyword = ''; 
-let searchAuthor = 'all'; // 작성자 필터 상태 변수 추가
+let searchAuthor = 'all'; 
 let isSubmitting = false;
-
-// 실시간 자동 분산 복구 백업 시스템 제어용 인터셉터 잠금 플래그
 let isInternalSyncAction = false; 
 
 function showSystemAlert(message, callback) {
@@ -354,7 +342,7 @@ function closeDetailModal() {
     const modal = document.getElementById('detail-modal');
     if (modal) {
         modal.style.display = 'none'; 
-        document.body.classList.remove('no-scroll'); // 💡 배경 스크롤 잠금 해제
+        document.body.classList.remove('no-scroll'); 
     }
 }
 
@@ -486,6 +474,7 @@ function handleSearch() {
     currentPage = 1; 
     renderUI();
 }
+
 // ==========================================
 // 🔥 백업 및 알림 통합 연동형 실시간 리스너 엔진 
 // ==========================================
@@ -669,7 +658,7 @@ function loadBackupTimelineList() {
             if (loadingMsg) loadingMsg.style.display = 'none';
             container.innerHTML = `
                 <p style="color:#ef4444; font-size:0.85rem; padding: 15px 0;">백업 목록 로드 실패: 권한 부족</p>
-                <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; text-align:left; padding:0 10px;">Firebase Database 규칙(Rules) 탭에서 <span style="color:#90e0ef;">"backups"</span> 노드에 대한 읽기/쓰기가 허용되어 있는지 확인해 주세요.<br>예시 규칙:<br>".read": "auth != null" 또는 true</p>
+                <p style="color:#94a3b8; font-size:0.75rem; line-height:1.4; text-align:left; padding:0 10px;">Firebase Database 규칙(Rules) 탭에서 backups 노드가 허용되어 있는지 확인해 주세요.</p>
             `;
             console.error("타임라인 동기화 실패:", error);
         });
@@ -709,11 +698,8 @@ function restoreFromTargetBackupPoint(key) {
 function scrollToPosts() {
     const postsSection = document.getElementById('posts-section');
     if (postsSection) {
-        // 여백 확보를 위해 타이틀보다 40px 높은 위치로 스크롤합니다.
         const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40;
         window.scrollTo({ top: yOffset, behavior: 'smooth' });
-    } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -725,7 +711,6 @@ function renderUI() {
     const paginationContainer = document.getElementById('pagination-container');
     const subtitleElem = document.querySelector('.section-subtitle');
     
-    // UI 컨트롤 엘리먼트
     const authorStatsContainer = document.getElementById('author-stats');
     const authorFilterContainer = document.getElementById('author-filter-container');
     
@@ -734,19 +719,14 @@ function renderUI() {
     container.innerHTML = '';
     paginationContainer.innerHTML = '';
 
-    if (!isAdmin && currentView === 'letters') {
-        currentView = 'posts';
-    }
-
     if (subtitleElem) {
         if (currentView === 'posts') {
-            subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(144, 224, 239, 0.3);">총 기록된 글 : ${allPosts.length}개</span>`;
+            subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>`;
         } else {
-            subtitleElem.innerHTML = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(255, 212, 186, 0.3);">띄워진 편지 : ${allLetters.length}개</span>`;
+            subtitleElem.innerHTML = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         }
     }
 
-    // 💡 작성자별 통계 및 필터 UI 노출 처리
     if (currentView === 'posts') {
         if (authorStatsContainer) authorStatsContainer.style.display = 'flex';
         if (authorFilterContainer) authorFilterContainer.style.display = 'block';
@@ -757,7 +737,7 @@ function renderUI() {
         allPosts.forEach(post => {
             const author = post.author || "기록자";
             if (author.includes("하은")) haeunCount++;
-            else ashiCount++; // 하은님이 아닌 과거 글들은 모두 아시님 글로 카운트
+            else ashiCount++;
         });
         
         if (authorStatsContainer) {
@@ -767,14 +747,12 @@ function renderUI() {
             `;
         }
     } else {
-        // 편지 탭에서는 통계와 작성자 필터를 숨김
         if (authorStatsContainer) authorStatsContainer.style.display = 'none';
         if (authorFilterContainer) authorFilterContainer.style.display = 'none';
     }
 
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
 
-    // 💡 작성자 필터 적용
     if (currentView === 'posts' && searchAuthor !== 'all') {
         targetArray = targetArray.filter(item => {
             const author = item.author || "기록자";
@@ -784,7 +762,6 @@ function renderUI() {
         });
     }
 
-    // 💡 검색어 필터 적용
     if (searchKeyword) {
         targetArray = targetArray.filter(item => 
             String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
@@ -792,13 +769,9 @@ function renderUI() {
     }
 
     if (targetArray.length === 0) {
-        const text = searchKeyword 
-            ? `'${searchKeyword}'이/가 포함된 내용(제목)이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "해당 조건의 기록이 아직 바다에 없습니다." : "띄워진 편지가 없습니다.");
-        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px;">존재하지 않습니다.</p>`;
         return;
     }
-
 
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const startIndex = (currentPage - 1) * postsPerPage;
@@ -844,15 +817,6 @@ function renderUI() {
     });
 
     if (totalPages > 1) {
-        const maxPageButtons = 5; 
-        let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
-        let endPage = startPage + maxPageButtons - 1;
-
-        if (endPage > totalPages) {
-            endPage = totalPages;
-            startPage = Math.max(1, endPage - maxPageButtons + 1);
-        }
-
         if (currentPage > 1) {
             const prevBtn = document.createElement('div');
             prevBtn.className = 'page-btn';
@@ -860,19 +824,19 @@ function renderUI() {
             prevBtn.onclick = () => {
                 currentPage--;
                 renderUI();
-                scrollToPosts(); // 변경된 스크롤 로직 적용
+                scrollToPosts();
             };
             paginationContainer.appendChild(prevBtn);
         }
 
-        for (let i = startPage; i <= endPage; i++) {
+        for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement('div');
             btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
             btn.innerText = i;
             btn.onclick = () => {
                 currentPage = i;
                 renderUI();
-                scrollToPosts(); // 변경된 스크롤 로직 적용
+                scrollToPosts();
             };
             paginationContainer.appendChild(btn);
         }
@@ -884,7 +848,7 @@ function renderUI() {
             nextBtn.onclick = () => {
                 currentPage++;
                 renderUI();
-                scrollToPosts(); // 변경된 스크롤 로직 적용
+                scrollToPosts();
             };
             paginationContainer.appendChild(nextBtn);
         }
@@ -898,24 +862,18 @@ function openDetailModal(key) {
     const item = searchPool.find(p => p.id === key);
     if (!item) return;
 
-    const titleElem = document.getElementById('detail-title');
-    const dateElem = document.getElementById('detail-date');
-    const textElem = document.getElementById('detail-text');
-    const modalElem = document.getElementById('detail-modal');
-
-    if (titleElem) titleElem.innerHTML = escapeHtml(item.title);
-    if (dateElem) dateElem.innerText = formatTo24Hour(item.date);
-    if (textElem) textElem.innerHTML = escapeHtml(item.content); 
+    if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
+    if (document.getElementById('detail-date')) document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
+    if (document.getElementById('detail-text')) document.getElementById('detail-text').innerHTML = escapeHtml(item.content); 
     
-    if (modalElem) {
-        modalElem.style.display = 'flex';
-        document.body.classList.add('no-scroll'); // 💡 배경 스크롤 잠금
+    if (document.getElementById('detail-modal')) {
+        document.getElementById('detail-modal').style.display = 'flex';
+        document.body.classList.add('no-scroll'); 
     }
 }
 
 function savePost() {
-    if (!isAdmin || !database) return;
-    if (isSubmitting) return; 
+    if (!isAdmin || !database || isSubmitting) return; 
 
     const titleInput = document.getElementById('post-title');
     const contentInput = document.getElementById('post-content');
@@ -960,7 +918,7 @@ function saveLetter() {
 
     const titleInput = document.getElementById('letter-title');
     const contentInput = document.getElementById('letter-content');
-    const agreeCheckbox = document.getElementById('agree-terms'); // 추가된 체크박스 감지
+    const agreeCheckbox = document.getElementById('agree-terms');
 
     if (!titleInput || !contentInput) return;
 
@@ -975,7 +933,6 @@ function saveLetter() {
         return;
     }
 
-    // 약관 동의 검증
     if (agreeCheckbox && !agreeCheckbox.checked) {
         showSystemAlert('편지를 보내기 전, 안내 및 약관에 동의해주세요.');
         return;
@@ -988,7 +945,7 @@ function saveLetter() {
         .then(() => {
             titleInput.value = '';
             contentInput.value = '';
-            if (agreeCheckbox) agreeCheckbox.checked = false; // 전송 완료 후 체크 해제
+            if (agreeCheckbox) agreeCheckbox.checked = false; 
             showSystemAlert('기록자 분들에게 보낼 편지가 넓은 수평선 너머, 바다 위로 안전하게 띄워졌습니다.');
             currentPage = 1;
             renderUI();
