@@ -674,6 +674,10 @@ function renderUI() {
     const paginationContainer = document.getElementById('pagination-container');
     const subtitleElem = document.querySelector('.section-subtitle');
     
+    // UI 컨트롤 엘리먼트
+    const authorStatsContainer = document.getElementById('author-stats');
+    const authorFilterContainer = document.getElementById('author-filter-container');
+    
     if (!container || !paginationContainer) return;
     
     container.innerHTML = '';
@@ -685,14 +689,51 @@ function renderUI() {
 
     if (subtitleElem) {
         if (currentView === 'posts') {
-            subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(144, 224, 239, 0.3);">기록된 글 : ${allPosts.length}개</span>`;
+            subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(144, 224, 239, 0.3);">총 기록된 글 : ${allPosts.length}개</span>`;
         } else {
             subtitleElem.innerHTML = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px; letter-spacing: 1px; font-weight: 400; text-shadow: 0 0 5px rgba(255, 212, 186, 0.3);">띄워진 편지 : ${allLetters.length}개</span>`;
         }
     }
 
+    // 💡 작성자별 통계 및 필터 UI 노출 처리
+    if (currentView === 'posts') {
+        if (authorStatsContainer) authorStatsContainer.style.display = 'flex';
+        if (authorFilterContainer) authorFilterContainer.style.display = 'block';
+        
+        let ashiCount = 0;
+        let haeunCount = 0;
+        
+        allPosts.forEach(post => {
+            const author = post.author || "기록자";
+            if (author.includes("하은")) haeunCount++;
+            else ashiCount++; // 하은님이 아닌 과거 글들은 모두 아시님 글로 카운트
+        });
+        
+        if (authorStatsContainer) {
+            authorStatsContainer.innerHTML = `
+                <span class="stat-badge">아시 : ${ashiCount}개</span>
+                <span class="stat-badge">하은 : ${haeunCount}개</span>
+            `;
+        }
+    } else {
+        // 편지 탭에서는 통계와 작성자 필터를 숨김
+        if (authorStatsContainer) authorStatsContainer.style.display = 'none';
+        if (authorFilterContainer) authorFilterContainer.style.display = 'none';
+    }
+
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
 
+    // 💡 작성자 필터 적용
+    if (currentView === 'posts' && searchAuthor !== 'all') {
+        targetArray = targetArray.filter(item => {
+            const author = item.author || "기록자";
+            if (searchAuthor === "하은") return author.includes("하은");
+            if (searchAuthor === "아시") return !author.includes("하은");
+            return true;
+        });
+    }
+
+    // 💡 검색어 필터 적용
     if (searchKeyword) {
         targetArray = targetArray.filter(item => 
             String(item.title).toLowerCase().includes(searchKeyword.toLowerCase())
@@ -702,10 +743,11 @@ function renderUI() {
     if (targetArray.length === 0) {
         const text = searchKeyword 
             ? `'${searchKeyword}'이/가 포함된 내용(제목)이 바다에 존재하지 않습니다.` 
-            : ((currentView === 'posts') ? "아직 채워지지 않은 수평선 너머, 바다입니다." : "띄워진 편지가 없습니다.");
+            : ((currentView === 'posts') ? "해당 조건의 기록이 아직 바다에 없습니다." : "띄워진 편지가 없습니다.");
         container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px; font-size:0.9rem; letter-spacing:1px;">${text}</p>`;
         return;
     }
+
 
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const startIndex = (currentPage - 1) * postsPerPage;
