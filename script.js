@@ -35,7 +35,7 @@ function requestNotificationPermission() {
             const messaging = firebase.messaging();
             
             // 💡 주의: '여기에_복사한_VAPID_키를_넣으세요' 부분을 1단계에서 얻은 키로 반드시 교체하세요!
-            messaging.getToken({ vapidKey: 'dfa71344db168067ec27134b0e3c8260a2d88ac0' })
+            messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg' })
                 .then((currentToken) => {
                     if (currentToken) {
                         console.log('발급된 기기 토큰:', currentToken);
