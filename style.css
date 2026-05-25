@@ -242,17 +242,37 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 /* 3. 맨 아래: 작성자 필터 드롭다운 */
 .author-filter-container {
     width: 100%; 
-    text-align: center; /* JS가 컨테이너 속성을 변경해도 내부 요소를 중앙에 잡아두는 1차 방어막 */
+    text-align: center; 
 }
 #author-filter {
-    display: block; /* 마진(margin) 정렬이 무조건 먹히도록 블록 요소로 강제 지정 */
+    display: block; 
     height: 44px; width: 100%; max-width: 250px; 
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
-    color: #e2e8f0; padding: 0 16px 0 20px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
+    
+    /* 브라우저 기본 화살표 숨기기 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* 커스텀 화살표 추가 및 우측 20px 여백 대칭 배치 */
+    background-color: rgba(255, 255, 255, 0.03);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 20px center; 
+    background-size: 16px;
+    
+    border: 1px solid rgba(0, 180, 216, 0.15);
+    color: #e2e8f0; 
+    /* 글씨가 화살표와 겹치지 않도록 오른쪽 패딩(여백)을 넉넉히 45px 확보 */
+    padding: 0 45px 0 20px; 
+    border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
     transition: all 0.25s ease;
-    margin: 0 auto; /* 완벽한 중앙 정렬을 위한 2차 방어막 */
+    margin: 0 auto; 
 }
-#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
+#author-filter:focus { 
+    border-color: #00b4d8; 
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); 
+    background-color: rgba(3, 10, 23, 0.85); 
+}
 #author-filter option { background: #030a16; color: #fff; }
 
 /* 기입창 외형 */
