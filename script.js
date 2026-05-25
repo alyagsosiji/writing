@@ -427,11 +427,14 @@ function switchView(view) {
 
 function handleSearch() {
     const searchInput = document.getElementById('search-input');
+    const authorFilter = document.getElementById('author-filter');
+    
     searchKeyword = searchInput ? searchInput.value.trim() : '';
+    searchAuthor = authorFilter ? authorFilter.value : 'all';
+    
     currentPage = 1; 
     renderUI();
 }
-
 // ==========================================
 // 🔥 백업 및 알림 통합 연동형 실시간 리스너 엔진 
 // ==========================================
