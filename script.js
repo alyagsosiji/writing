@@ -232,6 +232,7 @@ let allPosts = [];
 let allLetters = []; 
 let editTargetKey = null; 
 let searchKeyword = ''; 
+let searchAuthor = 'all'; // 작성자 필터 상태 변수 추가
 let isSubmitting = false;
 
 // 실시간 자동 분산 복구 백업 시스템 제어용 인터셉터 잠금 플래그
