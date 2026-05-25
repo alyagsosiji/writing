@@ -241,41 +241,16 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 
 /* 3. 맨 아래: 작성자 필터 드롭다운 */
 .author-filter-container {
-    width: 100%; display: flex; justify-content: center; align-items: center;
+    width: 100%; 
+    text-align: center; /* JS가 컨테이너 속성을 변경해도 내부 요소를 중앙에 잡아두는 1차 방어막 */
 }
 #author-filter {
+    display: block; /* 마진(margin) 정렬이 무조건 먹히도록 블록 요소로 강제 지정 */
     height: 44px; width: 100%; max-width: 250px; 
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
     color: #e2e8f0; padding: 0 16px 0 20px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
     transition: all 0.25s ease;
-    margin: 0 auto; /* 안전장치: 좌우 여백을 자동으로 밀어서 무조건 중앙에 배치 */
-}
-#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
-#author-filter option { background: #030a16; color: #fff; }
-
-
-#author-filter {
-    height: 44px; width: 100%; max-width: 250px; /* 드롭다운 길이 지정 */
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
-    color: #e2e8f0; padding: 0 16px 0 20px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
-    transition: all 0.25s ease;
-}
-#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
-#author-filter option { background: #030a16; color: #fff; }
-
-#author-filter {
-    height: 44px; /* 높이 완벽 통일 */
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
-    color: #e2e8f0; padding: 0 16px 0 20px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
-    transition: all 0.25s ease;
-}
-#author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
-#author-filter option { background: #030a16; color: #fff; }
-#author-filter {
-    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 180, 216, 0.15);
-    color: #e2e8f0; padding: 11px 16px; border-radius: 25px; font-size: 0.85rem; outline: none; cursor: pointer;
-    transition: all 0.25s ease;
-    /* 브라우저 기본 화살표 스타일링 적용을 위한 최소한의 외형 유지 */
+    margin: 0 auto; /* 완벽한 중앙 정렬을 위한 2차 방어막 */
 }
 #author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background: rgba(3, 10, 23, 0.85); }
 #author-filter option { background: #030a16; color: #fff; }
