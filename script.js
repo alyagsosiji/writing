@@ -764,7 +764,13 @@ function openDetailModal(key) {
     if (currentView === 'letters' && isAdmin && !item.read) database.ref('letters/' + key).update({ read: true });
 
     if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
-    if (document.getElementById('detail-date')) document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
+    
+    // 🛠️ [작성자가 안 뜨는 문제 수정 완료] 글 모드일 때 작성자 정보가 날짜와 함께 바인딩되도록 교정
+    if (document.getElementById('detail-date')) {
+        const displayInfo = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
+        document.getElementById('detail-date').innerText = displayInfo;
+    }
+    
     if (document.getElementById('detail-text')) document.getElementById('detail-text').innerHTML = escapeHtml(item.content); 
     if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'flex'; document.body.classList.add('no-scroll'); }
 }
