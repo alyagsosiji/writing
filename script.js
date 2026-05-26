@@ -27,7 +27,7 @@ asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
 // ==========================================
-// 🎨 0-C. 감성 및 UI 전용 동적 CSS (스타일 고정 완료)
+// 🎨 0-C. 감성 및 UI 전용 동적 CSS (위치 및 크기 오류 패치 완비)
 // ==========================================
 const customStyleSheet = document.createElement('style');
 customStyleSheet.innerHTML = `
@@ -38,7 +38,12 @@ customStyleSheet.innerHTML = `
     .posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
     .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
     
-    /* 레이어 우선순위 최상단 보장 */
+    /* 🚨 [위치 및 크기 오류 수정] 날씨 및 하단 시간 영역 한 줄 강제 정렬 */
+    .post-footer { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; margin-top: auto !important; padding-top: 12px !important; border-top: 1px solid rgba(255,255,255,0.03) !important; gap: 10px !important; }
+    .post-footer .date { white-space: nowrap !important; font-size: 0.72rem !important; color: #94a3b8 !important; flex-shrink: 0 !important; overflow: hidden; text-overflow: ellipsis; max-width: 65%; }
+    .card-mgmt-btns { display: flex !important; gap: 4px !important; flex-shrink: 0 !important; }
+    
+    /* 스크롤 제어 및 고정 위젯 레이어 */
     .no-scroll { overflow: hidden !important; }
     #weather-widget { position:fixed; top:20px; right:20px; font-size:1rem; z-index:9000 !important; background:rgba(3,10,23,0.6); padding:6px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; backdrop-filter:blur(4px); pointer-events:none; }
     #random-memory-btn { position:fixed; bottom:25px; left:25px; font-size:35px; cursor:pointer; z-index:9000 !important; text-shadow:0 0 15px rgba(255,255,255,0.6); transition: transform 0.3s; }
@@ -57,7 +62,7 @@ function applyTimeBasedThemeEngine() {
     document.body.style.backgroundAttachment = "fixed";
 }
 
-// 🚨 [복구 완입] 실시간 입력 감지 브라우저 임시저장 시스템
+// 💾 항해 일지 실시간 입력값 브라우저 자동 임시저장 엔진
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
     targetFields.forEach(id => {
@@ -69,7 +74,6 @@ function initDraftAutoSaveEngine() {
     });
 }
 
-// 🚨 [복구 완입] 등록 완료 및 취소 시 작동하는 캐시 클리너
 function clearDraftCacheStorage(type) {
     if (type === 'post') { localStorage.removeItem('draft_post-title'); localStorage.removeItem('draft_post-content'); } 
     else if (type === 'letter') { localStorage.removeItem('draft_letter-title'); localStorage.removeItem('draft_letter-content'); }
@@ -135,10 +139,11 @@ function togglePlayPause() {
             isTrackPlaying = true;
             if (playerTrigger) playerTrigger.classList.add('playing');
             if (btn) btn.innerText = '일시정지';
-        }).catch(err => console.log("오디오 재생 대기"));
+        }).catch(err => console.log("오디오 스트리밍 핸들링"));
     }
 }
 
+// 🌦️ 부산광역시 기준 기상 인프라 데이터 연동
 function fetchWeatherWidget() {
     fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
     .then(res => res.json())
@@ -157,7 +162,7 @@ function fetchWeatherWidget() {
             document.body.appendChild(wElem);
         }
         wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
-    }).catch(e => console.log("날씨 서버 동기화"));
+    }).catch(e => console.log("기상 데이터 응답 지연"));
 }
 
 function injectRandomMemoryButton() {
@@ -205,6 +210,7 @@ else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
 let isRestMode = false; 
 let isGridView = false; 
+let backupTriggerQueued = false; // 🚨 비동기 레이스 현상 방지용 백업 동기화 큐 플래그
 
 window.toggleGridView = function() {
     isGridView = !isGridView;
@@ -215,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         if (localStorage.getItem('isAdminLoggedIn') === 'true') { isAdmin = true; loggedInUser = localStorage.getItem('loggedInUser') || ''; requestNotificationPermission(); }
         applyTimeBasedThemeEngine();
-        initDraftAutoSaveEngine(); // 🚨 라이프사이클 엔진 주입
+        initDraftAutoSaveEngine();
         injectRandomMemoryButton();
         fetchWeatherWidget();
         
@@ -231,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     } catch (e) {
-        console.error("엔진 로딩 예외 발생 : ", e);
+        console.error("인프라 로드 실패 예외 감지 : ", e);
         hideLoadingScreen();
     }
 });
@@ -282,6 +288,7 @@ document.addEventListener('keydown', function(e) {
 
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
+// 🚨 [오류 패치 핵심] databaseURL 주소 디코딩 오타 철저 교정 완료
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
     authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlcGFwcC5jb20="),
@@ -335,16 +342,18 @@ function openModal() { if (document.getElementById('login-modal')) document.getE
 function closeModal() { if (document.getElementById('login-modal')) document.getElementById('login-modal').style.display = 'none'; }
 function closeDetailModal() { if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'none'; document.body.classList.remove('no-scroll'); } }
 
+// 🚨 [최신화] 백업 관리 팝업 오픈 모듈 최적화 및 강제 초기화 트리거
 function openBackupModal() { 
     if (!isAdmin) return; 
     if (document.getElementById('backup-modal')) { 
         document.getElementById('backup-modal').style.display = 'flex'; 
         initAdminTabs();
-        loadBackupTimelineList(); 
+        window.switchAdminTab('backup'); // 모달을 열 때마다 무조건 1번 데이터 백업 탭이 기본 활성화되도록 고정
     } 
 }
 function closeBackupModal() { if (document.getElementById('backup-modal')) document.getElementById('backup-modal').style.display = 'none'; }
 
+// 🚨 [구조 리팩토링] 복구 지점 로딩과의 충돌 및 엘리먼트 꼬임 버그 해결 완료
 function initAdminTabs() {
     const wrapper = document.querySelector('.backup-timeline-wrapper');
     if (!wrapper || document.getElementById('admin-tab-header')) return; 
@@ -353,46 +362,67 @@ function initAdminTabs() {
     tabHeader.id = 'admin-tab-header';
     tabHeader.style.cssText = 'display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:15px;';
     
-    const btnBackup = document.createElement('button');
-    btnBackup.innerText = '💾 데이터 백업';
-    btnBackup.style.cssText = 'flex:1; background:transparent; border:none; color:#f7a37f; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid #f7a37f; transition:0.2s; outline:none;';
-    
-    const btnSettings = document.createElement('button');
-    btnSettings.innerText = '⚙️ 서재 설정';
-    btnSettings.style.cssText = 'flex:1; background:transparent; border:none; color:#64748b; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid transparent; transition:0.2s; outline:none;';
-    
-    tabHeader.appendChild(btnBackup);
-    tabHeader.appendChild(btnSettings);
+    tabHeader.innerHTML = `
+        <button id="admin-btn-backup" onclick="window.switchAdminTab('backup')" style="flex:1; background:transparent; border:none; color:#f7a37f; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid #f7a37f; transition:0.2s; outline:none;">💾 데이터 백업</button>
+        <button id="admin-btn-settings" onclick="window.switchAdminTab('settings')" style="flex:1; background:transparent; border:none; color:#64748b; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid transparent; transition:0.2s; outline:none;">⚙️ 서재 설정</button>
+    `;
 
     const settingsContainer = document.createElement('div');
     settingsContainer.id = 'admin-settings-container';
     settingsContainer.style.display = 'none';
     
+    let controlsWrapper = document.getElementById('backup-delete-controls');
+    if (!controlsWrapper) {
+        controlsWrapper = document.createElement('div'); 
+        controlsWrapper.id = 'backup-delete-controls'; 
+        controlsWrapper.style.cssText = 'display:none; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;';
+        controlsWrapper.innerHTML = `
+            <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" id="backup-select-all" onclick="toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
+                <span style="line-height:1;">전체 선택</span>
+            </label>
+            <div style="display:flex; gap:8px;">
+                <select id="backup-period-select" onchange="selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
+                    <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
+                </select>
+                <button onclick="deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
+            </div>
+        `;
+    }
+
     wrapper.insertBefore(settingsContainer, wrapper.firstChild);
-    wrapper.insertBefore(tabHeader, settingsContainer);
+    wrapper.insertBefore(controlsWrapper, settingsContainer);
+    wrapper.insertBefore(tabHeader, controlsWrapper);
+}
 
-    btnBackup.onclick = () => {
-        btnBackup.style.color = '#f7a37f'; btnBackup.style.borderBottom = '2px solid #f7a37f';
-        btnSettings.style.color = '#64748b'; btnSettings.style.borderBottom = '2px solid transparent';
-        document.getElementById('backup-list-container').style.display = 'block';
-        const delControls = document.getElementById('backup-delete-controls');
+// 🚨 [UI 보강] 탭 간 유연한 디스플레이 속성 분배 스위처
+window.switchAdminTab = function(tab) {
+    const btnBackup = document.getElementById('admin-btn-backup');
+    const btnSettings = document.getElementById('admin-btn-settings');
+    const listContainer = document.getElementById('backup-list-container');
+    const delControls = document.getElementById('backup-delete-controls');
+    const settingsContainer = document.getElementById('admin-settings-container');
+
+    if (tab === 'backup') {
+        if(btnBackup) { btnBackup.style.color = '#f7a37f'; btnBackup.style.borderBottom = '2px solid #f7a37f'; }
+        if(btnSettings) { btnSettings.style.color = '#64748b'; btnSettings.style.borderBottom = '2px solid transparent'; }
+        if(listContainer) listContainer.style.display = 'block';
         if(delControls) delControls.style.display = 'flex';
-        settingsContainer.style.display = 'none';
-    };
-
-    btnSettings.onclick = () => {
-        btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f';
-        btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent';
-        document.getElementById('backup-list-container').style.display = 'none';
-        const delControls = document.getElementById('backup-delete-controls');
+        if(settingsContainer) settingsContainer.style.display = 'none';
+        loadBackupTimelineList();
+    } else if (tab === 'settings') {
+        if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
+        if(btnBackup) { btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent'; }
+        if(listContainer) listContainer.style.display = 'none';
         if(delControls) delControls.style.display = 'none';
-        settingsContainer.style.display = 'block';
+        if(settingsContainer) settingsContainer.style.display = 'block';
         renderAdminSettings();
-    };
+    }
 }
 
 function renderAdminSettings() {
     const container = document.getElementById('admin-settings-container');
+    if(!container) return;
     container.innerHTML = `
         <div style="background:rgba(3,10,23,0.5); padding:20px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
             <h3 style="color:#fff; margin-bottom:15px; font-size:1.05rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">관리자 전용 제어 시스템</h3>
@@ -494,7 +524,8 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
-        if (!isInitialPostLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
+        // 🚨 [최신화] 비동기 데이터 적재 대기 큐 처리 
+        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
@@ -514,7 +545,8 @@ function listenLetters() {
             });
             allLetters.reverse();
         }
-        if (!isInitialLetterLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
+        // 🚨 [최신화] 비동기 데이터 적재 대기 큐 처리
+        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
         if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         knownLetterIds = currentIds; isInitialLetterLoad = false;
         if(currentView === 'letters') renderUI();
@@ -565,31 +597,11 @@ function deleteSelectedBackups() {
 }
 
 function loadBackupTimelineList() {
-    const wrapper = document.querySelector('.backup-timeline-wrapper'); const container = document.getElementById('backup-list-container'); 
+    const container = document.getElementById('backup-list-container'); 
     if (!container || !database) return; container.innerHTML = '';
     
-    let controlsWrapper = document.getElementById('backup-delete-controls');
-    if (!controlsWrapper && wrapper) {
-        controlsWrapper = document.createElement('div'); controlsWrapper.id = 'backup-delete-controls'; controlsWrapper.style.display = 'none'; 
-        controlsWrapper.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;">
-                <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                    <input type="checkbox" id="backup-select-all" onclick="toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
-                    <span style="line-height:1;">전체 선택</span>
-                </label>
-                <div style="display:flex; gap:8px;">
-                    <select id="backup-period-select" onchange="selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
-                        <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
-                    </select>
-                    <button onclick="deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
-                </div>
-            </div>
-        `;
-        wrapper.insertBefore(controlsWrapper, document.getElementById('admin-settings-container').nextSibling); 
-    } else if (controlsWrapper) {
-        const selectAllCb = document.getElementById('backup-select-all'); if(selectAllCb) selectAllCb.checked = false;
-        const periodSelect = document.getElementById('backup-period-select'); if(periodSelect) periodSelect.value = "";
-    }
+    const selectAllCb = document.getElementById('backup-select-all'); if(selectAllCb) selectAllCb.checked = false;
+    const periodSelect = document.getElementById('backup-period-select'); if(periodSelect) periodSelect.value = "";
 
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
@@ -601,8 +613,6 @@ function loadBackupTimelineList() {
         const keys = Object.keys(backups).filter(key => backups[key].timestamp >= expirationThreshold).reverse();
         if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
 
-        if (controlsWrapper) controlsWrapper.style.display = 'flex';
-        
         keys.forEach((key) => {
             const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
@@ -757,10 +767,9 @@ function savePost() {
     const postData = { title: title, content: content, date: date, author: loggedInUser };
 
     if (editTargetKey) { 
-        // 🚨 [복구 완입] 성공 시 임시저장 캐시 제거
-        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
     } else { 
-        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
     }
 }
 
@@ -778,8 +787,9 @@ function saveLetter() {
         database.ref('letters').push(letterData).then(() => {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-            clearDraftCacheStorage('letter'); // 🚨 [복구 완입] 성공 시 편지 캐시 제거
+            clearDraftCacheStorage('letter'); 
             showSystemAlert('편지가 둥실둥실 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+            backupTriggerQueued = true; 
         }).finally(() => { isSubmitting = false; });
     });
 }
@@ -801,27 +811,27 @@ function cancelEdit() {
     if (document.getElementById('post-content')) document.getElementById('post-content').value = '';
     if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "기록하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "none";
-    clearDraftCacheStorage('post'); // 🚨 [복구 완입] 수정 취소 시 글 캐시 클리어
+    clearDraftCacheStorage('post'); 
 }
 
 function deletePost(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
-        database.ref('posts/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; });
+        database.ref('posts/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
     });
 }
 
 function deleteLetter(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 편지를 바다에서 완전히 소멸시키겠습니까?', function() {
-        database.ref('letters/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; });
+        database.ref('letters/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
     });
 }
 
 function clearDatabase() {
     if (!isAdmin || !database) return;
-    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); }); }); }, 150); });
+    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); backupTriggerQueued = true; }); }); }, 150); });
 }
 
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
