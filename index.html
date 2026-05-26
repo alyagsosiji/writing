@@ -160,7 +160,7 @@
         <div class="modal-content backup-modal-content" onclick="event.stopPropagation()" style="max-width: 500px !important;">
             <div class="detail-popup-header">
                 <h3>📖 수평선 서재 안내실</h3>
-                <span style="color: #90e0ef; font-size: 0.78rem; display: block; margin-top: 4px;">처음 오신 기록자분들을 위한 서재 지침서</span>
+                <span style="color: #90e0ef; font-size: 0.78rem; display: block; margin-top: 4px;">처음 오신 분들을 위한 서재 지침서</span>
             </div>
             
             <div style="max-height: 340px; overflow-y: auto; padding-right: 5px; margin: 15px 0; text-align: left;">
@@ -199,8 +199,29 @@
         <div class="modal-content backup-modal-content" onclick="event.stopPropagation()">
             <div class="detail-popup-header">
                 <h3>💾 기록자 관리창</h3>
-                <span>최근 30일 이내의 복구 지점만 보존됩니다.</span>
+                <span id="backup-modal-subtitle">최근 30일 이내의 복구 지점만 보존됩니다.</span>
             </div>
+            
+            <div class="admin-tab-header-node">
+                <button id="admin-btn-backup" class="admin-tab-node-btn" onclick="window.switchAdminTab('backup')" style="color:#f7a37f; border-bottom:2px solid #f7a37f;">💾 데이터 백업</button>
+                <button id="admin-btn-settings" class="admin-tab-node-btn" onclick="window.switchAdminTab('settings')" style="color:#64748b; border-bottom:2px solid transparent;">⚙️ 서재 설정</button>
+            </div>
+
+            <div id="backup-delete-controls" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;">
+                <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="backup-select-all" onclick="window.toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
+                    <span style="line-height:1;">전체 선택</span>
+                </label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button onclick="window.triggerManualBackup()" class="mgmt-btn" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(56,189,248,0.12); border:1px solid #38bdf8; color:#38bdf8; font-weight:bold;">✨ 수동 백업</button>
+                    <select id="backup-period-select" onchange="window.selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
+                        <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
+                    </select>
+                    <button onclick="window.deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
+                </div>
+            </div>
+
+            <div id="admin-settings-container" style="display: none;"></div>
             
             <div class="backup-timeline-wrapper">
                 <p id="backup-loading-msg" style="color:#94a3b8; font-size:0.85rem; padding: 20px 0; text-align: center;">클라우드 보존 목록을 호출하는 중...</p>
