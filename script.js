@@ -505,9 +505,9 @@ function updateUI() {
     const letterContent = document.getElementById('letter-content');
     if (isRestMode) {
         if(letterSubmitBtn) { letterSubmitBtn.disabled = true; letterSubmitBtn.innerText = '바다가 쉬어가는 중입니다'; letterSubmitBtn.style.opacity = '0.5'; }
-        if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머로 편지를 보낼 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
+        if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머, 바다로 편지를 띄울 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
     } else {
-        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '편지 보내기'; letterSubmitBtn.style.opacity = '1'; }
+        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '편지 띄우기'; letterSubmitBtn.style.opacity = '1'; }
         if(letterContent) { letterContent.disabled = false; letterContent.placeholder = '기록자 분들에게 보낼 편지의 내용을 입력해주세요...'; }
     }
 }
@@ -827,7 +827,7 @@ function saveLetter() {
         database.ref('letters').push(letterData).then(() => {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-            clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+            clearDraftCacheStorage('letter'); showSystemAlert('편지가 수평선 너머, 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
             backupTriggerQueued = true; 
         }).finally(() => { isSubmitting = false; });
     });
