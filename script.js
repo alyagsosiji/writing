@@ -120,28 +120,52 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
+// ⚡ [트래픽 최적화 1단계] 날씨 Open-Meteo API에 15분 로컬 캐싱 디펜더 탑재
 function fetchWeatherWidget() {
+    const cacheKey = 'weather_cache_payload';
+    const cacheTimeKey = 'weather_cache_timestamp';
+    const now = Date.now();
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+
+    // 15분(= 900,000ms) 동안 호출 흐름을 완전히 차단하고 캐시 본문 사용
+    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
+        renderWeatherHTML(JSON.parse(cachedData));
+        return;
+    }
+
     fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
     .then(res => res.json())
     .then(data => {
-        const code = data.current_weather.weathercode;
-        let icon = '☁️';
-        if(code === 0) icon = '☀️';
-        else if(code > 0 && code <= 3) icon = '⛅';
-        else if(code >= 51 && code <= 67) icon = '🌧️';
-        else if(code >= 71 && code <= 77) icon = '❄️';
-        
-        let wElem = document.getElementById('weather-widget');
-        if(!wElem) {
-            wElem = document.createElement('div');
-            wElem.id = 'weather-widget';
-            document.body.appendChild(wElem);
-        }
-        wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
-    }).catch(e => console.log("기상 트래픽 백오프"));
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimeKey, String(now));
+        renderWeatherHTML(data);
+    }).catch(e => {
+        if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
+        console.log("기상 트래픽 백오프");
+    });
+}
+
+function renderWeatherHTML(data) {
+    const code = data.current_weather.weathercode;
+    let icon = '☁️';
+    if(code === 0) icon = '☀️';
+    else if(code > 0 && code <= 3) icon = '⛅';
+    else if(code >= 51 && code <= 67) icon = '🌧️';
+    else if(code >= 71 && code <= 77) icon = '❄️';
+    
+    let wElem = document.getElementById('weather-widget');
+    if(!wElem) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+    wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
 }
 
 function injectRandomMemoryButton() {
+    // 중복 생성 원천 차단
+    if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
@@ -169,6 +193,7 @@ window.closeLibraryModal = function() {
     }
 }
 
+// ⚡ [트래픽 최적화 2단계] 동일 토큰의 Firebase 중복 쓰기 트래픽 디펜더 구축
 function requestNotificationPermission() {
     if (!("Notification" in window) || !database) return;
     Notification.requestPermission().then((permission) => {
@@ -178,7 +203,16 @@ function requestNotificationPermission() {
                 navigator.serviceWorker.ready.then((registration) => {
                     messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg', serviceWorkerRegistration: registration })
                     .then((currentToken) => {
-                        if (currentToken) database.ref('fcmTokens/' + currentToken.replace(/[.#$\[\]]/g, '_')).set(currentToken);
+                        if (currentToken) {
+                            const lastToken = localStorage.getItem('last_registered_fcm_token');
+                            // 이미 기록된 동일 토큰인 경우 무조건 업로드 트래픽 차단
+                            if (lastToken === currentToken) return;
+                            
+                            database.ref('fcmTokens/' + currentToken.replace(/[.#$\[\]]/g, '_')).set(currentToken)
+                            .then(() => {
+                                localStorage.setItem('last_registered_fcm_token', currentToken);
+                            });
+                        }
                     });
                 });
             }
@@ -412,7 +446,7 @@ window.switchAdminTab = function(tab) {
         if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
         if(btnBackup) { btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent'; }
         if(listContainer) listContainer.style.setProperty('display', 'none', 'important');
-        if(delControls) delControls.style.setProperty('display', 'none', 'important');
+        if(delControls) delControls.style.setProperty('none', 'important');
         if(settingsContainer) settingsContainer.style.setProperty('display', 'block', 'important');
         if(infoSpan) infoSpan.style.setProperty('display', 'none', 'important');
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'none', 'important');
@@ -852,7 +886,7 @@ function deletePost(key) {
             const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
             backupTriggerQueued = true; 
-            renderUI(); // 소멸 직후 레이아웃 즉시 동기화 보정
+            renderUI(); 
         });
     });
 }
@@ -865,7 +899,7 @@ function deleteLetter(key) {
             const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
             backupTriggerQueued = true; 
-            renderUI(); // 소멸 직후 레이아웃 즉시 동기화 보정
+            renderUI(); 
         });
     });
 }
