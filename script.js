@@ -12,7 +12,7 @@ const NOTIFICATION_CONFIG = {
 };
 
 // ==========================================
-// 🎵 0-B. 음악 재생 목록 설정 배열
+// 🎵 0-B. 음악 및 소리 엔진 설정
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
@@ -22,99 +22,170 @@ const MY_MUSIC_LIST = [
 let currentTrackIndex = 0;
 let isTrackPlaying = false;
 let audioEngine = new Audio();
+let asmrEngine = new Audio("waves.mp3"); 
+asmrEngine.loop = true;
+let isAsmrPlaying = false;
 
-// 🚨 [추천 기능 #6] 카드 페이드인 시각 효과용 동적 CSS 주입
-const waveAnimationStyle = document.createElement('style');
-waveAnimationStyle.innerHTML = `
-    @keyframes fadeInWave {
-        from { opacity: 0; transform: translateY(12px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .post-card { animation: fadeInWave 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+// ==========================================
+// 🎨 0-C. 감성 및 UI 전용 동적 CSS (스타일 고정 완료)
+// ==========================================
+const customStyleSheet = document.createElement('style');
+customStyleSheet.innerHTML = `
+    @keyframes fadeInWave { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .post-card { animation: fadeInWave 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; position: relative; }
+    
+    /* 갤러리 뷰 그리드 스타일 */
+    .posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
+    .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    /* 레이어 우선순위 최상단 보장 */
+    .no-scroll { overflow: hidden !important; }
+    #weather-widget { position:fixed; top:20px; right:20px; font-size:1rem; z-index:9000 !important; background:rgba(3,10,23,0.6); padding:6px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; backdrop-filter:blur(4px); pointer-events:none; }
+    #random-memory-btn { position:fixed; bottom:25px; left:25px; font-size:35px; cursor:pointer; z-index:9000 !important; text-shadow:0 0 15px rgba(255,255,255,0.6); transition: transform 0.3s; }
+    #random-memory-btn:hover { transform: scale(1.2); }
 `;
-document.head.appendChild(waveAnimationStyle);
+document.head.appendChild(customStyleSheet);
 
-// 🚨 [추천 기능 #1] 시간대에 따라 변하는 실시간 수평선 바다 테마 엔진
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
-    if (hour >= 6 && hour < 12) {
-        // 아침: 새벽이 걷히는 맑은 바다 테마
-        bgStyle = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)";
-    } else if (hour >= 12 && hour < 18) {
-        // 오후: 정오의 반짝이는 푸른 바다 테마
-        bgStyle = "linear-gradient(135deg, #0f172a 0%, #0f2d4a 60%, #0284c7 100%)";
-    } else if (hour >= 18 && hour < 20) {
-        // 저녁: 노을이 물드는 황혼의 수평선 테마
-        bgStyle = "linear-gradient(135deg, #0f172a 0%, #31102f 60%, #7c2d12 100%)";
-    } else {
-        // 밤: 별빛과 어둠이 교차하는 심해 테마
-        bgStyle = "linear-gradient(135deg, #020617 0%, #0f172a 70%, #1e1b4b 100%)";
-    }
+    if (hour >= 6 && hour < 12) bgStyle = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)"; 
+    else if (hour >= 12 && hour < 18) bgStyle = "linear-gradient(135deg, #0f172a 0%, #0f2d4a 60%, #0284c7 100%)"; 
+    else if (hour >= 18 && hour < 20) bgStyle = "linear-gradient(135deg, #0f172a 0%, #31102f 60%, #7c2d12 100%)"; 
+    else bgStyle = "linear-gradient(135deg, #020617 0%, #0f172a 70%, #1e1b4b 100%)"; 
     document.body.style.background = bgStyle;
     document.body.style.backgroundAttachment = "fixed";
 }
 
-// 🚨 [추천 기능 #7] 항해 일지 유실 차단 브라우저 임시저장 시스템
+// 🚨 [복구 완입] 실시간 입력 감지 브라우저 임시저장 시스템
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
     targetFields.forEach(id => {
         const field = document.getElementById(id);
         if (!field) return;
-        
-        // 복구 작업
         const savedDraft = localStorage.getItem('draft_' + id);
         if (savedDraft) field.value = savedDraft;
-        
-        // 실시간 입력 감지 백업
-        field.addEventListener('input', () => {
-            localStorage.setItem('draft_' + id, field.value);
-        });
+        field.addEventListener('input', () => localStorage.setItem('draft_' + id, field.value));
     });
 }
 
+// 🚨 [복구 완입] 등록 완료 및 취소 시 작동하는 캐시 클리너
 function clearDraftCacheStorage(type) {
-    if (type === 'post') {
-        localStorage.removeItem('draft_post-title');
-        localStorage.removeItem('draft_post-content');
-    } else if (type === 'letter') {
-        localStorage.removeItem('draft_letter-title');
-        localStorage.removeItem('draft_letter-content');
+    if (type === 'post') { localStorage.removeItem('draft_post-title'); localStorage.removeItem('draft_post-content'); } 
+    else if (type === 'letter') { localStorage.removeItem('draft_letter-title'); localStorage.removeItem('draft_letter-content'); }
+}
+
+function openSoundModal() {
+    let modal = document.getElementById('sound-modal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'sound-modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:99999;';
+        modal.innerHTML = `
+            <div style="background:#0f172a; padding:25px; border-radius:12px; border:1px solid #38bdf8; width:320px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                <h3 style="color:#fff; margin-bottom:20px; font-size:1.1rem;">바다의 소리 설정</h3>
+                <div style="margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
+                    <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🎵 배경 음악 (BGM)</p>
+                    <button id="btn-music-toggle" onclick="togglePlayPause()" style="padding:8px 16px; border-radius:6px; background:#0284c7; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
+                </div>
+                <div style="margin-bottom:25px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
+                    <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🌊 수평선 파도 소리 (ASMR)</p>
+                    <button id="btn-asmr-toggle" onclick="toggleAsmr()" style="padding:8px 16px; border-radius:6px; background:#059669; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기'}</button>
+                </div>
+                <button onclick="document.getElementById('sound-modal').style.display='none'" style="padding:6px 20px; border:1px solid #94a3b8; background:transparent; color:#94a3b8; border-radius:6px; cursor:pointer;">닫기</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    } else {
+        document.getElementById('btn-music-toggle').innerText = isTrackPlaying ? '일시정지' : '음악 재생';
+        document.getElementById('btn-asmr-toggle').innerText = isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기';
+    }
+    modal.style.display = 'flex';
+}
+
+function toggleAsmr() {
+    const btn = document.getElementById('btn-asmr-toggle');
+    if(isAsmrPlaying) { asmrEngine.pause(); isAsmrPlaying=false; if(btn) btn.innerText='파도 소리 켜기'; }
+    else { asmrEngine.play().catch(()=>{}); isAsmrPlaying=true; if(btn) btn.innerText='파도 소리 끄기'; }
+}
+
+function initMusicPlayerEngine() {
+    if (MY_MUSIC_LIST.length === 0) return;
+    const playerTrigger = document.getElementById('mini-audio-trigger');
+    loadTrack(currentTrackIndex);
+    if (playerTrigger) playerTrigger.addEventListener('click', openSoundModal);
+    audioEngine.addEventListener('ended', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % MY_MUSIC_LIST.length;
+        loadTrack(currentTrackIndex);
+        audioEngine.play().then(() => { if (playerTrigger) playerTrigger.classList.add('playing'); }).catch(() => { isTrackPlaying = false; if (playerTrigger) playerTrigger.classList.remove('playing'); });
+    });
+}
+
+function loadTrack(index) { if (index < 0 || index >= MY_MUSIC_LIST.length) return; audioEngine.src = MY_MUSIC_LIST[index].src; }
+
+function togglePlayPause() {
+    const playerTrigger = document.getElementById('mini-audio-trigger');
+    const btn = document.getElementById('btn-music-toggle');
+    if (isTrackPlaying) {
+        audioEngine.pause(); isTrackPlaying = false;
+        if (playerTrigger) playerTrigger.classList.remove('playing');
+        if (btn) btn.innerText = '음악 재생';
+    } else {
+        audioEngine.play().then(() => {
+            isTrackPlaying = true;
+            if (playerTrigger) playerTrigger.classList.add('playing');
+            if (btn) btn.innerText = '일시정지';
+        }).catch(err => console.log("오디오 재생 대기"));
     }
 }
 
-// ==========================================
-// 🔔 0-C. 푸시 알림 및 브라우저 알림 권한 시스템 (FCM 버전)
-// ==========================================
+function fetchWeatherWidget() {
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
+    .then(res => res.json())
+    .then(data => {
+        const code = data.current_weather.weathercode;
+        let icon = '☁️';
+        if(code === 0) icon = '☀️';
+        else if(code > 0 && code <= 3) icon = '⛅';
+        else if(code >= 51 && code <= 67) icon = '🌧️';
+        else if(code >= 71 && code <= 77) icon = '❄️';
+        
+        let wElem = document.getElementById('weather-widget');
+        if(!wElem) {
+            wElem = document.createElement('div');
+            wElem.id = 'weather-widget';
+            document.body.appendChild(wElem);
+        }
+        wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
+    }).catch(e => console.log("날씨 서버 동기화"));
+}
+
+function injectRandomMemoryButton() {
+    const btn = document.createElement('div');
+    btn.id = 'random-memory-btn';
+    btn.innerHTML = '🐚';
+    btn.title = "파도에 밀려온 과거의 조각 (랜덤 글 읽기)";
+    btn.onclick = () => {
+        if(allPosts.length === 0) return showSystemAlert('아직 바다에 기록된 추억이 없습니다.');
+        const randomPost = allPosts[Math.floor(Math.random() * allPosts.length)];
+        openDetailModal(randomPost.id);
+    };
+    document.body.appendChild(btn);
+}
+
 function requestNotificationPermission() {
     if (!("Notification" in window) || !database) return;
-    
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
-            console.log('알림 권한 허용됨. 토큰 발급 시작...');
             const messaging = firebase.messaging();
-            
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.ready.then((registration) => {
-                    messaging.getToken({ 
-                        vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg',
-                        serviceWorkerRegistration: registration 
-                    })
+                    messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg', serviceWorkerRegistration: registration })
                     .then((currentToken) => {
-                        if (currentToken) {
-                            console.log('발급된 기기 토큰:', currentToken);
-                            const tokenKey = currentToken.replace(/[.#$\[\]]/g, '_');
-                            database.ref('fcmTokens/' + tokenKey).set(currentToken);
-                        } else {
-                            console.log('토큰 발급 실패: 권한이 부족합니다.');
-                        }
-                    }).catch((err) => {
-                        console.error('토큰 가져오기 에러 원인:', err);
+                        if (currentToken) database.ref('fcmTokens/' + currentToken.replace(/[.#$\[\]]/g, '_')).set(currentToken);
                     });
                 });
             }
-        } else {
-            console.log('사용자가 알림 권한을 차단했거나 무시했습니다.');
         }
     });
 }
@@ -124,34 +195,41 @@ function sendNotification(title, body) {
     new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
 }
 
-// ==========================================
-// 🛠️ 0-D. 최우선 라이프 사이클 매니저
-// ==========================================
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
     if (loader) loader.classList.add('fade-out');
 }
 
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    hideLoadingScreen();
-} else {
-    document.addEventListener('DOMContentLoaded', hideLoadingScreen);
-}
+if (document.readyState === 'complete' || document.readyState === 'interactive') { hideLoadingScreen(); } 
+else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
+
+let isRestMode = false; 
+let isGridView = false; 
+
+window.toggleGridView = function() {
+    isGridView = !isGridView;
+    renderUI();
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        if (localStorage.getItem('isAdminLoggedIn') === 'true') {
-            isAdmin = true;
-            loggedInUser = localStorage.getItem('loggedInUser') || ''; 
-            requestNotificationPermission(); 
-        }
-
-        applyTimeBasedThemeEngine(); // 테마 적용
+        if (localStorage.getItem('isAdminLoggedIn') === 'true') { isAdmin = true; loggedInUser = localStorage.getItem('loggedInUser') || ''; requestNotificationPermission(); }
+        applyTimeBasedThemeEngine();
+        initDraftAutoSaveEngine(); // 🚨 라이프사이클 엔진 주입
+        injectRandomMemoryButton();
+        fetchWeatherWidget();
+        
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
-        initDraftAutoSaveEngine(); // 임시저장 주입
-        updateUI(); 
+        
+        if(typeof firebase !== 'undefined') {
+            firebase.database().ref('settings').on('value', snap => {
+                const settings = snap.val() || {};
+                isRestMode = settings.restMode || false;
+                updateUI();
+            });
+        }
     } catch (e) {
         console.error("엔진 로딩 예외 발생 : ", e);
         hideLoadingScreen();
@@ -162,100 +240,28 @@ let newWorker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('firebase-messaging-sw.js', { scope: './' }).then((reg) => {
-            console.log('PWA 및 모바일 알림 통합 인프라 가동 완료:', reg.scope);
-            
-            if (typeof firebase !== 'undefined' && firebase.messaging) {
-                firebase.messaging().useServiceWorker(reg);
-            }
-            
+            if (typeof firebase !== 'undefined' && firebase.messaging) { firebase.messaging().useServiceWorker(reg); }
             reg.addEventListener('updatefound', () => {
                 newWorker = reg.installing;
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        const updateToast = document.getElementById('update-toast');
-                        if (updateToast) updateToast.classList.add('show');
-                    }
-                });
+                newWorker.addEventListener('statechange', () => { if (newWorker.state === 'installed' && navigator.serviceWorker.controller) { const updateToast = document.getElementById('update-toast'); if (updateToast) updateToast.classList.add('show'); } });
             });
-        }).catch((err) => console.error('서비스 워커 등록 실패:', err));
+        }).catch((err) => console.error(err));
     });
-
     let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-            refreshing = true;
-            window.location.reload();
-        }
-    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (!refreshing) { refreshing = true; window.location.reload(); } });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const reloadBtn = document.getElementById('update-reload-btn');
-    const dismissBtn = document.getElementById('update-dismiss-btn');
-    const updateToast = document.getElementById('update-toast');
-
-    if (reloadBtn) {
-        reloadBtn.addEventListener('click', () => {
-            if (updateToast) updateToast.classList.remove('show');
-            if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
-        });
-    }
-    if (dismissBtn) {
-        dismissBtn.addEventListener('click', () => {
-            if (updateToast) updateToast.classList.remove('show');
-        });
-    }
+    const reloadBtn = document.getElementById('update-reload-btn'); const dismissBtn = document.getElementById('update-dismiss-btn'); const updateToast = document.getElementById('update-toast');
+    if (reloadBtn) reloadBtn.addEventListener('click', () => { if (updateToast) updateToast.classList.remove('show'); if (newWorker) newWorker.postMessage({ action: 'skipWaiting' }); });
+    if (dismissBtn) dismissBtn.addEventListener('click', () => { if (updateToast) updateToast.classList.remove('show'); });
 });
-
-function initMusicPlayerEngine() {
-    if (MY_MUSIC_LIST.length === 0) return;
-    const playerTrigger = document.getElementById('mini-audio-trigger');
-    loadTrack(currentTrackIndex);
-
-    if (playerTrigger) playerTrigger.addEventListener('click', togglePlayPause);
-
-    audioEngine.addEventListener('ended', () => {
-        currentTrackIndex = (currentTrackIndex + 1) % MY_MUSIC_LIST.length;
-        loadTrack(currentTrackIndex);
-        audioEngine.play().then(() => {
-            if (playerTrigger) playerTrigger.classList.add('playing');
-        }).catch(() => {
-            isTrackPlaying = false;
-            if (playerTrigger) playerTrigger.classList.remove('playing');
-        });
-    });
-}
-
-function loadTrack(index) {
-    if (index < 0 || index >= MY_MUSIC_LIST.length) return;
-    audioEngine.src = MY_MUSIC_LIST[index].src;
-}
-
-function togglePlayPause() {
-    const playerTrigger = document.getElementById('mini-audio-trigger');
-    if (!playerTrigger) return;
-
-    if (isTrackPlaying) {
-        audioEngine.pause();
-        isTrackPlaying = false;
-        playerTrigger.classList.remove('playing');
-    } else {
-        audioEngine.play().then(() => {
-            isTrackPlaying = true;
-            playerTrigger.classList.add('playing');
-        }).catch(err => {
-            console.log("오디오 차단 해제 패치 가동");
-        });
-    }
-}
 
 function formatTo24Hour(dateStr) {
     if (!dateStr) return '';
-    let str = String(dateStr).trim();
-    str = str.replace(/\b24(?=:\d{2})/g, '00');
+    let str = String(dateStr).trim(); str = str.replace(/\b24(?=:\d{2})/g, '00');
     if (str.includes('오전') || str.includes('오후')) {
-        const isPm = str.includes('오후');
-        str = str.replace(/오전\s*|오후\s*/g, ''); 
+        const isPm = str.includes('오후'); str = str.replace(/오전\s*|오후\s*/g, ''); 
         str = str.replace(/(\d{1,2})(?=:\d{2})/, function(match) {
             let h = parseInt(match, 10);
             if (isPm) { if (h !== 12) h += 12; } else { if (h === 12) h = 0; }
@@ -265,7 +271,6 @@ function formatTo24Hour(dateStr) {
     return str;
 }
 
-// 보안 시스템
 document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('dragstart', e => e.preventDefault());
 document.addEventListener('selectstart', e => e.preventDefault());
@@ -279,7 +284,7 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlYXBwLmNvbQ=="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlcGFwcC5jb20="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
     storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
@@ -288,35 +293,15 @@ const secureConfig = {
     measurementId: atob("Ry0zRU03OTQ3OUpU")
 };
 
-const secureAdmin = {
-    id: decodeData("7JWE7Iuc"), 
-    pw: atob("YXNoaSMyNjA0MTY=")        
-};
+const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaSMyNjA0MTY=") };
 
 let database = null;
-try {
-    if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(secureConfig); 
-        database = firebase.database();
-    } else {
-        console.error("Firebase SDK가 로드되지 않았습니다.");
-    }
-} catch (error) {
-    console.error("Firebase 초기화 중 에러 발생 : ", error);
-}
+try { if (typeof firebase !== 'undefined') { firebase.initializeApp(secureConfig); database = firebase.database(); } } 
+catch (error) { console.error("Firebase 초기화 에러:", error); }
 
-let isAdmin = false;
-let loggedInUser = ''; 
-let currentView = 'posts'; 
-let currentPage = 1;
-const postsPerPage = 6;
-let allPosts = [];
-let allLetters = []; 
-let editTargetKey = null; 
-let searchKeyword = ''; 
-let searchAuthor = 'all';
-let isSubmitting = false;
-let isInternalSyncAction = false; 
+let isAdmin = false; let loggedInUser = ''; let currentView = 'posts'; let currentPage = 1; const postsPerPage = 6;
+let allPosts = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
+let isSubmitting = false; let isInternalSyncAction = false; 
 
 function showSystemAlert(message, callback) {
     const modalElem = document.getElementById('system-modal');
@@ -324,12 +309,8 @@ function showSystemAlert(message, callback) {
     if (document.getElementById('system-message')) document.getElementById('system-message').innerText = message;
     if (document.getElementById('system-buttons')) {
         document.getElementById('system-buttons').innerHTML = "";
-        const okBtn = document.createElement('button');
-        okBtn.innerText = "확인";
-        okBtn.onclick = function() {
-            if (modalElem) modalElem.style.display = 'none';
-            if (callback) callback();
-        };
+        const okBtn = document.createElement('button'); okBtn.innerText = "확인";
+        okBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; if (callback) callback(); };
         document.getElementById('system-buttons').appendChild(okBtn);
     }
     if (modalElem) modalElem.style.display = 'flex';
@@ -341,21 +322,11 @@ function showSystemConfirm(message, onConfirm, onCancel) {
     if (document.getElementById('system-message')) document.getElementById('system-message').innerText = message;
     if (document.getElementById('system-buttons')) {
         document.getElementById('system-buttons').innerHTML = "";
-        const confirmBtn = document.createElement('button');
-        confirmBtn.innerText = "확인";
-        confirmBtn.onclick = function() {
-            if (modalElem) modalElem.style.display = 'none';
-            if (onConfirm) onConfirm();
-        };
-        const cancelBtn = document.createElement('button');
-        cancelBtn.innerText = "취소";
-        cancelBtn.className = "cancel-btn";
-        cancelBtn.onclick = function() {
-            if (modalElem) modalElem.style.display = 'none';
-            if (onCancel) onCancel();
-        };
-        document.getElementById('system-buttons').appendChild(confirmBtn);
-        document.getElementById('system-buttons').appendChild(cancelBtn);
+        const confirmBtn = document.createElement('button'); confirmBtn.innerText = "확인";
+        confirmBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; if (onConfirm) onConfirm(); };
+        const cancelBtn = document.createElement('button'); cancelBtn.innerText = "취소"; cancelBtn.className = "cancel-btn";
+        cancelBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; if (onCancel) onCancel(); };
+        document.getElementById('system-buttons').appendChild(confirmBtn); document.getElementById('system-buttons').appendChild(cancelBtn);
     }
     if (modalElem) modalElem.style.display = 'flex';
 }
@@ -363,15 +334,94 @@ function showSystemConfirm(message, onConfirm, onCancel) {
 function openModal() { if (document.getElementById('login-modal')) document.getElementById('login-modal').style.display = 'flex'; }
 function closeModal() { if (document.getElementById('login-modal')) document.getElementById('login-modal').style.display = 'none'; }
 function closeDetailModal() { if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'none'; document.body.classList.remove('no-scroll'); } }
-function openBackupModal() { if (!isAdmin) return; if (document.getElementById('backup-modal')) { document.getElementById('backup-modal').style.display = 'flex'; loadBackupTimelineList(); } }
+
+function openBackupModal() { 
+    if (!isAdmin) return; 
+    if (document.getElementById('backup-modal')) { 
+        document.getElementById('backup-modal').style.display = 'flex'; 
+        initAdminTabs();
+        loadBackupTimelineList(); 
+    } 
+}
 function closeBackupModal() { if (document.getElementById('backup-modal')) document.getElementById('backup-modal').style.display = 'none'; }
 
+function initAdminTabs() {
+    const wrapper = document.querySelector('.backup-timeline-wrapper');
+    if (!wrapper || document.getElementById('admin-tab-header')) return; 
+    
+    const tabHeader = document.createElement('div');
+    tabHeader.id = 'admin-tab-header';
+    tabHeader.style.cssText = 'display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:15px;';
+    
+    const btnBackup = document.createElement('button');
+    btnBackup.innerText = '💾 데이터 백업';
+    btnBackup.style.cssText = 'flex:1; background:transparent; border:none; color:#f7a37f; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid #f7a37f; transition:0.2s; outline:none;';
+    
+    const btnSettings = document.createElement('button');
+    btnSettings.innerText = '⚙️ 서재 설정';
+    btnSettings.style.cssText = 'flex:1; background:transparent; border:none; color:#64748b; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid transparent; transition:0.2s; outline:none;';
+    
+    tabHeader.appendChild(btnBackup);
+    tabHeader.appendChild(btnSettings);
+
+    const settingsContainer = document.createElement('div');
+    settingsContainer.id = 'admin-settings-container';
+    settingsContainer.style.display = 'none';
+    
+    wrapper.insertBefore(settingsContainer, wrapper.firstChild);
+    wrapper.insertBefore(tabHeader, settingsContainer);
+
+    btnBackup.onclick = () => {
+        btnBackup.style.color = '#f7a37f'; btnBackup.style.borderBottom = '2px solid #f7a37f';
+        btnSettings.style.color = '#64748b'; btnSettings.style.borderBottom = '2px solid transparent';
+        document.getElementById('backup-list-container').style.display = 'block';
+        const delControls = document.getElementById('backup-delete-controls');
+        if(delControls) delControls.style.display = 'flex';
+        settingsContainer.style.display = 'none';
+    };
+
+    btnSettings.onclick = () => {
+        btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f';
+        btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent';
+        document.getElementById('backup-list-container').style.display = 'none';
+        const delControls = document.getElementById('backup-delete-controls');
+        if(delControls) delControls.style.display = 'none';
+        settingsContainer.style.display = 'block';
+        renderAdminSettings();
+    };
+}
+
+function renderAdminSettings() {
+    const container = document.getElementById('admin-settings-container');
+    container.innerHTML = `
+        <div style="background:rgba(3,10,23,0.5); padding:20px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
+            <h3 style="color:#fff; margin-bottom:15px; font-size:1.05rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">관리자 전용 제어 시스템</h3>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="padding-right:10px;">
+                    <div style="color:#e2e8f0; font-weight:bold; margin-bottom:5px;">🌊 바다 휴식 모드 (수신 차단)</div>
+                    <div style="color:#94a3b8; font-size:0.75rem; line-height:1.4;">활성화 시, 일반 방문객들이 더 이상 편지를 띄울 수 없도록 작성 버튼이 막히고 안내 문구가 표시됩니다.</div>
+                </div>
+                <button onclick="toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:6px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none; cursor:pointer;">
+                    ${isRestMode ? '휴식 중 (해제하기)' : '휴식 모드 켜기'}
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function toggleRestMode() {
+    if(!isAdmin || !database) return;
+    database.ref('settings/restMode').set(!isRestMode).then(() => {
+        showSystemAlert(!isRestMode ? '바다가 휴식에 들어갑니다. 편지 수신이 차단됩니다.' : '바다의 휴식이 끝났습니다. 편지 수신이 재개됩니다.');
+        renderAdminSettings();
+    });
+}
+
 function login() {
-    const idElem = document.getElementById('admin-id');
-    const pwElem = document.getElementById('admin-pw');
+    const idElem = document.getElementById('admin-id'); const pwElem = document.getElementById('admin-pw');
     if (!idElem || !pwElem) return;
-    const inputId = idElem.value.trim();
-    const inputPw = pwElem.value;
+    const inputId = idElem.value.trim(); const inputPw = pwElem.value;
     const haeunId = decodeData("7ZWY7J2A"); 
 
     let tempUser = null;
@@ -380,320 +430,147 @@ function login() {
 
     if (tempUser) {
         isAdmin = true; loggedInUser = tempUser; 
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        localStorage.setItem('loggedInUser', loggedInUser);
-        closeModal();
-        idElem.value = ''; pwElem.value = '';
-        requestNotificationPermission();
+        localStorage.setItem('isAdminLoggedIn', 'true'); localStorage.setItem('loggedInUser', loggedInUser);
+        closeModal(); idElem.value = ''; pwElem.value = ''; requestNotificationPermission();
         showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`, function() { updateUI(); });
-    } else {
-        showSystemAlert('올바른 접근이 아닙니다.');
-    }
+    } else showSystemAlert('올바른 접근이 아닙니다.');
 }
 
-function logout() {
-    isAdmin = false; loggedInUser = ''; 
-    localStorage.removeItem('isAdminLoggedIn'); localStorage.removeItem('loggedInUser');
-    cancelEdit();
-    showSystemAlert('로그아웃 되었습니다.', function() { updateUI(); });
-}
+function logout() { isAdmin = false; loggedInUser = ''; localStorage.removeItem('isAdminLoggedIn'); localStorage.removeItem('loggedInUser'); cancelEdit(); showSystemAlert('로그아웃 되었습니다.', function() { updateUI(); }); }
 
 function updateUI() {
-    const writeSection = document.getElementById('write-section');
-    const letterSection = document.getElementById('letter-section');
-    const loginBtn = document.getElementById('login-btn');
-    const adminMenu = document.getElementById('admin-menu');
-    const tabContainer = document.getElementById('view-tab-container');
-    const currentUserBtn = document.getElementById('current-user-btn'); 
+    const writeSection = document.getElementById('write-section'); const letterSection = document.getElementById('letter-section');
+    const loginBtn = document.getElementById('login-btn'); const adminMenu = document.getElementById('admin-menu');
+    const tabContainer = document.getElementById('view-tab-container'); const currentUserBtn = document.getElementById('current-user-btn'); 
     const backupTrigger = document.getElementById('mini-backup-trigger');
 
     if (isAdmin) {
-        if (writeSection) writeSection.style.display = 'block';
-        if (letterSection) letterSection.style.display = 'none'; 
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (adminMenu) adminMenu.style.display = 'flex'; 
-        if (tabContainer) tabContainer.style.display = 'flex'; 
-        if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
+        if (writeSection) writeSection.style.display = 'block'; if (letterSection) letterSection.style.display = 'none'; 
+        if (loginBtn) loginBtn.style.display = 'none'; if (adminMenu) adminMenu.style.display = 'flex'; 
+        if (tabContainer) tabContainer.style.display = 'flex'; if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
         if (backupTrigger) backupTrigger.style.display = 'flex'; 
         switchView(currentView);
     } else {
-        if (writeSection) writeSection.style.display = 'none';
-        if (letterSection) letterSection.style.display = 'block'; 
-        if (loginBtn) loginBtn.style.display = 'inline-block';
-        if (adminMenu) adminMenu.style.display = 'none';
-        if (tabContainer) tabContainer.style.display = 'none'; 
-        if (backupTrigger) backupTrigger.style.display = 'none'; 
+        if (writeSection) writeSection.style.display = 'none'; if (letterSection) letterSection.style.display = 'block'; 
+        if (loginBtn) loginBtn.style.display = 'inline-block'; if (adminMenu) adminMenu.style.display = 'none';
+        if (tabContainer) tabContainer.style.display = 'none'; if (backupTrigger) backupTrigger.style.display = 'none'; 
         switchView('posts'); 
+    }
+    
+    const letterSubmitBtn = document.getElementById('submit-letter-btn');
+    const letterContent = document.getElementById('letter-content');
+    if (isRestMode) {
+        if(letterSubmitBtn) { letterSubmitBtn.disabled = true; letterSubmitBtn.innerText = '바다가 쉬어가는 중입니다'; letterSubmitBtn.style.opacity = '0.5'; }
+        if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머로 편지를 보낼 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
+    } else {
+        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '띄우기'; letterSubmitBtn.style.opacity = '1'; }
+        if(letterContent) { letterContent.disabled = false; letterContent.placeholder = '바다에 띄울 편지 내용을 작성해주세요...'; }
     }
 }
 
 function switchView(view) {
     if (!isAdmin && view === 'letters') { currentView = 'posts'; return; }
     currentView = view; currentPage = 1;
-    const tabPosts = document.getElementById('tab-posts');
-    const tabLetters = document.getElementById('tab-letters');
+    const tabPosts = document.getElementById('tab-posts'); const tabLetters = document.getElementById('tab-letters');
     const mainTitle = document.getElementById('section-main-title');
-    if (tabPosts) tabPosts.classList.remove('active');
-    if (tabLetters) tabLetters.classList.remove('active');
-    if(view === 'posts') {
-        if (tabPosts) tabPosts.classList.add('active');
-        if (mainTitle) mainTitle.innerText = "바다의 기록";
-    } else {
-        if (tabLetters) tabLetters.classList.add('active');
-        if (mainTitle) mainTitle.innerText = "띄워진 편지";
-    }
+    if (tabPosts) tabPosts.classList.remove('active'); if (tabLetters) tabLetters.classList.remove('active');
+    if(view === 'posts') { if (tabPosts) tabPosts.classList.add('active'); if (mainTitle) mainTitle.innerText = "바다의 기록"; } 
+    else { if (tabLetters) tabLetters.classList.add('active'); if (mainTitle) mainTitle.innerText = "띄워진 편지"; }
     renderUI();
 }
 
-function handleSearch() {
-    searchKeyword = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : '';
-    searchAuthor = document.getElementById('author-filter') ? document.getElementById('author-filter').value : 'all';
-    currentPage = 1; renderUI();
-}
+function handleSearch() { searchKeyword = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : ''; searchAuthor = document.getElementById('author-filter') ? document.getElementById('author-filter').value : 'all'; currentPage = 1; renderUI(); }
 
-let rawPostsSnapshot = null;
-let rawLettersSnapshot = null;
-let isInitialPostLoad = true;
-let knownPostIds = new Set();
-
+let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
 function listenPosts() {
     if (!database) return;
     database.ref('posts').off();
     database.ref('posts').on('value', (snapshot) => {
-        rawPostsSnapshot = snapshot.val();
-        allPosts = []; let currentIds = new Set(); let hasNewPost = false;
+        rawPostsSnapshot = snapshot.val(); allPosts = []; let currentIds = new Set(); let hasNewPost = false;
         if (rawPostsSnapshot) {
             Object.keys(rawPostsSnapshot).forEach((key) => {
-                allPosts.push({ id: key, ...rawPostsSnapshot[key] });
-                currentIds.add(key);
+                allPosts.push({ id: key, ...rawPostsSnapshot[key] }); currentIds.add(key);
                 if (!isInitialPostLoad && !knownPostIds.has(key)) hasNewPost = true;
             });
             allPosts.reverse(); 
         }
-        
         if (!isInitialPostLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
-        
-        if (hasNewPost && isAdmin && !isSubmitting) {
-            sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
-        }
+        if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
     });
 }
 
-let knownLetterIds = new Set();
-let isInitialLetterLoad = true;
-
+let knownLetterIds = new Set(); let isInitialLetterLoad = true;
 function listenLetters() {
     if (!database) return;
     database.ref('letters').off();
     database.ref('letters').on('value', (snapshot) => {
-        rawLettersSnapshot = snapshot.val();
-        allLetters = []; let currentIds = new Set(); let hasNewLetter = false;
+        rawLettersSnapshot = snapshot.val(); allLetters = []; let currentIds = new Set(); let hasNewLetter = false;
         if (rawLettersSnapshot) {
             Object.keys(rawLettersSnapshot).forEach((key) => {
-                allLetters.push({ id: key, ...rawLettersSnapshot[key] });
-                currentIds.add(key);
+                allLetters.push({ id: key, ...rawLettersSnapshot[key] }); currentIds.add(key);
                 if (!isInitialLetterLoad && !knownLetterIds.has(key)) hasNewLetter = true;
             });
             allLetters.reverse();
         }
-        
         if (!isInitialLetterLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
-        
-        if (hasNewLetter && isAdmin && !isSubmitting) {
-            sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
-        }
+        if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         knownLetterIds = currentIds; isInitialLetterLoad = false;
         if(currentView === 'letters') renderUI();
     });
 }
 
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
-
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
     const now = new Date(); const timestamp = now.getTime();
     const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    
-    const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0;
-    const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
-
+    const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0; const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
     const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, lCount: lCount };
     const backupPayload = { posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
-
     const newBackupKey = database.ref().push().key;
-
-    Promise.all([
-        database.ref(`backupMeta/${newBackupKey}`).set(backupMeta),
-        database.ref(`backupData/${newBackupKey}`).set(backupPayload)
-    ]).then(() => { 
-        cleanExpiredBackupsTimeline(); 
-    }).catch(err => console.error(err));
+    Promise.all([ database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload) ])
+    .then(() => { cleanExpiredBackupsTimeline(); }).catch(err => console.error(err));
 }
 
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
-    
     database.ref('backupMeta').orderByChild('timestamp').endAt(expirationThreshold).once('value').then((snapshot) => {
-        const expiredBackups = snapshot.val(); 
-        if (!expiredBackups) return;
-        
-        Object.keys(expiredBackups).forEach((key) => { 
-            database.ref(`backupMeta/${key}`).remove(); 
-            database.ref(`backupData/${key}`).remove(); 
-        });
+        const expiredBackups = snapshot.val(); if (!expiredBackups) return;
+        Object.keys(expiredBackups).forEach((key) => { database.ref(`backupMeta/${key}`).remove(); database.ref(`backupData/${key}`).remove(); });
     });
 }
 
-function triggerManualBackup() { if (!isAdmin) return; executeCloudBackupEngine(false); showSystemAlert('모든 상태 스냅샷을 안전하게 기록했습니다.'); loadBackupTimelineList(); }
-
-// ==========================================
-// 💡 백업 다중 선택 및 삭제 매니저
-// ==========================================
-function toggleAllBackups(source) {
-    const checkboxes = document.querySelectorAll('.backup-checkbox');
-    checkboxes.forEach(cb => cb.checked = source.checked);
-}
-
+function toggleAllBackups(source) { document.querySelectorAll('.backup-checkbox').forEach(cb => cb.checked = source.checked); }
 function selectBackupsByPeriod(days) {
-    const checkboxes = document.querySelectorAll('.backup-checkbox');
-    const selectAllCb = document.getElementById('backup-select-all');
+    const checkboxes = document.querySelectorAll('.backup-checkbox'); const selectAllCb = document.getElementById('backup-select-all');
     if(selectAllCb) selectAllCb.checked = false;
-
-    if (!days) {
-        checkboxes.forEach(cb => cb.checked = false);
-        return;
-    }
-    
-    const now = new Date().getTime();
-    const threshold = days === 'all' ? now + 999999999 : now - (parseInt(days) * 24 * 60 * 60 * 1000);
-    
+    if (!days) { checkboxes.forEach(cb => cb.checked = false); return; }
+    const now = new Date().getTime(); const threshold = days === 'all' ? now + 999999999 : now - (parseInt(days) * 24 * 60 * 60 * 1000);
     let allChecked = true;
-    checkboxes.forEach(cb => {
-        const ts = parseInt(cb.getAttribute('data-timestamp'));
-        if (days === 'all') {
-            cb.checked = true;
-        } else {
-            cb.checked = ts < threshold; 
-        }
-        if(!cb.checked) allChecked = false;
-    });
-    
+    checkboxes.forEach(cb => { const ts = parseInt(cb.getAttribute('data-timestamp')); if (days === 'all') cb.checked = true; else cb.checked = ts < threshold; if(!cb.checked) allChecked = false; });
     if (selectAllCb) selectAllCb.checked = allChecked;
 }
 
 function deleteSelectedBackups() {
     if (!isAdmin || !database) return;
-    const checkboxes = document.querySelectorAll('.backup-checkbox:checked');
-    const keysToDelete = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (keysToDelete.length === 0) {
-        showSystemAlert('소멸시킬 백업 지점을 선택해주세요.');
-        return;
-    }
-
+    const checkboxes = document.querySelectorAll('.backup-checkbox:checked'); const keysToDelete = Array.from(checkboxes).map(cb => cb.value);
+    if (keysToDelete.length === 0) return showSystemAlert('소멸시킬 백업 지점을 선택해주세요.');
     showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?\n(이 작업은 되돌릴 수 없습니다)`, function() {
-        const deletePromises = keysToDelete.map(key => {
-            return Promise.all([
-                database.ref(`backupMeta/${key}`).remove(),
-                database.ref(`backupData/${key}`).remove()
-            ]);
-        });
-        
-        Promise.all(deletePromises).then(() => {
-            showSystemAlert('선택한 백업이 바다에서 성공적으로 소멸되었습니다.');
-            loadBackupTimelineList(); 
-        }).catch(err => {
-            console.error("백업 소멸 에러:", err);
-            showSystemAlert('백업 소멸 중 오류가 발생했습니다.');
-        });
-    });
-}
-
-// 🚨 [추천 기능 #10] 백업 파일 로컬 컴퓨터로 TXT / PDF 선택 다운로드 엔진
-function downloadBackupFile(key, format) {
-    if (!isAdmin || !database) return;
-    database.ref(`backupData/${key}`).once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (!data) {
-            showSystemAlert("해당 시점의 디테일 원본 데이터 백업본 파일이 존재하지 않습니다.");
-            return;
-        }
-        const posts = data.posts || {};
-        const letters = data.letters || {};
-        
-        if (format === 'txt') {
-            // 깔끔하게 포맷팅된 순수 TXT 텍스트 생성
-            let textResult = `=========================================\n  수평선 너머의 서재 백업 기록 파일 (${key})\n=========================================\n\n`;
-            textResult += `[1. 바다의 기록 (글)]\n`;
-            Object.keys(posts).forEach(k => {
-                const p = posts[k];
-                textResult += `▶ 제목: ${p.title}\n▶ 기록자: ${p.author || '기록자'}\n▶ 날짜: ${p.date}\n▶ 내용:\n${p.content}\n`;
-                textResult += `-----------------------------------------\n`;
-            });
-            textResult += `\n[2. 띄워진 편지]\n`;
-            Object.keys(letters).forEach(k => {
-                const l = letters[k];
-                textResult += `▶ 제목: ${l.title}\n▶ 날짜: ${l.date}\n▶ 상태: ${l.read ? '수거됨' : '미수거'}\n▶ 내용:\n${l.content}\n`;
-                textResult += `-----------------------------------------\n`;
-            });
-
-            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `서재_백업데이터_${key}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        } else if (format === 'pdf') {
-            // 인쇄 서식을 맞춘 정갈한 HTML 프린트 윈도우 생성 (PDF 자동 유도)
-            const printWindow = window.open("", "_blank");
-            let htmlContent = `
-                <html>
-                <head>
-                    <title>수평선 너머의 서재 백업 리포트</title>
-                    <style>
-                        body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-                        h1 { border-bottom: 2px solid #0f172a; padding-bottom: 12px; font-size: 22px; }
-                        h2 { color: #0284c7; margin-top: 32px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; }
-                        .item { margin-bottom: 24px; page-break-inside: avoid; }
-                        .meta { font-size: 12px; color: #64748b; margin-bottom: 6px; }
-                        .content { background: #f8fafc; padding: 14px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #e2e8f0; }
-                    </style>
-                </head>
-                <body>
-                    <h1>수평선 너머의 서재 스냅샷 백업 [시점 코드: ${key}]</h1>
-                    <h2>[바다의 기록 - 글 목록]</h2>
-            `;
-            Object.keys(posts).forEach(k => {
-                const p = posts[k];
-                htmlContent += `<div class="item"><strong>${escapeHtml(p.title)}</strong><div class="meta">작성자: ${p.author || '기록자'} | 일시: ${p.date}</div><div class="content">${escapeHtml(p.content)}</div></div>`;
-            });
-            htmlContent += `<h2>[띄워진 편지 목록]</h2>`;
-            Object.keys(letters).forEach(k => {
-                const l = letters[k];
-                htmlContent += `<div class="item"><strong>${escapeHtml(l.title)}</strong><div class="meta">일시: ${l.date} | 처리 상태: ${l.read ? '수거됨' : '미수거'}</div><div class="content">${escapeHtml(l.content)}</div></div>`;
-            });
-            htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-        }
+        const deletePromises = keysToDelete.map(key => { return Promise.all([ database.ref(`backupMeta/${key}`).remove(), database.ref(`backupData/${key}`).remove() ]); });
+        Promise.all(deletePromises).then(() => { showSystemAlert('선택한 백업이 바다에서 성공적으로 소멸되었습니다.'); loadBackupTimelineList(); }).catch(err => showSystemAlert('백업 소멸 중 오류가 발생했습니다.'));
     });
 }
 
 function loadBackupTimelineList() {
-    const wrapper = document.querySelector('.backup-timeline-wrapper');
-    const container = document.getElementById('backup-list-container'); 
-    if (!container || !database) return; 
-    container.innerHTML = '';
-
+    const wrapper = document.querySelector('.backup-timeline-wrapper'); const container = document.getElementById('backup-list-container'); 
+    if (!container || !database) return; container.innerHTML = '';
+    
     let controlsWrapper = document.getElementById('backup-delete-controls');
     if (!controlsWrapper && wrapper) {
-        controlsWrapper = document.createElement('div');
-        controlsWrapper.id = 'backup-delete-controls';
-        controlsWrapper.style.display = 'none'; 
+        controlsWrapper = document.createElement('div'); controlsWrapper.id = 'backup-delete-controls'; controlsWrapper.style.display = 'none'; 
         controlsWrapper.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;">
                 <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
@@ -702,22 +579,16 @@ function loadBackupTimelineList() {
                 </label>
                 <div style="display:flex; gap:8px;">
                     <select id="backup-period-select" onchange="selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
-                        <option value="">기간 선택 지우기</option>
-                        <option value="7">7일 이전 기록</option>
-                        <option value="14">14일 이전 기록</option>
-                        <option value="all">모두 선택</option>
+                        <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
                     </select>
                     <button onclick="deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
                 </div>
             </div>
         `;
-        wrapper.insertBefore(controlsWrapper, wrapper.firstChild);
+        wrapper.insertBefore(controlsWrapper, document.getElementById('admin-settings-container').nextSibling); 
     } else if (controlsWrapper) {
-        const selectAllCb = document.getElementById('backup-select-all');
-        if(selectAllCb) selectAllCb.checked = false;
-        const periodSelect = document.getElementById('backup-period-select');
-        if(periodSelect) periodSelect.value = "";
-        controlsWrapper.style.display = 'none';
+        const selectAllCb = document.getElementById('backup-select-all'); if(selectAllCb) selectAllCb.checked = false;
+        const periodSelect = document.getElementById('backup-period-select'); if(periodSelect) periodSelect.value = "";
     }
 
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
@@ -726,28 +597,15 @@ function loadBackupTimelineList() {
     database.ref('backupMeta').once('value').then((snapshot) => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
         const backups = snapshot.val(); 
-        
-        if (!backups) { 
-            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; 
-            return; 
-        }
-
+        if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
         const keys = Object.keys(backups).filter(key => backups[key].timestamp >= expirationThreshold).reverse();
-        if (keys.length === 0) {
-            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; 
-            return; 
-        }
+        if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
 
-        if (controlsWrapper) controlsWrapper.style.display = 'block';
-
+        if (controlsWrapper) controlsWrapper.style.display = 'flex';
+        
         keys.forEach((key) => {
-            const item = backups[key];
-            const pCount = item.pCount || 0; 
-            const lCount = item.lCount || 0;
-            const badgeClass = item.type === "자동" ? "auto" : "manual";
-            
+            const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
-            // 🚨 [추천 기능 #10 반영] 리스트 항목 우측에 가볍고 직관적인 TXT 및 PDF 다운로드용 가이드 버튼 추가
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; margin-top:0; margin-bottom:0; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
@@ -767,53 +625,62 @@ function loadBackupTimelineList() {
     });
 }
 
+function downloadBackupFile(key, format) {
+    if (!isAdmin || !database) return;
+    database.ref(`backupData/${key}`).once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (!data) return showSystemAlert("해당 시점의 원본 데이터 백업본이 존재하지 않습니다.");
+        const posts = data.posts || {}; const letters = data.letters || {};
+        
+        if (format === 'txt') {
+            let textResult = `=========================================\n  수평선 너머의 서재 백업 기록 파일 (${key})\n=========================================\n\n[1. 바다의 기록 (글)]\n`;
+            Object.keys(posts).forEach(k => { textResult += `▶ 제목: ${posts[k].title}\n▶ 기록자: ${posts[k].author || '기록자'}\n▶ 날짜: ${posts[k].date}\n▶ 내용:\n${posts[k].content}\n-----------------------------------------\n`; });
+            textResult += `\n[2. 띄워진 편지]\n`;
+            Object.keys(letters).forEach(k => { textResult += `▶ 제목: ${letters[k].title}\n▶ 날짜: ${letters[k].date}\n▶ 상태: ${letters[k].read ? '수거됨' : '미수거'}\n▶ 내용:\n${letters[k].content}\n-----------------------------------------\n`; });
+            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = `서재_백업데이터_${key}.txt`; a.click(); URL.revokeObjectURL(url);
+        } else if (format === 'pdf') {
+            const printWindow = window.open("", "_blank");
+            let htmlContent = `<html><head><title>수평선 너머의 서재 백업 리포트</title><style>body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; } h1 { border-bottom: 2px solid #0f172a; padding-bottom: 12px; font-size: 22px; } h2 { color: #0284c7; margin-top: 32px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; } .item { margin-bottom: 24px; page-break-inside: avoid; } .meta { font-size: 12px; color: #64748b; margin-bottom: 6px; } .content { background: #f8fafc; padding: 14px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #e2e8f0; }</style></head><body><h1>수평선 너머의 서재 스냅샷 백업 [시점: ${key}]</h1><h2>[바다의 기록 - 글 목록]</h2>`;
+            Object.keys(posts).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(posts[k].title)}</strong><div class="meta">작성자: ${posts[k].author || '기록자'} | 일시: ${posts[k].date}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; });
+            htmlContent += `<h2>[띄워진 편지 목록]</h2>`;
+            Object.keys(letters).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(letters[k].title)}</strong><div class="meta">일시: ${letters[k].date} | 처리 상태: ${letters[k].read ? '수거됨' : '미수거'}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; });
+            htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
+            printWindow.document.write(htmlContent); printWindow.document.close();
+        }
+    });
+}
+
 function restoreFromTargetBackupPoint(key) {
     if (!isAdmin || !database) return;
-    showSystemConfirm('선택하신 시점으로 바다 데이터를 덮어씌워 복구하시겠습니까?', function() {
-        database.ref(`backupData/${key}`).once('value').then((snapshot) => {
-            let targetBackup = snapshot.val(); 
-            executeRestore(targetBackup);
-        });
-    });
+    showSystemConfirm('선택하신 시점으로 바다 데이터를 덮어씌워 복구하시겠습니까?', function() { database.ref(`backupData/${key}`).once('value').then((snapshot) => { executeRestore(snapshot.val()); }); });
 }
-
 function executeRestore(targetBackup) {
-    if (!targetBackup) return;
-    isInternalSyncAction = true;
-    
-    database.ref('posts').off();
-    database.ref('letters').off();
-
-    Promise.all([
-        database.ref('posts').set(targetBackup.posts || null), 
-        database.ref('letters').set(targetBackup.letters || null)
-    ]).then(() => {
-        listenPosts();
-        listenLetters();
-        showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { 
-            isInternalSyncAction = false; 
-            closeBackupModal(); 
-        });
-    }).catch(err => {
-        console.error("복구 중 에러 발생:", err);
-        listenPosts();
-        listenLetters();
-    });
+    if (!targetBackup) return; isInternalSyncAction = true;
+    database.ref('posts').off(); database.ref('letters').off();
+    Promise.all([ database.ref('posts').set(targetBackup.posts || null), database.ref('letters').set(targetBackup.letters || null) ]).then(() => {
+        listenPosts(); listenLetters(); showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
+    }).catch(err => { listenPosts(); listenLetters(); });
 }
 
-function scrollToPosts() {
-    const postsSection = document.getElementById('posts-section');
-    if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); }
-}
+function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
 function renderUI() {
     const container = document.getElementById('posts-container'); const paginationContainer = document.getElementById('pagination-container');
     const subtitleElem = document.querySelector('.section-subtitle'); const authorStatsContainer = document.getElementById('author-stats'); const authorFilterContainer = document.getElementById('author-filter-container');
     if (!container || !paginationContainer) return; container.innerHTML = ''; paginationContainer.innerHTML = '';
 
+    if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
+
     if (subtitleElem) {
-        if (currentView === 'posts') { subtitleElem.innerHTML = `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>`; } 
-        else { subtitleElem.innerHTML = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`; }
+        let subtitleText = currentView === 'posts' 
+            ? `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
+            : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
+        
+        let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
+        let gridBtnHtml = `<div style="margin-top:12px;"><button onclick="window.toggleGridView()" style="font-size:0.75rem; background:transparent; border:1px solid #cbd5e1; color:#cbd5e1; padding:4px 10px; border-radius:5px; cursor:pointer; transition:0.2s; outline:none;">${gridBtnText}</button></div>`;
+        
+        subtitleElem.innerHTML = subtitleText + gridBtnHtml;
     }
 
     if (currentView === 'posts') {
@@ -825,9 +692,7 @@ function renderUI() {
     }
 
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
-    if (currentView === 'posts' && searchAuthor !== 'all') {
-        targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); });
-    }
+    if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
 
     if (targetArray.length === 0) { container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px;">존재하지 않습니다.</p>`; return; }
@@ -844,11 +709,7 @@ function renderUI() {
                 : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button></div>`;
         }
         
-        // 🚨 [추천 기능 #9 반영] 편지함 탭에서 관리자가 수거/확인한 편지 카드 상단에 '수거됨' 이펙트 배지 주입
-        let readBadgeHtml = '';
-        if (currentView === 'letters' && item.read === true) {
-            readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`;
-        }
+        let readBadgeHtml = ''; if (currentView === 'letters' && item.read === true) { readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; }
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} | ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         card.innerHTML = `<h3>${escapeHtml(item.title)}${readBadgeHtml}</h3><div class="post-content-area">${escapeHtml(item.content)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
@@ -856,46 +717,19 @@ function renderUI() {
     });
 
     if (totalPages > 1) {
-        const maxPageButtons = 5; 
-        const currentGroup = Math.ceil(currentPage / maxPageButtons);
-        let startPage = (currentGroup - 1) * maxPageButtons + 1;
-        let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
-        
-        if (startPage > 1) {
-            const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
-            prevBtn.onclick = () => { 
-                currentPage = startPage - 1; 
-                renderUI(); 
-                scrollToPosts(); 
-            }; 
-            paginationContainer.appendChild(prevBtn);
-        }
-        
-        for (let i = startPage; i <= endPage; i++) {
-            const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i;
-            btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn);
-        }
-        
-        if (endPage < totalPages) {
-            const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;';
-            nextBtn.onclick = () => { 
-                currentPage = endPage + 1; 
-                renderUI(); 
-                scrollToPosts(); 
-            }; 
-            paginationContainer.appendChild(nextBtn);
-        }
+        const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
+        let startPage = (currentGroup - 1) * maxPageButtons + 1; let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
+        if (startPage > 1) { const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;'; prevBtn.onclick = () => { currentPage = startPage - 1; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(prevBtn); }
+        for (let i = startPage; i <= endPage; i++) { const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i; btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn); }
+        if (endPage < totalPages) { const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;'; nextBtn.onclick = () => { currentPage = endPage + 1; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(nextBtn); }
     }
 }
 
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
     const item = ((currentView === 'posts') ? allPosts : allLetters).find(p => p.id === key); if (!item) return;
-    
-    // 🚨 [추천 기능 #9 반영] 기록자가 편지를 확인하기 위해 여는 순간 Firebase 상태를 즉시 '수거됨(read:true)' 상태로 전환
-    if (currentView === 'letters' && isAdmin && !item.read) {
-        database.ref('letters/' + key).update({ read: true });
-    }
+
+    if (currentView === 'letters' && isAdmin && !item.read) database.ref('letters/' + key).update({ read: true });
 
     if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
     if (document.getElementById('detail-date')) document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
@@ -903,14 +737,27 @@ function openDetailModal(key) {
     if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'flex'; document.body.classList.add('no-scroll'); }
 }
 
+function triggerBottleAnimation(callback) {
+    const bottle = document.createElement('div');
+    bottle.innerHTML = '🍾'; 
+    bottle.style.cssText = 'position:fixed; bottom:15%; left:-100px; font-size:60px; z-index:99999 !important; transition: all 2.5s cubic-bezier(0.42, 0, 0.58, 1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));';
+    document.body.appendChild(bottle);
+    
+    setTimeout(() => { bottle.style.left = '120%'; bottle.style.transform = 'rotate(720deg) translateY(-80px)'; }, 50);
+    setTimeout(() => { bottle.remove(); if(callback) callback(); }, 2500);
+}
+
 function savePost() {
     if (!isAdmin || !database || isSubmitting) return;
     const title = document.getElementById('post-title')?.value.trim(); const content = document.getElementById('post-content')?.value.trim();
     if (!title || !content) { showSystemAlert('내용을 모두 입력해주세요.'); return; }
+
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    isSubmitting = true; const postData = { title: title, content: content, date: date, author: loggedInUser };
-    
+    isSubmitting = true; 
+    const postData = { title: title, content: content, date: date, author: loggedInUser };
+
     if (editTargetKey) { 
+        // 🚨 [복구 완입] 성공 시 임시저장 캐시 제거
         database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); }).finally(() => { isSubmitting = false; }); 
     } else { 
         database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); }).finally(() => { isSubmitting = false; }); 
@@ -918,16 +765,23 @@ function savePost() {
 }
 
 function saveLetter() {
-    if (!database || isSubmitting) return;
+    if (!database || isSubmitting || isRestMode) return;
     const title = document.getElementById('letter-title')?.value.trim(); const content = document.getElementById('letter-content')?.value.trim();
     if (!title || !content) { showSystemAlert('제목과 내용을 모두 채워주세요.'); return; }
     if (document.getElementById('agree-terms') && !document.getElementById('agree-terms').checked) { showSystemAlert('안내 및 약관에 동의해주세요.'); return; }
+
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    isSubmitting = true; const letterData = { title: title, content: content, date: date };
-    database.ref('letters').push(letterData).then(() => {
-        document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = ''; if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-        clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
-    }).finally(() => { isSubmitting = false; });
+    isSubmitting = true; 
+    const letterData = { title: title, content: content, date: date };
+
+    triggerBottleAnimation(() => {
+        database.ref('letters').push(letterData).then(() => {
+            document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
+            if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
+            clearDraftCacheStorage('letter'); // 🚨 [복구 완입] 성공 시 편지 캐시 제거
+            showSystemAlert('편지가 둥실둥실 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+        }).finally(() => { isSubmitting = false; });
+    });
 }
 
 function prepareEdit(key) {
@@ -947,7 +801,7 @@ function cancelEdit() {
     if (document.getElementById('post-content')) document.getElementById('post-content').value = '';
     if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "기록하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "none";
-    clearDraftCacheStorage('post');
+    clearDraftCacheStorage('post'); // 🚨 [복구 완입] 수정 취소 시 글 캐시 클리어
 }
 
 function deletePost(key) {
@@ -967,11 +821,7 @@ function deleteLetter(key) {
 
 function clearDatabase() {
     if (!isAdmin || !database) return;
-    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() {
-        setTimeout(function() {
-            showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); }); });
-        }, 150);
-    });
+    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); }); }); }, 150); });
 }
 
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
