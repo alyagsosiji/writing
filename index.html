@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <div class="mini-backup-manager" id="mini-backup-trigger" title="바다 타임라인 백업/복구 관리창 열기" onclick="openBackupModal()" style="display: none;">
+        <div class="mini-backup-manager" id="mini-backup-trigger" title="바다 타임라인 백업/복구 관리창 열기" onclick="window.openBackupModal()" style="display: none;">
             <div class="backup-core-icon">
                 <div class="backup-spin-ring"></div>
                 <div class="backup-center-dot"></div>
@@ -70,18 +70,18 @@
             <p class="subtitle">노을지는 수평선 너머의 서재 그 바다 속의 기록들</p>
             <div class="auth-box">
                 <div class="auth-flex">
-                    <button id="login-btn" onclick="openModal()">기록자 로그인</button>
+                    <button id="login-btn" onclick="window.openModal()">기록자 로그인</button>
                     <div id="admin-menu" style="display: none; gap: 10px;">
-                        <button id="init-btn" class="danger-btn" onclick="clearDatabase()">초기화</button>
+                        <button id="init-btn" class="danger-btn" onclick="window.clearDatabase()">초기화</button>
                         <button id="current-user-btn" style="cursor: default; pointer-events: none; border-color: #90e0ef; color: #90e0ef;"></button>
-                        <button id="logout-btn" onclick="logout()">나가기</button>
+                        <button id="logout-btn" onclick="window.logout()">나가기</button>
                     </div>
                 </div>
             </div>
 
             <div id="view-tab-container" class="view-tab-container" style="display: none;">
-                <button id="tab-posts" class="tab-btn active" onclick="switchView('posts')">🌊 기록된 바다</button>
-                <button id="tab-letters" class="tab-btn" onclick="switchView('letters')">✉️ 띄워진 편지</button>
+                <button id="tab-posts" class="tab-btn active" onclick="window.switchView('posts')">🌊 기록된 바다</button>
+                <button id="tab-letters" class="tab-btn" onclick="window.switchView('letters')">✉️ 띄워진 편지</button>
             </div>
         </header>
 
@@ -91,8 +91,8 @@
                 <input type="text" id="post-title" placeholder="제목을 입력해주세요.">
                 <textarea id="post-content" rows="8" placeholder="수평선 너머의 이야기를 적어주세요!"></textarea>
                 <div class="write-buttons">
-                    <button id="submit-post-btn" onclick="savePost()">기록하기</button>
-                    <button id="cancel-edit-btn" class="cancel-btn" onclick="cancelEdit()" style="display:none;">수정 취소</button>
+                    <button id="submit-post-btn" onclick="window.savePost()">기록하기</button>
+                    <button id="cancel-edit-btn" class="cancel-btn" onclick="window.cancelEdit()" style="display:none;">수정 취소</button>
                 </div>
             </section>
 
@@ -115,7 +115,7 @@
                 </div>
                 
                 <div class="write-buttons">
-                    <button id="submit-letter-btn" onclick="saveLetter()">편지 보내기</button>
+                    <button id="submit-letter-btn" onclick="window.saveLetter()">편지 보내기</button>
                 </div>
             </section>
 
@@ -127,11 +127,11 @@
                     <div id="author-stats" class="author-stats" style="display: none;"></div>
                     
                     <div class="search-container">
-                        <input type="text" id="search-input" placeholder="기록의 제목을 검색해보세요!" oninput="handleSearch()">
+                        <input type="text" id="search-input" placeholder="기록의 제목을 검색해보세요!" oninput="window.handleSearch()">
                     </div>
                     
                     <div id="author-filter-container" class="author-filter-container" style="display: none;">
-                        <select id="author-filter" onchange="handleSearch()">
+                        <select id="author-filter" onchange="window.handleSearch()">
                             <option value="all">전체 보기</option>
                             <option value="아시">아시 님</option>
                             <option value="하은">하은 님</option>
@@ -158,35 +158,31 @@
             <input type="text" id="admin-id" placeholder="아이디">
             <input type="password" id="admin-pw" placeholder="비밀번호">
             <div class="modal-buttons">
-                <button onclick="login()">로그인</button>
-                <button onclick="closeModal()" class="cancel-btn">취소</button>
+                <button onclick="window.login()">로그인</button>
+                <button onclick="window.closeModal()" class="cancel-btn">취소</button>
             </div>
         </div>
     </div>
 
-    <div id="backup-modal" class="modal" onclick="closeBackupModal()">
+    <div id="backup-modal" class="modal" onclick="window.closeBackupModal()">
         <div class="modal-content backup-modal-content" onclick="event.stopPropagation()">
             <div class="detail-popup-header">
-                <h3>💾 바다 백업 및 복구 타임라인</h3>
-                <span class="date" style="color: #ffbba2; display:block; margin-top:4px; font-size:0.75rem;">최근 30일 이내의 복구 지점만 보존됩니다.</span>
+                <h3>💾 기록자 관리창</h3>
+                <span>최근 30일 이내의 복구 지점만 보존됩니다.</span>
             </div>
             
-            <div class="manual-backup-action-box" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                <button onclick="triggerManualBackup()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, rgba(247,163,127,0.2), rgba(0,180,216,0.1)); border-color: #f7a37f; color: #fff; font-weight: bold;">✨ 현재 바다 상태 즉시 수동 백업</button>
-            </div>
-
             <div class="backup-timeline-wrapper">
-                <p id="backup-loading-msg" style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">클라우드 보존 목록을 호출하는 중...</p>
+                <p id="backup-loading-msg" style="color:#94a3b8; font-size:0.85rem; padding: 20px 0; text-align: center;">클라우드 보존 목록을 호출하는 중...</p>
                 <div id="backup-list-container"></div>
             </div>
 
             <div class="modal-buttons" style="margin-top: 20px;">
-                <button onclick="closeBackupModal()" class="cancel-btn">닫기</button>
+                <button onclick="window.closeBackupModal()" class="cancel-btn">닫기</button>
             </div>
         </div>
     </div>
 
-    <div id="detail-modal" class="modal" onclick="closeDetailModal()">
+    <div id="detail-modal" class="modal" onclick="window.closeDetailModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="detail-popup-header">
                 <h3 id="detail-title">제목</h3>
@@ -196,7 +192,7 @@
                 <div id="detail-text">본문 내용</div>
             </div>
             <div class="modal-buttons" style="margin-top: 5px;">
-                <button onclick="closeDetailModal()">바다로 돌아가기</button>
+                <button onclick="window.closeDetailModal()">바다로 돌아가기</button>
             </div>
         </div>
     </div>
