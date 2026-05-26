@@ -120,7 +120,7 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-// ⚡ [트래픽 최적화 1단계] 날씨 Open-Meteo API에 15분 로컬 캐싱 디펜더 탑재
+// ⚡ [트래픽 최적화 1단계] 날씨 API 15분 로컬 캐싱 엔진
 function fetchWeatherWidget() {
     const cacheKey = 'weather_cache_payload';
     const cacheTimeKey = 'weather_cache_timestamp';
@@ -128,7 +128,6 @@ function fetchWeatherWidget() {
     const cachedData = localStorage.getItem(cacheKey);
     const cachedTime = localStorage.getItem(cacheTimeKey);
 
-    // 15분(= 900,000ms) 동안 호출 흐름을 완전히 차단하고 캐시 본문 사용
     if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
         renderWeatherHTML(JSON.parse(cachedData));
         return;
@@ -164,7 +163,6 @@ function renderWeatherHTML(data) {
 }
 
 function injectRandomMemoryButton() {
-    // 중복 생성 원천 차단
     if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
@@ -193,7 +191,7 @@ window.closeLibraryModal = function() {
     }
 }
 
-// ⚡ [트래픽 최적화 2단계] 동일 토큰의 Firebase 중복 쓰기 트래픽 디펜더 구축
+// ⚡ [트래픽 최적화 2단계] FCM 기기 토큰 중복 업데이트 차단 필터
 function requestNotificationPermission() {
     if (!("Notification" in window) || !database) return;
     Notification.requestPermission().then((permission) => {
@@ -205,7 +203,6 @@ function requestNotificationPermission() {
                     .then((currentToken) => {
                         if (currentToken) {
                             const lastToken = localStorage.getItem('last_registered_fcm_token');
-                            // 이미 기록된 동일 토큰인 경우 무조건 업로드 트래픽 차단
                             if (lastToken === currentToken) return;
                             
                             database.ref('fcmTokens/' + currentToken.replace(/[.#$\[\]]/g, '_')).set(currentToken)
@@ -424,6 +421,7 @@ function initAdminTabs() {
     wrapper.parentNode.insertBefore(tabHeader, wrapper);
 }
 
+// 🛠️ [정밀 보정 적용 완료] 탭 전환 시 디스플레이 빌드 유실 버그 완치
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
@@ -446,7 +444,7 @@ window.switchAdminTab = function(tab) {
         if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
         if(btnBackup) { btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent'; }
         if(listContainer) listContainer.style.setProperty('display', 'none', 'important');
-        if(delControls) delControls.style.setProperty('none', 'important');
+        if(delControls) delControls.style.setProperty('display', 'none', 'important'); // 수리 부분
         if(settingsContainer) settingsContainer.style.setProperty('display', 'block', 'important');
         if(infoSpan) infoSpan.style.setProperty('display', 'none', 'important');
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'none', 'important');
