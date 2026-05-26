@@ -120,6 +120,27 @@ body {
 }
 .backup-center-dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #030d1e; }
 
+/* 🏛️ [신규 반영] 맨아래 중앙 고정식 플로팅 서재 버튼 인터페이스 디자인 */
+.mini-library-btn {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999;
+    padding: 10px 22px; border-radius: 30px;
+    background: rgba(6, 15, 31, 0.85); border: 1px solid rgba(144, 224, 239, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 180, 216, 0.2);
+    display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
+    -webkit-transform: translate3d(-50%, 0, 0); transform: translate3d(-50%, 0, 0);
+}
+.mini-library-btn:hover {
+    transform: translateX(-50%) scale(1.04) translate3d(0,0,0); border-color: #90e0ef;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45);
+}
+.library-core-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #90e0ef 0%, #0284c7 100%);
+    display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 1.15rem;
+}
+
 /* 로딩 화면 */
 #loading-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -275,6 +296,8 @@ input[type="text"]:focus, textarea:focus { border-color: #00b4d8; background: rg
     .vinyl-disc { width: 32px; height: 32px; }
     .mini-backup-manager { bottom: 20px; left: 20px; padding: 8px 14px; }
     .backup-core-icon { width: 32px; height: 32px; }
+    .mini-library-btn { bottom: 20px; padding: 8px 16px; }
+    .library-core-icon { width: 30px; height: 30px; font-size: 1rem; }
     #write-section, #letter-section { padding: 20px; }
     .author-stats { justify-content: center; order: -1; }
     .search-container { max-width: 100%; }
