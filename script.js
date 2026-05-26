@@ -39,7 +39,7 @@ function requestNotificationPermission() {
                 navigator.serviceWorker.ready.then((registration) => {
                     messaging.getToken({ 
                         vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg',
-                        serviceWorkerRegistration: registration // 이 옵션이 들어가야 길을 잃지 않습니다!
+                        serviceWorkerRegistration: registration 
                     })
                     .then((currentToken) => {
                         if (currentToken) {
@@ -484,19 +484,142 @@ function checkAndTriggerDailyBackup() {
 
 function triggerManualBackup() { if (!isAdmin) return; executeCloudBackupEngine(false); showSystemAlert('모든 상태 스냅샷을 안전하게 기록했습니다.'); loadBackupTimelineList(); }
 
+// ==========================================
+// 💡 [새 기능] 백업 다중 선택 및 삭제 매니저
+// ==========================================
+function toggleAllBackups(source) {
+    const checkboxes = document.querySelectorAll('.backup-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+}
+
+function selectBackupsByPeriod(days) {
+    const checkboxes = document.querySelectorAll('.backup-checkbox');
+    const selectAllCb = document.getElementById('backup-select-all');
+    if(selectAllCb) selectAllCb.checked = false;
+
+    if (!days) {
+        checkboxes.forEach(cb => cb.checked = false);
+        return;
+    }
+    
+    const now = new Date().getTime();
+    // 'all'이면 기준을 아주 먼 미래로, 아니면 입력받은 일수만큼 차감
+    const threshold = days === 'all' ? now + 999999999 : now - (parseInt(days) * 24 * 60 * 60 * 1000);
+    
+    let allChecked = true;
+    checkboxes.forEach(cb => {
+        const ts = parseInt(cb.getAttribute('data-timestamp'));
+        if (days === 'all') {
+            cb.checked = true;
+        } else {
+            cb.checked = ts < threshold; // 설정 기간 '이전' 데이터만 체크
+        }
+        if(!cb.checked) allChecked = false;
+    });
+    
+    if (selectAllCb) selectAllCb.checked = allChecked;
+}
+
+function deleteSelectedBackups() {
+    if (!isAdmin || !database) return;
+    const checkboxes = document.querySelectorAll('.backup-checkbox:checked');
+    const keysToDelete = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (keysToDelete.length === 0) {
+        showSystemAlert('소멸시킬 백업 지점을 선택해주세요.');
+        return;
+    }
+
+    showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?\n(이 작업은 되돌릴 수 없습니다)`, function() {
+        const deletePromises = keysToDelete.map(key => database.ref(`backups/${key}`).remove());
+        Promise.all(deletePromises).then(() => {
+            showSystemAlert('선택한 백업이 바다에서 성공적으로 소멸되었습니다.');
+            loadBackupTimelineList(); // 리스트 갱신
+        }).catch(err => {
+            console.error("백업 소멸 에러:", err);
+            showSystemAlert('백업 소멸 중 오류가 발생했습니다.');
+        });
+    });
+}
+
+// 기존 백업 로드 함수 (체크박스 및 필터 동적 생성 삽입)
 function loadBackupTimelineList() {
-    const container = document.getElementById('backup-list-container'); if (!container || !database) return; container.innerHTML = '';
+    const wrapper = document.querySelector('.backup-timeline-wrapper');
+    const container = document.getElementById('backup-list-container'); 
+    if (!container || !database) return; 
+    container.innerHTML = '';
+
+    // HTML을 건드리지 않기 위해 필터 UI를 JS에서 동적으로 최상단에 생성
+    let controlsWrapper = document.getElementById('backup-delete-controls');
+    if (!controlsWrapper && wrapper) {
+        controlsWrapper = document.createElement('div');
+        controlsWrapper.id = 'backup-delete-controls';
+        controlsWrapper.style.display = 'none'; // 데이터 로드 전 숨김 처리
+        controlsWrapper.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;">
+                <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="backup-select-all" onclick="toggleAllBackups(this)" style="accent-color:#f7a37f; width:14px; height:14px; cursor:pointer;"> <span style="padding-top:2px;">전체 선택</span>
+                </label>
+                <div style="display:flex; gap:8px;">
+                    <select id="backup-period-select" onchange="selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
+                        <option value="">기간 선택 지우기</option>
+                        <option value="7">7일 이전 기록</option>
+                        <option value="14">14일 이전 기록</option>
+                        <option value="all">모두 선택</option>
+                    </select>
+                    <button onclick="deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
+                </div>
+            </div>
+        `;
+        wrapper.insertBefore(controlsWrapper, wrapper.firstChild);
+    } else if (controlsWrapper) {
+        // 모달 재오픈 시 체크박스와 필터 초기화
+        const selectAllCb = document.getElementById('backup-select-all');
+        if(selectAllCb) selectAllCb.checked = false;
+        const periodSelect = document.getElementById('backup-period-select');
+        if(periodSelect) periodSelect.value = "";
+        controlsWrapper.style.display = 'none';
+    }
+
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
+    
     database.ref('backups').once('value').then((snapshot) => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
-        const backups = snapshot.val(); if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
-        Object.keys(backups).reverse().forEach((key) => {
-            const item = backups[key]; if (item.timestamp < expirationThreshold) return;
-            const pCount = item.posts ? Object.keys(item.posts).length : 0; const lCount = item.letters ? Object.keys(item.letters).length : 0;
+        const backups = snapshot.val(); 
+        
+        if (!backups) { 
+            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; 
+            return; 
+        }
+
+        const keys = Object.keys(backups).filter(key => backups[key].timestamp >= expirationThreshold).reverse();
+        if (keys.length === 0) {
+            container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; 
+            return; 
+        }
+
+        // 백업 데이터가 하나라도 있으면 컨트롤 패널을 보여줍니다.
+        if (controlsWrapper) controlsWrapper.style.display = 'block';
+
+        keys.forEach((key) => {
+            const item = backups[key];
+            const pCount = item.posts ? Object.keys(item.posts).length : 0; 
+            const lCount = item.letters ? Object.keys(item.letters).length : 0;
             const badgeClass = item.type === "자동" ? "auto" : "manual";
+            
             const element = document.createElement('div'); element.className = 'backup-item';
-            element.innerHTML = `<div class="backup-meta"><div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div><div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div></div><button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px;">복구</button>`;
+            // 🚨 백업 리스트 안에 다중 선택용 체크박스를 삽입
+            element.innerHTML = `
+                <div style="display:flex; align-items:center; width:100%;">
+                    <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
+                    <div class="backup-meta" style="flex-grow: 1; padding-right: 10px;">
+                        <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
+                        <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
+                    </div>
+                    <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px; flex-shrink:0;">복구</button>
+                </div>
+            `;
             container.appendChild(element);
         });
     });
@@ -562,7 +685,6 @@ function renderUI() {
         container.appendChild(card);
     });
 
-    // 🚨 화살표 클릭 시 5페이지 단위 첫 장/끝 장으로 넘어가도록 로직 업그레이드
     if (totalPages > 1) {
         const maxPageButtons = 5; // 5개 묶음 기준
         const currentGroup = Math.ceil(currentPage / maxPageButtons);
@@ -573,14 +695,13 @@ function renderUI() {
         if (startPage > 1) {
             const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
             prevBtn.onclick = () => { 
-                currentPage = startPage - 1; // 이전 그룹의 마지막 페이지 (예: 5페이지)
+                currentPage = startPage - 1; 
                 renderUI(); 
                 scrollToPosts(); 
             }; 
             paginationContainer.appendChild(prevBtn);
         }
         
-        // 현재 그룹의 페이지 번호 나열 (예: 1, 2, 3, 4, 5)
         for (let i = startPage; i <= endPage; i++) {
             const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i;
             btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn);
@@ -590,7 +711,7 @@ function renderUI() {
         if (endPage < totalPages) {
             const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;';
             nextBtn.onclick = () => { 
-                currentPage = endPage + 1; // 다음 그룹의 첫 페이지 (예: 6페이지)
+                currentPage = endPage + 1; 
                 renderUI(); 
                 scrollToPosts(); 
             }; 
