@@ -34,7 +34,6 @@ function requestNotificationPermission() {
             console.log('알림 권한 허용됨. 토큰 발급 시작...');
             const messaging = firebase.messaging();
             
-            // 🚨 [핵심 패치] 깃허브 하위 폴더(/writing/)에서 우체부를 찾을 수 있도록 길 강제 안내
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.ready.then((registration) => {
                     messaging.getToken({ 
@@ -90,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
-        checkAndTriggerDailyBackup(); 
+        // 🚨 1일 자동 백업 스케줄러 기능은 요청에 따라 완전히 제거되었습니다.
         updateUI(); 
     } catch (e) {
         console.error("엔진 로딩 예외 발생 : ", e);
@@ -98,7 +97,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// 🔄 PWA 서비스 워커 안전 등록 및 실시간 업데이트 감지 엔진
 let newWorker;
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -399,6 +397,7 @@ let knownPostIds = new Set();
 
 function listenPosts() {
     if (!database) return;
+    database.ref('posts').off();
     database.ref('posts').on('value', (snapshot) => {
         rawPostsSnapshot = snapshot.val();
         allPosts = []; let currentIds = new Set(); let hasNewPost = false;
@@ -410,7 +409,10 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
+        
+        // 🚨 이 부분이 작성, 수정, 소멸 등 데이터베이스에 변동이 생길 때만 반응하여 자동으로 백업을 실행시키는 핵심 로직입니다.
         if (!isInitialPostLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
+        
         if (hasNewPost && isAdmin && !isSubmitting) {
             sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         }
@@ -424,6 +426,7 @@ let isInitialLetterLoad = true;
 
 function listenLetters() {
     if (!database) return;
+    database.ref('letters').off();
     database.ref('letters').on('value', (snapshot) => {
         rawLettersSnapshot = snapshot.val();
         allLetters = []; let currentIds = new Set(); let hasNewLetter = false;
@@ -435,7 +438,10 @@ function listenLetters() {
             });
             allLetters.reverse();
         }
+        
+        // 🚨 편지 역시 작성이나 소멸이 발생한 그 찰나의 순간에만 자동 백업 엔진을 호출합니다.
         if (!isInitialLetterLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
+        
         if (hasNewLetter && isAdmin && !isSubmitting) {
             sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         }
@@ -446,67 +452,41 @@ function listenLetters() {
 
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
-// 🚨 [트래픽 최적화] 메타데이터(backups)와 실제 데이터(backupData) 분리 저장 엔진
+// 🚨 [트래픽 최적화] 메타데이터(backupMeta)와 실제 데이터(backupData) 완벽 분리
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
     const now = new Date(); const timestamp = now.getTime();
     const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     
-    // 카운트 계산
     const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0;
     const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
 
-    // 가벼운 목차 정보
     const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, lCount: lCount };
-    // 무거운 텍스트 덩어리
     const backupPayload = { posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
 
-    const newBackupRef = database.ref('backups').push();
-    const backupKey = newBackupRef.key;
+    const newBackupKey = database.ref().push().key;
 
-    // 두 곳에 동시에 안전하게 저장
     Promise.all([
-        newBackupRef.set(backupMeta),
-        database.ref(`backupData/${backupKey}`).set(backupPayload)
+        database.ref(`backupMeta/${newBackupKey}`).set(backupMeta),
+        database.ref(`backupData/${newBackupKey}`).set(backupPayload)
     ]).then(() => { 
         cleanExpiredBackupsTimeline(); 
     }).catch(err => console.error(err));
 }
 
-// 🚨 [트래픽 최적화] 서버 측에서 만료된 데이터만 골라내어 삭제
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
     
-    database.ref('backups').orderByChild('timestamp').endAt(expirationThreshold).once('value').then((snapshot) => {
+    database.ref('backupMeta').orderByChild('timestamp').endAt(expirationThreshold).once('value').then((snapshot) => {
         const expiredBackups = snapshot.val(); 
         if (!expiredBackups) return;
         
         Object.keys(expiredBackups).forEach((key) => { 
-            // 메타데이터와 실제 데이터를 모두 소멸
-            database.ref(`backups/${key}`).remove(); 
+            database.ref(`backupMeta/${key}`).remove(); 
             database.ref(`backupData/${key}`).remove(); 
         });
     });
-}
-
-function checkAndTriggerDailyBackup() {
-    if (!database) return;
-    database.ref('backups').orderByChild('timestamp').limitToLast(1).once('value').then((snapshot) => {
-        let lastBackupTimestamp = 0;
-        if (snapshot.exists()) {
-            snapshot.forEach((child) => {
-                lastBackupTimestamp = child.val().timestamp || 0;
-            });
-        }
-        const now = new Date().getTime();
-        const ONE_DAY = 24 * 60 * 60 * 1000; 
-        
-        if (now - lastBackupTimestamp >= ONE_DAY) {
-            console.log("[스케줄러] 마지막 안전 백업 지점으로부터 1일이 경과하여 일일 자동 백업을 집행합니다.");
-            executeCloudBackupEngine(true);
-        }
-    }).catch(err => console.error("일일 정기 백업 프로세스 조회 실패:", err));
 }
 
 function triggerManualBackup() { if (!isAdmin) return; executeCloudBackupEngine(false); showSystemAlert('모든 상태 스냅샷을 안전하게 기록했습니다.'); loadBackupTimelineList(); }
@@ -557,10 +537,9 @@ function deleteSelectedBackups() {
     }
 
     showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?\n(이 작업은 되돌릴 수 없습니다)`, function() {
-        // 🚨 선택한 백업의 메타데이터와 실제 덩어리 데이터를 모두 지움
         const deletePromises = keysToDelete.map(key => {
             return Promise.all([
-                database.ref(`backups/${key}`).remove(),
+                database.ref(`backupMeta/${key}`).remove(),
                 database.ref(`backupData/${key}`).remove()
             ]);
         });
@@ -575,7 +554,6 @@ function deleteSelectedBackups() {
     });
 }
 
-// 🚨 [트래픽 최적화 + UI 패치 적용] 백업 로드 함수
 function loadBackupTimelineList() {
     const wrapper = document.querySelector('.backup-timeline-wrapper');
     const container = document.getElementById('backup-list-container'); 
@@ -616,8 +594,7 @@ function loadBackupTimelineList() {
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
     
-    // 이 backups 노드는 이제 메타데이터(수십 바이트)만 담겨 있으므로 불러와도 트래픽을 차지하지 않음.
-    database.ref('backups').once('value').then((snapshot) => {
+    database.ref('backupMeta').once('value').then((snapshot) => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
         const backups = snapshot.val(); 
         
@@ -636,13 +613,11 @@ function loadBackupTimelineList() {
 
         keys.forEach((key) => {
             const item = backups[key];
-            // 구버전 백업과 신버전(메타 분리) 백업 간의 호환성 100% 대응
-            const pCount = item.pCount !== undefined ? item.pCount : (item.posts ? Object.keys(item.posts).length : 0); 
-            const lCount = item.lCount !== undefined ? item.lCount : (item.letters ? Object.keys(item.letters).length : 0);
+            const pCount = item.pCount || 0; 
+            const lCount = item.lCount || 0;
             const badgeClass = item.type === "자동" ? "auto" : "manual";
             
             const element = document.createElement('div'); element.className = 'backup-item';
-            // 🚨 리스트 내 체크박스도 위치 고정을 위해 margin 강제 패치
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; margin-top:0; margin-bottom:0; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
@@ -658,36 +633,37 @@ function loadBackupTimelineList() {
     });
 }
 
-// 🚨 [트래픽 최적화] 복구를 클릭했을 때만 무거운 실제 데이터를 다운로드 받음
 function restoreFromTargetBackupPoint(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('선택하신 시점으로 바다 데이터를 덮어씌워 복구하시겠습니까?', function() {
-        
-        // 1. 새롭게 분리된 무거운 데이터 저장소(backupData)에서 먼저 찾음
         database.ref(`backupData/${key}`).once('value').then((snapshot) => {
             let targetBackup = snapshot.val(); 
-            
-            if (!targetBackup) {
-                // 2. 만약 없다면 과거에 저장했던 통짜 무거운 백업(backups)에서 찾음 (과거 백업 복구용)
-                database.ref(`backups/${key}`).once('value').then((oldSnap) => {
-                    executeRestore(oldSnap.val());
-                });
-            } else {
-                executeRestore(targetBackup);
-            }
+            executeRestore(targetBackup);
         });
     });
 }
 
-// 복구 처리 엔진
 function executeRestore(targetBackup) {
     if (!targetBackup) return;
     isInternalSyncAction = true;
+    
+    database.ref('posts').off();
+    database.ref('letters').off();
+
     Promise.all([
         database.ref('posts').set(targetBackup.posts || null), 
         database.ref('letters').set(targetBackup.letters || null)
     ]).then(() => {
-        showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
+        listenPosts();
+        listenLetters();
+        showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { 
+            isInternalSyncAction = false; 
+            closeBackupModal(); 
+        });
+    }).catch(err => {
+        console.error("복구 중 에러 발생:", err);
+        listenPosts();
+        listenLetters();
     });
 }
 
