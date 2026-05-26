@@ -137,6 +137,7 @@ function fetchWeatherWidget() {
             wElem.id = 'weather-widget';
             document.body.appendChild(wElem);
         }
+        wElem.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999; font-size:0.85rem; color:#90e0ef; background:rgba(6,15,31,0.7); padding:6px 14px; border-radius:20px; border:1px solid rgba(144,224,239,0.15); backdrop-filter:blur(4px);';
         wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
     }).catch(e => console.log("기상 트래픽 백오프"));
 }
@@ -146,6 +147,9 @@ function injectRandomMemoryButton() {
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
     btn.title = "파도에 밀려온 과거의 조각 (랜덤 글 읽기)";
+    btn.style.cssText = 'position:fixed; bottom:95px; right:35px; z-index:9999; font-size:22px; cursor:pointer; background:rgba(6,15,31,0.82); border:1px solid rgba(144,224,239,0.25); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:transform 0.2s;';
+    btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
+    btn.onmouseleave = () => btn.style.transform = 'scale(1)';
     btn.onclick = () => {
         if(allPosts.length === 0) return showSystemAlert('아직 바다에 기록된 추억이 없습니다.');
         const randomPost = allPosts[Math.floor(Math.random() * allPosts.length)];
@@ -154,7 +158,6 @@ function injectRandomMemoryButton() {
     document.body.appendChild(btn);
 }
 
-// 🏛️ [신규 반영] 서재 안내 및 공지사항 전용 모달 오픈/클로즈 트리거 엔진
 window.openLibraryModal = function() {
     if (document.getElementById('library-modal')) {
         document.getElementById('library-modal').style.display = 'flex';
@@ -194,8 +197,6 @@ function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
     if (loader) {
         loader.classList.add('fade-out');
-        
-        // 🚨 로딩 화면이 완전히 걷힌 직후 최초 방문자 팝업 전역 감지 스캔 실행
         setTimeout(() => {
             if (localStorage.getItem('library_welcomed') !== 'true') {
                 localStorage.setItem('library_welcomed', 'true');
