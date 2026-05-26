@@ -464,7 +464,7 @@ function renderAdminSettings() {
                     <div style="color:#94a3b8; font-size:0.75rem; line-height:1.4;">활성화 시, 일반 방문객들의 편지 수신 작성이 제한되고 안내 문구가 표시됩니다.</div>
                 </div>
                 <button onclick="window.toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:6px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none; cursor:pointer;">
-                    ${isRestMode ? '휴식 중 (해제하기)' : '휴식 모드 켜기'}
+                    ${isRestMode ? '휴식 모드 켜기' : '휴식 중 (해제하기)'}
                 </button>
             </div>
         </div>
