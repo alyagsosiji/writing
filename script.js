@@ -142,12 +142,22 @@ function fetchWeatherWidget() {
     }).catch(e => console.log("기상 트래픽 백오프"));
 }
 
+// 🐚 [오프셋 정렬 보정 완료] LP 플레이어 부양 높이 상향에 연동되어 쉘 아이콘 위치 비례 이동
 function injectRandomMemoryButton() {
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
     btn.title = "파도에 밀려온 과거의 조각 (랜덤 글 읽기)";
-    btn.style.cssText = 'position:fixed; bottom:95px; right:35px; z-index:9999; font-size:22px; cursor:pointer; background:rgba(6,15,31,0.82); border:1px solid rgba(144,224,239,0.25); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:transform 0.2s;';
+    
+    // 오디오 플레이어가 bottom: 160px로 조정되었으므로, 해당 단추 바로 위에 안착하도록 bottom: 220px 설정
+    btn.style.cssText = 'position:fixed; bottom:220px; right:35px; z-index:9999; font-size:22px; cursor:pointer; background:rgba(6,15,31,0.82); border:1px solid rgba(144,224,239,0.25); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:transform 0.2s;';
+    
+    // 모바일 해상도 매칭 미디어 쿼리 대체 동적 트래킹 보정
+    if (window.innerWidth <= 768) {
+        btn.style.bottom = '195px';
+        btn.style.right = '23px';
+    }
+    
     btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
     btn.onmouseleave = () => btn.style.transform = 'scale(1)';
     btn.onclick = () => {
