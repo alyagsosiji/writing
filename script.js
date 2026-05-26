@@ -137,27 +137,15 @@ function fetchWeatherWidget() {
             wElem.id = 'weather-widget';
             document.body.appendChild(wElem);
         }
-        wElem.style.cssText = 'position:fixed; top:20px; right:20px; z-index:9999; font-size:0.85rem; color:#90e0ef; background:rgba(6,15,31,0.7); padding:6px 14px; border-radius:20px; border:1px solid rgba(144,224,239,0.15); backdrop-filter:blur(4px);';
         wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
     }).catch(e => console.log("기상 트래픽 백오프"));
 }
 
-// 🐚 [오프셋 정렬 보정 완료] LP 플레이어 부양 높이 상향에 연동되어 쉘 아이콘 위치 비례 이동
 function injectRandomMemoryButton() {
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
     btn.title = "파도에 밀려온 과거의 조각 (랜덤 글 읽기)";
-    
-    // 오디오 플레이어가 bottom: 160px로 조정되었으므로, 해당 단추 바로 위에 안착하도록 bottom: 220px 설정
-    btn.style.cssText = 'position:fixed; bottom:220px; right:35px; z-index:9999; font-size:22px; cursor:pointer; background:rgba(6,15,31,0.82); border:1px solid rgba(144,224,239,0.25); width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:transform 0.2s;';
-    
-    // 모바일 해상도 매칭 미디어 쿼리 대체 동적 트래킹 보정
-    if (window.innerWidth <= 768) {
-        btn.style.bottom = '195px';
-        btn.style.right = '23px';
-    }
-    
     btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
     btn.onmouseleave = () => btn.style.transform = 'scale(1)';
     btn.onclick = () => {
@@ -505,9 +493,9 @@ function updateUI() {
     const letterContent = document.getElementById('letter-content');
     if (isRestMode) {
         if(letterSubmitBtn) { letterSubmitBtn.disabled = true; letterSubmitBtn.innerText = '바다가 쉬어가는 중입니다'; letterSubmitBtn.style.opacity = '0.5'; }
-        if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머, 바다로 편지를 띄울 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
+        if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머로 편지를 보낼 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
     } else {
-        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '편지 띄우기'; letterSubmitBtn.style.opacity = '1'; }
+        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '편지 보내기'; letterSubmitBtn.style.opacity = '1'; }
         if(letterContent) { letterContent.disabled = false; letterContent.placeholder = '기록자 분들에게 보낼 편지의 내용을 입력해주세요...'; }
     }
 }
@@ -827,7 +815,7 @@ function saveLetter() {
         database.ref('letters').push(letterData).then(() => {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-            clearDraftCacheStorage('letter'); showSystemAlert('편지가 수평선 너머, 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+            clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
             backupTriggerQueued = true; 
         }).finally(() => { isSubmitting = false; });
     });
@@ -860,7 +848,12 @@ function deletePost(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
-        database.ref('posts/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
+        database.ref('posts/' + key).remove().then(() => { 
+            const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); 
+            if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
+            backupTriggerQueued = true; 
+            renderUI(); // 소멸 직후 레이아웃 즉시 동기화 보정
+        });
     });
 }
 window.deletePost = deletePost;
@@ -868,7 +861,12 @@ window.deletePost = deletePost;
 function deleteLetter(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 편지를 바다에서 완전히 소멸시키겠습니까?', function() {
-        database.ref('letters/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
+        database.ref('letters/' + key).remove().then(() => { 
+            const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); 
+            if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
+            backupTriggerQueued = true; 
+            renderUI(); // 소멸 직후 레이아웃 즉시 동기화 보정
+        });
     });
 }
 window.deleteLetter = deleteLetter;
