@@ -65,6 +65,10 @@
             </div>
         </div>
 
+        <div class="mini-library-btn" id="mini-library-trigger" title="서재 공지사항 및 안내" onclick="window.openLibraryModal()">
+            <div class="library-core-icon">📖</div>
+        </div>
+
         <header>
             <h1 class="main-title">수평선 너머의 서재</h1>
             <p class="subtitle">노을지는 수평선 너머의 서재 그 바다 속의 기록들</p>
@@ -150,6 +154,33 @@
             <p>&copy; 2026. alyagsosiji. & atritime. & haeun. writing.</p><br>
             <p>&copy; 2026. alyagsosiji. & atritime. site code, design.</p><br>
         </footer>
+    </div>
+
+    <div id="library-modal" class="modal" onclick="window.closeLibraryModal()">
+        <div class="modal-content backup-modal-content" onclick="event.stopPropagation()" style="max-width: 500px !important;">
+            <div class="detail-popup-header">
+                <h3>📖 수평선 서재 안내실</h3>
+                <span style="color: #90e0ef; font-size: 0.78rem; display: block; margin-top: 4px;">처음 오신 기록자분들을 위한 바다 사용 지침서</span>
+            </div>
+            
+            <div style="max-height: 340px; overflow-y: auto; padding-right: 5px; margin: 15px 0; text-align: left;">
+                <div style="background: rgba(0, 180, 216, 0.05); border: 1px solid rgba(0, 180, 216, 0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <h4 style="color: #90e0ef; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">📢 공지사항 (Notice)</h4>
+                    <p style="color: #cbd5e1; font-size: 0.82rem; line-height: 1.6; white-space: pre-wrap;">• 본 서재는 공인된 전용 관리자 권한을 인증받은 고유 기록자(아시 님, 하은 님)에 한해서만 글 기록 보존 및 편집 수정을 완전히 보장합니다.
+• 일반 익명 방문객분들께서는 하단의 작성 칸을 통해 바다 위로 자유롭게 소중한 감성 편지를 띄워 보내실 수 있습니다.</p>
+                </div>
+                
+                <div style="background: rgba(247, 163, 127, 0.05); border: 1px solid rgba(247, 163, 127, 0.2); padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #f7a37f; font-size: 0.95rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">✨ 서재 설명 (Description)</h4>
+                    <p style="color: #cbd5e1; font-size: 0.82rem; line-height: 1.6; white-space: pre-wrap;">• 아득히 물드는 밤바다와 노을빛의 감성을 머금은 프라이빗 문학 아카이브 공간입니다.
+• 실시간 기상 관측 동적 위젯 연동, 브라우저 유실 방지 원고 자동 세이브 기능, 그리고 우클릭 차단 기술이 탑재되어 소중한 텍스트 자산을 철저히 보호합니다.</p>
+                </div>
+            </div>
+
+            <div class="modal-buttons" style="margin-top: 15px;">
+                <button onclick="window.closeLibraryModal()" class="cancel-btn" style="width: 100%; border-radius: 8px;">확인 완료</button>
+            </div>
+        </div>
     </div>
 
     <div id="login-modal" class="modal">
