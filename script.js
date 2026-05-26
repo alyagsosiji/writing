@@ -166,17 +166,29 @@ function injectRandomMemoryButton() {
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
-    btn.title = "파도에 밀려온 과거의 조각 (랜덤 글 읽기)";
+    btn.title = "파도에 밀려온 과거의 조각 (필터 기준 랜덤 글 읽기)";
     btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
     btn.onmouseleave = () => btn.style.transform = 'scale(1)';
+    
+    // 🛠️ [정렬 기준 반영 완료] 현재 선택된 기록자 필터(searchAuthor)에 맞춰 랜덤 추출되도록 로직 개조
     btn.onclick = () => {
-        if(allPosts.length === 0) return showSystemAlert('아직 바다에 기록된 추억이 없습니다.');
-        const randomPost = allPosts[Math.floor(Math.random() * allPosts.length)];
+        let filtered = allPosts;
+        if (searchAuthor !== 'all') {
+            filtered = filtered.filter(item => {
+                const author = item.author || "기록자";
+                return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은");
+            });
+        }
+
+        if (filtered.length === 0) {
+            return showSystemAlert(searchAuthor === 'all' ? '아직 바다에 기록된 추억이 없습니다.' : `현재 선택된 기록자(${searchAuthor} 님)의 글이 존재하지 않습니다.`);
+        }
+        
+        const randomPost = filtered[Math.floor(Math.random() * filtered.length)];
         openDetailModal(randomPost.id);
     };
     document.body.appendChild(btn);
 }
-
 window.openLibraryModal = function() {
     if (document.getElementById('library-modal')) {
         document.getElementById('library-modal').style.display = 'flex';
