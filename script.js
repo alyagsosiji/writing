@@ -120,7 +120,6 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-// ⚡ [트래픽 최적화 1단계] 날씨 API 15분 로컬 캐싱 엔진
 function fetchWeatherWidget() {
     const cacheKey = 'weather_cache_payload';
     const cacheTimeKey = 'weather_cache_timestamp';
@@ -191,7 +190,6 @@ window.closeLibraryModal = function() {
     }
 }
 
-// ⚡ [트래픽 최적화 2단계] FCM 기기 토큰 중복 업데이트 차단 필터
 function requestNotificationPermission() {
     if (!("Notification" in window) || !database) return;
     Notification.requestPermission().then((permission) => {
@@ -376,59 +374,20 @@ function openBackupModal() {
     if (!isAdmin) return; 
     if (document.getElementById('backup-modal')) { 
         document.getElementById('backup-modal').style.display = 'flex'; 
-        initAdminTabs();
         window.switchAdminTab('backup'); 
     } 
 }
 function closeBackupModal() { if (document.getElementById('backup-modal')) document.getElementById('backup-modal').style.display = 'none'; }
 window.openBackupModal = openBackupModal; window.closeBackupModal = closeBackupModal;
 
-function initAdminTabs() {
-    const wrapper = document.querySelector('.backup-timeline-wrapper');
-    if (!wrapper || document.getElementById('admin-tab-header')) return; 
-    
-    const tabHeader = document.createElement('div');
-    tabHeader.id = 'admin-tab-header';
-    tabHeader.style.cssText = 'display:flex; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:15px;';
-    tabHeader.innerHTML = `
-        <button id="admin-btn-backup" onclick="window.switchAdminTab('backup')" style="flex:1; background:transparent; border:none; color:#f7a37f; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid #f7a37f; transition:0.2s; outline:none;">💾 데이터 백업</button>
-        <button id="admin-btn-settings" onclick="window.switchAdminTab('settings')" style="flex:1; background:transparent; border:none; color:#64748b; padding:10px; cursor:pointer; font-weight:bold; border-bottom:2px solid transparent; transition:0.2s; outline:none;">⚙️ 서재 설정</button>
-    `;
-
-    const settingsContainer = document.createElement('div');
-    settingsContainer.id = 'admin-settings-container';
-    settingsContainer.style.display = 'none';
-    
-    const controlsWrapper = document.createElement('div'); 
-    controlsWrapper.id = 'backup-delete-controls'; 
-    controlsWrapper.style.cssText = 'display:none; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;';
-    controlsWrapper.innerHTML = `
-        <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
-            <input type="checkbox" id="backup-select-all" onclick="window.toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
-            <span style="line-height:1;">전체 선택</span>
-        </label>
-        <div style="display:flex; gap:8px; align-items:center;">
-            <button onclick="window.triggerManualBackup()" class="mgmt-btn" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(56,189,248,0.12); border:1px solid #38bdf8; color:#38bdf8; font-weight:bold;">✨ 수동 백업</button>
-            <select id="backup-period-select" onchange="window.selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
-                <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
-            </select>
-            <button onclick="window.deleteSelectedBackups()" class="danger-btn" style="padding:4px 12px; font-size:0.75rem; border-radius:6px;">선택 소멸</button>
-        </div>
-    `;
-
-    wrapper.parentNode.insertBefore(controlsWrapper, wrapper);
-    wrapper.parentNode.insertBefore(settingsContainer, wrapper);
-    wrapper.parentNode.insertBefore(tabHeader, wrapper);
-}
-
-// 🛠️ [정밀 보정 적용 완료] 탭 전환 시 디스플레이 빌드 유실 버그 완치
+// 🛠️ [신택스오류 제거 및 30일 보존 문구 유실 차단 완성형 탭 스위처]
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
     const listContainer = document.getElementById('backup-list-container');
     const delControls = document.getElementById('backup-delete-controls');
     const settingsContainer = document.getElementById('admin-settings-container');
-    const infoSpan = document.querySelector('.backup-modal-content .detail-popup-header span');
+    const subtitleSpan = document.getElementById('backup-modal-subtitle');
     const timelineWrapper = document.querySelector('.backup-timeline-wrapper');
 
     if (tab === 'backup') {
@@ -437,16 +396,16 @@ window.switchAdminTab = function(tab) {
         if(listContainer) listContainer.style.setProperty('display', 'block', 'important');
         if(delControls) delControls.style.setProperty('display', 'flex', 'important');
         if(settingsContainer) settingsContainer.style.setProperty('display', 'none', 'important');
-        if(infoSpan) infoSpan.style.setProperty('display', 'block', 'important');
+        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'block', 'important'); // 백업 탭 진입 시 보존 문구 가동
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'block', 'important');
         loadBackupTimelineList();
     } else if (tab === 'settings') {
         if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
         if(btnBackup) { btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent'; }
         if(listContainer) listContainer.style.setProperty('display', 'none', 'important');
-        if(delControls) delControls.style.setProperty('display', 'none', 'important'); // 수리 부분
+        if(delControls) delControls.style.setProperty('display', 'none', 'important'); // 런타임 오류 완전히 수정 완료
         if(settingsContainer) settingsContainer.style.setProperty('display', 'block', 'important');
-        if(infoSpan) infoSpan.style.setProperty('display', 'none', 'important');
+        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'none', 'important'); // 설정 탭 진입 시 보존 문구 철저히 소멸
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'none', 'important');
         renderAdminSettings();
     }
@@ -471,10 +430,12 @@ function renderAdminSettings() {
     `;
 }
 
+// 🛠️ [레이스 컨디션 해결] 목적 타겟 상태 선제 매핑을 통한 반대 출력 문제 완치
 function toggleRestMode() {
     if(!isAdmin || !database) return;
-    database.ref('settings/restMode').set(!isRestMode).then(() => {
-        showSystemAlert(!isRestMode ? '바다가 휴식에 들어갑니다. 편지 수신이 차단됩니다.' : '바다의 휴식이 끝났습니다. 편지 수신이 재개됩니다.');
+    const targetState = !isRestMode; // 비동기 쓰기 이전에 타겟 상태 완벽 변수 바인딩
+    database.ref('settings/restMode').set(targetState).then(() => {
+        showSystemAlert(targetState ? '바다가 휴식에 들어갑니다. 편지 수신이 차단됩니다.' : '바다의 휴식이 끝났습니다. 편지 수신이 재개됩니다.');
         renderAdminSettings();
     });
 }
