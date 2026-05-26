@@ -12,11 +12,11 @@ const NOTIFICATION_CONFIG = {
 };
 
 // ==========================================
-// 🎵 0-B. 음악 및 소리 엔진 설정
+// 🎵 0-B. 음악 및 소리 엔진 설정 (저작권 프리 BGM)
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
-    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
+    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" }
 ];
 
 let currentTrackIndex = 0;
@@ -25,31 +25,6 @@ let audioEngine = new Audio();
 let asmrEngine = new Audio("waves.mp3"); 
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
-
-// ==========================================
-// 🎨 0-C. 감성 및 UI 전용 동적 CSS
-// ==========================================
-const customStyleSheet = document.createElement('style');
-customStyleSheet.innerHTML = `
-    @keyframes fadeInWave { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-    .post-card { animation: fadeInWave 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; position: relative; }
-    
-    /* 갤러리 뷰 그리드 스타일 */
-    .posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
-    .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
-    
-    /* 날씨 및 하단 시간 영역 한 줄 강제 정렬 */
-    .post-footer { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; margin-top: auto !important; padding-top: 12px !important; border-top: 1px solid rgba(255,255,255,0.03) !important; gap: 10px !important; }
-    .post-footer .date { white-space: nowrap !important; font-size: 0.72rem !important; color: #94a3b8 !important; flex-shrink: 0 !important; overflow: hidden; text-overflow: ellipsis; max-width: 65%; }
-    .card-mgmt-btns { display: flex !important; gap: 4px !important; flex-shrink: 0 !important; }
-    
-    /* 스크롤 제어 및 고정 위젯 레이어 */
-    .no-scroll { overflow: hidden !important; }
-    #weather-widget { position:fixed; top:20px; right:20px; font-size:1rem; z-index:9000 !important; background:rgba(3,10,23,0.6); padding:6px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.15); color:#cbd5e1; backdrop-filter:blur(4px); pointer-events:none; }
-    #random-memory-btn { position:fixed; bottom:25px; left:25px; font-size:35px; cursor:pointer; z-index:9000 !important; text-shadow:0 0 15px rgba(255,255,255,0.6); transition: transform 0.3s; }
-    #random-memory-btn:hover { transform: scale(1.2); }
-`;
-document.head.appendChild(customStyleSheet);
 
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
@@ -62,7 +37,6 @@ function applyTimeBasedThemeEngine() {
     document.body.style.backgroundAttachment = "fixed";
 }
 
-// 항해 일지 실시간 입력값 브라우저 자동 임시저장 엔진
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
     targetFields.forEach(id => {
@@ -141,12 +115,11 @@ function togglePlayPause() {
             isTrackPlaying = true;
             if (playerTrigger) playerTrigger.classList.add('playing');
             if (btn) btn.innerText = '일시정지';
-        }).catch(err => console.log("오디오 스트리밍 핸들링"));
+        }).catch(err => console.log("오디오 스트리밍 방어"));
     }
 }
 window.togglePlayPause = togglePlayPause;
 
-// 🌦️ 부산광역시 기상 데이터 연동
 function fetchWeatherWidget() {
     fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
     .then(res => res.json())
@@ -165,7 +138,7 @@ function fetchWeatherWidget() {
             document.body.appendChild(wElem);
         }
         wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
-    }).catch(e => console.log("기상 데이터 응답 지연"));
+    }).catch(e => console.log("기상 트래픽 백오프"));
 }
 
 function injectRandomMemoryButton() {
@@ -213,7 +186,7 @@ else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
 let isRestMode = false; 
 let isGridView = false; 
-let backupTriggerQueued = false; // 실시간 무결점 백업 동기화 플래그
+let backupTriggerQueued = false; 
 
 window.toggleGridView = function() {
     isGridView = !isGridView;
@@ -240,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     } catch (e) {
-        console.error("인프라 로드 실패 예외 감지 : ", e);
+        console.error("인프라 가동 실패 예외 : ", e);
         hideLoadingScreen();
     }
 });
@@ -349,8 +322,6 @@ function openBackupModal() {
     if (!isAdmin) return; 
     if (document.getElementById('backup-modal')) { 
         document.getElementById('backup-modal').style.display = 'flex'; 
-        const modalTitle = document.querySelector('#backup-modal h2') || document.querySelector('#backup-modal h3') || document.querySelector('.backup-modal-title');
-        if (modalTitle) modalTitle.innerText = '기록자 관리창';
         initAdminTabs();
         window.switchAdminTab('backup'); 
     } 
@@ -382,7 +353,8 @@ function initAdminTabs() {
             <input type="checkbox" id="backup-select-all" onclick="window.toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
             <span style="line-height:1;">전체 선택</span>
         </label>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button onclick="window.triggerManualBackup()" class="mgmt-btn" style="padding:4px 10px; font-size:0.75rem; border-radius:6px; background:rgba(56,189,248,0.12); border:1px solid #38bdf8; color:#38bdf8; font-weight:bold;">✨ 수동 백업</button>
             <select id="backup-period-select" onchange="window.selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
                 <option value="">기간 선택</option><option value="7">7일 이전</option><option value="14">14일 이전</option><option value="all">모두 선택</option>
             </select>
@@ -390,17 +362,20 @@ function initAdminTabs() {
         </div>
     `;
 
-    wrapper.prepend(controlsWrapper);
-    wrapper.prepend(settingsContainer);
-    wrapper.prepend(tabHeader);
+    wrapper.parentNode.insertBefore(controlsWrapper, wrapper);
+    wrapper.parentNode.insertBefore(settingsContainer, wrapper);
+    wrapper.parentNode.insertBefore(tabHeader, wrapper);
 }
 
+// 🚨 [패치 완료] 설정창 전환 시 빈 타임라인 스크롤 컨테이너까지 잔상 없이 일괄 추적 격리 소멸
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
-    const listContainer = document.getElementById('backup-list-container') || document.getElementById('backup-list');
+    const listContainer = document.getElementById('backup-list-container');
     const delControls = document.getElementById('backup-delete-controls');
     const settingsContainer = document.getElementById('admin-settings-container');
+    const infoSpan = document.querySelector('.backup-modal-content .detail-popup-header span');
+    const timelineWrapper = document.querySelector('.backup-timeline-wrapper');
 
     if (tab === 'backup') {
         if(btnBackup) { btnBackup.style.color = '#f7a37f'; btnBackup.style.borderBottom = '2px solid #f7a37f'; }
@@ -408,6 +383,8 @@ window.switchAdminTab = function(tab) {
         if(listContainer) listContainer.style.setProperty('display', 'block', 'important');
         if(delControls) delControls.style.setProperty('display', 'flex', 'important');
         if(settingsContainer) settingsContainer.style.setProperty('display', 'none', 'important');
+        if(infoSpan) infoSpan.style.setProperty('display', 'block', 'important');
+        if(timelineWrapper) timelineWrapper.style.setProperty('display', 'block', 'important');
         loadBackupTimelineList();
     } else if (tab === 'settings') {
         if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
@@ -415,6 +392,8 @@ window.switchAdminTab = function(tab) {
         if(listContainer) listContainer.style.setProperty('display', 'none', 'important');
         if(delControls) delControls.style.setProperty('display', 'none', 'important');
         if(settingsContainer) settingsContainer.style.setProperty('display', 'block', 'important');
+        if(infoSpan) infoSpan.style.setProperty('display', 'none', 'important');
+        if(timelineWrapper) timelineWrapper.style.setProperty('display', 'none', 'important');
         renderAdminSettings();
     }
 }
@@ -423,13 +402,12 @@ function renderAdminSettings() {
     const container = document.getElementById('admin-settings-container');
     if(!container) return;
     container.innerHTML = `
-        <div style="background:rgba(3,10,23,0.5); padding:20px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
+        <div style="background:rgba(3,10,23,0.5); padding:20px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); text-align:left; margin-bottom: 15px;">
             <h3 style="color:#fff; margin-bottom:15px; font-size:1.05rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">관리자 전용 제어 시스템</h3>
-            
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div style="padding-right:10px;">
                     <div style="color:#e2e8f0; font-weight:bold; margin-bottom:5px;">🌊 바다 휴식 모드 (수신 차단)</div>
-                    <div style="color:#94a3b8; font-size:0.75rem; line-height:1.4;">활성화 시, 일반 방문객들이 더 이상 편지를 띄울 수 없도록 작성 버튼이 막히고 안내 문구가 표시됩니다.</div>
+                    <div style="color:#94a3b8; font-size:0.75rem; line-height:1.4;">활성화 시, 일반 방문객들의 편지 수신 작성이 제한되고 안내 문구가 표시됩니다.</div>
                 </div>
                 <button onclick="window.toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:6px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none; cursor:pointer;">
                     ${isRestMode ? '휴식 중 (해제하기)' : '휴식 모드 켜기'}
@@ -495,8 +473,8 @@ function updateUI() {
         if(letterSubmitBtn) { letterSubmitBtn.disabled = true; letterSubmitBtn.innerText = '바다가 쉬어가는 중입니다'; letterSubmitBtn.style.opacity = '0.5'; }
         if(letterContent) { letterContent.disabled = true; letterContent.placeholder = '현재 수평선 너머로 편지를 보낼 수 없습니다. 바다가 고요히 쉬고 있습니다...'; }
     } else {
-        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '띄우기'; letterSubmitBtn.style.opacity = '1'; }
-        if(letterContent) { letterContent.disabled = false; letterContent.placeholder = '바다에 띄울 편지 내용을 작성해주세요...'; }
+        if(letterSubmitBtn) { letterSubmitBtn.disabled = false; letterSubmitBtn.innerText = '편지 보내기'; letterSubmitBtn.style.opacity = '1'; }
+        if(letterContent) { letterContent.disabled = false; letterContent.placeholder = '기록자 분들에게 보낼 편지의 내용을 입력해주세요...'; }
     }
 }
 
@@ -557,16 +535,25 @@ function listenLetters() {
 
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 function executeCloudBackupEngine(isAutomatic = true) {
-    if (!database) return;
+    if (!database) return Promise.reject(new Error("Database connection lost"));
     const now = new Date(); const timestamp = now.getTime();
     const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0; const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
     const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, lCount: lCount };
     const backupPayload = { posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
     const newBackupKey = database.ref().push().key;
-    Promise.all([ database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload) ])
-    .then(() => { cleanExpiredBackupsTimeline(); }).catch(err => console.error(err));
+    return Promise.all([ database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload) ])
+    .then(() => { cleanExpiredBackupsTimeline(); loadBackupTimelineList(); });
 }
+window.executeCloudBackupEngine = executeCloudBackupEngine;
+
+window.triggerManualBackup = function() {
+    if (!isAdmin || !database) return showSystemAlert("권한이 누락되었습니다.");
+    window.executeCloudBackupEngine(false)
+    .then(() => showSystemAlert("현재 바다 상태 스냅샷 수동 저장이 완료되었습니다."))
+    .catch(err => showSystemAlert("수동 백업 실패: " + err.message));
+};
+window.triggerManualBackup = triggerManualBackup;
 
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
@@ -595,16 +582,16 @@ function deleteSelectedBackups() {
     if (!isAdmin || !database) return;
     const checkboxes = document.querySelectorAll('.backup-checkbox:checked'); const keysToDelete = Array.from(checkboxes).map(cb => cb.value);
     if (keysToDelete.length === 0) return showSystemAlert('소멸시킬 백업 지점을 선택해주세요.');
-    showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?\n(이 작업은 되돌릴 수 없습니다)`, function() {
+    showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?`, function() {
         const deletePromises = keysToDelete.map(key => { return Promise.all([ database.ref(`backupMeta/${key}`).remove(), database.ref(`backupData/${key}`).remove() ]); });
-        Promise.all(deletePromises).then(() => { showSystemAlert('선택한 백업이 바다에서 성공적으로 소멸되었습니다.'); loadBackupTimelineList(); }).catch(err => showSystemAlert('백업 소멸 중 오류가 발생했습니다.'));
+        Promise.all(deletePromises).then(() => { showSystemAlert('선택한 백업이 완전 소멸되었습니다.'); loadBackupTimelineList(); });
     });
 }
 window.deleteSelectedBackups = deleteSelectedBackups;
 
 function loadBackupTimelineList() {
-    const container = document.getElementById('backup-list-container') || document.getElementById('backup-list'); 
-    if (!container || !database) return; container.innerHTML = '';
+    let container = document.getElementById('backup-list-container'); 
+    if (!container) return; container.innerHTML = '';
     
     const selectAllCb = document.getElementById('backup-select-all'); if(selectAllCb) selectAllCb.checked = false;
     const periodSelect = document.getElementById('backup-period-select'); if(periodSelect) periodSelect.value = "";
@@ -615,16 +602,16 @@ function loadBackupTimelineList() {
     database.ref('backupMeta').once('value').then((snapshot) => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
         const backups = snapshot.val(); 
-        if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
+        if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0; text-align:center;">복구 지점이 없습니다.</p>`; return; }
         const keys = Object.keys(backups).filter(key => backups[key].timestamp >= expirationThreshold).reverse();
-        if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0;">복구 지점이 없습니다.</p>`; return; }
+        if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0; text-align:center;">복구 지점이 없습니다.</p>`; return; }
 
         keys.forEach((key) => {
             const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
-                    <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; margin-top:0; margin-bottom:0; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
+                    <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
                     <div class="backup-meta" style="flex-grow: 1; padding-right: 8px;">
                         <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
                         <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
@@ -640,16 +627,16 @@ function loadBackupTimelineList() {
         });
     }).catch(err => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
-        console.error("백업 유입 차단 탐지 : ", err);
-        container.innerHTML = `<p style="color:#ef4444; font-size:0.82rem; padding: 20px 0; line-height: 1.5;">서버 권한 오류로 백업을 불러오지 못했습니다.<br>파이어베이스 Realtime Database 콘솔 Rules 탭에서 'backupMeta'와 'backupData' 노드의 '.read' 권한이 true로 켜져있는지 점검해 주세요.</p>`;
+        container.innerHTML = `<p style="color:#ef4444; font-size:0.82rem; padding: 20px 0; text-align:center;">인프라 클라우드 연동 차단 상태</p>`;
     });
 }
+window.loadBackupTimelineList = loadBackupTimelineList;
 
 function downloadBackupFile(key, format) {
     if (!isAdmin || !database) return;
     database.ref(`backupData/${key}`).once('value').then((snapshot) => {
         const data = snapshot.val();
-        if (!data) return showSystemAlert("해당 시점의 원본 데이터 백업본이 존재하지 않습니다.");
+        if (!data) return showSystemAlert("백업 파일이 유실되었습니다.");
         const posts = data.posts || {}; const letters = data.letters || {};
         
         if (format === 'txt') {
@@ -669,9 +656,7 @@ function downloadBackupFile(key, format) {
             htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
             printWindow.document.write(htmlContent); printWindow.document.close();
         }
-    }).catch(err => {
-        showSystemAlert("다운로드 파일 추출 실패 : " + err.message);
-    });
+    }).catch(err => showSystemAlert("다운로드 파일 추출 실패"));
 }
 window.downloadBackupFile = downloadBackupFile;
 
@@ -686,7 +671,7 @@ function executeRestore(targetBackup) {
     database.ref('posts').off(); database.ref('letters').off();
     Promise.all([ database.ref('posts').set(targetBackup.posts || null), database.ref('letters').set(targetBackup.letters || null) ]).then(() => {
         listenPosts(); listenLetters(); showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
-    }).catch(err => { listenPosts(); listenLetters(); });
+    }).catch(() => { listenPosts(); listenLetters(); });
 }
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
@@ -704,9 +689,11 @@ function renderUI() {
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
+        
+        // 🚨 [매칭 완료] 하단 다크 검색창의 투명감 사양인 'rgba(255,255,255,0.03)' 양식을 버튼에 완벽 대입
         let gridBtnHtml = `
             <div style="margin-top:14px;">
-                <button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:7px 16px; border-radius:6px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                <button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
                     ${gridBtnText}
                 </button>
             </div>
@@ -769,11 +756,9 @@ function openDetailModal(key) {
 }
 
 function triggerBottleAnimation(callback) {
-    const bottle = document.createElement('div');
-    bottle.innerHTML = '🍾'; 
+    const bottle = document.createElement('div'); bottle.innerHTML = '🍾'; 
     bottle.style.cssText = 'position:fixed; bottom:15%; left:-100px; font-size:60px; z-index:99999 !important; transition: all 2.5s cubic-bezier(0.42, 0, 0.58, 1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));';
     document.body.appendChild(bottle);
-    
     setTimeout(() => { bottle.style.left = '120%'; bottle.style.transform = 'rotate(720deg) translateY(-80px)'; }, 50);
     setTimeout(() => { bottle.remove(); if(callback) callback(); }, 2500);
 }
@@ -809,8 +794,7 @@ function saveLetter() {
         database.ref('letters').push(letterData).then(() => {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-            clearDraftCacheStorage('letter'); 
-            showSystemAlert('편지가 둥실둥실 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+            clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
             backupTriggerQueued = true; 
         }).finally(() => { isSubmitting = false; });
     });
