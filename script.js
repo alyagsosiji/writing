@@ -446,20 +446,47 @@ function listenLetters() {
 
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
+// 🚨 [트래픽 최적화] 메타데이터(backups)와 실제 데이터(backupData) 분리 저장 엔진
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
     const now = new Date(); const timestamp = now.getTime();
     const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    const backupPack = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
-    database.ref('backups').push(backupPack).then(() => { cleanExpiredBackupsTimeline(); }).catch(err => console.error(err));
+    
+    // 카운트 계산
+    const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0;
+    const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
+
+    // 가벼운 목차 정보
+    const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, lCount: lCount };
+    // 무거운 텍스트 덩어리
+    const backupPayload = { posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
+
+    const newBackupRef = database.ref('backups').push();
+    const backupKey = newBackupRef.key;
+
+    // 두 곳에 동시에 안전하게 저장
+    Promise.all([
+        newBackupRef.set(backupMeta),
+        database.ref(`backupData/${backupKey}`).set(backupPayload)
+    ]).then(() => { 
+        cleanExpiredBackupsTimeline(); 
+    }).catch(err => console.error(err));
 }
 
+// 🚨 [트래픽 최적화] 서버 측에서 만료된 데이터만 골라내어 삭제
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
-    database.ref('backups').once('value').then((snapshot) => {
-        const backups = snapshot.val(); if (!backups) return;
-        Object.keys(backups).forEach((key) => { if (backups[key].timestamp < expirationThreshold) database.ref(`backups/${key}`).remove(); });
+    
+    database.ref('backups').orderByChild('timestamp').endAt(expirationThreshold).once('value').then((snapshot) => {
+        const expiredBackups = snapshot.val(); 
+        if (!expiredBackups) return;
+        
+        Object.keys(expiredBackups).forEach((key) => { 
+            // 메타데이터와 실제 데이터를 모두 소멸
+            database.ref(`backups/${key}`).remove(); 
+            database.ref(`backupData/${key}`).remove(); 
+        });
     });
 }
 
@@ -485,7 +512,7 @@ function checkAndTriggerDailyBackup() {
 function triggerManualBackup() { if (!isAdmin) return; executeCloudBackupEngine(false); showSystemAlert('모든 상태 스냅샷을 안전하게 기록했습니다.'); loadBackupTimelineList(); }
 
 // ==========================================
-// 💡 [새 기능] 백업 다중 선택 및 삭제 매니저
+// 💡 백업 다중 선택 및 삭제 매니저
 // ==========================================
 function toggleAllBackups(source) {
     const checkboxes = document.querySelectorAll('.backup-checkbox');
@@ -503,7 +530,6 @@ function selectBackupsByPeriod(days) {
     }
     
     const now = new Date().getTime();
-    // 'all'이면 기준을 아주 먼 미래로, 아니면 입력받은 일수만큼 차감
     const threshold = days === 'all' ? now + 999999999 : now - (parseInt(days) * 24 * 60 * 60 * 1000);
     
     let allChecked = true;
@@ -512,7 +538,7 @@ function selectBackupsByPeriod(days) {
         if (days === 'all') {
             cb.checked = true;
         } else {
-            cb.checked = ts < threshold; // 설정 기간 '이전' 데이터만 체크
+            cb.checked = ts < threshold; 
         }
         if(!cb.checked) allChecked = false;
     });
@@ -531,10 +557,17 @@ function deleteSelectedBackups() {
     }
 
     showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?\n(이 작업은 되돌릴 수 없습니다)`, function() {
-        const deletePromises = keysToDelete.map(key => database.ref(`backups/${key}`).remove());
+        // 🚨 선택한 백업의 메타데이터와 실제 덩어리 데이터를 모두 지움
+        const deletePromises = keysToDelete.map(key => {
+            return Promise.all([
+                database.ref(`backups/${key}`).remove(),
+                database.ref(`backupData/${key}`).remove()
+            ]);
+        });
+        
         Promise.all(deletePromises).then(() => {
             showSystemAlert('선택한 백업이 바다에서 성공적으로 소멸되었습니다.');
-            loadBackupTimelineList(); // 리스트 갱신
+            loadBackupTimelineList(); 
         }).catch(err => {
             console.error("백업 소멸 에러:", err);
             showSystemAlert('백업 소멸 중 오류가 발생했습니다.');
@@ -542,23 +575,23 @@ function deleteSelectedBackups() {
     });
 }
 
-// 기존 백업 로드 함수 (체크박스 및 필터 동적 생성 삽입)
+// 🚨 [트래픽 최적화 + UI 패치 적용] 백업 로드 함수
 function loadBackupTimelineList() {
     const wrapper = document.querySelector('.backup-timeline-wrapper');
     const container = document.getElementById('backup-list-container'); 
     if (!container || !database) return; 
     container.innerHTML = '';
 
-    // HTML을 건드리지 않기 위해 필터 UI를 JS에서 동적으로 최상단에 생성
     let controlsWrapper = document.getElementById('backup-delete-controls');
     if (!controlsWrapper && wrapper) {
         controlsWrapper = document.createElement('div');
         controlsWrapper.id = 'backup-delete-controls';
-        controlsWrapper.style.display = 'none'; // 데이터 로드 전 숨김 처리
+        controlsWrapper.style.display = 'none'; 
         controlsWrapper.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 5px;">
                 <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
-                    <input type="checkbox" id="backup-select-all" onclick="toggleAllBackups(this)" style="accent-color:#f7a37f; width:14px; height:14px; cursor:pointer;"> <span style="padding-top:2px;">전체 선택</span>
+                    <input type="checkbox" id="backup-select-all" onclick="toggleAllBackups(this)" style="accent-color:#f7a37f; width:15px; height:15px; margin:0; cursor:pointer;"> 
+                    <span style="line-height:1;">전체 선택</span>
                 </label>
                 <div style="display:flex; gap:8px;">
                     <select id="backup-period-select" onchange="selectBackupsByPeriod(this.value)" style="background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:4px 8px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
@@ -573,7 +606,6 @@ function loadBackupTimelineList() {
         `;
         wrapper.insertBefore(controlsWrapper, wrapper.firstChild);
     } else if (controlsWrapper) {
-        // 모달 재오픈 시 체크박스와 필터 초기화
         const selectAllCb = document.getElementById('backup-select-all');
         if(selectAllCb) selectAllCb.checked = false;
         const periodSelect = document.getElementById('backup-period-select');
@@ -584,6 +616,7 @@ function loadBackupTimelineList() {
     if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'block';
     const expirationThreshold = new Date().getTime() - CONTEXT_RETENTION_PERIOD;
     
+    // 이 backups 노드는 이제 메타데이터(수십 바이트)만 담겨 있으므로 불러와도 트래픽을 차지하지 않음.
     database.ref('backups').once('value').then((snapshot) => {
         if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
         const backups = snapshot.val(); 
@@ -599,20 +632,20 @@ function loadBackupTimelineList() {
             return; 
         }
 
-        // 백업 데이터가 하나라도 있으면 컨트롤 패널을 보여줍니다.
         if (controlsWrapper) controlsWrapper.style.display = 'block';
 
         keys.forEach((key) => {
             const item = backups[key];
-            const pCount = item.posts ? Object.keys(item.posts).length : 0; 
-            const lCount = item.letters ? Object.keys(item.letters).length : 0;
+            // 구버전 백업과 신버전(메타 분리) 백업 간의 호환성 100% 대응
+            const pCount = item.pCount !== undefined ? item.pCount : (item.posts ? Object.keys(item.posts).length : 0); 
+            const lCount = item.lCount !== undefined ? item.lCount : (item.letters ? Object.keys(item.letters).length : 0);
             const badgeClass = item.type === "자동" ? "auto" : "manual";
             
             const element = document.createElement('div'); element.className = 'backup-item';
-            // 🚨 백업 리스트 안에 다중 선택용 체크박스를 삽입
+            // 🚨 리스트 내 체크박스도 위치 고정을 위해 margin 강제 패치
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
-                    <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
+                    <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; margin-top:0; margin-bottom:0; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
                     <div class="backup-meta" style="flex-grow: 1; padding-right: 10px;">
                         <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
                         <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
@@ -625,16 +658,36 @@ function loadBackupTimelineList() {
     });
 }
 
+// 🚨 [트래픽 최적화] 복구를 클릭했을 때만 무거운 실제 데이터를 다운로드 받음
 function restoreFromTargetBackupPoint(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('선택하신 시점으로 바다 데이터를 덮어씌워 복구하시겠습니까?', function() {
-        database.ref(`backups/${key}`).once('value').then((snapshot) => {
-            const targetBackup = snapshot.val(); if (!targetBackup) return;
-            isInternalSyncAction = true;
-            Promise.all([database.ref('posts').set(targetBackup.posts || null), database.ref('letters').set(targetBackup.letters || null)]).then(() => {
-                showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
-            });
+        
+        // 1. 새롭게 분리된 무거운 데이터 저장소(backupData)에서 먼저 찾음
+        database.ref(`backupData/${key}`).once('value').then((snapshot) => {
+            let targetBackup = snapshot.val(); 
+            
+            if (!targetBackup) {
+                // 2. 만약 없다면 과거에 저장했던 통짜 무거운 백업(backups)에서 찾음 (과거 백업 복구용)
+                database.ref(`backups/${key}`).once('value').then((oldSnap) => {
+                    executeRestore(oldSnap.val());
+                });
+            } else {
+                executeRestore(targetBackup);
+            }
         });
+    });
+}
+
+// 복구 처리 엔진
+function executeRestore(targetBackup) {
+    if (!targetBackup) return;
+    isInternalSyncAction = true;
+    Promise.all([
+        database.ref('posts').set(targetBackup.posts || null), 
+        database.ref('letters').set(targetBackup.letters || null)
+    ]).then(() => {
+        showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
     });
 }
 
@@ -686,12 +739,11 @@ function renderUI() {
     });
 
     if (totalPages > 1) {
-        const maxPageButtons = 5; // 5개 묶음 기준
+        const maxPageButtons = 5; 
         const currentGroup = Math.ceil(currentPage / maxPageButtons);
         let startPage = (currentGroup - 1) * maxPageButtons + 1;
         let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
         
-        // 왼쪽 화살표: 이전 5개 묶음이 있을 때만 표시 -> 클릭 시 이전 묶음의 마지막 페이지로 이동
         if (startPage > 1) {
             const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;';
             prevBtn.onclick = () => { 
@@ -707,7 +759,6 @@ function renderUI() {
             btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn);
         }
         
-        // 오른쪽 화살표: 다음 5개 묶음이 있을 때만 표시 -> 클릭 시 다음 묶음의 첫 페이지로 이동
         if (endPage < totalPages) {
             const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;';
             nextBtn.onclick = () => { 
