@@ -27,7 +27,7 @@ asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
 // ==========================================
-// 🎨 0-C. 감성 및 UI 전용 동적 CSS (위치/크기 오류 완벽 대응)
+// 🎨 0-C. 감성 및 UI 전용 동적 CSS
 // ==========================================
 const customStyleSheet = document.createElement('style');
 customStyleSheet.innerHTML = `
@@ -38,7 +38,7 @@ customStyleSheet.innerHTML = `
     .posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
     .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
     
-    /* 날씨 및 하단 시간 영역 한 줄 강제 정렬 패치 */
+    /* 날씨 및 하단 시간 영역 한 줄 강제 정렬 */
     .post-footer { display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important; margin-top: auto !important; padding-top: 12px !important; border-top: 1px solid rgba(255,255,255,0.03) !important; gap: 10px !important; }
     .post-footer .date { white-space: nowrap !important; font-size: 0.72rem !important; color: #94a3b8 !important; flex-shrink: 0 !important; overflow: hidden; text-overflow: ellipsis; max-width: 65%; }
     .card-mgmt-btns { display: flex !important; gap: 4px !important; flex-shrink: 0 !important; }
@@ -90,28 +90,30 @@ function openSoundModal() {
                 <h3 style="color:#fff; margin-bottom:20px; font-size:1.1rem;">바다의 소리 설정</h3>
                 <div style="margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
                     <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🎵 배경 음악 (BGM)</p>
-                    <button id="btn-music-toggle" onclick="togglePlayPause()" style="padding:8px 16px; border-radius:6px; background:#0284c7; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
+                    <button id="btn-music-toggle" onclick="window.togglePlayPause()" style="padding:8px 16px; border-radius:6px; background:#0284c7; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
                 </div>
                 <div style="margin-bottom:25px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
                     <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🌊 수평선 파도 소리 (ASMR)</p>
-                    <button id="btn-asmr-toggle" onclick="toggleAsmr()" style="padding:8px 16px; border-radius:6px; background:#059669; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기'}</button>
+                    <button id="btn-asmr-toggle" onclick="window.toggleAsmr()" style="padding:8px 16px; border-radius:6px; background:#059669; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기'}</button>
                 </div>
                 <button onclick="document.getElementById('sound-modal').style.display='none'" style="padding:6px 20px; border:1px solid #94a3b8; background:transparent; color:#94a3b8; border-radius:6px; cursor:pointer;">닫기</button>
             </div>
         `;
         document.body.appendChild(modal);
     } else {
-        document.getElementById('btn-music-toggle').innerText = isTrackPlaying ? '일시정지' : '음악 재생';
-        document.getElementById('btn-asmr-toggle').innerText = isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기';
+        const mBtn = document.getElementById('btn-music-toggle'); if(mBtn) mBtn.innerText = isTrackPlaying ? '일시정지' : '음악 재생';
+        const aBtn = document.getElementById('btn-asmr-toggle'); if(aBtn) aBtn.innerText = isAsmrPlaying ? '파도 소리 끄기' : '파도 소리 켜기';
     }
     modal.style.display = 'flex';
 }
+window.openSoundModal = openSoundModal;
 
 function toggleAsmr() {
     const btn = document.getElementById('btn-asmr-toggle');
     if(isAsmrPlaying) { asmrEngine.pause(); isAsmrPlaying=false; if(btn) btn.innerText='파도 소리 켜기'; }
     else { asmrEngine.play().catch(()=>{}); isAsmrPlaying=true; if(btn) btn.innerText='파도 소리 끄기'; }
 }
+window.toggleAsmr = toggleAsmr;
 
 function initMusicPlayerEngine() {
     if (MY_MUSIC_LIST.length === 0) return;
@@ -142,8 +144,9 @@ function togglePlayPause() {
         }).catch(err => console.log("오디오 스트리밍 핸들링"));
     }
 }
+window.togglePlayPause = togglePlayPause;
 
-// 🌦️ 부산광역시 기준 기상 인프라 데이터 연동
+// 🌦️ 부산광역시 기상 데이터 연동
 function fetchWeatherWidget() {
     fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
     .then(res => res.json())
@@ -210,6 +213,7 @@ else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
 let isRestMode = false; 
 let isGridView = false; 
+let backupTriggerQueued = false; // 실시간 무결점 백업 동기화 플래그
 
 window.toggleGridView = function() {
     isGridView = !isGridView;
@@ -336,22 +340,24 @@ function showSystemConfirm(message, onConfirm, onCancel) {
     if (modalElem) modalElem.style.display = 'flex';
 }
 
-// 창 타이틀 명칭 '기록자 관리창' 고정화 모듈
+function openModal() { if (document.getElementById('login-modal')) document.getElementById('login-modal').style.display = 'flex'; }
+function closeModal() { if (document.getElementById('login-modal')) document.getElementById('login-modal').style.display = 'none'; }
+function closeDetailModal() { if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'none'; document.body.classList.remove('no-scroll'); } }
+window.openModal = openModal; window.closeModal = closeModal; window.closeDetailModal = closeDetailModal;
+
 function openBackupModal() { 
     if (!isAdmin) return; 
     if (document.getElementById('backup-modal')) { 
         document.getElementById('backup-modal').style.display = 'flex'; 
-        
         const modalTitle = document.querySelector('#backup-modal h2') || document.querySelector('#backup-modal h3') || document.querySelector('.backup-modal-title');
         if (modalTitle) modalTitle.innerText = '기록자 관리창';
-        
         initAdminTabs();
         window.switchAdminTab('backup'); 
     } 
 }
 function closeBackupModal() { if (document.getElementById('backup-modal')) document.getElementById('backup-modal').style.display = 'none'; }
+window.openBackupModal = openBackupModal; window.closeBackupModal = closeBackupModal;
 
-// 🚨 [충돌 오류 완파] DOM 제어방식을 prepend 구조로 격리하여 엘리먼트 유실 방지
 function initAdminTabs() {
     const wrapper = document.querySelector('.backup-timeline-wrapper');
     if (!wrapper || document.getElementById('admin-tab-header')) return; 
@@ -389,7 +395,6 @@ function initAdminTabs() {
     wrapper.prepend(tabHeader);
 }
 
-// 서재 설정창 선택 시 클라우드 타임라인 목록 차단 디스플레이 제어 스위처
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
@@ -426,7 +431,7 @@ function renderAdminSettings() {
                     <div style="color:#e2e8f0; font-weight:bold; margin-bottom:5px;">🌊 바다 휴식 모드 (수신 차단)</div>
                     <div style="color:#94a3b8; font-size:0.75rem; line-height:1.4;">활성화 시, 일반 방문객들이 더 이상 편지를 띄울 수 없도록 작성 버튼이 막히고 안내 문구가 표시됩니다.</div>
                 </div>
-                <button onclick="toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:6px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none; cursor:pointer;">
+                <button onclick="window.toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:6px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none; cursor:pointer;">
                     ${isRestMode ? '휴식 중 (해제하기)' : '휴식 모드 켜기'}
                 </button>
             </div>
@@ -441,6 +446,7 @@ function toggleRestMode() {
         renderAdminSettings();
     });
 }
+window.toggleRestMode = toggleRestMode;
 
 function login() {
     const idElem = document.getElementById('admin-id'); const pwElem = document.getElementById('admin-pw');
@@ -459,8 +465,10 @@ function login() {
         showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`, function() { updateUI(); });
     } else showSystemAlert('올바른 접근이 아닙니다.');
 }
+window.login = login;
 
 function logout() { isAdmin = false; loggedInUser = ''; localStorage.removeItem('isAdminLoggedIn'); localStorage.removeItem('loggedInUser'); cancelEdit(); showSystemAlert('로그아웃 되었습니다.', function() { updateUI(); }); }
+window.logout = logout;
 
 function updateUI() {
     const writeSection = document.getElementById('write-section'); const letterSection = document.getElementById('letter-section');
@@ -502,8 +510,10 @@ function switchView(view) {
     else { if (tabLetters) tabLetters.classList.add('active'); if (mainTitle) mainTitle.innerText = "띄워진 편지"; }
     renderUI();
 }
+window.switchView = switchView;
 
 function handleSearch() { searchKeyword = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : ''; searchAuthor = document.getElementById('author-filter') ? document.getElementById('author-filter').value : 'all'; currentPage = 1; renderUI(); }
+window.handleSearch = handleSearch;
 
 let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
 function listenPosts() {
@@ -518,6 +528,7 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
+        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
@@ -537,6 +548,7 @@ function listenLetters() {
             });
             allLetters.reverse();
         }
+        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
         if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         knownLetterIds = currentIds; isInitialLetterLoad = false;
         if(currentView === 'letters') renderUI();
@@ -565,7 +577,6 @@ function cleanExpiredBackupsTimeline() {
     });
 }
 
-// 🚨 [동적 스코프 크래시 방지] 모든 인라인 클릭 이벤트 전역 바인딩 처리 완료
 function toggleAllBackups(source) { document.querySelectorAll('.backup-checkbox').forEach(cb => cb.checked = source.checked); }
 window.toggleAllBackups = toggleAllBackups;
 
@@ -693,8 +704,13 @@ function renderUI() {
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
-        let gridBtnHtml = `<div style="margin-top:12px;"><button onclick="window.toggleGridView()" style="font-size:0.75rem; background:transparent; border:1px solid #cbd5e1; color:#cbd5e1; padding:4px 10px; border-radius:5px; cursor:pointer; transition:0.2s; outline:none;">${gridBtnText}</button></div>`;
-        
+        let gridBtnHtml = `
+            <div style="margin-top:14px;">
+                <button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:7px 16px; border-radius:6px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                    ${gridBtnText}
+                </button>
+            </div>
+        `;
         subtitleElem.innerHTML = subtitleText + gridBtnHtml;
     }
 
@@ -720,8 +736,8 @@ function renderUI() {
         let mgmtButtonsHtml = '';
         if (isAdmin) {
             mgmtButtonsHtml = currentView === 'posts' 
-                ? `<div class="card-mgmt-btns"><button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button></div>`
-                : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button></div>`;
+                ? `<div class="card-mgmt-btns"><button class="mgmt-btn" onclick="event.stopPropagation(); window.prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deletePost('${item.id}')">소멸</button></div>`
+                : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deleteLetter('${item.id}')">소멸</button></div>`;
         }
         
         let readBadgeHtml = ''; if (currentView === 'letters' && item.read === true) { readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; }
@@ -762,7 +778,6 @@ function triggerBottleAnimation(callback) {
     setTimeout(() => { bottle.remove(); if(callback) callback(); }, 2500);
 }
 
-// 🚨 [인프라 최신화] 변동 확정 시점에 콜백 내부에서 직접 동기화하여 완벽한 트래픽 제어 달성
 function savePost() {
     if (!isAdmin || !database || isSubmitting) return;
     const title = document.getElementById('post-title')?.value.trim(); const content = document.getElementById('post-content')?.value.trim();
@@ -773,11 +788,12 @@ function savePost() {
     const postData = { title: title, content: content, date: date, author: loggedInUser };
 
     if (editTargetKey) { 
-        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); executeCloudBackupEngine(true); }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
     } else { 
-        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); executeCloudBackupEngine(true); }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
     }
 }
+window.savePost = savePost;
 
 function saveLetter() {
     if (!database || isSubmitting || isRestMode) return;
@@ -795,10 +811,11 @@ function saveLetter() {
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); 
             showSystemAlert('편지가 둥실둥실 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
-            executeCloudBackupEngine(true); 
+            backupTriggerQueued = true; 
         }).finally(() => { isSubmitting = false; });
     });
 }
+window.saveLetter = saveLetter;
 
 function prepareEdit(key) {
     const post = allPosts.find(p => p.id === key); if (!post) return; editTargetKey = key;
@@ -809,6 +826,7 @@ function prepareEdit(key) {
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "inline-block";
     if (document.getElementById('write-section')) document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
 }
+window.prepareEdit = prepareEdit;
 
 function cancelEdit() {
     editTargetKey = null;
@@ -819,25 +837,29 @@ function cancelEdit() {
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "none";
     clearDraftCacheStorage('post'); 
 }
+window.cancelEdit = cancelEdit;
 
 function deletePost(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
-        database.ref('posts/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; executeCloudBackupEngine(true); });
+        database.ref('posts/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
     });
 }
+window.deletePost = deletePost;
 
 function deleteLetter(key) {
     if (!isAdmin || !database) return;
     showSystemConfirm('이 편지를 바다에서 완전히 소멸시키겠습니까?', function() {
-        database.ref('letters/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; executeCloudBackupEngine(true); });
+        database.ref('letters/' + key).remove().then(() => { const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; backupTriggerQueued = true; });
     });
 }
+window.deleteLetter = deleteLetter;
 
 function clearDatabase() {
     if (!isAdmin || !database) return;
-    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); executeCloudBackupEngine(true); }); }); }, 150); });
+    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); backupTriggerQueued = true; }); }); }, 150); });
 }
+window.clearDatabase = clearDatabase;
 
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
