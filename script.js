@@ -154,6 +154,20 @@ function injectRandomMemoryButton() {
     document.body.appendChild(btn);
 }
 
+// 🏛️ [신규 반영] 서재 안내 및 공지사항 전용 모달 오픈/클로즈 트리거 엔진
+window.openLibraryModal = function() {
+    if (document.getElementById('library-modal')) {
+        document.getElementById('library-modal').style.display = 'flex';
+        document.body.classList.add('no-scroll');
+    }
+}
+window.closeLibraryModal = function() {
+    if (document.getElementById('library-modal')) {
+        document.getElementById('library-modal').style.display = 'none';
+        document.body.classList.remove('no-scroll');
+    }
+}
+
 function requestNotificationPermission() {
     if (!("Notification" in window) || !database) return;
     Notification.requestPermission().then((permission) => {
@@ -178,7 +192,17 @@ function sendNotification(title, body) {
 
 function hideLoadingScreen() {
     const loader = document.getElementById('loading-screen');
-    if (loader) loader.classList.add('fade-out');
+    if (loader) {
+        loader.classList.add('fade-out');
+        
+        // 🚨 로딩 화면이 완전히 걷힌 직후 최초 방문자 팝업 전역 감지 스캔 실행
+        setTimeout(() => {
+            if (localStorage.getItem('library_welcomed') !== 'true') {
+                localStorage.setItem('library_welcomed', 'true');
+                window.openLibraryModal();
+            }
+        }, 300);
+    }
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') { hideLoadingScreen(); } 
@@ -367,7 +391,6 @@ function initAdminTabs() {
     wrapper.parentNode.insertBefore(tabHeader, wrapper);
 }
 
-// 🚨 [패치 완료] 설정창 전환 시 빈 타임라인 스크롤 컨테이너까지 잔상 없이 일괄 추적 격리 소멸
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
@@ -690,7 +713,6 @@ function renderUI() {
         
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
         
-        // 🚨 [매칭 완료] 하단 다크 검색창의 투명감 사양인 'rgba(255,255,255,0.03)' 양식을 버튼에 완벽 대입
         let gridBtnHtml = `
             <div style="margin-top:14px;">
                 <button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
