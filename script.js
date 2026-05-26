@@ -23,6 +23,66 @@ let currentTrackIndex = 0;
 let isTrackPlaying = false;
 let audioEngine = new Audio();
 
+// 🚨 [추천 기능 #6] 카드 페이드인 시각 효과용 동적 CSS 주입
+const waveAnimationStyle = document.createElement('style');
+waveAnimationStyle.innerHTML = `
+    @keyframes fadeInWave {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .post-card { animation: fadeInWave 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+`;
+document.head.appendChild(waveAnimationStyle);
+
+// 🚨 [추천 기능 #1] 시간대에 따라 변하는 실시간 수평선 바다 테마 엔진
+function applyTimeBasedThemeEngine() {
+    const hour = new Date().getHours();
+    let bgStyle = "";
+    if (hour >= 6 && hour < 12) {
+        // 아침: 새벽이 걷히는 맑은 바다 테마
+        bgStyle = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)";
+    } else if (hour >= 12 && hour < 18) {
+        // 오후: 정오의 반짝이는 푸른 바다 테마
+        bgStyle = "linear-gradient(135deg, #0f172a 0%, #0f2d4a 60%, #0284c7 100%)";
+    } else if (hour >= 18 && hour < 20) {
+        // 저녁: 노을이 물드는 황혼의 수평선 테마
+        bgStyle = "linear-gradient(135deg, #0f172a 0%, #31102f 60%, #7c2d12 100%)";
+    } else {
+        // 밤: 별빛과 어둠이 교차하는 심해 테마
+        bgStyle = "linear-gradient(135deg, #020617 0%, #0f172a 70%, #1e1b4b 100%)";
+    }
+    document.body.style.background = bgStyle;
+    document.body.style.backgroundAttachment = "fixed";
+}
+
+// 🚨 [추천 기능 #7] 항해 일지 유실 차단 브라우저 임시저장 시스템
+function initDraftAutoSaveEngine() {
+    const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
+    targetFields.forEach(id => {
+        const field = document.getElementById(id);
+        if (!field) return;
+        
+        // 복구 작업
+        const savedDraft = localStorage.getItem('draft_' + id);
+        if (savedDraft) field.value = savedDraft;
+        
+        // 실시간 입력 감지 백업
+        field.addEventListener('input', () => {
+            localStorage.setItem('draft_' + id, field.value);
+        });
+    });
+}
+
+function clearDraftCacheStorage(type) {
+    if (type === 'post') {
+        localStorage.removeItem('draft_post-title');
+        localStorage.removeItem('draft_post-content');
+    } else if (type === 'letter') {
+        localStorage.removeItem('draft_letter-title');
+        localStorage.removeItem('draft_letter-content');
+    }
+}
+
 // ==========================================
 // 🔔 0-C. 푸시 알림 및 브라우저 알림 권한 시스템 (FCM 버전)
 // ==========================================
@@ -86,10 +146,11 @@ document.addEventListener('DOMContentLoaded', function() {
             requestNotificationPermission(); 
         }
 
+        applyTimeBasedThemeEngine(); // 테마 적용
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
-        // 🚨 1일 자동 백업 스케줄러 기능은 요청에 따라 완전히 제거되었습니다.
+        initDraftAutoSaveEngine(); // 임시저장 주입
         updateUI(); 
     } catch (e) {
         console.error("엔진 로딩 예외 발생 : ", e);
@@ -410,7 +471,6 @@ function listenPosts() {
             allPosts.reverse(); 
         }
         
-        // 🚨 이 부분이 작성, 수정, 소멸 등 데이터베이스에 변동이 생길 때만 반응하여 자동으로 백업을 실행시키는 핵심 로직입니다.
         if (!isInitialPostLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
         
         if (hasNewPost && isAdmin && !isSubmitting) {
@@ -439,7 +499,6 @@ function listenLetters() {
             allLetters.reverse();
         }
         
-        // 🚨 편지 역시 작성이나 소멸이 발생한 그 찰나의 순간에만 자동 백업 엔진을 호출합니다.
         if (!isInitialLetterLoad && !isInternalSyncAction) executeCloudBackupEngine(true);
         
         if (hasNewLetter && isAdmin && !isSubmitting) {
@@ -452,7 +511,6 @@ function listenLetters() {
 
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
-// 🚨 [트래픽 최적화] 메타데이터(backupMeta)와 실제 데이터(backupData) 완벽 분리
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return;
     const now = new Date(); const timestamp = now.getTime();
@@ -554,6 +612,77 @@ function deleteSelectedBackups() {
     });
 }
 
+// 🚨 [추천 기능 #10] 백업 파일 로컬 컴퓨터로 TXT / PDF 선택 다운로드 엔진
+function downloadBackupFile(key, format) {
+    if (!isAdmin || !database) return;
+    database.ref(`backupData/${key}`).once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (!data) {
+            showSystemAlert("해당 시점의 디테일 원본 데이터 백업본 파일이 존재하지 않습니다.");
+            return;
+        }
+        const posts = data.posts || {};
+        const letters = data.letters || {};
+        
+        if (format === 'txt') {
+            // 깔끔하게 포맷팅된 순수 TXT 텍스트 생성
+            let textResult = `=========================================\n  수평선 너머의 서재 백업 기록 파일 (${key})\n=========================================\n\n`;
+            textResult += `[1. 바다의 기록 (글)]\n`;
+            Object.keys(posts).forEach(k => {
+                const p = posts[k];
+                textResult += `▶ 제목: ${p.title}\n▶ 기록자: ${p.author || '기록자'}\n▶ 날짜: ${p.date}\n▶ 내용:\n${p.content}\n`;
+                textResult += `-----------------------------------------\n`;
+            });
+            textResult += `\n[2. 띄워진 편지]\n`;
+            Object.keys(letters).forEach(k => {
+                const l = letters[k];
+                textResult += `▶ 제목: ${l.title}\n▶ 날짜: ${l.date}\n▶ 상태: ${l.read ? '수거됨' : '미수거'}\n▶ 내용:\n${l.content}\n`;
+                textResult += `-----------------------------------------\n`;
+            });
+
+            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `서재_백업데이터_${key}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } else if (format === 'pdf') {
+            // 인쇄 서식을 맞춘 정갈한 HTML 프린트 윈도우 생성 (PDF 자동 유도)
+            const printWindow = window.open("", "_blank");
+            let htmlContent = `
+                <html>
+                <head>
+                    <title>수평선 너머의 서재 백업 리포트</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+                        h1 { border-bottom: 2px solid #0f172a; padding-bottom: 12px; font-size: 22px; }
+                        h2 { color: #0284c7; margin-top: 32px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; }
+                        .item { margin-bottom: 24px; page-break-inside: avoid; }
+                        .meta { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+                        .content { background: #f8fafc; padding: 14px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #e2e8f0; }
+                    </style>
+                </head>
+                <body>
+                    <h1>수평선 너머의 서재 스냅샷 백업 [시점 코드: ${key}]</h1>
+                    <h2>[바다의 기록 - 글 목록]</h2>
+            `;
+            Object.keys(posts).forEach(k => {
+                const p = posts[k];
+                htmlContent += `<div class="item"><strong>${escapeHtml(p.title)}</strong><div class="meta">작성자: ${p.author || '기록자'} | 일시: ${p.date}</div><div class="content">${escapeHtml(p.content)}</div></div>`;
+            });
+            htmlContent += `<h2>[띄워진 편지 목록]</h2>`;
+            Object.keys(letters).forEach(k => {
+                const l = letters[k];
+                htmlContent += `<div class="item"><strong>${escapeHtml(l.title)}</strong><div class="meta">일시: ${l.date} | 처리 상태: ${l.read ? '수거됨' : '미수거'}</div><div class="content">${escapeHtml(l.content)}</div></div>`;
+            });
+            htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+        }
+    });
+}
+
 function loadBackupTimelineList() {
     const wrapper = document.querySelector('.backup-timeline-wrapper');
     const container = document.getElementById('backup-list-container'); 
@@ -618,14 +747,19 @@ function loadBackupTimelineList() {
             const badgeClass = item.type === "자동" ? "auto" : "manual";
             
             const element = document.createElement('div'); element.className = 'backup-item';
+            // 🚨 [추천 기능 #10 반영] 리스트 항목 우측에 가볍고 직관적인 TXT 및 PDF 다운로드용 가이드 버튼 추가
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; margin-top:0; margin-bottom:0; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
-                    <div class="backup-meta" style="flex-grow: 1; padding-right: 10px;">
+                    <div class="backup-meta" style="flex-grow: 1; padding-right: 8px;">
                         <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
                         <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
                     </div>
-                    <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 12px; border-radius:6px; flex-shrink:0;">복구</button>
+                    <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
+                        <button onclick="downloadBackupFile('${key}', 'txt')" style="font-size:0.7rem; border:1px solid #90e0ef; color:#90e0ef; padding: 3px 6px; border-radius:5px; background:transparent; cursor:pointer;">TXT</button>
+                        <button onclick="downloadBackupFile('${key}', 'pdf')" style="font-size:0.7rem; border:1px solid #ffd4ba; color:#ffd4ba; padding: 3px 6px; border-radius:5px; background:transparent; cursor:pointer;">PDF</button>
+                        <button onclick="restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 10px; border-radius:6px; background:transparent; cursor:pointer;">복구</button>
+                    </div>
                 </div>
             `;
             container.appendChild(element);
@@ -709,8 +843,15 @@ function renderUI() {
                 ? `<div class="card-mgmt-btns"><button class="mgmt-btn" onclick="event.stopPropagation(); prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deletePost('${item.id}')">소멸</button></div>`
                 : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); deleteLetter('${item.id}')">소멸</button></div>`;
         }
+        
+        // 🚨 [추천 기능 #9 반영] 편지함 탭에서 관리자가 수거/확인한 편지 카드 상단에 '수거됨' 이펙트 배지 주입
+        let readBadgeHtml = '';
+        if (currentView === 'letters' && item.read === true) {
+            readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`;
+        }
+
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} | ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
-        card.innerHTML = `<h3>${escapeHtml(item.title)}</h3><div class="post-content-area">${escapeHtml(item.content)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        card.innerHTML = `<h3>${escapeHtml(item.title)}${readBadgeHtml}</h3><div class="post-content-area">${escapeHtml(item.content)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         container.appendChild(card);
     });
 
@@ -750,6 +891,12 @@ function renderUI() {
 function openDetailModal(key) {
     if (!isAdmin && currentView === 'letters') return;
     const item = ((currentView === 'posts') ? allPosts : allLetters).find(p => p.id === key); if (!item) return;
+    
+    // 🚨 [추천 기능 #9 반영] 기록자가 편지를 확인하기 위해 여는 순간 Firebase 상태를 즉시 '수거됨(read:true)' 상태로 전환
+    if (currentView === 'letters' && isAdmin && !item.read) {
+        database.ref('letters/' + key).update({ read: true });
+    }
+
     if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
     if (document.getElementById('detail-date')) document.getElementById('detail-date').innerText = formatTo24Hour(item.date);
     if (document.getElementById('detail-text')) document.getElementById('detail-text').innerHTML = escapeHtml(item.content); 
@@ -762,8 +909,12 @@ function savePost() {
     if (!title || !content) { showSystemAlert('내용을 모두 입력해주세요.'); return; }
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; const postData = { title: title, content: content, date: date, author: loggedInUser };
-    if (editTargetKey) { database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); cancelEdit(); }).finally(() => { isSubmitting = false; }); } 
-    else { database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); }).finally(() => { isSubmitting = false; }); }
+    
+    if (editTargetKey) { 
+        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); }).finally(() => { isSubmitting = false; }); 
+    } else { 
+        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); }).finally(() => { isSubmitting = false; }); 
+    }
 }
 
 function saveLetter() {
@@ -775,7 +926,7 @@ function saveLetter() {
     isSubmitting = true; const letterData = { title: title, content: content, date: date };
     database.ref('letters').push(letterData).then(() => {
         document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = ''; if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
-        showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
+        clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
     }).finally(() => { isSubmitting = false; });
 }
 
@@ -796,6 +947,7 @@ function cancelEdit() {
     if (document.getElementById('post-content')) document.getElementById('post-content').value = '';
     if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "기록하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "none";
+    clearDraftCacheStorage('post');
 }
 
 function deletePost(key) {
