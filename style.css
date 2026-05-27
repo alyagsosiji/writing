@@ -168,11 +168,23 @@ body {
     display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 1.15rem;
 }
 
+/* 🐚 소라게 (랜덤 메모리) 버튼 동적 위치 및 크기 최적화 */
 #random-memory-btn {
-    position: fixed; bottom: 92px; right: 35px; z-index: 9999; font-size: 22px; cursor: pointer; 
+    position: fixed; z-index: 9999; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; 
     background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
-    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
-    border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 부드러운 탄성 이동 애니메이션 */
+    
+    /* [비로그인 기본 상태] 백업창 아이콘과 동일한 위치(좌측 하단) 및 크기 */
+    bottom: 30px; left: 30px; 
+    width: 44px; height: 44px; 
+    border-radius: 50%; 
+    font-size: 20px;
+}
+#random-memory-btn:hover {
+    transform: scale(1.1); border-color: #00b4d8;
+    box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
 }
 
 #weather-widget {
