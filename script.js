@@ -549,7 +549,7 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
-        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
+        // ✨ 자동 백업 꼬임 방지를 위해 리스너에서는 알림만 담당합니다.
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
@@ -569,13 +569,11 @@ function listenLetters() {
             });
             allLetters.reverse();
         }
-        if (backupTriggerQueued) { backupTriggerQueued = false; executeCloudBackupEngine(true); }
         if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         knownLetterIds = currentIds; isInitialLetterLoad = false;
         if(currentView === 'letters') renderUI();
     });
 }
-
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return Promise.reject(new Error("Database connection lost"));
@@ -821,9 +819,16 @@ function savePost() {
     const postData = { title: title, content: content, date: date, author: loggedInUser };
 
     if (editTargetKey) { 
-        database.ref('posts/' + editTargetKey).update(postData).then(() => { showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts/' + editTargetKey).update(postData).then(() => { 
+            showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); 
+            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 작성/수정 완료 시 확실한 자동 백업
+        }).finally(() => { isSubmitting = false; }); 
     } else { 
-        database.ref('posts').push(postData).then(() => { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; showSystemAlert('성공적으로 새겨졌습니다.'); backupTriggerQueued = true; }).finally(() => { isSubmitting = false; }); 
+        database.ref('posts').push(postData).then(() => { 
+            document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; 
+            showSystemAlert('성공적으로 새겨졌습니다.'); 
+            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 작성 완료 시 확실한 자동 백업
+        }).finally(() => { isSubmitting = false; }); 
     }
 }
 window.savePost = savePost;
@@ -843,7 +848,7 @@ function saveLetter() {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
-            backupTriggerQueued = true; 
+            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 편지 작성 시 확실한 자동 백업
         }).finally(() => { isSubmitting = false; });
     });
 }
@@ -878,8 +883,8 @@ function deletePost(key) {
         database.ref('posts/' + key).remove().then(() => { 
             const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
-            backupTriggerQueued = true; 
             renderUI(); 
+            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 삭제 완료 시 확실한 자동 백업
         });
     });
 }
@@ -891,8 +896,8 @@ function deleteLetter(key) {
         database.ref('letters/' + key).remove().then(() => { 
             const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
-            backupTriggerQueued = true; 
             renderUI(); 
+            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 삭제 완료 시 확실한 자동 백업
         });
     });
 }
