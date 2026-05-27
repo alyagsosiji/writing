@@ -1,5 +1,5 @@
 /* ==========================================
-   🔒 전역 기본기 세팅 및 잔상/복제 완벽 차단
+   🔒 전역 기본기 세팅 및 잔상/복제 완벽 차단 + 💡 전역 스크롤바 디자인
    ========================================== */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
@@ -14,6 +14,28 @@
     
     /* [해결] 클릭 시 순간적으로 나타나는 브라우저 기본 사각 테두리 링크박스 제거 */
     outline: none !important;
+    
+    /* 파이어폭스 브라우저 스크롤바 대응 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 180, 216, 0.25) transparent;
+}
+
+/* ✨ 크롬, 사파리, 엣지 전역 스크롤바 커스텀 (은은한 밤바다 윤슬 테마) */
+::-webkit-scrollbar {
+    width: 6px;  /* 세로 스크롤바 두께 */
+    height: 6px; /* 가로 스크롤바 두께 */
+}
+::-webkit-scrollbar-track {
+    background: transparent; /* 스크롤바가 지나가는 배경 궤도는 투명하게 처리 */
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 180, 216, 0.25); /* 기본 상태: 은은한 청록빛 반투명 */
+    border-radius: 10px;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 180, 216, 0.5); /* 마우스 올렸을 때: 조금 더 선명하게 */
+    box-shadow: 0 0 8px rgba(0, 180, 216, 0.3); /* 미세한 야광 효과 */
 }
 
 /* 인터랙션이 일어나는 모든 요소의 포커스 사각 링 뿌리 뽑기 */
@@ -34,7 +56,7 @@ button:active, input:active, textarea:active, select:active, a:active {
 
 html {
     height: 100%;
-    overflow: hidden; /* 💡 [핵심] 모바일 그라데이션이 길게 찢어지거나 잘리는 현상을 막기 위해 윈도우 스크롤 차단 */
+    overflow: hidden; /* [핵심] 모바일 그라데이션이 길게 찢어지거나 잘리는 현상을 막기 위해 윈도우 스크롤 차단 */
 }
 
 html, body {
@@ -47,7 +69,7 @@ body {
     color: #f1f5f9; overflow-x: hidden;
     position: relative;
     
-    /* 💡 [핵심] 스크롤을 바디 내부 엘리먼트 격실로 이관하여 JS 배경 그라데이션이 화면 뷰포트에 100% 고정되도록 완치 */
+    /* [핵심] 스크롤을 바디 내부 엘리먼트 격실로 이관하여 JS 배경 그라데이션이 화면 뷰포트에 100% 고정되도록 완치 */
     height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch; /* 모바일 부드러운 가속 스크롤 활성화 */
@@ -66,7 +88,7 @@ body {
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
 }
 
-/* ✨ [수정 완료] 기존 고정 색상 그라데이션을 투명화하여 JS의 유기적인 시간대별 테마가 완벽히 투과되도록 정밀 교정 */
+/* [수정 완료] 기존 고정 색상 그라데이션을 투명화하여 JS의 유기적인 시간대별 테마가 완벽히 투과되도록 정밀 교정 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
     background: transparent !important; 
@@ -439,7 +461,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     .mini-library-btn { bottom: 20px; padding: 8px 16px; }
     .library-core-icon { width: 30px; height: 30px; font-size: 1rem; }
     
-    /* ✨ [수정 완료] 소라게 위치 조율을 훼방 놓던 구형 중복 버그 코드(#random-memory-btn)를 완전 소멸시켜 모바일 정렬 완치 */
+    /* ✨ [수정 완료] 소라게 위치 조율을 훼방 놓던 구형 중복 버그 코드를 완전 소멸시켜 모바일 정렬 완치 */
     
     #write-section, #letter-section { padding: 20px; }
     .author-stats { justify-content: center; order: -1; }
@@ -458,8 +480,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 
 .backup-modal-content { max-width: 540px !important; }
 .backup-timeline-wrapper { max-height: 280px; overflow-y: auto; padding-right: 5px; margin: 15px 0; }
-.backup-timeline-wrapper::-webkit-scrollbar { width: 4px; }
-.backup-timeline-wrapper::-webkit-scrollbar-thumb { background: rgba(247, 163, 127, 0.3); border-radius: 10px; }
+/* 개별 요소의 스크롤바 형태도 상단의 얇고 이쁜 사양으로 흡수되므로 기존 임시 두께 지정은 상속 유도 */
 
 /* 🔥 클라우드 복구 및 백업 아이템 정밀 제어 */
 .backup-item {
@@ -492,8 +513,6 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 #detail-text *, #detail-text p, #detail-text span {
     color: #cbd5e1 !important; font-size: inherit !important; line-height: inherit !important; background: transparent !important;
 }
-#detail-text::-webkit-scrollbar { width: 4px; }
-#detail-text::-webkit-scrollbar-thumb { background: rgba(0, 180, 216, 0.3); border-radius: 10px; }
 
 .system-modal-box p { color: #cbd5e1 !important; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px; white-space: pre-wrap; text-align: center; }
 
