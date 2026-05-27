@@ -353,11 +353,31 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     color: #cbd5e1 !important; font-size: inherit !important; line-height: inherit !important; background: transparent !important;
 }
 
-.post-footer { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
-.post-card .date { font-size: 0.78rem; color: #94a3b8 !important; }
-.card-mgmt-btns { display: flex; gap: 6px; }
-.mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #cbd5e1; cursor: pointer; }
+/* 📝 카드 하단 푸터 (날짜 및 관리 버튼 레이아웃 방어) */
+.post-footer { 
+    display: flex; justify-content: space-between; align-items: center; 
+    flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); 
+    padding-top: 12px; gap: 10px; /* 날짜와 버튼 사이가 너무 붙지 않도록 최소 간격 방어벽 추가 */
+}
 
+.post-card .date { 
+    font-size: 0.78rem; color: #94a3b8 !important; 
+    line-height: 1.4; 
+    word-break: keep-all; /* 날짜나 이름이 이상한 위치에서 뚝 끊겨 줄바꿈되지 않도록 설정 */
+}
+
+.card-mgmt-btns { 
+    display: flex; gap: 6px; 
+    flex-shrink: 0; /* ✨ [핵심] 공간이 좁아져도 버튼 그룹의 크기를 절대 줄이지 않음 */
+}
+
+.mgmt-btn { 
+    padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; 
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); 
+    color: #cbd5e1; cursor: pointer; 
+    white-space: nowrap; /* ✨ [핵심] '수', '정' 글자가 세로로 찢어지는 현상 완벽 방지 */
+    flex-shrink: 0; 
+}
 /* 🔲 갤러리 모드 그리드 할당 */
 .posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
 .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
