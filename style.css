@@ -169,48 +169,57 @@ body {
 }
 
 /* ==========================================
-   🐚 소라게 (랜덤 메모리) 동적 위치 및 크기 제어 
+   🐚 소라게 (랜덤 메모리) 캡슐형 ↔ 원형 동적 변환
    ========================================== */
 #random-memory-btn {
     position: fixed; z-index: 9999; cursor: pointer; 
     display: flex; align-items: center; justify-content: center; 
     background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
     box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    /* 형태가 바뀔 때 부드럽게 스르륵 변하도록 애니메이션 가속 */
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     
-    /* [PC 비로그인] 트리니티 버튼들의 실제 높이(56px)와 완벽히 동일하게 맞춤 */
+    /* [PC 비로그인] 음악 플레이어처럼 옆으로 길쭉한 캡슐 모양 (높이 56px) */
     bottom: 30px; left: 30px; right: auto !important; 
-    width: 56px; height: 56px; 
-    border-radius: 50%; font-size: 24px; /* 커진 덩치에 맞게 소라게 이모지도 살짝 확대 */
+    height: 56px; width: auto; /* 고정 너비 해제 */
+    padding: 0 28px; /* 양옆으로 길쭉하게 여백 부여 */
+    border-radius: 30px; /* 50% 원형에서 30px 캡슐형으로 변경 */
+    font-size: 24px; 
 }
 #random-memory-btn:hover {
-    transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
+    transform: scale(1.05); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
 }
 
-/* [PC 로그인] 백업창 위로 상승하며 원래 원하시던 작은 크기(40px)로 쏙 줄어듦 */
+/* [PC 로그인] 백업창 위로 상승하며 원래의 작고 둥근 원형(40px)으로 쏙 변신 */
 body.admin-logged-in #random-memory-btn {
-    bottom: 95px; left: 38px; /* 크기가 줄어들면서 시각적 중앙 정렬을 맞추기 위해 left 미세 조정 */
+    bottom: 95px; left: 38px; 
     width: 40px; height: 40px; 
+    padding: 0; /* 패딩 초기화 */
+    border-radius: 50%; /* 다시 완벽한 동그라미로 */
     font-size: 18px;
 }
 
-/* 📱 모바일 환경 소라게 크기 및 위치 절대 강제 방어선 */
+/* 📱 모바일 환경 반응형 */
 @media (max-width: 768px) {
     #random-memory-btn { 
-        /* [모바일 비로그인] 모바일 트리니티 버튼 높이(48px)와 완벽히 동일하게 맞춤 */
+        /* [모바일 비로그인] 모바일 음악 플레이어처럼 길쭉하게 (높이 48px) */
         bottom: 20px !important; 
         left: 20px !important; 
         right: auto !important; 
-        width: 48px !important; 
         height: 48px !important; 
+        width: auto !important; 
+        padding: 0 24px !important; 
+        border-radius: 30px !important;
         font-size: 20px !important; 
     }
     body.admin-logged-in #random-memory-btn { 
-        /* [모바일 로그인] 위로 상승 & 작은 크기(36px)로 축소 */
+        /* [모바일 로그인] 위로 상승 & 작은 원형(36px)으로 변신 */
         bottom: 75px !important; 
-        left: 26px !important; /* 중앙 정렬 미세 보정 */
+        left: 26px !important; 
         width: 36px !important; 
         height: 36px !important; 
+        padding: 0 !important;
+        border-radius: 50% !important;
         font-size: 16px !important; 
     }
 }
