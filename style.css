@@ -502,3 +502,18 @@ footer {
 .update-buttons button { padding: 8px 20px; font-size: 0.85rem; width: 100%; }
 
 body.no-scroll { overflow: hidden; touch-action: none; }
+/* ==========================================
+   🚀 모바일 스크롤 렌더링 과부하(네모 잔상) 방지
+   ========================================== */
+@media (max-width: 768px) {
+    .post-card {
+        /* 모바일 스크롤 버그의 주범인 글래스모피즘(블러) 연산을 강제 중단 */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        /* 블러 대신 배경을 거의 불투명한 짙은 남색으로 덮어 위화감 제거 */
+        background: linear-gradient(135deg, rgba(8, 22, 46, 0.98) 0%, rgba(4, 12, 28, 0.98) 100%) !important; 
+        /* GPU 하드웨어 가속 강제 할당으로 스크롤 부드럽게 만들기 */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
