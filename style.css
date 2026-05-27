@@ -53,9 +53,10 @@ body {
     -webkit-transform: translate3d(0,0,0); transform: translate3d(0,0,0);
 }
 
+/* 🔥 [수정 완료] 기존 고정 색상을 지우고 투명화하여 JS의 시간대별 배경 그라데이션이 완벽히 투과되도록 교정 */
 .ocean-deep-water { 
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-    background: linear-gradient(180deg, #061630 0%, #030d1e 40%, #01050d 100%); 
+    background: transparent !important; 
 }
 
 .yoonseul-sunlight {
@@ -513,6 +514,7 @@ footer {
 .update-buttons button { padding: 8px 20px; font-size: 0.85rem; width: 100%; }
 
 body.no-scroll { overflow: hidden; touch-action: none; }
+
 /* ==========================================
    🚀 모바일 스크롤 렌더링 과부하(네모 잔상) 방지
    ========================================== */
