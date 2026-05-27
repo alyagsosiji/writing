@@ -169,7 +169,7 @@ body {
 }
 
 /* ==========================================
-   🐚 소라게 (랜덤 메모리) 동적 위치 제어 
+   🐚 소라게 (랜덤 메모리) 동적 위치 및 크기 제어 
    ========================================== */
 #random-memory-btn {
     position: fixed; z-index: 9999; cursor: pointer; 
@@ -178,32 +178,37 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     
-    /* [PC 비로그인] 백업창 아이콘 위치(좌측 하단) */
+    /* [PC 비로그인] 트리니티 버튼들의 실제 높이(56px)와 완벽히 동일하게 맞춤 */
     bottom: 30px; left: 30px; right: auto !important; 
-    width: 44px; height: 44px; border-radius: 50%; font-size: 20px;
+    width: 56px; height: 56px; 
+    border-radius: 50%; font-size: 24px; /* 커진 덩치에 맞게 소라게 이모지도 살짝 확대 */
 }
 #random-memory-btn:hover {
     transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
 }
 
-/* [PC 로그인] 백업창 위로 상승 */
+/* [PC 로그인] 백업창 위로 상승하며 원래 원하시던 작은 크기(40px)로 쏙 줄어듦 */
 body.admin-logged-in #random-memory-btn {
-    bottom: 105px; left: 32px; width: 40px; height: 40px; font-size: 18px;
+    bottom: 95px; left: 38px; /* 크기가 줄어들면서 시각적 중앙 정렬을 맞추기 위해 left 미세 조정 */
+    width: 40px; height: 40px; 
+    font-size: 18px;
 }
 
-/* 📱 모바일 환경 소라게 위치 절대 강제 방어선 */
+/* 📱 모바일 환경 소라게 크기 및 위치 절대 강제 방어선 */
 @media (max-width: 768px) {
     #random-memory-btn { 
+        /* [모바일 비로그인] 모바일 트리니티 버튼 높이(48px)와 완벽히 동일하게 맞춤 */
         bottom: 20px !important; 
         left: 20px !important; 
-        right: auto !important; /* 우측 정렬 찌꺼기 완벽 무력화 */
-        width: 40px !important; 
-        height: 40px !important; 
-        font-size: 18px !important; 
+        right: auto !important; 
+        width: 48px !important; 
+        height: 48px !important; 
+        font-size: 20px !important; 
     }
     body.admin-logged-in #random-memory-btn { 
-        bottom: 70px !important; 
-        left: 20px !important; 
+        /* [모바일 로그인] 위로 상승 & 작은 크기(36px)로 축소 */
+        bottom: 75px !important; 
+        left: 26px !important; /* 중앙 정렬 미세 보정 */
         width: 36px !important; 
         height: 36px !important; 
         font-size: 16px !important; 
