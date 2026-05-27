@@ -166,7 +166,7 @@ function injectRandomMemoryButton() {
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
-    btn.title = "파도에 밀려온 과거의 조각 (필터 기준 랜덤 글 읽기)";
+    btn.title = "파도에 밀려온 과거의 조각 (필터를 기준으로 랜덤 글 뽑기)";
     btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
     btn.onmouseleave = () => btn.style.transform = 'scale(1)';
     
