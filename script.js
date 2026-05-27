@@ -476,23 +476,39 @@ function logout() { isAdmin = false; loggedInUser = ''; localStorage.removeItem(
 window.logout = logout;
 
 function updateUI() {
-    const writeSection = document.getElementById('write-section'); const letterSection = document.getElementById('letter-section');
-    const loginBtn = document.getElementById('login-btn'); const adminMenu = document.getElementById('admin-menu');
-    const tabContainer = document.getElementById('view-tab-container'); const currentUserBtn = document.getElementById('current-user-btn'); 
+    const writeSection = document.getElementById('write-section'); 
+    const letterSection = document.getElementById('letter-section');
+    const loginBtn = document.getElementById('login-btn'); 
+    const adminMenu = document.getElementById('admin-menu');
+    const tabContainer = document.getElementById('view-tab-container'); 
+    const currentUserBtn = document.getElementById('current-user-btn'); 
     const backupTrigger = document.getElementById('mini-backup-trigger');
 
     if (isAdmin) {
-        if (writeSection) writeSection.style.display = 'block'; if (letterSection) letterSection.style.display = 'none'; 
-        if (loginBtn) loginBtn.style.display = 'none'; if (adminMenu) adminMenu.style.display = 'flex'; 
-        if (tabContainer) tabContainer.style.display = 'flex'; if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
+        // ✨ [추가] 로그인 시 body에 클래스를 추가하여 소라게를 위로 올립니다.
+        document.body.classList.add('admin-logged-in'); 
+
+        if (writeSection) writeSection.style.display = 'block'; 
+        if (letterSection) letterSection.style.display = 'none'; 
+        if (loginBtn) loginBtn.style.display = 'none'; 
+        if (adminMenu) adminMenu.style.display = 'flex'; 
+        if (tabContainer) tabContainer.style.display = 'flex'; 
+        if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
         if (backupTrigger) backupTrigger.style.display = 'flex'; 
         switchView(currentView);
     } else {
-        if (writeSection) writeSection.style.display = 'none'; if (letterSection) letterSection.style.display = 'block'; 
-        if (loginBtn) loginBtn.style.display = 'inline-block'; if (adminMenu) adminMenu.style.display = 'none';
-        if (tabContainer) tabContainer.style.display = 'none'; if (backupTrigger) backupTrigger.style.display = 'none'; 
+        // ✨ [추가] 로그아웃 시 클래스를 제거하여 소라게를 다시 밑으로 내립니다.
+        document.body.classList.remove('admin-logged-in');
+
+        if (writeSection) writeSection.style.display = 'none'; 
+        if (letterSection) letterSection.style.display = 'block'; 
+        if (loginBtn) loginBtn.style.display = 'inline-block'; 
+        if (adminMenu) adminMenu.style.display = 'none';
+        if (tabContainer) tabContainer.style.display = 'none'; 
+        if (backupTrigger) backupTrigger.style.display = 'none'; 
         switchView('posts'); 
     }
+
     
     const letterSubmitBtn = document.getElementById('submit-letter-btn');
     const letterContent = document.getElementById('letter-content');
