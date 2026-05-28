@@ -590,7 +590,7 @@ footer:hover {
 }
 
 @media (max-width: 768px) {
-    footer { padding: 35px 0 115px 0; font-size: 0.78rem; letter-spacing: 1.5px; }
+    footer { padding: 35px 0 105px 0; font-size: 0.78rem; letter-spacing: 1.5px; }
     footer::before { width: 85%; }
 }
 
