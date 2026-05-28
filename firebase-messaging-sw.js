@@ -8,8 +8,8 @@ const ASSETS_TO_CACHE = [
     'style.css',
     'script.js',
     'manifest.json', /* 🚨 [핵심 수정] 이게 있어야 웹앱 설치가 뜹니다! */
-    '글_하은.jpg',
-    '멘헤라_하은.jpg'
+    '글_하은.png',
+    '멘헤라_하은.png'
 ];
 
 // 서비스 워커 설치 및 초기 자산 캐싱
@@ -143,8 +143,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title || "수평선 너머의 서재";
     const notificationOptions = {
         body: payload.notification.body,
-        icon: "글_하은.jpg",
-        badge: "글_하은.jpg",
+        icon: "글_하은.png",
+        badge: "글_하은.png",
         vibrate: [200, 100, 200]
     };
 
