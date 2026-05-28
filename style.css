@@ -227,7 +227,7 @@ body {
 
 /* [PC 로그인] 백업창 위로 상승하며 원래의 작고 둥근 원형(40px)으로 변신 */
 body.admin-logged-in #random-memory-btn {
-    bottom: 105px; left: 38px; 
+    bottom: 95px; left: 38px; 
     width: 40px; height: 40px; 
     border-radius: 50%;
     font-size: 18px;
@@ -523,13 +523,31 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .cancel-btn { background: rgba(255,255,245,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 /* ==========================================
-   🌌 푸터 매커니즘 (감성 수평선 테마 적용)
+   🌌 푸터 및 저작권 표기 글자 (감성 수평선 테마 적용)
    ========================================== */
 footer { 
     position: relative; z-index: 10; 
     text-align: center; margin-top: 60px; padding: 35px 0 90px 0; 
-    color: #64748b; font-size: 0.85rem; letter-spacing: 1.5px; 
-    font-weight: 300; transition: all 0.4s ease;
+    
+    /* 저작권 텍스트 기본 스타일 (밤하늘의 별처럼 은은하게) */
+    color: #94a3b8; 
+    font-size: 0.85rem; 
+    letter-spacing: 2px; 
+    font-weight: 400; 
+    text-transform: uppercase;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 텍스트에 은은한 기본 네온 그림자 할당 */
+    text-shadow: 0 0 8px rgba(144, 224, 239, 0.15);
+    
+    /* 모바일 환경에서 텍스트 드래그 및 복사 방지 */
+    user-select: none;
+    cursor: default;
+}
+
+footer p, footer span {
+    color: inherit;
+    font-size: inherit;
 }
 
 /* 밤바다 수평선을 닮은 은은한 상단 빛 번짐 그라데이션 선 */
@@ -548,8 +566,12 @@ footer::after {
     animation: starTwinkle 3s infinite alternate;
 }
 
-/* 푸터 호버 시 은은한 야광 효과 */
-footer:hover { color: #90e0ef; text-shadow: 0 0 10px rgba(0, 180, 216, 0.3); }
+/* 🌟 저작권 텍스트 마우스 호버 시 오로라 빛 발산 효과 */
+footer:hover { 
+    color: #ffffff; 
+    text-shadow: 0 0 12px rgba(144, 224, 239, 0.8), 0 0 25px rgba(247, 163, 127, 0.4); 
+    transform: translateY(-2px);
+}
 
 @keyframes starTwinkle {
     0% { opacity: 0.4; transform: translateX(-50%) scale(0.9); }
@@ -557,7 +579,7 @@ footer:hover { color: #90e0ef; text-shadow: 0 0 10px rgba(0, 180, 216, 0.3); }
 }
 
 @media (max-width: 768px) {
-    footer { padding: 35px 0 115px 0; }
+    footer { padding: 35px 0 115px 0; font-size: 0.78rem; letter-spacing: 1.5px; }
     footer::before { width: 85%; }
 }
 
