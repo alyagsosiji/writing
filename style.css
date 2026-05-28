@@ -589,8 +589,14 @@ footer:hover {
     100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
 }
 
+/* 📱 모바일 미디어 쿼리 내 푸터 높이 정밀 가둠 설정 */
 @media (max-width: 768px) {
-    footer { padding: 35px 0 105px 0; font-size: 0.78rem; letter-spacing: 1.5px; }
+    footer { 
+        /* 💡 [정렬 완치] 바닥 아이콘 높이(68px) 기준 + 딱 10px의 여유만 남기도록 하단 패딩 교정 */
+        padding: 35px 0 78px 0 !important; 
+        font-size: 0.78rem; 
+        letter-spacing: 1.5px; 
+    }
     footer::before { width: 85%; }
 }
 
