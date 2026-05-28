@@ -1,7 +1,7 @@
 /* firebase-messaging-sw.js - PWA 자산 캐싱 및 백그라운드 푸시 통합 최종 보정 버전 (Pro Mode) */
 
 // 1. PWA 캐시 설정 (버전 갱신을 통해 브라우저의 구버전 캐시를 즉각 밀어냅니다)
-const CACHE_NAME = 'we-final-v4';
+const CACHE_NAME = 'we-final-v5';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
