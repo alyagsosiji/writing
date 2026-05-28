@@ -1,12 +1,12 @@
 /* sw.js - 로딩 정체 및 버튼 먹통 방지 최종 고도화 버전 */
-const CACHE_NAME = 'we-final-v3'; // 버전을 갱신하여 브라우저의 구버전 캐시를 강제로 밀어냅니다.
+const CACHE_NAME = 'we-final-v4'; // 버전을 갱신하여 브라우저의 구버전 캐시를 강제로 밀어냅니다.
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
     'style.css',
     'script.js',
-    '글_하은.jpg',
-    '멘헤라_하은.jpg'
+    'manifest.json',
+    '글_하은.png'
 ];
 
 // 1. 서비스 워커 설치 및 초기 자산 캐싱
@@ -55,8 +55,9 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // [핵심] index.html, script.js, style.css는 무조건 최신 상태를 유지해야 로딩 스크린이 정상 종료됩니다.
-    const isCoreFile = url.pathname.endsWith('index.html') || 
+    // [핵심/Pro 모드] 네비게이션 요청(PC 앱 설치 요건) 및 코어 파일 처리 로직
+    const isCoreFile = event.request.mode === 'navigate' || 
+                       url.pathname.endsWith('index.html') || 
                        url.pathname.endsWith('script.js') || 
                        url.pathname.endsWith('style.css') || 
                        url.pathname === '/' || 
@@ -73,7 +74,12 @@ self.addEventListener('fetch', (event) => {
                     }
                     return response;
                 })
-                .catch(() => caches.match(event.request)) // 인터넷 암전 시에만 작동하는 오프라인 방어선
+                .catch(() => {
+                    // 데스크탑 PWA 요건 충족을 위한 오프라인 폴백 처리
+                    return caches.match(event.request).then((cachedResponse) => {
+                        return cachedResponse || caches.match('index.html');
+                    });
+                })
         );
     } else {
         // 이미지는 속도를 위해 캐시 우선 전략 적용
@@ -95,7 +101,7 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
-javascript
+
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js');
 
@@ -121,8 +127,8 @@ messaging.onBackgroundMessage((payload) => {
     const notificationTitle = payload.notification.title || "수평선 너머의 서재";
     const notificationOptions = {
         body: payload.notification.body,
-        icon: "글_하은.jpg",
-        badge: "글_하은.jpg",
+        icon: "글_하은.png",
+        badge: "멘헤라_하은.png",
         vibrate: [200, 100, 200]
     };
 
