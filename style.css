@@ -297,11 +297,25 @@ header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opac
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-.view-tab-container { display: flex; justify-content: center; gap: 15px; margin-top: 35px; }
+/* 🌊 뷰 탭(바다의 기록, 유리병 편지 등) 반응형 2줄 및 자름 교정 */
+.view-tab-container { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 10px; 
+    margin-top: 35px; 
+    flex-wrap: wrap; 
+    width: 100%;
+}
+
 .tab-btn {
     background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #94a3b8; border-radius: 30px; padding: 10px 26px; font-size: 0.92rem;
+    color: #94a3b8; border-radius: 30px; padding: 10px 20px; font-size: 0.92rem;
     cursor: pointer; transition: all 0.3s ease; letter-spacing: 0.5px;
+    flex: 1 1 auto;
+    min-width: 100px;
+    white-space: nowrap;
+    text-align: center;
 }
 .tab-btn:hover { color: #fff; border-color: rgba(0, 180, 216, 0.4); background: rgba(255,255,255,0.05); }
 .tab-btn.active {
@@ -415,25 +429,25 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .post-footer { 
     display: flex; justify-content: space-between; align-items: center; 
     flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); 
-    padding-top: 12px; gap: 10px; /* 날짜와 버튼 사이가 너무 붙지 않도록 최소 간격 방어벽 추가 */
+    padding-top: 12px; gap: 10px; 
 }
 
 .post-card .date { 
     font-size: 0.78rem; color: #94a3b8 !important; 
     line-height: 1.4; 
-    word-break: keep-all; /* 날짜나 이름이 이상한 위치에서 뚝 끊겨 줄바꿈되지 않도록 설정 */
+    word-break: keep-all; 
 }
 
 .card-mgmt-btns { 
     display: flex; gap: 6px; 
-    flex-shrink: 0; /* ✨ [핵심] 공간이 좁아져도 버튼 그룹의 크기를 절대 줄이지 않음 */
+    flex-shrink: 0; 
 }
 
 .mgmt-btn { 
     padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; 
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); 
     color: #cbd5e1; cursor: pointer; 
-    white-space: nowrap; /* ✨ [핵심] '수', '정' 글자가 세로로 찢어지는 현상 완벽 방지 */
+    white-space: nowrap; 
     flex-shrink: 0; 
 }
 /* 🔲 갤러리 모드 그리드 할당 */
@@ -460,8 +474,6 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     .backup-core-icon { width: 32px; height: 32px; }
     .mini-library-btn { bottom: 20px; padding: 8px 16px; }
     .library-core-icon { width: 30px; height: 30px; font-size: 1rem; }
-    
-    /* ✨ [수정 완료] 소라게 위치 조율을 훼방 놓던 구형 중복 버그 코드를 완전 소멸시켜 모바일 정렬 완치 */
     
     #write-section, #letter-section { padding: 20px; }
     .author-stats { justify-content: center; order: -1; }
@@ -523,24 +535,23 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .cancel-btn { background: rgba(255,255,245,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 /* ==========================================
-   🌌 푸터 및 저작권 표기 글자 (감성 수평선 테마 적용)
+   🌌 푸터 및 저작권 표기 글자 (원문 형태 보존 완료)
    ========================================== */
 footer { 
     position: relative; z-index: 10; 
     text-align: center; margin-top: 60px; padding: 35px 0 90px 0; 
     
-    /* 저작권 텍스트 기본 스타일 (밤하늘의 별처럼 은은하게) */
+    /* 저작권 텍스트 기본 스타일 */
     color: #94a3b8; 
     font-size: 0.85rem; 
     letter-spacing: 2px; 
     font-weight: 400; 
-    text-transform: uppercase;
+    
+    /* 🚨 [교정 완료] 강제 대문자 속성을 지워 HTML 원문 텍스트가 대소문자 그대로 출력되도록 보정 */
+    /* text-transform: uppercase; Line Removed! */
+    
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* 텍스트에 은은한 기본 네온 그림자 할당 */
     text-shadow: 0 0 8px rgba(144, 224, 239, 0.15);
-    
-    /* 모바일 환경에서 텍스트 드래그 및 복사 방지 */
     user-select: none;
     cursor: default;
 }
@@ -602,12 +613,9 @@ body.no-scroll { overflow: hidden; touch-action: none; }
    ========================================== */
 @media (max-width: 768px) {
     .post-card {
-        /* 모바일 스크롤 버그의 주범인 글래스모피즘(블러) 연산을 강제 중단 */
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
-        /* 블러 대신 배경을 거의 불투명한 짙은 남색으로 덮어 위화감 제거 */
         background: linear-gradient(135deg, rgba(8, 22, 46, 0.98) 0%, rgba(4, 12, 28, 0.98) 100%) !important; 
-        /* GPU 하드웨어 가속 강제 할당으로 스크롤 부드럽게 만들기 */
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
     }
