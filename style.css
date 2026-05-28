@@ -384,7 +384,8 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     margin-bottom: 45px; box-shadow: 0 12px 40px rgba(0,0,0,0.5);
 }
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #00b4d8; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
-.write-buttons { display: flex; gap: 10px; }
+.write-buttons { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; width: 100%; }
+.write-buttons button { flex: 1 1 auto; min-width: 110px; white-space: nowrap; padding: 10px 18px; }
 
 /* ✨ [디자인 버그 해결] 비밀번호(password) 인풋 폼 누락 현상 교정 */
 input[type="text"], input[type="password"], textarea, select {
@@ -488,7 +489,8 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 @keyframes popupScale { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
-.modal-buttons { display: flex; justify-content: center; gap: 10px; }
+.modal-buttons, #system-buttons { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; width: 100%; }
+.modal-buttons button, #system-buttons button { flex: 1 1 auto; min-width: 110px; white-space: nowrap; padding: 10px 18px; }
 
 .backup-modal-content { max-width: 540px !important; }
 .backup-timeline-wrapper { max-height: 280px; overflow-y: auto; padding-right: 5px; margin: 15px 0; }
@@ -535,20 +537,19 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .cancel-btn { background: rgba(255,255,245,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 /* ==========================================
-   🌌 푸터 및 저작권 표기 글자 (원문 형태 보존 완료)
+   🌌 푸터 및 저작권 표기 글자 (원문 형태 보존 + 7px 간격 맞춤)
    ========================================== */
 footer { 
     position: relative; z-index: 10; 
-    text-align: center; margin-top: 60px; padding: 35px 0 90px 0; 
+    text-align: center; margin-top: 60px; 
     
-    /* 저작권 텍스트 기본 스타일 */
+    /* 💡 [정렬 완치] PC 데스크탑 아이콘 높이(86px) 기준 + 딱 7px 여유를 둔 패딩 */
+    padding: 35px 0 93px 0; 
+    
     color: #94a3b8; 
     font-size: 0.85rem; 
     letter-spacing: 2px; 
     font-weight: 400; 
-    
-    /* 🚨 [교정 완료] 강제 대문자 속성을 지워 HTML 원문 텍스트가 대소문자 그대로 출력되도록 보정 */
-    /* text-transform: uppercase; Line Removed! */
     
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     text-shadow: 0 0 8px rgba(144, 224, 239, 0.15);
@@ -589,11 +590,11 @@ footer:hover {
     100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
 }
 
-/* 📱 모바일 미디어 쿼리 내 푸터 높이 정밀 가둠 설정 */
+/* 📱 모바일 미디어 쿼리 내 푸터 7px 간격 정밀 설정 */
 @media (max-width: 768px) {
     footer { 
-        /* 💡 [정렬 완치] 바닥 아이콘 높이(68px) 기준 + 딱 10px의 여유만 남기도록 하단 패딩 교정 */
-        padding: 35px 0 78px 0 !important; 
+        /* 💡 [정렬 완치] 모바일 아이콘 높이(68px) 기준 + 딱 7px의 여유만 남기도록 하단 패딩 75px로 교정 */
+        padding: 35px 0 75px 0 !important; 
         font-size: 0.78rem; 
         letter-spacing: 1.5px; 
     }
