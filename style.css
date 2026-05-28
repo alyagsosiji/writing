@@ -142,7 +142,7 @@ body {
 
 /* [PC 로그인] 백업창 위로 상승하며 원래의 작고 둥근 원형(40px)으로 변신 */
 body.admin-logged-in #random-memory-btn {
-    bottom: 95px; left: 38px; width: 40px; height: 40px; border-radius: 50%; font-size: 18px;
+    bottom: 105px; left: 38px; width: 40px; height: 40px; border-radius: 50%; font-size: 18px;
 }
 
 /* 📱 모바일 환경 반응형 (소라게 및 위젯) */
