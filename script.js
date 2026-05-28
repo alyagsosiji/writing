@@ -26,16 +26,49 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
+// ==========================================
+// 🌅 시간대별 배경 테마 적용 엔진
+// ==========================================
+// ==========================================
+// 🌅 시간대별 배경 테마 적용 엔진 (실시간 감지 및 부드러운 전환)
+// ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
-    if (hour >= 6 && hour < 12) bgStyle = "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0c4a6e 100%)"; 
-    else if (hour >= 12 && hour < 18) bgStyle = "linear-gradient(135deg, #0f172a 0%, #0f2d4a 60%, #0284c7 100%)"; 
-    else if (hour >= 18 && hour < 20) bgStyle = "linear-gradient(135deg, #0f172a 0%, #31102f 60%, #7c2d12 100%)"; 
-    else bgStyle = "linear-gradient(135deg, #020617 0%, #0f172a 70%, #1e1b4b 100%)"; 
+    
+    // 1. 아침 (06:00 ~ 11:59): 물안개 걷히는 청명한 새벽 바다 (딥 네이비 -> 맑은 청록)
+    if (hour >= 6 && hour < 12) {
+        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
+    } 
+    // 2. 낮 (12:00 ~ 17:59): 햇살이 깊게 스며드는 눈부신 심해 (코발트 블루 -> 스카이 블루)
+    else if (hour >= 12 && hour < 18) {
+        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
+    } 
+    // 3. 저녁 (18:00 ~ 19:59): 수평선 너머 타오르는 노을 바다 (어스름 -> 자홍빛 -> 코랄 산호색)
+    else if (hour >= 18 && hour < 20) {
+        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
+    } 
+    // 4. 밤/심야 (20:00 ~ 05:59): 오로라가 흐르는 고요한 밤바다 (극심해 -> 짙은 보라)
+    else {
+        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+    }
+    
+    // 💡 [핵심] 배경이 바뀔 때 딱딱하게 끊기지 않고 3초 동안 서서히 섞이며 변하도록 스무딩 처리
+    document.body.style.transition = "background 3s ease-in-out";
     document.body.style.background = bgStyle;
-    document.body.style.backgroundAttachment = "fixed";
 }
+
+// ---------------------------------------------------------
+// ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
+// ---------------------------------------------------------
+// 1. 유저가 서재에 처음 들어왔을 때 즉시 1회 실행하여 시간대에 맞는 배경을 렌더링
+applyTimeBasedThemeEngine();
+
+// 2. 백그라운드 타이머를 켜서 1분(60초)마다 현재 시간을 몰래 확인하고, 
+//    시간대가 바뀌면 새로고침 없이 실시간으로 다음 배경으로 스르륵 물들게 함!
+setInterval(() => {
+    applyTimeBasedThemeEngine();
+}, 60000);
 
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
