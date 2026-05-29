@@ -106,11 +106,52 @@ body {
 }
 .mini-backup-manager:hover { transform: scale(1.03); border-color: #f7a37f; box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 138, 101, 0.35); }
 
+/* ==========================================
+   📖 서재 지침서 - 둥둥 뜬 상태로 본문 정중앙 정렬 (스크롤바 오차 완치)
+   ========================================== */
 .mini-library-btn {
-    bottom: 30px; left: 50%; transform: translate3d(-50%, 0, 0); padding: 10px 22px;
-    border: 1px solid rgba(144, 224, 239, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 180, 216, 0.2);
+    position: fixed !important;      /* 둥둥 떠 있는 상태 유지 */
+    bottom: 30px !important;         /* 밑바닥에서 30px 여백 */
+    
+    /* 💡 유령처럼 푸터 중앙과 미세하게 어긋나던 현상을 완벽히 해결하는 마법의 정렬 수식 */
+    left: calc(50vw - (100vw - 100%) / 2) !important;
+    transform: translate3d(-50%, 0, 0) !important;
+    
+    z-index: 9999 !important;
+    padding: 10px 22px !important;
+    border-radius: 30px !important;
+    background: rgba(6, 15, 31, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    cursor: pointer !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 180, 216, 0.2) !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s !important;
 }
-.mini-library-btn:hover { transform: translate3d(-50%, -4px, 0) scale(1.03); border-color: #90e0ef; box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45); }
+
+.mini-library-btn:hover {
+    /* 제자리 균형을 무너뜨리지 않고 위로만 은은하게 띄우는 호버 가속 */
+    transform: translate3d(-50%, -4px, 0) scale(1.03) !important;
+    border-color: #90e0ef !important;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45) !important;
+}
+
+/* 📱 모바일 디바이스 레이아웃 중앙 유지 보정 */
+@media (max-width: 768px) {
+    .mini-library-btn {
+        bottom: 20px !important;
+        padding: 8px 16px !important;
+        left: calc(50vw - (100vw - 100%) / 2) !important;
+        transform: translate3d(-50%, 0, 0) !important;
+    }
+    .mini-library-btn:hover {
+        transform: translate3d(-50%, -2px, 0) scale(1.02) !important;
+    }
+}
 
 .vinyl-disc { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #b89df5 0%, #90e0ef 100%); display: flex; justify-content: center; align-items: center; position: relative; flex-shrink: 0; will-change: transform; }
 .vinyl-groove { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #030d1e; background: transparent; opacity: 0.85; }
