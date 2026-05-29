@@ -978,7 +978,17 @@ function prepareEdit(key) {
     if (document.getElementById('post-content')) document.getElementById('post-content').value = post.content;
     if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "수정하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "inline-block";
-    if (document.getElementById('write-section')) document.getElementById('write-section').scrollIntoView({ behavior: 'smooth' });
+    
+    // 💡 모바일 브라우저의 스크롤 무시 현상을 완벽히 타파하는 정밀 좌표 추적 스크롤
+    const writeSection = document.getElementById('write-section');
+    if (writeSection) {
+        // 상단에 딱 붙지 않도록 60px의 여유 공간을 두고 부드럽게 끌어올립니다.
+        const yOffset = writeSection.getBoundingClientRect().top + window.scrollY - 60; 
+        window.scrollTo({ top: yOffset, behavior: 'smooth' });
+    } else {
+        // 혹시라도 구역을 못 찾으면 무조건 맨 꼭대기로 강제 사출합니다.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 window.prepareEdit = prepareEdit;
 
