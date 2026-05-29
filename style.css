@@ -638,3 +638,34 @@ body.no-scroll { overflow: hidden; touch-action: none; }
         padding: 6px 12px !important;
     }
 }
+/* ==========================================
+   ⛅ 날씨 표시 위젯 (우측 상단 완벽 고정 및 테마 원복)
+   ========================================== */
+#weather-widget {
+    position: fixed !important;
+    top: 25px !important;
+    right: 25px !important; /* 💡 좌측 상단 배지(#theme-widget)와 완벽히 대칭되도록 우측 상단 고정 */
+    z-index: 999999 !important; /* 화면 가장 최상단 고정 */
+    background: rgba(3, 10, 23, 0.6) !important;
+    border: 1px solid rgba(144, 224, 239, 0.25) !important;
+    color: #e2e8f0 !important;
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+    display: block !important;
+}
+
+@media (max-width: 768px) {
+    #weather-widget {
+        top: 15px !important;
+        right: 15px !important;
+        font-size: 0.75rem !important;
+        padding: 6px 12px !important;
+    }
+}
