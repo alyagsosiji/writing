@@ -1027,3 +1027,83 @@ function syncWeatherAndWidget() {
         { timeout: 7000 } // 7초 이상 응답 없으면 에러로 간주하고 부산 날씨 표시
     );
 }
+// ==========================================
+// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
+// ==========================================
+window.highlightSearchKeyword = function(text, keyword) {
+    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
+    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (!keyword) return escaped;
+    
+    // 검색어가 존재하면 야광 CSS를 씌워서 반환
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
+};
+
+// ==========================================
+// ⚙️ 2. 환경 수동 조작(톱니바퀴) 엔진 (기본값: 자동)
+// ==========================================
+window.manualTimeOverride = 'auto'; 
+window.manualWeatherOverride = 'auto'; 
+
+window.injectTimeGearButton = function() {
+    if (document.getElementById('time-gear-btn')) return;
+    const btn = document.createElement('div');
+    btn.id = 'time-gear-btn';
+    btn.innerHTML = '⚙️';
+    btn.title = "환경 설정 (시간/날씨 수동 조작)";
+    btn.onclick = openEnvironmentSettingsModal;
+    document.body.appendChild(btn);
+};
+
+window.openEnvironmentSettingsModal = function() {
+    let modal = document.getElementById('env-modal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'env-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:340px; padding:30px;">
+                <h3 style="color:#fff; margin-bottom:20px; font-size:1.15rem;">서재 환경 조작</h3>
+                <div style="margin-bottom:20px; text-align:left;">
+                    <label style="color:#cbd5e1; font-size:0.85rem; margin-bottom:8px; display:block;">🌅 시간대 배경</label>
+                    <select id="time-select" style="width:100%; padding:12px; border-radius:8px; background:rgba(0,0,0,0.4); border:1px solid rgba(144,224,239,0.3); color:#fff; outline:none; font-size:0.9rem;">
+                        <option value="auto">자동 (실시간 동기화)</option>
+                        <option value="morning">아침 (물안개 청록)</option>
+                        <option value="day">낮 (스카이 블루)</option>
+                        <option value="evening">저녁 (코랄빛 노을)</option>
+                        <option value="night">밤 (오로라 심해)</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:25px; text-align:left;">
+                    <label style="color:#cbd5e1; font-size:0.85rem; margin-bottom:8px; display:block;">⛅ 날씨 효과</label>
+                    <select id="weather-select" style="width:100%; padding:12px; border-radius:8px; background:rgba(0,0,0,0.4); border:1px solid rgba(144,224,239,0.3); color:#fff; outline:none; font-size:0.9rem;">
+                        <option value="auto">자동 (현재 위치 기반)</option>
+                        <option value="clear">맑음 (평온한 바다)</option>
+                        <option value="rain">비 (비 내리는 바다)</option>
+                        <option value="snow">눈 (눈 내리는 바다)</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button onclick="applyEnvironmentSettings()" style="flex:1; padding:10px; border-radius:8px; background:#00b4d8; color:#02050d; border:none; cursor:pointer; font-weight:bold;">적용</button>
+                    <button onclick="document.getElementById('env-modal').style.display='none'" style="flex:1; padding:10px; border:1px solid #94a3b8; background:transparent; color:#94a3b8; border-radius:8px; cursor:pointer;">닫기</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('time-select').value = window.manualTimeOverride;
+    document.getElementById('weather-select').value = window.manualWeatherOverride;
+    modal.style.display = 'flex';
+};
+
+window.applyEnvironmentSettings = function() {
+    window.manualTimeOverride = document.getElementById('time-select').value;
+    window.manualWeatherOverride = document.getElementById('weather-select').value;
+    
+    applyTimeBasedThemeEngine(); // 배경 업데이트
+    syncWeatherAndWidget(); // 날씨 업데이트
+    document.getElementById('env-modal').style.display = 'none';
+};
