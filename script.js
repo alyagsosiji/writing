@@ -956,28 +956,75 @@ window.addEventListener('online', () => {
     showSystemAlert('다시 수평선 너머로 연결되었습니다.');
 });
 
-// ==========================================
-// ⛅ 실시간 날씨 및 위젯 통합 동기화 시스템 (위치 기반 + 기본 부산)
-// ==========================================
+// 🌅 [수정] 수동 설정을 감지하는 배경 테마 엔진
+function applyTimeBasedThemeEngine() {
+    const hour = new Date().getHours();
+    let bgStyle = "";
+    
+    let mode = window.manualTimeOverride || 'auto';
+    if (mode === 'auto') {
+        if (hour >= 6 && hour < 12) mode = 'morning';
+        else if (hour >= 12 && hour < 18) mode = 'day';
+        else if (hour >= 18 && hour < 20) mode = 'evening';
+        else mode = 'night';
+    }
+
+    if (mode === 'morning') bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
+    else if (mode === 'day') bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
+    else if (mode === 'evening') bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
+    else bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+    
+    document.body.style.transition = "background 3s ease-in-out";
+    document.body.style.background = bgStyle;
+}
+
+// ⛅ [수정] 수동 설정을 감지하는 날씨 동기화 엔진
+function applyManualWeatherEffect(type) {
+    let overlay = document.getElementById('weather-overlay-layer');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'weather-overlay-layer';
+        overlay.className = 'weather-overlay';
+        document.body.insertBefore(overlay, document.body.firstChild);
+    }
+    let wElem = document.getElementById('weather-widget');
+
+    if (type === 'rain') {
+        overlay.className = 'weather-overlay rain';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "🌧️ 비 내리는 바다";
+    } else if (type === 'snow') {
+        overlay.className = 'weather-overlay snow';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "❄️ 눈 내리는 바다";
+    } else {
+        overlay.className = 'weather-overlay';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "☀️ 평온한 바다";
+    }
+}
+
 function syncWeatherAndWidget() {
-    // 💡 권한 거부 시 기본 좌표 (부산)
+    if (window.manualWeatherOverride !== 'auto') {
+        applyManualWeatherEffect(window.manualWeatherOverride);
+        return;
+    }
+
     const defaultLat = 35.1796;
     const defaultLon = 129.0756;
     
-    // 날씨 API 호출 및 UI 업데이트 공통 함수
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
+            if (window.manualWeatherOverride !== 'auto') return; 
+            
             const code = data.current_weather.weathercode;
             const temp = data.current_weather.temperature;
-            
-            // 1. 우측 상단 날씨 텍스트 위젯 업데이트
             let icon = '☁️';
+            let weatherType = 'clear';
+
             if(code === 0) icon = '☀️';
             else if(code > 0 && code <= 3) icon = '⛅';
-            else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) icon = '🌧️';
-            else if((code >= 71 && code <= 77) || code === 85 || code === 86) icon = '❄️';
+            else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
+            else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
             let wElem = document.getElementById('weather-widget');
             if(!wElem) {
@@ -986,45 +1033,17 @@ function syncWeatherAndWidget() {
                 document.body.appendChild(wElem);
             }
             wElem.innerHTML = `${icon} ${temp}°C`;
-
-            // 2. 배경 오버레이 (비/눈 내리는 효과) 업데이트
-            let overlay = document.getElementById('weather-overlay-layer');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'weather-overlay-layer';
-                overlay.className = 'weather-overlay';
-                document.body.insertBefore(overlay, document.body.firstChild);
-            }
-
-            if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-                overlay.className = 'weather-overlay rain'; // 비 내림
-            } else if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
-                overlay.className = 'weather-overlay snow'; // 눈 내림
-            } else {
-                overlay.className = 'weather-overlay'; // 맑거나 흐린 날은 효과 끄기
-            }
+            applyManualWeatherEffect(weatherType);
         })
         .catch(err => console.log("날씨 정보를 불러오지 못했습니다."));
     }
 
-    // 브라우저가 위치 정보를 아예 지원하지 않는 경우 즉시 부산 날씨 호출
-    if (!navigator.geolocation) {
-        fetchWeatherData(defaultLat, defaultLon);
-        return;
-    }
+    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
 
-    // 유저에게 위치 권한을 요청하고, 승인/거절에 따라 분기 처리
     navigator.geolocation.getCurrentPosition(
-        (position) => {
-            // 승인됨: 유저의 현재 위치 기준 날씨 적용
-            fetchWeatherData(position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-            // 거절됨: 기본 위치(부산) 날씨 강제 적용
-            console.log("위치 권한이 거부되어 기본 위치(부산)의 날씨로 설정됩니다.");
-            fetchWeatherData(defaultLat, defaultLon);
-        },
-        { timeout: 7000 } // 7초 이상 응답 없으면 에러로 간주하고 부산 날씨 표시
+        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
+        (error) => fetchWeatherData(defaultLat, defaultLon),
+        { timeout: 7000 }
     );
 }
 // ==========================================
