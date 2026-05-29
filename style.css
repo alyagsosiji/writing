@@ -653,10 +653,30 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 #time-gear-btn:hover { transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3); }
 
+
+
+/* ==========================================
+   📱 모바일 기록자 로그인 시 소라게 버튼 높이 오류 완치
+   ========================================== */
 @media (max-width: 768px) {
-    #time-gear-btn { 
-        bottom: 80px !important; right: 26px !important; 
-        width: 36px !important; height: 36px !important; 
-        font-size: 16px !important; 
+    /* 모바일 환경설정(톱니바퀴) 버튼 높이 기준점 재확정 */
+    #time-gear-btn {
+        bottom: 80px !important;
+        right: 26px !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
+    }
+
+    /* 💡 기록자 로그인 시, 소라게 버튼을 톱니바퀴 버튼과 똑같은 높이(75px)로 강제 고정 */
+    body.admin-logged-in #random-memory-btn {
+        bottom: 80px !important;  /* 환경 설정 버튼 높이와 100% 일치 */
+        left: 26px !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 50% !important;
+        font-size: 16px !important;
+        display: flex !important;
     }
 }
+
