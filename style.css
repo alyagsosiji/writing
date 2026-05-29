@@ -229,25 +229,45 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 
 /* ==========================================
-   📌 메인 지침서/안내 문구 영역 (가로·세로 완전 중앙 정렬)
+   📌 메인 지침서/안내 문구 영역 (미세 치우침 버그 완전 박멸)
    ========================================== */
 .section-subtitle {
-    display: flex !important;
-    flex-direction: column !important; /* 텍스트와 버튼이 위아래로 쌓이도록 설정 */
-    align-items: center !important;    /* 자식 요소들을 가로축 기준 정중앙으로 배치 */
-    justify-content: center !important;
-    text-align: center !important;     /* 텍스트 줄바꿈 시에도 행 전체 중앙 정렬 */
+    display: block !important;
+    text-align: center !important;    /* 텍스트 줄바꿈 시 정중앙 정렬 */
     
-    margin: 0 auto 24px auto !important; /* 좌우 마진을 auto로 주어 컨테이너 자체를 중앙 배치 */
+    /* 💡 [핵심] 왼쪽/오른쪽 마진을 완벽하게 등분(auto)하여 대칭 정렬 */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 24px !important;
+
+    /* 💡 [핵심 2] 미세하게 오른쪽으로 밀어내던 범인(기존 왼쪽 패딩)을 흔적도 없이 박멸 */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    
     width: 100% !important;
-    max-width: 600px; /* 너무 퍼지지 않도록 가독성 좋은 폭 제한 */
+    max-width: 100% !important;        /* 부모 컨테이너 너비를 꽉 채워 비대칭 여백 차단 */
+    box-sizing: border-box !important; /* 패딩과 테두리를 너비 계산에 포함 */
 }
 
-/* 지침서 내부의 버튼 정렬 보강 */
+/* 지침서 내부의 모든 자식 요소(글자, div, 버튼 등)도 한 번 더 정중앙 정렬 */
+.section-subtitle * {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* 갤러리/리스트 모드 전환 버튼 정렬 영역 */
 .section-subtitle div {
     display: flex !important;
-    justify-content: center !important;
+    justify-content: center !important; /* 버튼 그룹을 가로축 기준 정중앙으로 배치 */
+    align-items: center !important;
     width: 100% !important;
+    margin-top: 14px !important;
 }
 
 /* 🔍 검색창 및 필터 통합 레이아웃 */
