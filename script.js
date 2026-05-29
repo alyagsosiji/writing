@@ -1081,9 +1081,6 @@ window.highlightSearchKeyword = function(text, keyword) {
 // ==========================================
 // ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
 // ==========================================
-// ==========================================
-// ⚙️ [복구] 환경 수동 조작 톱니바퀴 버튼 생성
-// ==========================================
 window.injectTimeGearButton = function() {
     if (document.getElementById('time-gear-btn')) return;
     const btn = document.createElement('div');
