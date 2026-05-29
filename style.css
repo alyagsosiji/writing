@@ -656,10 +656,10 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 
 
 /* ==========================================
-   📱 모바일 기록자 로그인 시 소라게 버튼 높이 오류 완치
+   🚨 [최종 해결] 모바일 로그인 시 소라게 버튼 높이 강제 견인 (우선순위 완전 정복)
    ========================================== */
 @media (max-width: 768px) {
-    /* 모바일 환경설정(톱니바퀴) 버튼 높이 기준점 재확정 */
+    /* 톱니바퀴(환경설정) 버튼 높이 기준점 (75px) */
     #time-gear-btn {
         bottom: 80px !important;
         right: 26px !important;
@@ -668,15 +668,18 @@ body.no-scroll { overflow: hidden; touch-action: none; }
         font-size: 16px !important;
     }
 
-    /* 💡 기록자 로그인 시, 소라게 버튼을 톱니바퀴 버튼과 똑같은 높이(75px)로 강제 고정 */
-    body.admin-logged-in #random-memory-btn {
-        bottom: 80px !important;  /* 환경 설정 버튼 높이와 100% 일치 */
-        left: 26px !important;
+    /* 💡 html과 body 태그까지 정밀하게 엮은 초고강도 선택자를 사용하여 
+       기존의 모든 !important 간섭을 무조건 깨부수고 위로 들어 올립니다. */
+    html body.admin-logged-in #random-memory-btn {
+        bottom: 80px !important;       /* 톱니바퀴 버튼 높이와 자석처럼 100% 일치 */
+        left: 26px !important;         /* 좌측 여백도 대칭 일치 */
         width: 36px !important;
         height: 36px !important;
-        border-radius: 50% !important;
+        border-radius: 50% !important; /* 완벽한 원형 유지 */
         font-size: 16px !important;
+        position: fixed !important;
         display: flex !important;
     }
 }
+
 
