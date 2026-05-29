@@ -608,33 +608,33 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background-size: 18px !important;
 }
 /* ==========================================
-   🌅 시간대(테마) 표시 위젯 (좌측 상단)
+   🌅 시간대(테마) 표시 위젯 (좌측 상단 완벽 고정)
    ========================================== */
 #theme-widget {
-    position: fixed;
-    top: 25px;
-    left: 25px;
-    z-index: 999;
-    background: rgba(3, 10, 23, 0.45);
-    border: 1px solid rgba(144, 224, 239, 0.25);
-    color: #e2e8f0;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.5s ease;
-    pointer-events: none; /* 유저 클릭을 방해하지 않도록 설정 */
+    position: fixed !important;
+    top: 25px !important;
+    left: 25px !important;
+    z-index: 999999 !important; /* 화면 가장 최상단으로 올림 */
+    background: rgba(3, 10, 23, 0.6) !important;
+    border: 1px solid rgba(144, 224, 239, 0.25) !important;
+    color: #e2e8f0 !important;
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    pointer-events: none;
     letter-spacing: 0.5px;
+    display: block !important;
 }
 
 @media (max-width: 768px) {
     #theme-widget {
-        top: 15px;
-        left: 15px;
-        font-size: 0.75rem;
-        padding: 6px 12px;
+        top: 15px !important;
+        left: 15px !important;
+        font-size: 0.75rem !important;
+        padding: 6px 12px !important;
     }
 }
