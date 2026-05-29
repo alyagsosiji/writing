@@ -644,62 +644,59 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background-size: 18px !important;
 }
 /* ==========================================
-   🌅 좌측 상단 배경(시간) 표시 위젯 (오타 교정 완결)
+   🌅 ⛅ 상단 위젯 공용 통합 디자인 (크기 및 스타일 100% 일치)
    ========================================== */
+#theme-widget, #weather-widget {
+    position: fixed !important;
+    top: 25px !important;
+    z-index: 999999 !important; /* 화면 가장 최상단 고정 */
+    
+    /* 💡 크기와 내부 여백을 완벽하게 일치시킵니다 */
+    padding: 8px 16px !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    
+    /* 유리 질감 테마 동기화 */
+    background: rgba(3, 10, 23, 0.6) !important;
+    border: 1px solid rgba(144, 224, 239, 0.25) !important;
+    color: #e2e8f0 !important;
+    border-radius: 20px !important;
+    
+    /* 폰트 및 텍스트 스타일 동기화 */
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.5px !important;
+    
+    /* 효과 동기화 */
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    
+    pointer-events: none;
+    display: block !important;
+}
+
+/* 💡 오직 위치(좌우 대칭)만 분리하여 설정 */
 #theme-widget {
-    position: fixed !important;
-    top: 25px !important;
     left: 25px !important;
-    z-index: 999999 !important; /* 💡 오타 완벽 수정하여 최상단으로 끌어올림 */
-    background: rgba(3, 10, 23, 0.6) !important;
-    border: 1px solid rgba(144, 224, 239, 0.25) !important;
-    color: #e2e8f0 !important;
-    padding: 8px 16px !important;
-    border-radius: 20px !important;
-    font-size: 0.85rem !important;
-    font-weight: bold !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-    pointer-events: none;
-    letter-spacing: 0.5px;
-    display: block !important;
 }
 
-/* ==========================================
-   ⛅ 우측 상단 날씨 표시 위젯 (좌측 위젯과 스타일 100% 일치)
-   ========================================== */
 #weather-widget {
-    position: fixed !important;
-    top: 25px !important;
-    right: 25px !important; /* 💡 좌측 위젯과 완벽하게 대칭 배치 */
-    z-index: 999999 !important;
-    background: rgba(3, 10, 23, 0.6) !important;
-    border: 1px solid rgba(144, 224, 239, 0.25) !important;
-    color: #e2e8f0 !important;
-    padding: 8px 16px !important;
-    border-radius: 20px !important;
-    font-size: 0.85rem !important;
-    font-weight: bold !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-    pointer-events: none;
-    letter-spacing: 0.5px;
-    display: block !important;
+    right: 25px !important;
 }
 
+/* 📱 모바일 환경 반응형 크기 동기화 */
 @media (max-width: 768px) {
-    #theme-widget {
+    #theme-widget, #weather-widget {
         top: 15px !important;
-        left: 15px !important;
         font-size: 0.75rem !important;
         padding: 6px 12px !important;
     }
+    #theme-widget {
+        left: 15px !important;
+    }
     #weather-widget {
-        top: 15px !important;
         right: 15px !important;
-        font-size: 0.75rem !important;
-        padding: 6px 12px !important;
     }
 }
