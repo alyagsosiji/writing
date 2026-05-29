@@ -1093,7 +1093,9 @@ window.injectTimeGearButton = function() {
 window.openEnvironmentSettingsModal = function() {
     let modal = document.getElementById('env-modal');
     if(!modal) {
-        modal = document.createElement('div'); modal.id = 'env-modal'; modal.className = 'modal';
+        modal = document.createElement('div');
+        modal.id = 'env-modal';
+        modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
         modal.innerHTML = `
@@ -1113,7 +1115,7 @@ window.openEnvironmentSettingsModal = function() {
                 
                 <div class="env-panel-area" style="margin-bottom: 32px;">
                     <label class="env-label" style="color: #f7a37f;">⛅ 날씨 효과</label>
-                    <select id="weather-select" class="env-select-box" style="border-color: rgba(247, 163, 127, 0.3);">
+                    <select id="weather-select" class="env-select-box env-select-weather" style="border-color: rgba(247, 163, 127, 0.3);">
                         <option value="auto">📍 자동 (현재 위치 기반)</option>
                         <option value="clear">☀️ 맑음 (평온한 바다)</option>
                         <option value="rain">🌧️ 비 (비 내리는 바다)</option>
@@ -1128,12 +1130,12 @@ window.openEnvironmentSettingsModal = function() {
             </div>
         `;
         document.body.appendChild(modal);
-        
-        const weatherSelect = document.getElementById('weather-select');
-        weatherSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>')`;
     }
-    document.getElementById('time-select').value = window.manualTimeOverride;
-    document.getElementById('weather-select').value = window.manualWeatherOverride;
+    
+    // 💡 [버그 픽스] 초기값이 비어있을 경우 무조건 'auto'를 강제로 집어넣어 빈칸 출력을 방지합니다.
+    document.getElementById('time-select').value = window.manualTimeOverride || 'auto';
+    document.getElementById('weather-select').value = window.manualWeatherOverride || 'auto';
+    
     modal.style.display = 'flex';
 };
 
