@@ -763,22 +763,23 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
-            if (subtitleElem) {
+                if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
         
-        // 🛠️ 좌우 여백을 상하 크기(10px)와 완벽하게 일치하도록 padding: 10px 10px; 로 조정했습니다.
+        // 💡 padding을 6px(상하) 24px(좌우)로 변경하여 상하는 날씬하게 줄이고 좌우는 글자 밖으로 넓게 확장했습니다.
         subtitleElem.innerHTML = subtitleText + `
             <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
-                <button onclick="window.toggleGridView()" style="font-size:0.85rem; background:rgba(255, 255, 255, 0.04); border:1px solid rgba(0, 180, 216, 0.25); color:#fff; padding:10px 10px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.5px; transition:0.2s; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.35); display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+                <button onclick="window.toggleGridView()" style="font-size:0.85rem; background:rgba(255, 255, 255, 0.04); border:1px solid rgba(0, 180, 216, 0.25); color:#fff; padding: 6px 24px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.5px; transition:0.2s; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.35); display:inline-flex; align-items:center; justify-content:center; gap:8px;">
                     ${gridBtnText}
                 </button>
             </div>
         `;
     }
+
 
 
 
