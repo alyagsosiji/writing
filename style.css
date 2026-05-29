@@ -185,7 +185,6 @@ header .main-title {
     text-shadow: 0 4px 15px rgba(0, 180, 216, 0.2), 0 15px 35px rgba(2, 6, 15, 0.95);
 }
 
-/* ✨ [요청 사항 반영] 노을지는 서재 타이틀 장식 효과 부여 */
 header .subtitle { 
     font-size: 1rem; 
     letter-spacing: 2px; 
@@ -319,7 +318,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     color: #cbd5e1; cursor: pointer; white-space: nowrap; flex-shrink: 0; 
 }
 
-/* 🔄 [갤러리 모드 원본 규격 완벽 롤백] 이전 요청서 양식대로 조밀한 배치 크기 복구 완료 */
+/* 🔄 갤러리 모드 원본 규격 완전 롤백 포맷 */
 .posts-grid-view { 
     display: grid !important; 
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; 
@@ -488,9 +487,6 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 @keyframes snow-fall-back { 0% { transform: translate3d(0, 0, 0); } 33% { transform: translate3d(25px, 83px, 0); } 66% { transform: translate3d(-15px, 166px, 0); } 100% { transform: translate3d(0, 250px, 0); } }
 @keyframes snow-fall-front { 0% { transform: translate3d(0, 0, 0); } 33% { transform: translate3d(-40px, 133px, 0); } 66% { transform: translate3d(30px, 266px, 0); } 100% { transform: translate3d(0, 400px, 0); } }
 
-/* ==========================================
-   📌 메인 지침서/안내 문구 영역 (초정밀 중앙 잠금)
-   ========================================== */
 .section-subtitle {
     display: block !important;
     text-align: center !important;
@@ -505,48 +501,46 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     letter-spacing: 0px !important;
 }
 .section-subtitle * { text-align: center !important; margin-left: auto !important; margin-right: auto !important; padding-left: 0 !important; padding-right: 0 !important; }
-.section-subtitle div { display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; margin-top: 14px !important; }
 
 /* ==========================================
-   🌅 ⛅ 상단 위젯 공용 통합 디자인 (원본 스타일 100% 완벽 유지)
+   🌅 ⛅ 상단 위젯 공용 통합 디자인 (원본 규격 복구)
    ========================================== */
-#theme-widget {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 9999;
-    font-size: 0.85rem;
-    color: #e2e8f0;
-    background: rgba(6, 15, 31, 0.8);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(144, 224, 239, 0.25);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    pointer-events: none;
+#theme-widget, #weather-widget {
+    position: fixed !important;
+    top: 25px !important;
+    z-index: 999999 !important; 
+    
+    padding: 8px 16px !important;
+    height: auto !important;
+    box-sizing: border-box !important;
+    
+    background: rgba(3, 10, 23, 0.6) !important;
+    border: 1px solid rgba(144, 224, 239, 0.25) !important;
+    color: #e2e8f0 !important;
+    border-radius: 20px !important;
+    
+    font-size: 0.85rem !important;
+    font-weight: bold !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.5px !important;
+    
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    pointer-events: none !important;
 }
 
-#weather-widget {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    font-size: 0.85rem;
-    color: #90e0ef;
-    background: rgba(6, 15, 31, 0.8);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(144, 224, 239, 0.25);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    pointer-events: none;
-}
+#theme-widget { left: 25px !important; right: auto !important; }
+#weather-widget { right: 25px !important; left: auto !important; }
+
+/* 🌟 [유령 박스 현상 완전 해결] 비동기 데이터 수신 대기 상태 시 스타일 빈 껍데기 대신 로딩 가이드 표출 */
+#theme-widget:empty::before { content: "⏳ 서재 확인 중..."; }
+#weather-widget:empty::before { content: "⏳ 바다 읽는 중..."; }
 
 @media (max-width: 768px) {
-    #theme-widget { top: 20px; left: 20px; font-size: 0.85rem; padding: 6px 14px; }
-    #weather-widget { top: 20px; right: 20px; font-size: 0.85rem; padding: 6px 14px; }
+    #theme-widget, #weather-widget { top: 20px !important; font-size: 0.8rem !important; padding: 6px 12px !important; }
+    #theme-widget { left: 15px !important; }
+    #weather-widget { right: 15px !important; }
 }
 
 /* ==========================================
@@ -605,7 +599,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
     box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    bottom: 105px; right: 38px; 
+    bottom: 95px; right: 38px; 
     width: 40px; height: 40px; 
     border-radius: 50%;
     font-size: 18px; 
