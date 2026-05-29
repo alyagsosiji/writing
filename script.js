@@ -209,7 +209,6 @@ window.toggleGridView = function() {
     renderUI();
 };
 
-// 🔒 [Firebase 무결점 연동 엔진] 원본 데이터 전송 규격을 무결하게 확보하여 즉시 동기화 가동
 const secureConfig = {
     apiKey: "AIzaSyC7nqQqEJcFp_jdy4wVG33WYXIj5xWJuV0",
     authDomain: "star-bock.firebaseapp.com",
@@ -482,9 +481,23 @@ window.switchView = switchView;
 function handleSearch() { searchKeyword = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : ''; searchAuthor = document.getElementById('author-filter') ? document.getElementById('author-filter').value : 'all'; currentPage = 1; renderUI(); }
 window.handleSearch = handleSearch;
 
-let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
+// ⏱️ [시간차 역순 배치 분석 엔진] 날짜 문자열을 계측 가능한 타임스탬프로 치환
+function parseCustomDate(dateStr) {
+    if (!dateStr) return 0;
+    const cleaned = String(dateStr).replace(/\s+/g, '');
+    const parts = cleaned.split('.');
+    if (parts.length < 4) return 0;
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    const timeParts = parts[3].split(':');
+    const hours = parseInt(timeParts[0], 10) || 0;
+    const minutes = parseInt(timeParts[1], 10) || 0;
+    const seconds = parseInt(timeParts[2], 10) || 0;
+    return new Date(year, month, day, hours, minutes, seconds).getTime();
+}
 
-// 🛠️ [정렬 알고리즘 완벽 복구] 최신 글이 완벽하게 상단에 위치하도록 키값 역순 매칭 엔진 주입
+let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
 function listenPosts() {
     if (!database) return;
     database.ref('posts').off();
@@ -495,7 +508,13 @@ function listenPosts() {
                 allPosts.push({ id: key, ...rawPostsSnapshot[key] }); currentIds.add(key);
                 if (!isInitialPostLoad && !knownPostIds.has(key)) hasNewPost = true;
             });
-            allPosts.sort((a, b) => b.id.localeCompare(a.id));
+            // 시간차 역순 완전 정렬
+            allPosts.sort((a, b) => {
+                const timeA = parseCustomDate(a.date);
+                const timeB = parseCustomDate(b.date);
+                if (timeB !== timeA) return timeB - timeA;
+                return b.id.localeCompare(a.id);
+            });
         }
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
@@ -503,6 +522,7 @@ function listenPosts() {
     });
 }
 
+let knownLetterIds = new Set(); let isInitialLetterLoad = true;
 function listenLetters() {
     if (!database) return;
     database.ref('letters').off();
@@ -513,7 +533,12 @@ function listenLetters() {
                 allLetters.push({ id: key, ...rawLettersSnapshot[key] }); currentIds.add(key);
                 if (!isInitialLetterLoad && !knownLetterIds.has(key)) hasNewLetter = true;
             });
-            allLetters.sort((a, b) => b.id.localeCompare(a.id));
+            allLetters.sort((a, b) => {
+                const timeA = parseCustomDate(a.date);
+                const timeB = parseCustomDate(b.date);
+                if (timeB !== timeA) return timeB - timeA;
+                return b.id.localeCompare(a.id);
+            });
         }
         if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         knownLetterIds = currentIds; isInitialLetterLoad = false;
@@ -577,6 +602,7 @@ function deleteSelectedBackups() {
 }
 window.deleteSelectedBackups = deleteSelectedBackups;
 
+// 🎁 [첨부파일 스크린샷 부분 단추 UI 대폭 개선] 답답하지 않게 여백을 넓히고 여유 공간 배치 완성
 function loadBackupTimelineList() {
     let container = document.getElementById('backup-list-container'); 
     if (!container) return; container.innerHTML = '';
@@ -597,6 +623,8 @@ function loadBackupTimelineList() {
         keys.forEach((key) => {
             const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
+            
+            // 버튼 인라인 스타일 정밀 교정 (답답함 완전 해소 및 세련된 디자인 주입)
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
@@ -604,10 +632,10 @@ function loadBackupTimelineList() {
                         <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
                         <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
                     </div>
-                    <div style="display:flex; gap:4px; flex-shrink:0; align-items:center;">
-                        <button onclick="window.downloadBackupFile('${key}', 'txt')" style="font-size:0.7rem; border:1px solid #90e0ef; color:#90e0ef; padding: 3px 6px; border-radius:5px; background:transparent; cursor:pointer;">TXT</button>
-                        <button onclick="window.downloadBackupFile('${key}', 'pdf')" style="font-size:0.7rem; border:1px solid #ffd4ba; color:#ffd4ba; padding: 3px 6px; border-radius:5px; background:transparent; cursor:pointer;">PDF</button>
-                        <button onclick="window.restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border-color:#f7a37f; color:#f7a37f; padding: 4px 10px; border-radius:6px; background:transparent; cursor:pointer;">복구</button>
+                    <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+                        <button onclick="window.downloadBackupFile('${key}', 'txt')" style="font-size:0.75rem; border:1px solid rgba(144,224,239,0.35); color:#90e0ef; padding: 5px 9px; border-radius:6px; background:rgba(144,224,239,0.04); cursor:pointer; font-weight:500; transition:all 0.2s;">TXT</button>
+                        <button onclick="window.downloadBackupFile('${key}', 'pdf')" style="font-size:0.75rem; border:1px solid rgba(255,212,186,0.35); color:#ffd4ba; padding: 5px 9px; border-radius:6px; background:rgba(255,212,186,0.04); cursor:pointer; font-weight:500; transition:all 0.2s;">PDF</button>
+                        <button onclick="window.restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; border:1px solid #f7a37f; color:#fff; background:linear-gradient(135deg, #f7a37f, #e76f51); padding: 5px 12px; border-radius:6px; cursor:pointer; font-weight:bold; transition:all 0.2s; box-shadow:0 2px 6px rgba(247,163,127,0.25);">복구</button>
                     </div>
                 </div>
             `;
@@ -677,9 +705,10 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
+    // ✨ [요청 사항 지침 문구 데코레이션 완료] 밤바다 오로라 야광 이펙트 장식 주입
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
-            ? `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
+            ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
         subtitleElem.innerHTML = subtitleText + `<div style="margin-top:14px;"><button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">${gridBtnText}</button></div>`;
@@ -876,9 +905,7 @@ window.highlightSearchKeyword = highlightSearchKeyword;
 
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
-    let bgStyle = "";
-    let themeText = "";
-    
+    let bgStyle = ""; let themeText = "";
     let mode = window.manualTimeOverride || 'auto';
     if (mode === 'auto') {
         if (hour >= 6 && hour < 12) mode = 'morning';
@@ -886,33 +913,22 @@ function applyTimeBasedThemeEngine() {
         else if (hour >= 18 && hour < 20) mode = 'evening';
         else mode = 'night';
     }
-
     if (mode === 'morning') { bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)"; themeText = "🌅 아침의 바다"; }
     else if (mode === 'day') { bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)"; themeText = "☀️ 낮의 바다"; }
     else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
     else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
-    
     if (document.body) {
-        document.body.style.transition = "background 3s ease-in-out";
-        document.body.style.background = bgStyle;
-        let tElem = document.getElementById('theme-widget');
-        if (!tElem) { tElem = document.createElement('div'); tElem.id = 'theme-widget'; document.body.appendChild(tElem); }
+        document.body.style.transition = "background 3s ease-in-out"; document.body.style.background = bgStyle;
+        let tElem = document.getElementById('theme-widget'); if (!tElem) { tElem = document.createElement('div'); tElem.id = 'theme-widget'; document.body.appendChild(tElem); }
         tElem.innerText = themeText;
     }
 }
 
-// 🛠️ [레이스 컨디션 해결] 자동 모드(위치 기반)일 때 절대 강제 덮어쓰기가 발생하지 않는 청정 구조식 확립
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
-
-    if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') {
-        applyManualWeatherEffect(window.manualWeatherOverride);
-        return;
-    }
-
+    if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
     const defaultLat = 35.1796; const defaultLon = 129.0756;
-    
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
@@ -920,12 +936,9 @@ function syncWeatherAndWidget() {
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
             const code = data.current_weather.weathercode; const temp = data.current_weather.temperature;
             let icon = '☁️'; let weatherType = 'clear';
-
-            if(code === 0) icon = '☀️';
-            else if(code > 0 && code <= 3) icon = '⛅';
+            if(code === 0) icon = '☀️'; else if(code > 0 && code <= 3) icon = '⛅';
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
-            
             if (wElem) { wElem.innerText = `${icon} ${temp}°C`; }
             applyManualWeatherEffect(weatherType);
         })
@@ -934,19 +947,13 @@ function syncWeatherAndWidget() {
             applyManualWeatherEffect('clear');
         });
     }
-
     if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
-    navigator.geolocation.getCurrentPosition(
-        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon),
-        { timeout: 5000 }
-    );
+    navigator.geolocation.getCurrentPosition((position) => fetchWeatherData(position.coords.latitude, position.coords.longitude), (error) => fetchWeatherData(defaultLat, defaultLon), { timeout: 5000 });
 }
 
 function applyManualWeatherEffect(type) {
     let overlay = document.getElementById('weather-overlay-layer');
     if (!overlay && document.body) { overlay = document.createElement('div'); overlay.id = 'weather-overlay-layer'; document.body.insertBefore(overlay, document.body.firstChild); }
-
     if (type === 'rain') {
         if (overlay) overlay.className = 'weather-overlay rain';
         if (window.manualWeatherOverride !== 'auto') { const wElem = document.getElementById('weather-widget'); if (wElem) wElem.innerText = "🌧️ 비 내리는 바다"; }
@@ -956,9 +963,7 @@ function applyManualWeatherEffect(type) {
     } else if (type === 'clear') {
         if (overlay) overlay.className = 'weather-overlay';
         if (window.manualWeatherOverride !== 'auto') { const wElem = document.getElementById('weather-widget'); if (wElem) wElem.innerText = "☀️ 평온한 바다"; }
-    } else {
-        if (overlay) overlay.className = 'weather-overlay';
-    }
+    } else { if (overlay) overlay.className = 'weather-overlay'; }
 }
 
 applyTimeBasedThemeEngine();
@@ -974,8 +979,6 @@ window.openEnvironmentSettingsModal = function() {
     if(!modal) {
         modal = document.createElement('div'); modal.id = 'env-modal'; modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
-        
-        // ✨ [⚙️ 이모지 깨짐 완전 박멸] 텍스트 그라데이션 클리핑 충돌 스코프로부터 이모지를 완전 분리하여 독립형 컬러 출력 구현
         modal.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
                 <h3 style="margin-bottom:25px; font-size:1.3rem; color:#fff; display:flex; align-items:center; justify-content:center;">
