@@ -140,12 +140,10 @@ body {
 }
 #random-memory-btn:hover { transform: scale(1.05); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3); }
 
-/* [PC 로그인] 백업창 위로 상승하며 원래의 작고 둥근 원형(40px)으로 변신 */
 body.admin-logged-in #random-memory-btn {
     bottom: 105px; left: 38px; width: 40px; height: 40px; border-radius: 50%; font-size: 18px;
 }
 
-/* 📱 모바일 환경 반응형 (소라게 및 위젯) */
 @media (max-width: 768px) {
     #random-memory-btn { 
         bottom: 20px !important; left: 20px !important; right: auto !important; 
@@ -192,7 +190,6 @@ header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opac
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-/* 🌟 [복구 완료] 탭 버튼 원본 디자인 유지 */
 .view-tab-container { display: flex; justify-content: center; gap: 15px; margin-top: 35px; }
 .tab-btn {
     background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
@@ -253,7 +250,6 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 #author-filter:focus { border-color: #00b4d8; box-shadow: 0 0 10px rgba(0, 180, 216, 0.2); background-color: rgba(3, 10, 23, 0.85); }
 #author-filter option { background: #030a16; color: #fff; }
 
-/* 📝 기입창 외형 + [해결] 패스워드 셀렉터 보강 */
 #write-section, #letter-section {
     background: rgba(8, 19, 38, 0.85); border: 1px solid rgba(0, 180, 216, 0.15);
     padding: 30px; border-radius: 18px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
@@ -261,7 +257,6 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #00b4d8; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
 
-/* 🌟 [복구 완료] 글쓰기/편지보내기 등 폼 버튼들 원본 정렬 유지 */
 .write-buttons { display: flex; gap: 10px; }
 
 input[type="text"], input[type="password"], textarea, select {
@@ -278,7 +273,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .terms-label input[type="checkbox"] { cursor: pointer; width: 16px; height: 16px; accent-color: #00b4d8; }
 
 /* ==========================================
-   🖼️ 리스트 및 그리드 갤러리 뷰 포맷 + [BaaS 데이터 최적화]
+   🖼️ 리스트 및 그리드 갤러리 뷰 포맷 + 데이터 동기화
    ========================================== */
 .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 30px; width: 100%; }
 .post-card {
@@ -299,12 +294,11 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     color: #cbd5e1 !important; font-size: inherit !important; line-height: inherit !important; background: transparent !important;
 }
 
-/* 🚨 [버튼 먹통 완치 3] 글 내용 오버플로우 시 하단 버튼(수정/삭제)을 투명하게 덮는 버그 차단 */
 .post-footer { 
     display: flex; justify-content: space-between; align-items: center; 
     flex-shrink: 0; border-top: 1px solid rgba(255, 255, 255, 0.04); 
     padding-top: 12px; gap: 10px; 
-    position: relative; z-index: 40; /* 상단 내용보다 위로 끌어올려 터치 방어 */
+    position: relative; z-index: 40; 
 }
 
 .post-card .date { font-size: 0.78rem; color: #94a3b8 !important; line-height: 1.4; word-break: keep-all; }
@@ -320,7 +314,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
 
 /* ==========================================
-   📱 모바일 디바이스 레이아웃 트리니티 고정 최적화
+   📱 모바일 레이아웃 최적화
    ========================================== */
 @media (max-width: 900px) { .posts-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 768px) {
@@ -345,7 +339,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 }
 
 /* ==========================================
-   📦 모달 및 알림 팝업 프레임 세부 가속화 (BaaS 정합)
+   📦 모달 및 알림 팝업 프레임 세부 가속화
    ========================================== */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 15, 0.9); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .modal-content { background: linear-gradient(145deg, #0a1b36, #040d1c) !important; border: 1px solid rgba(0, 180, 216, 0.2); padding: 35px; border-radius: 18px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.7); animation: popupScale 0.25s cubic-bezier(0.25, 1, 0.5, 1); }
@@ -353,7 +347,6 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 
-/* 🌟 [복구 완료] 일반 모달 버튼들 원본 정렬 유지 */
 .modal-buttons { display: flex; justify-content: center; gap: 10px; }
 
 .backup-modal-content { max-width: 540px !important; }
@@ -389,16 +382,14 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .cancel-btn { background: rgba(255,255,245,0.04); border-color: rgba(255,255,255,0.08); color: #bbb; }
 
 /* ==========================================
-   🌌 푸터 및 저작권 표기 글자 (원문 형태 보존 + 7px 간격 맞춤)
+   🌌 푸터 및 저작권 표기 영역 (정밀 중앙 고정)
    ========================================== */
 footer { 
     position: relative; z-index: 10; text-align: center; margin-top: 60px; 
     padding: 35px 0 93px 0; color: #94a3b8; font-size: 0.85rem; letter-spacing: 2px; font-weight: 400; 
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); text-shadow: 0 0 8px rgba(144, 224, 239, 0.15); user-select: none; cursor: default;
 }
-
 footer p, footer span { color: inherit; font-size: inherit; }
-
 footer::before {
     content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 70%; max-width: 500px; height: 1px;
     background: linear-gradient(90deg, transparent 0%, rgba(0, 180, 216, 0.4) 50%, transparent 100%); box-shadow: 0 1px 10px rgba(0, 180, 216, 0.2);
@@ -407,7 +398,6 @@ footer::after {
     content: '✦'; position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
     color: rgba(144, 224, 239, 0.7); font-size: 0.7rem; text-shadow: 0 0 8px rgba(0, 180, 216, 0.6); animation: starTwinkle 3s infinite alternate;
 }
-
 footer:hover { color: #ffffff; text-shadow: 0 0 12px rgba(144, 224, 239, 0.8), 0 0 25px rgba(247, 163, 127, 0.4); transform: translateY(-2px); }
 
 @keyframes starTwinkle { 0% { opacity: 0.4; transform: translateX(-50%) scale(0.9); } 100% { opacity: 1; transform: translateX(-50%) scale(1.1); } }
@@ -417,7 +407,6 @@ footer:hover { color: #ffffff; text-shadow: 0 0 12px rgba(144, 224, 239, 0.8), 0
     footer::before { width: 85%; }
 }
 
-/* 🔔 앱 업데이트 안내 토스트 */
 .update-toast {
     position: fixed; top: -200px; left: 50%; transform: translateX(-50%); background: rgba(6, 15, 31, 0.95); border: 1px solid rgba(0, 180, 216, 0.4);
     padding: 16px 24px; border-radius: 14px; z-index: 100000; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 180, 216, 0.2);
@@ -431,9 +420,6 @@ footer:hover { color: #ffffff; text-shadow: 0 0 12px rgba(144, 224, 239, 0.8), 0
 
 body.no-scroll { overflow: hidden; touch-action: none; }
 
-/* ==========================================
-   🚀 모바일 스크롤 렌더링 과부하(네모 잔상) 방지
-   ========================================== */
 @media (max-width: 768px) {
     .post-card {
         backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
@@ -443,14 +429,13 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ⛅ 실시간 날씨 동기화 (GPU 가속 + 초자연 물리 엔진)
+   ⛅ 실시간 날씨 동기화 (GPU 가속 물리 레이어)
    ========================================== */
 .weather-overlay {
     position: fixed; top: -20%; left: -20%; width: 140%; height: 140%; 
     z-index: 0; pointer-events: none; overflow: hidden;
     opacity: 0; transition: opacity 2s ease-in-out;
 }
-
 .weather-overlay::before, .weather-overlay::after {
     content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none; background-repeat: repeat;
@@ -458,7 +443,6 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     opacity: 0; transition: opacity 1s;
 }
 
-/* 🌧️ 비 (Rain): 강한 중력 och 사선 궤적 */
 .weather-overlay.rain { opacity: 1; transform: rotate(15deg) scale(1.1); }
 .weather-overlay.rain::before {
     opacity: 1;
@@ -473,12 +457,8 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 @keyframes rain-fall-back  { 100% { transform: translate3d(0, 200px, 0); } }
 @keyframes rain-fall-front { 100% { transform: translate3d(0, 300px, 0); } }
 
-/* ❄️ 눈 (Snow): S자 궤적 흩날림 */
 .weather-overlay.snow { opacity: 1; animation: snow-wind 12s ease-in-out infinite alternate; }
-@keyframes snow-wind {
-    0%   { transform: rotate(-3deg) scale(1.1); }
-    100% { transform: rotate(4deg) scale(1.1); }
-}
+@keyframes snow-wind { 0% { transform: rotate(-3deg) scale(1.1); } 100% { transform: rotate(4deg) scale(1.1); } }
 .weather-overlay.snow::before {
     opacity: 1;
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="250" height="250"><circle cx="40" cy="40" r="1.5" fill="rgba(255,255,255,0.4)"/><circle cx="180" cy="80" r="2" fill="rgba(255,255,255,0.3)"/><circle cx="100" cy="160" r="1" fill="rgba(255,255,255,0.5)"/><circle cx="220" cy="200" r="1.5" fill="rgba(255,255,255,0.4)"/></svg>');
@@ -489,21 +469,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><circle cx="80" cy="80" r="3" fill="rgba(255,255,255,0.8)"/><circle cx="250" cy="150" r="2.5" fill="rgba(255,255,255,0.6)"/><circle cx="120" cy="300" r="4" fill="rgba(255,255,255,0.5)"/><circle cx="320" cy="350" r="3.5" fill="rgba(255,255,255,0.7)"/><circle cx="200" cy="20" r="2" fill="rgba(255,255,255,0.9)"/></svg>');
     animation: snow-fall-front 8s linear infinite;
 }
-@keyframes snow-fall-back {
-    0%   { transform: translate3d(0, 0, 0); }
-    33%  { transform: translate3d(25px, 83px, 0); }   
-    66%  { transform: translate3d(-15px, 166px, 0); } 
-    100% { transform: translate3d(0, 250px, 0); }      
-}
-@keyframes snow-fall-front {
-    0%   { transform: translate3d(0, 0, 0); }
-    33%  { transform: translate3d(-40px, 133px, 0); } 
-    66%  { transform: translate3d(30px, 266px, 0); }
-    100% { transform: translate3d(0, 400px, 0); }
-}
+@keyframes snow-fall-back { 0% { transform: translate3d(0, 0, 0); } 33% { transform: translate3d(25px, 83px, 0); } 66% { transform: translate3d(-15px, 166px, 0); } 100% { transform: translate3d(0, 250px, 0); } }
+@keyframes snow-fall-front { 0% { transform: translate3d(0, 0, 0); } 33% { transform: translate3d(-40px, 133px, 0); } 66% { transform: translate3d(30px, 266px, 0); } 100% { transform: translate3d(0, 400px, 0); } }
 
 /* ==========================================
-   📌 메인 지침서/안내 문구 영역 (절대 중심 잠금)
+   📌 메인 지침서/안내 문구 영역 (초정밀 중앙 잠금)
    ========================================== */
 .section-subtitle {
     display: block !important;
@@ -518,25 +488,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     box-sizing: border-box !important;
     letter-spacing: 0px !important;
 }
-
-.section-subtitle * {
-    text-align: center !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-.section-subtitle div {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: 14px !important;
-}
+.section-subtitle * { text-align: center !important; margin-left: auto !important; margin-right: auto !important; padding-left: 0 !important; padding-right: 0 !important; }
+.section-subtitle div { display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; margin-top: 14px !important; }
 
 /* ==========================================
-   🌅 ⛅ 상단 좌우 위젯 공용 통합 디자인 (inline-flex 고정으로 어긋남 완전 치료)
+   🌅 ⛅ 상단 위젯 레이아웃 (inline-flex 정렬 일치 완료)
    ========================================== */
 #theme-widget, #weather-widget {
     position: fixed !important;
@@ -545,7 +501,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     
     padding: 0 16px !important;
     height: 35px !important;
-    display: inline-flex !important; /* 🚨 기존의 무의미한 block 분기 충돌 규칙을 제거하고 flex 정렬로 대칭 잠금 */
+    display: inline-flex !important; 
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
@@ -567,13 +523,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     transition: opacity 0.3s ease-in-out !important;
 }
 
-#theme-widget:empty, #weather-widget:empty {
-    display: none !important;
-    padding: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
+#theme-widget:empty, #weather-widget:empty { display: none !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
 #theme-widget { left: 25px !important; }
 #weather-widget { right: 25px !important; }
 
@@ -589,7 +539,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ⚙️ 환경 설정 모달 - 커스텀 선택 박스 (화살표 튕김 방지)
+   ⚙️ 환경 설정 모달 - 커스텀 선택 박스 (안티 튕김 기법)
    ========================================== */
 .env-select-box {
     width: 100% !important;
@@ -606,7 +556,6 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
-    
     background-repeat: no-repeat !important;
     background-size: 18px !important;
     transition: border-color 0.3s, box-shadow 0.3s !important;
@@ -616,12 +565,10 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(144,224,239,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
     background-position: calc(100% - 14px) center !important;
 }
-
 #weather-select.env-select-box {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
     background-position: calc(100% - 14px) center !important;
 }
-
 .env-select-box:hover, .env-select-box:focus, .env-select-box:active {
     border-color: #00b4d8 !important;
     box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
@@ -629,21 +576,14 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     appearance: none !important;
     -webkit-appearance: none !important;
 }
-
-.env-select-box option {
-    background-color: #040d1c;
-    color: #ffffff;
-    padding: 10px;
-}
+.env-select-box option { background-color: #040d1c; color: #ffffff; padding: 10px; }
 
 .env-panel-area {
     margin-bottom: 25px; text-align: left; background: rgba(255, 255, 255, 0.02); 
     padding: 18px 16px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.04); 
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
 }
-.env-label {
-    font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; font-weight: bold; letter-spacing: 0.5px;
-}
+.env-label { font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; font-weight: bold; letter-spacing: 0.5px; }
 
 /* ==========================================
    ⚙️ 환경 설정 수동 조작 톱니바퀴 버튼 디자인
@@ -654,15 +594,12 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
     box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    
     bottom: 95px; right: 38px; 
     width: 40px; height: 40px; 
     border-radius: 50%;
     font-size: 18px; 
 }
-#time-gear-btn:hover {
-    transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
-}
+#time-gear-btn:hover { transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3); }
 
 @media (max-width: 768px) {
     #time-gear-btn { 
