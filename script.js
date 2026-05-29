@@ -843,7 +843,7 @@ function savePost() {
     if (!isAdmin || !database || isSubmitting) return;
     const title = document.getElementById('post-title')?.value.trim(); const content = document.getElementById('post-content')?.value.trim();
     if (!title || !content) { showSystemAlert('내용을 모두 입력해주세요.'); return; }
-
+    if (!navigator.onLine) { showSystemAlert('인터넷이 끊겨 글을 기록할 수 없습니다.'); return; }
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; 
     const postData = { title: title, content: content, date: date, author: loggedInUser };
@@ -867,6 +867,7 @@ function saveLetter() {
     if (!database || isSubmitting || isRestMode) return;
     const title = document.getElementById('letter-title')?.value.trim(); const content = document.getElementById('letter-content')?.value.trim();
     if (!title || !content) { showSystemAlert('제목과 내용을 모두 채워주세요.'); return; }
+    if (!navigator.onLine) { showSystemAlert('인터넷이 끊겨 편지를 띄울 수 없습니다.'); return; }
     if (document.getElementById('agree-terms') && !document.getElementById('agree-terms').checked) { showSystemAlert('안내 및 약관에 동의해주세요.'); return; }
 
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
@@ -940,3 +941,16 @@ function clearDatabase() {
 window.clearDatabase = clearDatabase;
 
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+
+// ==========================================
+// 📡 0-C. 오프라인(인터넷 끊김) 감지 방어 시스템
+// ==========================================
+window.addEventListener('offline', () => {
+    // 인터넷이 끊겼을 때 띄우는 알림
+    showSystemAlert('수평선 너머와의 연결이 끊어졌습니다. 네트워크를 확인해 주세요.');
+});
+
+window.addEventListener('online', () => {
+    // 인터넷이 다시 연결되었을 때 띄우는 알림
+    showSystemAlert('다시 수평선 너머로 연결되었습니다.');
+});
