@@ -159,8 +159,6 @@ body.admin-logged-in #random-memory-btn {
     }
 }
 
-/* 💡 크기 어긋남 방지를 위해 이곳에 수록되어 방해하던 구버전 #weather-widget 스타일 파편 제거 완료 */
-
 /* ==========================================
    ⏳ 로딩 화면 (네모 박스 유령 박멸)
    ========================================== */
@@ -179,7 +177,7 @@ body.admin-logged-in #random-memory-btn {
 #loading-screen p { color: #00b4d8; letter-spacing: 2px; font-size: 0.85rem; }
 
 /* ==========================================
-   #️ 메인 레이아웃 및 본문 구조
+   🏛️ 메인 레이아웃 및 본문 구조
    ========================================== */
 #app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px 20px 20px; }
 header { text-align: center; margin-bottom: 40px; }
@@ -194,7 +192,7 @@ header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opac
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-/* #️ [복구 완료] 탭 버튼 원본 디자인 유지 */
+/* 🌟 [복구 완료] 탭 버튼 원본 디자인 유지 */
 .view-tab-container { display: flex; justify-content: center; gap: 15px; margin-top: 35px; }
 .tab-btn {
     background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
@@ -263,7 +261,7 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #00b4d8; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
 
-/* #️ [복구 완료] 글쓰기/편지보내기 등 폼 버튼들 원본 정렬 유지 */
+/* 🌟 [복구 완료] 글쓰기/편지보내기 등 폼 버튼들 원본 정렬 유지 */
 .write-buttons { display: flex; gap: 10px; }
 
 input[type="text"], input[type="password"], textarea, select {
@@ -355,7 +353,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 
-/* #️ [복구 완료] 일반 모달 버튼들 원본 정렬 유지 */
+/* 🌟 [복구 완료] 일반 모달 버튼들 원본 정렬 유지 */
 .modal-buttons { display: flex; justify-content: center; gap: 10px; }
 
 .backup-modal-content { max-width: 540px !important; }
@@ -475,7 +473,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 @keyframes rain-fall-back  { 100% { transform: translate3d(0, 200px, 0); } }
 @keyframes rain-fall-front { 100% { transform: translate3d(0, 300px, 0); } }
 
-/* ❄️ 눈 (Snow): S자 궤적 흩날림 (CPU 부하 최소화 기법 적용) */
+/* ❄️ 눈 (Snow): S자 궤적 흩날림 */
 .weather-overlay.snow { opacity: 1; animation: snow-wind 12s ease-in-out infinite alternate; }
 @keyframes snow-wind {
     0%   { transform: rotate(-3deg) scale(1.1); }
@@ -505,17 +503,14 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   📌 메인 지침서/안내 문구 영역 (화면 절반 기준 초정밀 중앙 잠금)
+   📌 메인 지침서/안내 문구 영역 (절대 중심 잠금)
    ========================================== */
 .section-subtitle {
     display: block !important;
     text-align: center !important;
-    
-    /* 부모 요소의 숨은 비대칭 여백 간섭을 원천 차단하고 뷰포트 기준 정중앙 정렬 */
     position: relative !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    
     width: 100% !important;
     max-width: 600px !important;
     margin: 0 0 24px 0 !important;
@@ -524,7 +519,6 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     letter-spacing: 0px !important;
 }
 
-/* 지침서 하위 모든 텍스트 정렬 잔재 청소 */
 .section-subtitle * {
     text-align: center !important;
     margin-left: auto !important;
@@ -542,22 +536,20 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌅 ⛅ 상단 좌우 위젯 공용 통합 디자인 (쌍둥이 대칭 크기 동기화)
+   🌅 ⛅ 상단 좌우 위젯 공용 통합 디자인 (inline-flex로 높이 단차 100% 일치)
    ========================================== */
 #theme-widget, #weather-widget {
     position: fixed !important;
     top: 25px !important;
     z-index: 999999 !important;
     
-    /* 💡 단차 및 격차를 제로로 고정하기 위해 inline-flex와 정밀 높이 계산기 적용 */
-    padding: 8px 16px !important;
+    padding: 0 16px !important;
     height: 35px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
     
-    /* 투명 유리 테마 통일 */
     background: rgba(3, 10, 23, 0.6) !important;
     border: 1px solid rgba(144, 224, 239, 0.25) !important;
     color: #e2e8f0 !important;
@@ -571,13 +563,10 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     backdrop-filter: blur(6px) !important;
     -webkit-backdrop-filter: blur(6px) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-    
     pointer-events: none;
-    display: block !important;
     transition: opacity 0.3s ease-in-out !important;
 }
 
-/* 💡 글자가 채워지기 전, 빈 상태일 때는 여백과 패딩을 소멸시켜 버그 방어 */
 #theme-widget:empty, #weather-widget:empty {
     display: none !important;
     padding: 0 !important;
@@ -588,12 +577,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 #theme-widget { left: 25px !important; }
 #weather-widget { right: 25px !important; }
 
-/* 📱 모바일 환경 반응형 크기 완전 일치 */
 @media (max-width: 768px) {
     #theme-widget, #weather-widget {
         top: 15px !important;
         font-size: 0.75rem !important;
-        padding: 6px 12px !important;
+        padding: 0 12px !important;
         height: 28px !important;
     }
     #theme-widget { left: 15px !important; }
@@ -601,7 +589,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ⚙️ 환경 설정 모달 - 커스텀 선택 박스 (화살표 이탈 안티-쉬프팅 잠금)
+   ⚙️ 환경 설정 모달 - 커스텀 선택 박스 (화살표 튕김 방지)
    ========================================== */
 .env-select-box {
     width: 100% !important;
@@ -624,19 +612,16 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     transition: border-color 0.3s, box-shadow 0.3s !important;
 }
 
-/* 🌅 시간대 선택 상자 전용 푸른빛 화살표 절대 위치 고정 */
 #time-select.env-select-box {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(144,224,239,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
     background-position: calc(100% - 14px) center !important;
 }
 
-/* ⛅ 날씨 선택 상자 전용 산호빛 화살표 절대 위치 고정 */
 #weather-select.env-select-box {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
     background-position: calc(100% - 14px) center !important;
 }
 
-/* 💡 마우스 오버, 클릭 활성화 시 화살표 이동 버그를 원천 차단 */
 .env-select-box:hover, .env-select-box:focus, .env-select-box:active {
     border-color: #00b4d8 !important;
     box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
@@ -661,7 +646,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ⚙️ 환경 설정 수동 조작 톱니바퀴 버튼 디자인 (복구 및 정렬 완결)
+   ⚙️ 환경 설정 수동 조작 톱니바퀴 버튼 디자인
    ========================================== */
 #time-gear-btn {
     position: fixed; z-index: 9999; cursor: pointer; 
