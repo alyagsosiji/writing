@@ -26,9 +26,6 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
-
-
-
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
     targetFields.forEach(id => {
@@ -112,7 +109,6 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-
 function injectRandomMemoryButton() {
     if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
@@ -122,7 +118,6 @@ function injectRandomMemoryButton() {
     btn.onmouseenter = () => btn.style.transform = 'scale(1.1)';
     btn.onmouseleave = () => btn.style.transform = 'scale(1)';
     
-    // 🛠️ [정렬 기준 반영 완료] 현재 선택된 기록자 필터(searchAuthor)에 맞춰 랜덤 추출되도록 로직 개조
     btn.onclick = () => {
         let filtered = allPosts;
         if (searchAuthor !== 'all') {
@@ -141,6 +136,7 @@ function injectRandomMemoryButton() {
     };
     document.body.appendChild(btn);
 }
+
 window.openLibraryModal = function() {
     if (document.getElementById('library-modal')) {
         document.getElementById('library-modal').style.display = 'flex';
@@ -216,9 +212,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initDraftAutoSaveEngine();
         injectRandomMemoryButton();
         injectTimeGearButton();
-        fetchWeatherWidget();
-        syncWeatherAndWidget(); // 💡 처음에 한 번 날씨 불러오기
-        setInterval(syncWeatherAndWidget, 30 * 60000); // 💡 30분마다 날씨 갱신
+        syncWeatherAndWidget(); 
+        setInterval(syncWeatherAndWidget, 30 * 60000); 
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
@@ -284,10 +279,10 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlcGFwcC5jb20="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmViYXNlaW8uY29t"), 
+    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlcGFwcC5jb20="),
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmBiYXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmBiYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
@@ -346,7 +341,6 @@ function openBackupModal() {
 function closeBackupModal() { if (document.getElementById('backup-modal')) document.getElementById('backup-modal').style.display = 'none'; }
 window.openBackupModal = openBackupModal; window.closeBackupModal = closeBackupModal;
 
-// 🛠️ [신택스오류 제거 및 30일 보존 문구 유실 차단 완성형 탭 스위처]
 window.switchAdminTab = function(tab) {
     const btnBackup = document.getElementById('admin-btn-backup');
     const btnSettings = document.getElementById('admin-btn-settings');
@@ -362,16 +356,16 @@ window.switchAdminTab = function(tab) {
         if(listContainer) listContainer.style.setProperty('display', 'block', 'important');
         if(delControls) delControls.style.setProperty('display', 'flex', 'important');
         if(settingsContainer) settingsContainer.style.setProperty('display', 'none', 'important');
-        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'block', 'important'); // 백업 탭 진입 시 보존 문구 가동
+        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'block', 'important'); 
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'block', 'important');
         loadBackupTimelineList();
     } else if (tab === 'settings') {
         if(btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
         if(btnBackup) { btnBackup.style.color = '#64748b'; btnBackup.style.borderBottom = '2px solid transparent'; }
         if(listContainer) listContainer.style.setProperty('display', 'none', 'important');
-        if(delControls) delControls.style.setProperty('display', 'none', 'important'); // 런타임 오류 완전히 수정 완료
+        if(delControls) delControls.style.setProperty('display', 'none', 'important'); 
         if(settingsContainer) settingsContainer.style.setProperty('display', 'block', 'important');
-        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'none', 'important'); // 설정 탭 진입 시 보존 문구 철저히 소멸
+        if(subtitleSpan) subtitleSpan.style.setProperty('display', 'none', 'important'); 
         if(timelineWrapper) timelineWrapper.style.setProperty('display', 'none', 'important');
         renderAdminSettings();
     }
@@ -396,10 +390,9 @@ function renderAdminSettings() {
     `;
 }
 
-// 🛠️ [레이스 컨디션 해결] 목적 타겟 상태 선제 매핑을 통한 반대 출력 문제 완치
 function toggleRestMode() {
     if(!isAdmin || !database) return;
-    const targetState = !isRestMode; // 비동기 쓰기 이전에 타겟 상태 완벽 변수 바인딩
+    const targetState = !isRestMode; 
     database.ref('settings/restMode').set(targetState).then(() => {
         showSystemAlert(targetState ? '바다가 휴식에 들어갑니다. 편지 수신이 차단됩니다.' : '바다의 휴식이 끝났습니다. 편지 수신이 재개됩니다.');
         renderAdminSettings();
@@ -439,9 +432,7 @@ function updateUI() {
     const backupTrigger = document.getElementById('mini-backup-trigger');
 
     if (isAdmin) {
-        // ✨ [추가] 로그인 시 body에 클래스를 추가하여 소라게를 위로 올립니다.
         document.body.classList.add('admin-logged-in'); 
-
         if (writeSection) writeSection.style.display = 'block'; 
         if (letterSection) letterSection.style.display = 'none'; 
         if (loginBtn) loginBtn.style.display = 'none'; 
@@ -451,9 +442,7 @@ function updateUI() {
         if (backupTrigger) backupTrigger.style.display = 'flex'; 
         switchView(currentView);
     } else {
-        // ✨ [추가] 로그아웃 시 클래스를 제거하여 소라게를 다시 밑으로 내립니다.
         document.body.classList.remove('admin-logged-in');
-
         if (writeSection) writeSection.style.display = 'none'; 
         if (letterSection) letterSection.style.display = 'block'; 
         if (loginBtn) loginBtn.style.display = 'inline-block'; 
@@ -463,7 +452,6 @@ function updateUI() {
         switchView('posts'); 
     }
 
-    
     const letterSubmitBtn = document.getElementById('submit-letter-btn');
     const letterContent = document.getElementById('letter-content');
     if (isRestMode) {
@@ -503,7 +491,6 @@ function listenPosts() {
             });
             allPosts.reverse(); 
         }
-        // ✨ 자동 백업 꼬임 방지를 위해 리스너에서는 알림만 담당합니다.
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
@@ -528,6 +515,7 @@ function listenLetters() {
         if(currentView === 'letters') renderUI();
     });
 }
+
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return Promise.reject(new Error("Database connection lost"));
@@ -548,7 +536,6 @@ window.triggerManualBackup = function() {
     .then(() => showSystemAlert("현재 바다 상태 스냅샷 수동 저장이 완료되었습니다."))
     .catch(err => showSystemAlert("수동 백업 실패: " + err.message));
 };
-window.triggerManualBackup = triggerManualBackup;
 
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
@@ -672,10 +659,7 @@ function executeRestore(targetBackup) {
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
 // ==========================================
-// 🚀 [최적화 완료] 화면 렌더링 엔진 (DocumentFragment 적용으로 렉 99% 감소)
-// ==========================================
-// ==========================================
-// 🚀 [최적화 완결판] 화면 렌더링 엔진 (제목 야광 한정 + Reflow 최적화)
+// 🚀 화면 렌더링 엔진 (제목 야광 한정 + Reflow 최적화 완결판)
 // ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container'); 
@@ -690,7 +674,6 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
-    // 1. 헤더 안내 및 모드 버튼 동기화
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
@@ -707,7 +690,6 @@ function renderUI() {
         if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
     }
 
-    // 2. 필터링 및 검색 연동
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
     if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
@@ -717,7 +699,6 @@ function renderUI() {
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
-    // 가상 바구니(Fragment)를 이용해 브라우저 렉(Reflow) 완벽 방어
     const cardFragment = document.createDocumentFragment();
 
     currentItems.forEach((item) => {
@@ -733,13 +714,12 @@ function renderUI() {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // 💡 [요청 반영] h3(제목)에만 야광 효과를 입히고, post-content-area(본문)는 하이라이트 없이 원본 출력
+        // 💡 [요청 반영] h3 제목에만 하이라이트(야광) 효과 적용, 본문은 하이라이트 완전히 제외
         card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
     container.appendChild(cardFragment);
 
-    // 3. 페이지네이션
     if (totalPages > 1) {
         const pageFragment = document.createDocumentFragment();
         const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
@@ -790,13 +770,13 @@ function savePost() {
     if (editTargetKey) { 
         database.ref('posts/' + editTargetKey).update(postData).then(() => { 
             showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); 
-            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 작성/수정 완료 시 확실한 자동 백업
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
         }).finally(() => { isSubmitting = false; }); 
     } else { 
         database.ref('posts').push(postData).then(() => { 
             document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; 
             showSystemAlert('성공적으로 새겨졌습니다.'); 
-            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 작성 완료 시 확실한 자동 백업
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
         }).finally(() => { isSubmitting = false; }); 
     }
 }
@@ -818,7 +798,7 @@ function saveLetter() {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
-            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 편지 작성 시 확실한 자동 백업
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
         }).finally(() => { isSubmitting = false; });
     });
 }
@@ -854,7 +834,7 @@ function deletePost(key) {
             const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
             renderUI(); 
-            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 삭제 완료 시 확실한 자동 백업
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
         });
     });
 }
@@ -867,7 +847,7 @@ function deleteLetter(key) {
             const totalPagesAfterDelete = Math.ceil((allLetters.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
             renderUI(); 
-            setTimeout(() => window.executeCloudBackupEngine(true), 800); // ✨ 삭제 완료 시 확실한 자동 백업
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
         });
     });
 }
@@ -881,36 +861,21 @@ window.clearDatabase = clearDatabase;
 
 function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
-// ==========================================
-// 📡 0-C. 오프라인(인터넷 끊김) 감지 방어 시스템
-// ==========================================
-window.addEventListener('offline', () => {
-    // 인터넷이 끊겼을 때 띄우는 알림
-    showSystemAlert('수평선 너머와의 연결이 끊어졌습니다. 네트워크를 확인해 주세요.');
-});
+window.addEventListener('offline', () => { showSystemAlert('수평선 너머와의 연결이 끊어졌습니다. 네트워크를 확인해 주세요.'); });
+window.addEventListener('online', () => { showSystemAlert('다시 수평선 너머로 연결되었습니다.'); });
 
-window.addEventListener('online', () => {
-    // 인터넷이 다시 연결되었을 때 띄우는 알림
-    showSystemAlert('다시 수평선 너머로 연결되었습니다.');
-});
 // ==========================================
-// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
+// 🌟 1. 검색어 하이라이트(야광) 엔진
 // ==========================================
 window.highlightSearchKeyword = function(text, keyword) {
-    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
     const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     if (!keyword) return escaped;
-    
-    // 검색어가 존재하면 야광 CSS를 씌워서 반환
     const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
     return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
 };
 
 // ==========================================
-// 🌅 [최종] 배경 테마 및 좌측 상단 위젯 연동 엔진
-// ==========================================
-// ==========================================
-// 🌅 [완결형] 배경 테마 및 좌측 상단 위젯 연동 엔진
+// 🌅 [동기화] 배경 테마 및 좌측 상단 위젯 제어 엔진
 // ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
@@ -957,30 +922,30 @@ function applyTimeBasedThemeEngine() {
 }
 
 // ==========================================
-// ⛅ [완결형] 불필요 문구 제거 및 이모지+온도 전용 날씨 엔진
+// ⛅ [동기화] 위치 완전 삭제 + 오직 이모지와 온도로 구성하는 날씨 엔진
 // ==========================================
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) {
         wElem = document.createElement('div');
         wElem.id = 'weather-widget';
-        wElem.innerText = "⏳ --°C"; // 💡 빈 껍데기 상자 버그 방지를 위해 즉시 초기화
+        wElem.innerText = "⏳ --°C"; // 💡 유령 껍데기 상자 노출 차단을 위해 즉시 글자 입력
         document.body.appendChild(wElem);
     }
 
-    if (window.manualWeatherOverride !== 'auto') {
+    if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
     }
 
-    const defaultLat = 35.1796; // 디폴트 좌표 (부산)
+    const defaultLat = 35.1796; 
     const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
-            if (window.manualWeatherOverride !== 'auto') return; 
+            if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
             
             const code = data.current_weather.weathercode;
             const temp = data.current_weather.temperature;
@@ -992,15 +957,15 @@ function syncWeatherAndWidget() {
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
-            // 💡 [요청 반영] 위치 텍스트 완전 배제, 깔끔하게 이모지와 온도로만 화면 구성
+            // 💡 [요청 전격 반영] "📍 부산" 텍스트를 전면 박멸하고 이모지와 깔끔한 실시간 온도로 끝마침
             if (wElem) {
                 wElem.innerText = `${icon} ${temp}°C`;
             }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 통신 안전 백오프");
-            if (wElem && window.manualWeatherOverride === 'auto') {
+            console.log("날씨 API 차단 우회 안전 필터");
+            if (wElem && (!window.manualWeatherOverride || window.manualWeatherOverride === 'auto')) {
                 wElem.innerText = "☁️ 21°C";
             }
             applyManualWeatherEffect('clear');
@@ -1014,7 +979,7 @@ function syncWeatherAndWidget() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 거부 시 노출 없이 부산 좌표 우회
+        (error) => fetchWeatherData(defaultLat, defaultLon),
         { timeout: 5000 }
     );
 }
@@ -1030,30 +995,25 @@ function applyManualWeatherEffect(type) {
 
     let wElem = document.getElementById('weather-widget');
 
+    // 💡 [요청 적극 반영] 수동 모드 설정 시에도 텍스트 글자를 최소화하고 깔끔하게 이모지와 포맷 일치
     if (type === 'rain') {
         overlay.className = 'weather-overlay rain';
-        if (wElem && window.manualWeatherOverride === 'rain') wElem.innerText = "🌧️ 비 내리는 바다";
+        if (wElem && window.manualWeatherOverride === 'rain') wElem.innerText = "🌧️ --°C";
     } else if (type === 'snow') {
         overlay.className = 'weather-overlay snow';
-        if (wElem && window.manualWeatherOverride === 'snow') wElem.innerText = "❄️ 눈 내리는 바다";
+        if (wElem && window.manualWeatherOverride === 'snow') wElem.innerText = "❄️ --°C";
     } else {
         overlay.className = 'weather-overlay';
-        if (wElem && window.manualWeatherOverride === 'clear') wElem.innerText = "☀️ 평온한 바다";
+        if (wElem && window.manualWeatherOverride === 'clear') wElem.innerText = "☀️ --°C";
     }
 }
-// ---------------------------------------------------------
-// ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
-// ---------------------------------------------------------
-// 1. 유저가 서재에 처음 들어왔을 때 즉시 1회 실행하여 시간대에 맞는 배경을 렌더링
+
+// 실시간 자동 테마 리스너 (1분 주기 가동)
 applyTimeBasedThemeEngine();
+setInterval(() => { applyTimeBasedThemeEngine(); }, 60000);
 
-// 2. 백그라운드 타이머를 켜서 1분(60초)마다 현재 시간을 몰래 확인하고, 
-//    시간대가 바뀌면 새로고침 없이 실시간으로 다음 배경으로 스르륵 물들게 함!
-setInterval(() => {
-    applyTimeBasedThemeEngine();
-}, 60000);
 // ==========================================
-// ⚙️ [복구 완료] 환경 수동 조작 톱니바퀴 버튼 생성 함수
+// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 시스템
 // ==========================================
 window.injectTimeGearButton = function() {
     if (document.getElementById('time-gear-btn')) return;
@@ -1064,31 +1024,7 @@ window.injectTimeGearButton = function() {
     btn.onclick = openEnvironmentSettingsModal;
     document.body.appendChild(btn);
 };
-// ==========================================
-// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
-// ==========================================
-window.highlightSearchKeyword = function(text, keyword) {
-    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
-    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    if (!keyword) return escaped;
-    
-    // 검색어가 존재하면 야광 CSS를 씌워서 반환
-    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
-};
 
-// ==========================================
-// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
-// ==========================================
-window.injectTimeGearButton = function() {
-    if (document.getElementById('time-gear-btn')) return;
-    const btn = document.createElement('div');
-    btn.id = 'time-gear-btn';
-    btn.innerHTML = '⚙️';
-    btn.title = "환경 설정 (시간/날씨 수동 조작)";
-    btn.onclick = openEnvironmentSettingsModal;
-    document.body.appendChild(btn);
-};
 window.openEnvironmentSettingsModal = function() {
     let modal = document.getElementById('env-modal');
     if(!modal) {
