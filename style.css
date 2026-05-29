@@ -142,7 +142,7 @@ body {
     .mini-library-btn {
         /* 우측 스크롤바 두께(약 17px)로 인해 푸터 중앙과 틀어지는 현상을 
            절반 두께(-8.5px)만큼 왼쪽으로 견인하여 완벽히 수직 일치시킵니다. */
-        left: calc(50% - 3px) !important;
+        left: calc(50% - 5px) !important;
     }
 }
 
