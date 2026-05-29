@@ -12,7 +12,7 @@ const NOTIFICATION_CONFIG = {
 };
 
 // ==========================================
-// 🎵 0-B. 음악 및 소리 엔진 설정 (저작권 프리 BGM)
+// 🎵 0-B. 음악 및 소리 엔진 설정
 // ==========================================
 const MY_MUSIC_LIST = [
     { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
