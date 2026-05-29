@@ -714,6 +714,9 @@ function scrollToPosts() { const postsSection = document.getElementById('posts-s
 // ==========================================
 // 🚀 [최적화 완료] 화면 렌더링 엔진 (DocumentFragment 적용으로 렉 99% 감소)
 // ==========================================
+// ==========================================
+// 🚀 [최적화 완결판] 화면 렌더링 엔진 (제목 야광 한정 + Reflow 최적화)
+// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container'); 
     const paginationContainer = document.getElementById('pagination-container');
@@ -727,7 +730,7 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
-    // 1. 헤더 및 상태 업데이트
+    // 1. 헤더 안내 및 모드 버튼 동기화
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
@@ -744,7 +747,7 @@ function renderUI() {
         if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
     }
 
-    // 2. 필터링 및 검색
+    // 2. 필터링 및 검색 연동
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
     if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
@@ -754,7 +757,7 @@ function renderUI() {
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
 
-    // 💡 최적화 핵심: 가상의 바구니(Fragment)에 카드를 모아서 한 번에 화면에 그림 (Reflow 방지)
+    // 가상 바구니(Fragment)를 이용해 브라우저 렉(Reflow) 완벽 방어
     const cardFragment = document.createDocumentFragment();
 
     currentItems.forEach((item) => {
@@ -770,13 +773,13 @@ function renderUI() {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-       // ✨ 야광 플랑크톤 효과를 제목(title)에만 씌우고, 본문(content)은 하이라이트 없이 깔끔하게 출력
-card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        // 💡 [요청 반영] h3(제목)에만 야광 효과를 입히고, post-content-area(본문)는 하이라이트 없이 원본 출력
+        card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
-    container.appendChild(cardFragment); // 화면에 단 한 번만 그리기 적용 완료!
+    container.appendChild(cardFragment);
 
-    // 3. 페이지네이션 렌더링 최적화
+    // 3. 페이지네이션
     if (totalPages > 1) {
         const pageFragment = document.createDocumentFragment();
         const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
@@ -946,6 +949,9 @@ window.highlightSearchKeyword = function(text, keyword) {
 // ==========================================
 // 🌅 [최종] 배경 테마 및 좌측 상단 위젯 연동 엔진
 // ==========================================
+// ==========================================
+// 🌅 [완결형] 배경 테마 및 좌측 상단 위젯 연동 엔진
+// ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
@@ -991,13 +997,14 @@ function applyTimeBasedThemeEngine() {
 }
 
 // ==========================================
-// ⛅ [최종] 위치 표기 차단, 오직 이모지와 온도로만 끝내는 날씨 엔진
+// ⛅ [완결형] 불필요 문구 제거 및 이모지+온도 전용 날씨 엔진
 // ==========================================
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) {
         wElem = document.createElement('div');
         wElem.id = 'weather-widget';
+        wElem.innerText = "⏳ --°C"; // 💡 빈 껍데기 상자 버그 방지를 위해 즉시 초기화
         document.body.appendChild(wElem);
     }
 
@@ -1006,10 +1013,7 @@ function syncWeatherAndWidget() {
         return;
     }
 
-    // 자동 모드 가동 시 위치명 없이 이모지 대기 상태 표시
-    if (wElem) wElem.innerText = "⏳ --°C";
-
-    const defaultLat = 35.1796; // 부산 좌표
+    const defaultLat = 35.1796; // 디폴트 좌표 (부산)
     const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
@@ -1028,16 +1032,16 @@ function syncWeatherAndWidget() {
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
-            // 💡 [요청 반영] 부산이든 어디든 위치 텍스트 완전 삭제! 오직 이모지와 실시간 온도만 표기
+            // 💡 [요청 반영] 위치 텍스트 완전 배제, 깔끔하게 이모지와 온도로만 화면 구성
             if (wElem) {
                 wElem.innerText = `${icon} ${temp}°C`;
             }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 API 호출 실패");
+            console.log("날씨 통신 안전 백오프");
             if (wElem && window.manualWeatherOverride === 'auto') {
-                wElem.innerText = "☁️ 21°C"; // 인터넷 단절 시 텍스트 없이 깔끔하게 디폴트 포맷 출력
+                wElem.innerText = "☁️ 21°C";
             }
             applyManualWeatherEffect('clear');
         });
@@ -1050,14 +1054,11 @@ function syncWeatherAndWidget() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 권한 거부 시 조용히 부산 데이터 가져옴 (텍스트 표시 없음)
+        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 거부 시 노출 없이 부산 좌표 우회
         { timeout: 5000 }
     );
 }
 
-// ==========================================
-// ⛅ 날씨 오버레이 애니메이션 제어 엔진
-// ==========================================
 function applyManualWeatherEffect(type) {
     let overlay = document.getElementById('weather-overlay-layer');
     if (!overlay && document.body) {
@@ -1071,7 +1072,6 @@ function applyManualWeatherEffect(type) {
 
     if (type === 'rain') {
         overlay.className = 'weather-overlay rain';
-        // 수동 모드일 때만 텍스트 적용, 자동(auto) 모드일 때는 위에서 세팅한 기상청 온도를 절대 건드리지 않음
         if (wElem && window.manualWeatherOverride === 'rain') wElem.innerText = "🌧️ 비 내리는 바다";
     } else if (type === 'snow') {
         overlay.className = 'weather-overlay snow';
@@ -1081,24 +1081,6 @@ function applyManualWeatherEffect(type) {
         if (wElem && window.manualWeatherOverride === 'clear') wElem.innerText = "☀️ 평온한 바다";
     }
 }
-
-// ==========================================
-// ⚙️ 모달창 설정 적용 함수
-// ==========================================
-window.applyEnvironmentSettings = function() {
-    window.manualTimeOverride = document.getElementById('time-select').value;
-    window.manualWeatherOverride = document.getElementById('weather-select').value;
-    
-    applyTimeBasedThemeEngine(); 
-    
-    let wElem = document.getElementById('weather-widget');
-    if (window.manualWeatherOverride === 'auto' && wElem) { 
-        wElem.innerText = "⏳"; // 깔끔한 이모지 포맷으로 로딩 초기화
-    }
-    
-    syncWeatherAndWidget(); 
-    document.getElementById('env-modal').style.display = 'none';
-};
 // ---------------------------------------------------------
 // ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
 // ---------------------------------------------------------
@@ -1190,9 +1172,10 @@ window.applyEnvironmentSettings = function() {
     
     applyTimeBasedThemeEngine(); 
     
-    // 자동 복귀 시 부드러운 로딩 상태 처리
     let wElem = document.getElementById('weather-widget');
-    if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ 기상 관측 중..."; }
+    if (window.manualWeatherOverride === 'auto' && wElem) { 
+        wElem.innerText = "⏳ --°C";
+    }
     
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
