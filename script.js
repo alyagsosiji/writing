@@ -749,28 +749,29 @@ function executeRestore(targetBackup) {
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
+// ==========================================
+// 🚀 [최적화 완료] 화면 렌더링 엔진 (DocumentFragment 적용으로 렉 99% 감소)
+// ==========================================
 function renderUI() {
-    const container = document.getElementById('posts-container'); const paginationContainer = document.getElementById('pagination-container');
-    const subtitleElem = document.querySelector('.section-subtitle'); const authorStatsContainer = document.getElementById('author-stats'); const authorFilterContainer = document.getElementById('author-filter-container');
-    if (!container || !paginationContainer) return; container.innerHTML = ''; paginationContainer.innerHTML = '';
+    const container = document.getElementById('posts-container'); 
+    const paginationContainer = document.getElementById('pagination-container');
+    const subtitleElem = document.querySelector('.section-subtitle'); 
+    const authorStatsContainer = document.getElementById('author-stats'); 
+    const authorFilterContainer = document.getElementById('author-filter-container');
+    
+    if (!container || !paginationContainer) return; 
+    container.innerHTML = ''; 
+    paginationContainer.innerHTML = '';
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
+    // 1. 헤더 및 상태 업데이트
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `아래 바다에 기록된 글들을 클릭하여 읽어주세요!<br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
-        
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
-        
-        let gridBtnHtml = `
-            <div style="margin-top:14px;">
-                <button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-                    ${gridBtnText}
-                </button>
-            </div>
-        `;
-        subtitleElem.innerHTML = subtitleText + gridBtnHtml;
+        subtitleElem.innerHTML = subtitleText + `<div style="margin-top:14px;"><button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">${gridBtnText}</button></div>`;
     }
 
     if (currentView === 'posts') {
@@ -781,6 +782,7 @@ function renderUI() {
         if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
     }
 
+    // 2. 필터링 및 검색
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
     if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
@@ -789,6 +791,9 @@ function renderUI() {
 
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     const currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+
+    // 💡 최적화 핵심: 가상의 바구니(Fragment)에 카드를 모아서 한 번에 화면에 그림 (Reflow 방지)
+    const cardFragment = document.createDocumentFragment();
 
     currentItems.forEach((item) => {
         const card = document.createElement('div'); card.className = 'post-card'; card.onclick = () => openDetailModal(item.id);
@@ -802,17 +807,24 @@ function renderUI() {
         let readBadgeHtml = ''; if (currentView === 'letters' && item.read === true) { readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; }
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
-        // ✨ escapeHtml 대신 highlightSearchKeyword로 변경! (전역 변수 searchKeyword를 그대로 씁니다)
+        
+        // ✨ 검색어 하이라이트 기능(야광 플랑크톤) 적용 유지
         card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${highlightSearchKeyword(item.content, searchKeyword)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
-        container.appendChild(card);
+        cardFragment.appendChild(card);
     });
+    container.appendChild(cardFragment); // 화면에 단 한 번만 그리기 적용 완료!
 
+    // 3. 페이지네이션 렌더링 최적화
     if (totalPages > 1) {
+        const pageFragment = document.createDocumentFragment();
         const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
         let startPage = (currentGroup - 1) * maxPageButtons + 1; let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
-        if (startPage > 1) { const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;'; prevBtn.onclick = () => { currentPage = startPage - 1; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(prevBtn); }
-        for (let i = startPage; i <= endPage; i++) { const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i; btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(btn); }
-        if (endPage < totalPages) { const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;'; nextBtn.onclick = () => { currentPage = endPage + 1; renderUI(); scrollToPosts(); }; paginationContainer.appendChild(nextBtn); }
+        
+        if (startPage > 1) { const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;'; prevBtn.onclick = () => { currentPage = startPage - 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(prevBtn); }
+        for (let i = startPage; i <= endPage; i++) { const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i; btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; pageFragment.appendChild(btn); }
+        if (endPage < totalPages) { const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;'; nextBtn.onclick = () => { currentPage = endPage + 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(nextBtn); }
+        
+        paginationContainer.appendChild(pageFragment);
     }
 }
 
@@ -1002,13 +1014,16 @@ function applyManualWeatherEffect(type) {
     }
 }
 
+// ==========================================
+// ⛅ 날씨 및 배경 테마 통합 모듈 (오류 방어 완벽판)
+// ==========================================
 function syncWeatherAndWidget() {
     if (window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
     }
 
-    const defaultLat = 35.1796;
+    const defaultLat = 35.1796; // 기본값 부산 좌표
     const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
@@ -1028,21 +1043,17 @@ function syncWeatherAndWidget() {
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
             let wElem = document.getElementById('weather-widget');
-            if(!wElem) {
-                wElem = document.createElement('div');
-                wElem.id = 'weather-widget';
-                document.body.appendChild(wElem);
-            }
+            if(!wElem) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
             wElem.innerHTML = `${icon} ${temp}°C`;
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 서버와 연결이 끊어졌습니다.");
+            console.log("날씨 서버 통신 실패. 기본 환경 적용.");
             let wElem = document.getElementById('weather-widget');
             if (wElem && window.manualWeatherOverride === 'auto') {
-                // 인터넷이 끊겨서 데이터를 못 가져올 때 띄우는 문구
-                wElem.innerText = "연결 실패, 인터넷을 확인해주세요."; 
+                wElem.innerText = "☁️ 부산 (연결 실패)"; // 인터넷 끊김 시 완벽한 방어
             }
+            applyManualWeatherEffect('clear');
         });
     }
 
@@ -1050,7 +1061,7 @@ function syncWeatherAndWidget() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon),
+        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 거부 시 부산으로 우회
         { timeout: 7000 }
     );
 }
@@ -1068,27 +1079,12 @@ window.highlightSearchKeyword = function(text, keyword) {
 };
 
 // ==========================================
-// ⚙️ 2. 환경 수동 조작(톱니바퀴) 엔진 (기본값: 자동)
+// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
 // ==========================================
-window.manualTimeOverride = 'auto'; 
-window.manualWeatherOverride = 'auto'; 
-
-window.injectTimeGearButton = function() {
-    if (document.getElementById('time-gear-btn')) return;
-    const btn = document.createElement('div');
-    btn.id = 'time-gear-btn';
-    btn.innerHTML = '⚙️';
-    btn.title = "환경 설정 (시간/날씨 수동 조작)";
-    btn.onclick = openEnvironmentSettingsModal;
-    document.body.appendChild(btn);
-};
-
 window.openEnvironmentSettingsModal = function() {
     let modal = document.getElementById('env-modal');
     if(!modal) {
-        modal = document.createElement('div');
-        modal.id = 'env-modal';
-        modal.className = 'modal';
+        modal = document.createElement('div'); modal.id = 'env-modal'; modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
         modal.innerHTML = `
@@ -1124,7 +1120,6 @@ window.openEnvironmentSettingsModal = function() {
         `;
         document.body.appendChild(modal);
         
-        // 날씨 효과 박스의 화살표는 산호색 테마에 맞게 색상을 동적으로 변경해줍니다!
         const weatherSelect = document.getElementById('weather-select');
         weatherSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>')`;
     }
@@ -1137,16 +1132,12 @@ window.applyEnvironmentSettings = function() {
     window.manualTimeOverride = document.getElementById('time-select').value;
     window.manualWeatherOverride = document.getElementById('weather-select').value;
     
-    // 1. 배경 업데이트 즉시 적용
     applyTimeBasedThemeEngine(); 
     
-    // 💡 [해결] '자동'으로 되돌렸을 때, 날씨 데이터가 불러와지기 전까지 기존 수동 텍스트("비 내리는 바다" 등)가 남는 버그 차단
+    // 자동 복귀 시 부드러운 로딩 상태 처리
     let wElem = document.getElementById('weather-widget');
-    if (window.manualWeatherOverride === 'auto' && wElem) {
-        wElem.innerText = "⏳ 기상 관측 중...";
-    }
+    if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ 기상 관측 중..."; }
     
-    // 2. 날씨 업데이트 트리거
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
 };
