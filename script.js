@@ -294,7 +294,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initDraftAutoSaveEngine();
         injectRandomMemoryButton();
         fetchWeatherWidget();
-        
+        syncWeatherAndWidget(); // 💡 처음에 한 번 날씨 불러오기
+        setInterval(syncWeatherAndWidget, 30 * 60000); // 💡 30분마다 날씨 갱신
         listenPosts();
         listenLetters();
         initMusicPlayerEngine(); 
@@ -956,57 +957,73 @@ window.addEventListener('online', () => {
 });
 
 // ==========================================
-// ⛅ 10. 실시간 날씨 감지 및 환경 동기화 시스템
+// ⛅ 실시간 날씨 및 위젯 통합 동기화 시스템 (위치 기반 + 기본 부산)
 // ==========================================
-function syncRealTimeWeather() {
-    // 1. 유저의 위치 파악 권한 확인
-    if (!navigator.geolocation) return;
+function syncWeatherAndWidget() {
+    // 💡 권한 거부 시 기본 좌표 (부산)
+    const defaultLat = 35.1796;
+    const defaultLon = 129.0756;
+    
+    // 날씨 API 호출 및 UI 업데이트 공통 함수
+    function fetchWeatherData(lat, lon) {
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+        .then(res => res.json())
+        .then(data => {
+            const code = data.current_weather.weathercode;
+            const temp = data.current_weather.temperature;
+            
+            // 1. 우측 상단 날씨 텍스트 위젯 업데이트
+            let icon = '☁️';
+            if(code === 0) icon = '☀️';
+            else if(code > 0 && code <= 3) icon = '⛅';
+            else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) icon = '🌧️';
+            else if((code >= 71 && code <= 77) || code === 85 || code === 86) icon = '❄️';
+            
+            let wElem = document.getElementById('weather-widget');
+            if(!wElem) {
+                wElem = document.createElement('div');
+                wElem.id = 'weather-widget';
+                document.body.appendChild(wElem);
+            }
+            wElem.innerHTML = `${icon} ${temp}°C`;
 
-    // 2. 바다 배경 바로 위에 날씨를 표현할 투명 도화지(div) 생성
-    let overlay = document.getElementById('weather-overlay-layer');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'weather-overlay-layer';
-        overlay.className = 'weather-overlay';
-        // 배경(ocean-background)이 z-index:0이므로, 본문 콘텐츠 뒤쪽에 자연스럽게 겹치도록 삽입
-        document.body.insertBefore(overlay, document.body.firstChild);
+            // 2. 배경 오버레이 (비/눈 내리는 효과) 업데이트
+            let overlay = document.getElementById('weather-overlay-layer');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'weather-overlay-layer';
+                overlay.className = 'weather-overlay';
+                document.body.insertBefore(overlay, document.body.firstChild);
+            }
+
+            if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+                overlay.className = 'weather-overlay rain'; // 비 내림
+            } else if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
+                overlay.className = 'weather-overlay snow'; // 눈 내림
+            } else {
+                overlay.className = 'weather-overlay'; // 맑거나 흐린 날은 효과 끄기
+            }
+        })
+        .catch(err => console.log("날씨 정보를 불러오지 못했습니다."));
     }
 
-    // 3. 현재 위치 좌표를 가져와서 무료 날씨 API에 질문
-    navigator.geolocation.getCurrentPosition((position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-            .then(res => res.json())
-            .then(data => {
-                const code = data.current_weather.weathercode; // 날씨 상태 코드
-                const weatherWidget = document.getElementById('weather-widget');
+    // 브라우저가 위치 정보를 아예 지원하지 않는 경우 즉시 부산 날씨 호출
+    if (!navigator.geolocation) {
+        fetchWeatherData(defaultLat, defaultLon);
+        return;
+    }
 
-                // 세계기상기구(WMO) 코드 기준 - 비: 51~67, 80~82
-                if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-                    overlay.className = 'weather-overlay rain';
-                    if (weatherWidget) weatherWidget.innerText = "비 내리는 바다";
-                } 
-                // 세계기상기구(WMO) 코드 기준 - 눈: 71~77, 85, 86
-                else if ((code >= 71 && code <= 77) || code === 85 || code === 86) {
-                    overlay.className = 'weather-overlay snow';
-                    if (weatherWidget) weatherWidget.innerText = "눈 내리는 바다";
-                } 
-                // 그 외 맑거나 흐림
-                else {
-                    overlay.className = 'weather-overlay'; // 맑은 날엔 효과 끄기
-                    if (weatherWidget) weatherWidget.innerText = "평온한 바다";
-                }
-            })
-            .catch(err => console.log("날씨 정보를 불러오지 못했습니다."));
-    }, (error) => {
-        console.log("위치 접근이 거부되어 서재의 날씨가 기본 상태로 유지됩니다.");
-    });
+    // 유저에게 위치 권한을 요청하고, 승인/거절에 따라 분기 처리
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            // 승인됨: 유저의 현재 위치 기준 날씨 적용
+            fetchWeatherData(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+            // 거절됨: 기본 위치(부산) 날씨 강제 적용
+            console.log("위치 권한이 거부되어 기본 위치(부산)의 날씨로 설정됩니다.");
+            fetchWeatherData(defaultLat, defaultLon);
+        },
+        { timeout: 7000 } // 7초 이상 응답 없으면 에러로 간주하고 부산 날씨 표시
+    );
 }
-
-// 서재(앱)가 켜졌을 때 1번 실행하고, 30분마다 창밖의 날씨를 확인하여 업데이트합니다.
-window.addEventListener('DOMContentLoaded', () => {
-    syncRealTimeWeather();
-    setInterval(syncRealTimeWeather, 30 * 60000); // 30분(밀리초)
-});
