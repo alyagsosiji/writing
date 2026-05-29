@@ -29,30 +29,49 @@ let isAsmrPlaying = false;
 // ==========================================
 // 🌅 시간대별 배경 테마 적용 엔진 (실시간 감지 및 부드러운 전환)
 // ==========================================
+// 🌅 [수정] 수동 설정을 감지하고 좌측 상단 위젯과 연동되는 배경 테마 엔진
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
+    let themeText = "";
     
-    // 1. 아침 (06:00 ~ 11:59): 물안개 걷히는 청명한 새벽 바다 (딥 네이비 -> 맑은 청록)
-    if (hour >= 6 && hour < 12) {
+    let mode = window.manualTimeOverride || 'auto';
+    if (mode === 'auto') {
+        if (hour >= 6 && hour < 12) mode = 'morning';
+        else if (hour >= 12 && hour < 18) mode = 'day';
+        else if (hour >= 18 && hour < 20) mode = 'evening';
+        else mode = 'night';
+    }
+
+    // 모드에 따른 배경색과 위젯 텍스트 매핑
+    if (mode === 'morning') {
         bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-    } 
-    // 2. 낮 (12:00 ~ 17:59): 햇살이 깊게 스며드는 눈부신 심해 (코발트 블루 -> 스카이 블루)
-    else if (hour >= 12 && hour < 18) {
+        themeText = "🌅 아침의 바다";
+    }
+    else if (mode === 'day') {
         bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-    } 
-    // 3. 저녁 (18:00 ~ 19:59): 수평선 너머 타오르는 노을 바다 (어스름 -> 자홍빛 -> 코랄 산호색)
-    else if (hour >= 18 && hour < 20) {
+        themeText = "☀️ 낮의 바다";
+    }
+    else if (mode === 'evening') {
         bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-    } 
-    // 4. 밤/심야 (20:00 ~ 05:59): 오로라가 흐르는 고요한 밤바다 (극심해 -> 짙은 보라)
+        themeText = "🌇 저녁의 바다";
+    }
     else {
         bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+        themeText = "🌌 밤의 바다";
     }
     
-    // 💡 [핵심] 배경이 바뀔 때 딱딱하게 끊기지 않고 3초 동안 서서히 섞이며 변하도록 스무딩 처리
     document.body.style.transition = "background 3s ease-in-out";
     document.body.style.background = bgStyle;
+
+    // 💡 [추가] 좌측 상단에 시간대 위젯 렌더링 및 텍스트 갱신
+    let tElem = document.getElementById('theme-widget');
+    if(!tElem) {
+        tElem = document.createElement('div');
+        tElem.id = 'theme-widget';
+        document.body.appendChild(tElem);
+    }
+    tElem.innerText = themeText;
 }
 
 // ---------------------------------------------------------
