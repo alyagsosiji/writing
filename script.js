@@ -1091,14 +1091,13 @@ window.openEnvironmentSettingsModal = function() {
         modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
-        // ✨ 디자인 개선: 그라데이션, 은은한 테두리, 예쁜 폰트 크기 및 정렬 적용
         modal.innerHTML = `
-            <div class="modal-content" style="max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
+            <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
                 <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚙️ 서재 환경 조작</h3>
                 
-                <div style="margin-bottom:25px; text-align:left; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                    <label style="color:#90e0ef; font-size:0.9rem; margin-bottom:10px; display:block; font-weight:bold;">🌅 시간대 배경</label>
-                    <select id="time-select" style="width:100%; padding:14px; border-radius:8px; background:rgba(3, 10, 23, 0.8); border:1px solid rgba(0, 180, 216, 0.2); color:#fff; outline:none; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">
+                <div class="env-panel-area">
+                    <label class="env-label" style="color: #90e0ef;">🌅 시간대 배경</label>
+                    <select id="time-select" class="env-select-box">
                         <option value="auto">⏱️ 자동 (실시간 동기화)</option>
                         <option value="morning">🌅 아침 (물안개 청록)</option>
                         <option value="day">☀️ 낮 (스카이 블루)</option>
@@ -1107,9 +1106,9 @@ window.openEnvironmentSettingsModal = function() {
                     </select>
                 </div>
                 
-                <div style="margin-bottom:30px; text-align:left; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
-                    <label style="color:#f7a37f; font-size:0.9rem; margin-bottom:10px; display:block; font-weight:bold;">⛅ 날씨 효과</label>
-                    <select id="weather-select" style="width:100%; padding:14px; border-radius:8px; background:rgba(3, 10, 23, 0.8); border:1px solid rgba(247, 163, 127, 0.2); color:#fff; outline:none; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">
+                <div class="env-panel-area" style="margin-bottom: 32px;">
+                    <label class="env-label" style="color: #f7a37f;">⛅ 날씨 효과</label>
+                    <select id="weather-select" class="env-select-box" style="border-color: rgba(247, 163, 127, 0.3);">
                         <option value="auto">📍 자동 (현재 위치 기반)</option>
                         <option value="clear">☀️ 맑음 (평온한 바다)</option>
                         <option value="rain">🌧️ 비 (비 내리는 바다)</option>
@@ -1118,12 +1117,16 @@ window.openEnvironmentSettingsModal = function() {
                 </div>
                 
                 <div style="display:flex; gap:12px; justify-content:center;">
-                    <button onclick="applyEnvironmentSettings()" style="flex:1; padding:12px; border-radius:10px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:0.95rem; box-shadow:0 4px 15px rgba(0, 180, 216, 0.3); transition:transform 0.2s;">설정 적용</button>
-                    <button onclick="document.getElementById('env-modal').style.display='none'" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#cbd5e1; border-radius:10px; cursor:pointer; font-size:0.95rem; transition:background 0.2s;">닫기</button>
+                    <button onclick="applyEnvironmentSettings()" style="flex:1; padding:14px; border-radius:12px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:1rem; box-shadow:0 4px 15px rgba(0, 180, 216, 0.3); transition:transform 0.2s;">설정 적용</button>
+                    <button onclick="document.getElementById('env-modal').style.display='none'" style="flex:1; padding:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#cbd5e1; border-radius:12px; cursor:pointer; font-size:1rem; transition:background 0.2s;">닫기</button>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
+        
+        // 날씨 효과 박스의 화살표는 산호색 테마에 맞게 색상을 동적으로 변경해줍니다!
+        const weatherSelect = document.getElementById('weather-select');
+        weatherSelect.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>')`;
     }
     document.getElementById('time-select').value = window.manualTimeOverride;
     document.getElementById('weather-select').value = window.manualWeatherOverride;
