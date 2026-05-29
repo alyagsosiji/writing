@@ -158,11 +158,8 @@ body.admin-logged-in #random-memory-btn {
         border-radius: 50% !important; font-size: 16px !important; 
     }
 }
-#weather-widget {
-    position: fixed; top: 20px; right: 20px; z-index: 9999; font-size: 0.85rem; color: #90e0ef; 
-    background: rgba(6, 15, 31, 0.8); padding: 6px 14px; border-radius: 20px; 
-    border: 1px solid rgba(144, 224, 239, 0.15); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-}
+
+/* 💡 크기 어긋남 방지를 위해 이곳에 수록되어 방해하던 구버전 #weather-widget 스타일 파편 제거 완료 */
 
 /* ==========================================
    ⏳ 로딩 화면 (네모 박스 유령 박멸)
@@ -182,7 +179,7 @@ body.admin-logged-in #random-memory-btn {
 #loading-screen p { color: #00b4d8; letter-spacing: 2px; font-size: 0.85rem; }
 
 /* ==========================================
-   🏛️ 메인 레이아웃 및 본문 구조
+   #️ 메인 레이아웃 및 본문 구조
    ========================================== */
 #app { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 60px 20px 20px 20px; }
 header { text-align: center; margin-bottom: 40px; }
@@ -197,7 +194,7 @@ header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opac
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-/* 🌟 [복구 완료] 탭 버튼 원본 디자인 유지 */
+/* #️ [복구 완료] 탭 버튼 원본 디자인 유지 */
 .view-tab-container { display: flex; justify-content: center; gap: 15px; margin-top: 35px; }
 .tab-btn {
     background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06);
@@ -227,8 +224,6 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     text-shadow: 0 2px 12px rgba(0, 180, 216, 0.25); border-bottom: none !important; padding-bottom: 0 !important;
 }
-
-
 
 /* 🔍 검색창 및 필터 통합 레이아웃 */
 .search-wrapper {
@@ -268,7 +263,7 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 #write-section h3, #letter-section h3 { margin-bottom: 20px; color: #00b4d8; font-weight: 400; font-size: 1.05rem; letter-spacing: 0.5px; }
 
-/* 🌟 [복구 완료] 글쓰기/편지보내기 등 폼 버튼들 원본 정렬 유지 */
+/* #️ [복구 완료] 글쓰기/편지보내기 등 폼 버튼들 원본 정렬 유지 */
 .write-buttons { display: flex; gap: 10px; }
 
 input[type="text"], input[type="password"], textarea, select {
@@ -360,7 +355,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
 .modal-content h3 { margin-bottom: 20px; color: #fff; font-weight: 400; font-size: 1.25rem; letter-spacing: 0.5px; }
 .modal-content input { width: 100%; padding: 12px; margin-bottom: 14px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255, 255, 255, 0.05); color: #fff; border-radius: 6px; outline: none; }
 
-/* 🌟 [복구 완료] 일반 모달 버튼들 원본 정렬 유지 */
+/* #️ [복구 완료] 일반 모달 버튼들 원본 정렬 유지 */
 .modal-buttons { display: flex; justify-content: center; gap: 10px; }
 
 .backup-modal-content { max-width: 540px !important; }
@@ -448,6 +443,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
         -webkit-transform: translateZ(0); transform: translateZ(0);
     }
 }
+
 /* ==========================================
    ⛅ 실시간 날씨 동기화 (GPU 가속 + 초자연 물리 엔진)
    ========================================== */
@@ -457,7 +453,6 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     opacity: 0; transition: opacity 2s ease-in-out;
 }
 
-/* 🚀 최적화의 핵심: will-change 속성으로 브라우저에게 "이거 무조건 그래픽카드로 돌려!" 라고 명령 */
 .weather-overlay::before, .weather-overlay::after {
     content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none; background-repeat: repeat;
@@ -500,7 +495,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     0%   { transform: translate3d(0, 0, 0); }
     33%  { transform: translate3d(25px, 83px, 0); }   
     66%  { transform: translate3d(-15px, 166px, 0); } 
-    100% { transform: translate3d(0, 250px, 0); }     
+    100% { transform: translate3d(0, 250px, 0); }      
 }
 @keyframes snow-fall-front {
     0%   { transform: translate3d(0, 0, 0); }
@@ -554,8 +549,12 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     top: 25px !important;
     z-index: 999999 !important;
     
+    /* 💡 단차 및 격차를 제로로 고정하기 위해 inline-flex와 정밀 높이 계산기 적용 */
     padding: 8px 16px !important;
-    height: auto !important;
+    height: 35px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     box-sizing: border-box !important;
     
     /* 투명 유리 테마 통일 */
@@ -566,7 +565,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     
     font-size: 0.85rem !important;
     font-weight: bold !important;
-    line-height: 1.2 !important;
+    line-height: 1 !important;
     letter-spacing: 0.5px !important;
     
     backdrop-filter: blur(6px) !important;
@@ -595,6 +594,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
         top: 15px !important;
         font-size: 0.75rem !important;
         padding: 6px 12px !important;
+        height: 28px !important;
     }
     #theme-widget { left: 15px !important; }
     #weather-widget { right: 15px !important; }
@@ -658,4 +658,31 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 .env-label {
     font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; font-weight: bold; letter-spacing: 0.5px;
+}
+
+/* ==========================================
+   ⚙️ 환경 설정 수동 조작 톱니바퀴 버튼 디자인 (복구 및 정렬 완결)
+   ========================================== */
+#time-gear-btn {
+    position: fixed; z-index: 9999; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; 
+    background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    bottom: 95px; right: 38px; 
+    width: 40px; height: 40px; 
+    border-radius: 50%;
+    font-size: 18px; 
+}
+#time-gear-btn:hover {
+    transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
+}
+
+@media (max-width: 768px) {
+    #time-gear-btn { 
+        bottom: 75px !important; right: 26px !important; 
+        width: 36px !important; height: 36px !important; 
+        font-size: 16px !important; 
+    }
 }
