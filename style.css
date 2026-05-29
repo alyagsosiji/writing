@@ -191,7 +191,7 @@ body.admin-logged-in #random-memory-btn {
         border-radius: 30px !important; font-size: 20px !important; 
     }
     body.admin-logged-in #random-memory-btn { 
-        bottom: 75px !important; left: 26px !important; 
+        bottomed80px !important; left: 26px !important; 
         width: 36px !important; height: 36px !important; 
         border-radius: 50% !important; font-size: 16px !important; 
     }
@@ -649,7 +649,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 
 @media (max-width: 768px) {
     #time-gear-btn { 
-        bottom: 75px !important; right: 26px !important; 
+        bottom: 80px !important; right: 26px !important; 
         width: 36px !important; height: 36px !important; 
         font-size: 16px !important; 
     }
