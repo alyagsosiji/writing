@@ -1037,11 +1037,11 @@ function syncWeatherAndWidget() {
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 정보를 불러오지 못했습니다.");
-            // 날씨 서버 통신에 실패하면 계속 로딩중으로 두지 않고 기본 문구로 우아하게 복구
+            console.log("날씨 서버와 연결이 끊어졌습니다.");
             let wElem = document.getElementById('weather-widget');
             if (wElem && window.manualWeatherOverride === 'auto') {
-                wElem.innerText = "☁️ 평온한 바다"; 
+                // 인터넷이 끊겨서 데이터를 못 가져올 때 띄우는 문구
+                wElem.innerText = "연결 실패, 인터넷을 확인해주세요."; 
             }
         });
     }
