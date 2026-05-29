@@ -1161,7 +1161,7 @@ window.openEnvironmentSettingsModal = function() {
                 
                 <div class="env-panel-area" style="margin-bottom: 32px;">
                     <label class="env-label" style="color: #f7a37f;">⛅ 날씨 효과</label>
-                    <select id="weather-select" class="env-select-box env-select-weather" style="border-color: rgba(247, 163, 127, 0.3);">
+                    <select id="weather-select" class="env-select-box" style="border-color: rgba(247, 163, 127, 0.3);">
                         <option value="auto">📍 자동 (현재 위치 기반)</option>
                         <option value="clear">☀️ 맑음 (평온한 바다)</option>
                         <option value="rain">🌧️ 비 (비 내리는 바다)</option>
@@ -1178,7 +1178,6 @@ window.openEnvironmentSettingsModal = function() {
         document.body.appendChild(modal);
     }
     
-    // 💡 [버그 픽스] 초기값이 비어있을 경우 무조건 'auto'를 강제로 집어넣어 빈칸 출력을 방지합니다.
     document.getElementById('time-select').value = window.manualTimeOverride || 'auto';
     document.getElementById('weather-select').value = window.manualWeatherOverride || 'auto';
     
