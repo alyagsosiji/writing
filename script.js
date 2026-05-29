@@ -26,10 +26,7 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
-// ==========================================
-// 🌅 시간대별 배경 테마 적용 엔진 (실시간 감지 및 부드러운 전환)
-// ==========================================
-// 🌅 [수정] 수동 설정을 감지하고 좌측 상단 위젯과 연동되는 배경 테마 엔진
+// 🌅 [수정] 배경 테마 및 좌측 상단 위젯 연동 엔진
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
@@ -43,7 +40,6 @@ function applyTimeBasedThemeEngine() {
         else mode = 'night';
     }
 
-    // 모드에 따른 배경색과 위젯 텍스트 매핑
     if (mode === 'morning') {
         bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
         themeText = "🌅 아침의 바다";
@@ -64,16 +60,17 @@ function applyTimeBasedThemeEngine() {
     document.body.style.transition = "background 3s ease-in-out";
     document.body.style.background = bgStyle;
 
-    // 💡 [추가] 좌측 상단에 시간대 위젯 렌더링 및 텍스트 갱신
-    let tElem = document.getElementById('theme-widget');
-    if(!tElem) {
-        tElem = document.createElement('div');
-        tElem.id = 'theme-widget';
-        document.body.appendChild(tElem);
+    // 💡 body가 존재할 때만 안전하게 위젯을 만들고 글자를 넣습니다.
+    if (document.body) {
+        let tElem = document.getElementById('theme-widget');
+        if(!tElem) {
+            tElem = document.createElement('div');
+            tElem.id = 'theme-widget';
+            document.body.appendChild(tElem);
+        }
+        tElem.innerText = themeText;
     }
-    tElem.innerText = themeText;
 }
-
 // ---------------------------------------------------------
 // ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
 // ---------------------------------------------------------
@@ -1033,19 +1030,17 @@ function applyManualWeatherEffect(type) {
     }
 }
 
-// ==========================================
-// ⛅ 날씨 및 배경 테마 통합 모듈 (오류 방어 완벽판)
-// ==========================================
+// ⛅ [수정] 날씨 위젯 연동 및 디폴트(부산) 우회 엔진
 function syncWeatherAndWidget() {
     if (window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
     }
 
-    const defaultLat = 35.1796; // 기본값 부산 좌표
+    const defaultLat = 35.1796; // 디폴트: 부산 좌표
     const defaultLon = 129.0756;
     
-    function fetchWeatherData(lat, lon) {
+    function fetchWeatherData(lat, lon, isDefaultCall = false) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
@@ -1063,24 +1058,40 @@ function syncWeatherAndWidget() {
             
             let wElem = document.getElementById('weather-widget');
             if(!wElem) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
-            wElem.innerHTML = `${icon} ${temp}°C`;
+            
+            // 위치 거부 등으로 부산 날씨를 부른 경우 도시명을 명시해줍니다.
+            if (isDefaultCall) {
+                wElem.innerHTML = `📍 부산 ${icon} ${temp}°C`;
+            } else {
+                wElem.innerHTML = `${icon} ${temp}°C`;
+            }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 서버 통신 실패. 기본 환경 적용.");
+            console.log("날씨 API 호출 실패");
             let wElem = document.getElementById('weather-widget');
             if (wElem && window.manualWeatherOverride === 'auto') {
-                wElem.innerText = "☁️ 부산 (연결 실패)"; // 인터넷 끊김 시 완벽한 방어
+                wElem.innerText = "☁️ 부산 (기상청 연결 실패)";
             }
             applyManualWeatherEffect('clear');
         });
     }
 
-    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
+    // 💡 브라우저 지오로케이션 연동 감지 최적화
+    if (!navigator.geolocation) { 
+        fetchWeatherData(defaultLat, defaultLon, true); 
+        return; 
+    }
 
     navigator.geolocation.getCurrentPosition(
-        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 거부 시 부산으로 우회
+        (position) => {
+            // 위치 승인 시: 현재 위치 좌표로 날씨 호출
+            fetchWeatherData(position.coords.latitude, position.coords.longitude, false);
+        },
+        (error) => {
+            // 위치 거부(허용 안 함) 또는 에러 발생 시: 즉시 실시간 '부산 날씨' 호출!
+            fetchWeatherData(defaultLat, defaultLon, true);
+        },
         { timeout: 7000 }
     );
 }
