@@ -128,3 +128,25 @@ self.addEventListener('message', (event) => {
         self.skipWaiting();
     }
 });
+
+// 5. 알림 클릭 시 웹사이트 열기 / 포커스
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close(); // 클릭 시 알림 닫기
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            // 1. 이미 서재 창이 열려있는 경우 그 창을 맨 앞으로 가져옴 (포커스)
+            for (let i = 0; i < clientList.length; i++) {
+                const client = clientList[i];
+                if (client.url.includes(self.registration.scope) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // 2. 열려있는 창이 없다면 새로 열기
+            if (clients.openWindow) {
+                return clients.openWindow('/');
+            }
+        })
+    );
+});
+
