@@ -26,62 +26,8 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
-// 🌅 [수정] 배경 테마 및 좌측 상단 위젯 연동 엔진
-function applyTimeBasedThemeEngine() {
-    const hour = new Date().getHours();
-    let bgStyle = "";
-    let themeText = "";
-    
-    let mode = window.manualTimeOverride || 'auto';
-    if (mode === 'auto') {
-        if (hour >= 6 && hour < 12) mode = 'morning';
-        else if (hour >= 12 && hour < 18) mode = 'day';
-        else if (hour >= 18 && hour < 20) mode = 'evening';
-        else mode = 'night';
-    }
 
-    if (mode === 'morning') {
-        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-        themeText = "🌅 아침의 바다";
-    }
-    else if (mode === 'day') {
-        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-        themeText = "☀️ 낮의 바다";
-    }
-    else if (mode === 'evening') {
-        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-        themeText = "🌇 저녁의 바다";
-    }
-    else {
-        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
-        themeText = "🌌 밤의 바다";
-    }
-    
-    document.body.style.transition = "background 3s ease-in-out";
-    document.body.style.background = bgStyle;
 
-    // 💡 body가 존재할 때만 안전하게 위젯을 만들고 글자를 넣습니다.
-    if (document.body) {
-        let tElem = document.getElementById('theme-widget');
-        if(!tElem) {
-            tElem = document.createElement('div');
-            tElem.id = 'theme-widget';
-            document.body.appendChild(tElem);
-        }
-        tElem.innerText = themeText;
-    }
-}
-// ---------------------------------------------------------
-// ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
-// ---------------------------------------------------------
-// 1. 유저가 서재에 처음 들어왔을 때 즉시 1회 실행하여 시간대에 맞는 배경을 렌더링
-applyTimeBasedThemeEngine();
-
-// 2. 백그라운드 타이머를 켜서 1분(60초)마다 현재 시간을 몰래 확인하고, 
-//    시간대가 바뀌면 새로고침 없이 실시간으로 다음 배경으로 스르륵 물들게 함!
-setInterval(() => {
-    applyTimeBasedThemeEngine();
-}, 60000);
 
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
@@ -1030,7 +976,57 @@ function applyManualWeatherEffect(type) {
     }
 }
 
-// ⛅ [수정] 날씨 위젯 연동 및 디폴트(부산) 우회 엔진
+// ==========================================
+// 🌅 [최종] 배경 테마 및 좌측 상단 위젯 연동 엔진
+// ==========================================
+function applyTimeBasedThemeEngine() {
+    const hour = new Date().getHours();
+    let bgStyle = "";
+    let themeText = "";
+    
+    let mode = window.manualTimeOverride || 'auto';
+    if (mode === 'auto') {
+        if (hour >= 6 && hour < 12) mode = 'morning';
+        else if (hour >= 12 && hour < 18) mode = 'day';
+        else if (hour >= 18 && hour < 20) mode = 'evening';
+        else mode = 'night';
+    }
+
+    if (mode === 'morning') {
+        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
+        themeText = "🌅 아침의 바다";
+    }
+    else if (mode === 'day') {
+        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
+        themeText = "☀️ 낮의 바다";
+    }
+    else if (mode === 'evening') {
+        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
+        themeText = "🌇 저녁의 바다";
+    }
+    else {
+        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+        themeText = "🌌 밤의 바다";
+    }
+    
+    document.body.style.transition = "background 3s ease-in-out";
+    document.body.style.background = bgStyle;
+
+    // DOM이 완전히 로드된 후 좌측 상단 배지를 안전하게 생성 및 부착합니다.
+    let tElem = document.getElementById('theme-widget');
+    if (!tElem && document.body) {
+        tElem = document.createElement('div');
+        tElem.id = 'theme-widget';
+        document.body.appendChild(tElem);
+    }
+    if (tElem) {
+        tElem.innerText = themeText;
+    }
+}
+
+// ==========================================
+// ⛅ [최종] 날씨 위젯 연동 및 디폴트(자동/부산) 우회 엔진
+// ==========================================
 function syncWeatherAndWidget() {
     if (window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
@@ -1059,7 +1055,7 @@ function syncWeatherAndWidget() {
             let wElem = document.getElementById('weather-widget');
             if(!wElem) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
             
-            // 위치 거부 등으로 부산 날씨를 부른 경우 도시명을 명시해줍니다.
+            // 위치 거부 등으로 부산 날씨를 부른 경우 '📍 부산'을 명시하고, 승인 시에는 기상 아이콘과 온도만 노출
             if (isDefaultCall) {
                 wElem.innerHTML = `📍 부산 ${icon} ${temp}°C`;
             } else {
@@ -1077,7 +1073,7 @@ function syncWeatherAndWidget() {
         });
     }
 
-    // 💡 브라우저 지오로케이션 연동 감지 최적화
+    // 브라우저 위치 권한 확인 및 자동 분기 처리
     if (!navigator.geolocation) { 
         fetchWeatherData(defaultLat, defaultLon, true); 
         return; 
@@ -1085,16 +1081,50 @@ function syncWeatherAndWidget() {
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
-            // 위치 승인 시: 현재 위치 좌표로 날씨 호출
+            // 위치 승인 시 -> 유저의 현재 실시간 위치 기반 날씨 출력
             fetchWeatherData(position.coords.latitude, position.coords.longitude, false);
         },
         (error) => {
-            // 위치 거부(허용 안 함) 또는 에러 발생 시: 즉시 실시간 '부산 날씨' 호출!
+            // 위치 거부 시 -> 즉시 실시간 '부산 날씨'와 온도를 가져와 디폴트로 출력!
             fetchWeatherData(defaultLat, defaultLon, true);
         },
         { timeout: 7000 }
     );
 }
+
+function applyManualWeatherEffect(type) {
+    let overlay = document.getElementById('weather-overlay-layer');
+    if (!overlay && document.body) {
+        overlay = document.createElement('div');
+        overlay.id = 'weather-overlay-layer';
+        document.body.insertBefore(overlay, document.body.firstChild);
+    }
+    if (!overlay) return;
+
+    let wElem = document.getElementById('weather-widget');
+
+    if (type === 'rain') {
+        overlay.className = 'weather-overlay rain';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "🌧️ 비 내리는 바다";
+    } else if (type === 'snow') {
+        overlay.className = 'weather-overlay snow';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "❄️ 눈 내리는 바다";
+    } else {
+        overlay.className = 'weather-overlay';
+        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "☀️ 평온한 바다";
+    }
+}
+// ---------------------------------------------------------
+// ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
+// ---------------------------------------------------------
+// 1. 유저가 서재에 처음 들어왔을 때 즉시 1회 실행하여 시간대에 맞는 배경을 렌더링
+applyTimeBasedThemeEngine();
+
+// 2. 백그라운드 타이머를 켜서 1분(60초)마다 현재 시간을 몰래 확인하고, 
+//    시간대가 바뀌면 새로고침 없이 실시간으로 다음 배경으로 스르륵 물들게 함!
+setInterval(() => {
+    applyTimeBasedThemeEngine();
+}, 60000);
 // ==========================================
 // 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
 // ==========================================
