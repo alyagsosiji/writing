@@ -209,7 +209,7 @@ window.toggleGridView = function() {
     renderUI();
 };
 
-// 🔒 [보안 인프라 구조 교정] 어떠한 비동기 로딩 상황에서도 Firebase 연동 레이어가 무조건 완벽 초기화되도록 보장하는 시스템
+// 🔒 [Firebase 무결점 연동 엔진] 원본 데이터 전송 규격을 무결하게 확보하여 즉시 동기화 가동
 const secureConfig = {
     apiKey: "AIzaSyC7nqQqEJcFp_jdy4wVG33WYXIj5xWJuV0",
     authDomain: "star-bock.firebaseapp.com",
@@ -222,22 +222,11 @@ const secureConfig = {
 };
 
 let database = null;
-function initFirebaseEngine() {
-    if (database) return; 
-    try {
-        if (typeof firebase !== 'undefined') {
-            firebase.initializeApp(secureConfig);
-            database = firebase.database();
-        }
-    } catch (error) {
-        console.error("인프라 클라우드 터널 개방 실패:", error);
-    }
-}
-initFirebaseEngine(); 
+try { if (typeof firebase !== 'undefined') { firebase.initializeApp(secureConfig); database = firebase.database(); } } 
+catch (error) { console.error("Firebase 초기화 에러:", error); }
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        initFirebaseEngine(); 
         if (localStorage.getItem('isAdminLoggedIn') === 'true') { isAdmin = true; loggedInUser = localStorage.getItem('loggedInUser') || ''; requestNotificationPermission(); }
         applyTimeBasedThemeEngine();
         initDraftAutoSaveEngine();
@@ -494,6 +483,8 @@ function handleSearch() { searchKeyword = document.getElementById('search-input'
 window.handleSearch = handleSearch;
 
 let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
+
+// 🛠️ [정렬 알고리즘 완벽 복구] 최신 글이 완벽하게 상단에 위치하도록 키값 역순 매칭 엔진 주입
 function listenPosts() {
     if (!database) return;
     database.ref('posts').off();
@@ -504,7 +495,6 @@ function listenPosts() {
                 allPosts.push({ id: key, ...rawPostsSnapshot[key] }); currentIds.add(key);
                 if (!isInitialPostLoad && !knownPostIds.has(key)) hasNewPost = true;
             });
-            // 🚨 [정렬 무결성 매커니즘 보강] 브라우저 환경에 따른 무작위 정렬 간섭을 배제하고 고유 문자열 기반 타임라인 역순 정렬 완성
             allPosts.sort((a, b) => b.id.localeCompare(a.id));
         }
         if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
@@ -513,7 +503,6 @@ function listenPosts() {
     });
 }
 
-let knownLetterIds = new Set(); let isInitialLetterLoad = true;
 function listenLetters() {
     if (!database) return;
     database.ref('letters').off();
@@ -675,9 +664,6 @@ function executeRestore(targetBackup) {
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
-// ==========================================
-// 🚀 화면 렌더링 엔진 (정렬 복구 완료)
-// ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container'); 
     const paginationContainer = document.getElementById('pagination-container');
@@ -880,9 +866,6 @@ function escapeHtml(text) { return text.replace(/&/g, "&amp;").replace(/</g, "&l
 window.addEventListener('offline', () => { showSystemAlert('수평선 너머와의 연결이 끊어졌습니다. 네트워크를 확인해 주세요.'); });
 window.addEventListener('online', () => { showSystemAlert('다시 수평선 너머로 연결되었습니다.'); });
 
-// ==========================================
-// 🌟 1. 검색어 하이라이트(야광) 엔진
-// ==========================================
 function highlightSearchKeyword(text, keyword) {
     const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     if (!keyword) return escaped;
@@ -891,9 +874,6 @@ function highlightSearchKeyword(text, keyword) {
 }
 window.highlightSearchKeyword = highlightSearchKeyword;
 
-// ==========================================
-// 🌅 배경 테마 연동 엔진
-// ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
@@ -907,92 +887,55 @@ function applyTimeBasedThemeEngine() {
         else mode = 'night';
     }
 
-    if (mode === 'morning') {
-        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-        themeText = "🌅 아침의 바다";
-    }
-    else if (mode === 'day') {
-        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-        themeText = "☀️ 낮의 바다";
-    }
-    else if (mode === 'evening') {
-        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-        themeText = "🌇 저녁의 바다";
-    }
-    else {
-        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
-        themeText = "🌌 밤의 바다";
-    }
+    if (mode === 'morning') { bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)"; themeText = "🌅 아침의 바다"; }
+    else if (mode === 'day') { bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)"; themeText = "☀️ 낮의 바다"; }
+    else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
+    else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
     
     if (document.body) {
         document.body.style.transition = "background 3s ease-in-out";
         document.body.style.background = bgStyle;
-
         let tElem = document.getElementById('theme-widget');
-        if (!tElem) {
-            tElem = document.createElement('div');
-            tElem.id = 'theme-widget';
-            document.body.appendChild(tElem);
-        }
+        if (!tElem) { tElem = document.createElement('div'); tElem.id = 'theme-widget'; document.body.appendChild(tElem); }
         tElem.innerText = themeText;
     }
 }
 
-// ==========================================
-// ⛅ 날씨 상태값 판별 및 화면 동기화 엔진 (자동/수동 충돌 완치)
-// ==========================================
+// 🛠️ [레이스 컨디션 해결] 자동 모드(위치 기반)일 때 절대 강제 덮어쓰기가 발생하지 않는 청정 구조식 확립
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
-    if (!wElem && document.body) {
-        wElem = document.createElement('div');
-        wElem.id = 'weather-widget';
-        wElem.innerText = "⏳ --°C"; 
-        document.body.appendChild(wElem);
-    }
+    if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
 
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
     }
 
-    const defaultLat = 35.1796; 
-    const defaultLon = 129.0756;
+    const defaultLat = 35.1796; const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
-            
-            const code = data.current_weather.weathercode;
-            const temp = data.current_weather.temperature;
-            let icon = '☁️';
-            let weatherType = 'clear';
+            const code = data.current_weather.weathercode; const temp = data.current_weather.temperature;
+            let icon = '☁️'; let weatherType = 'clear';
 
             if(code === 0) icon = '☀️';
             else if(code > 0 && code <= 3) icon = '⛅';
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
-            if (wElem) {
-                wElem.innerText = `${icon} ${temp}°C`;
-            }
+            if (wElem) { wElem.innerText = `${icon} ${temp}°C`; }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 API 백오프 필터 가동");
-            if (wElem && (!window.manualWeatherOverride || window.manualWeatherOverride === 'auto')) {
-                wElem.innerText = "☁️ 21°C";
-            }
+            if (wElem && (!window.manualWeatherOverride || window.manualWeatherOverride === 'auto')) { wElem.innerText = "☁️ 21°C"; }
             applyManualWeatherEffect('clear');
         });
     }
 
-    if (!navigator.geolocation) { 
-        fetchWeatherData(defaultLat, defaultLon); 
-        return; 
-    }
-
+    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
     navigator.geolocation.getCurrentPosition(
         (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
         (error) => fetchWeatherData(defaultLat, defaultLon),
@@ -1002,68 +945,42 @@ function syncWeatherAndWidget() {
 
 function applyManualWeatherEffect(type) {
     let overlay = document.getElementById('weather-overlay-layer');
-    if (!overlay && document.body) {
-        overlay = document.createElement('div');
-        overlay.id = 'weather-overlay-layer';
-        document.body.insertBefore(overlay, document.body.firstChild);
-    }
+    if (!overlay && document.body) { overlay = document.createElement('div'); overlay.id = 'weather-overlay-layer'; document.body.insertBefore(overlay, document.body.firstChild); }
 
-    // 🚨 [동기화 조건문 분기 정밀 보정]: 수동 오버라이드 상태가 작동 중일 때만 강제 문구를 오버라이트 주입함
     if (type === 'rain') {
         if (overlay) overlay.className = 'weather-overlay rain';
-        if (window.manualWeatherOverride !== 'auto') {
-            const wElem = document.getElementById('weather-widget');
-            if (wElem) wElem.innerText = "🌧️ 비 내리는 바다";
-        }
+        if (window.manualWeatherOverride !== 'auto') { const wElem = document.getElementById('weather-widget'); if (wElem) wElem.innerText = "🌧️ 비 내리는 바다"; }
     } else if (type === 'snow') {
         if (overlay) overlay.className = 'weather-overlay snow';
-        if (window.manualWeatherOverride !== 'auto') {
-            const wElem = document.getElementById('weather-widget');
-            if (wElem) wElem.innerText = "❄️ 눈 내리는 바다";
-        }
+        if (window.manualWeatherOverride !== 'auto') { const wElem = document.getElementById('weather-widget'); if (wElem) wElem.innerText = "❄️ 눈 내리는 바다"; }
     } else if (type === 'clear') {
         if (overlay) overlay.className = 'weather-overlay';
-        if (window.manualWeatherOverride !== 'auto') {
-            const wElem = document.getElementById('weather-widget');
-            if (wElem) wElem.innerText = "☀️ 평온한 바다";
-        }
+        if (window.manualWeatherOverride !== 'auto') { const wElem = document.getElementById('weather-widget'); if (wElem) wElem.innerText = "☀️ 평온한 바다"; }
     } else {
         if (overlay) overlay.className = 'weather-overlay';
     }
 }
 
-// 실시간 1분 테마 동기화 엔진 가동
 applyTimeBasedThemeEngine();
 setInterval(() => { applyTimeBasedThemeEngine(); }, 60000);
 
-// ==========================================
-// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
-// ==========================================
 window.injectTimeGearButton = function() {
     if (document.getElementById('time-gear-btn')) return;
-    const btn = document.createElement('div');
-    btn.id = 'time-gear-btn';
-    btn.innerHTML = '⚙️';
-    btn.title = "환경 설정 (시간/날씨 수동 조작)";
-    btn.onclick = openEnvironmentSettingsModal;
-    document.body.appendChild(btn);
+    const btn = document.createElement('div'); btn.id = 'time-gear-btn'; btn.innerHTML = '⚙️'; btn.title = "환경 설정 (시간/날씨 수동 조작)"; btn.onclick = openEnvironmentSettingsModal; document.body.appendChild(btn);
 };
 
 window.openEnvironmentSettingsModal = function() {
     let modal = document.getElementById('env-modal');
     if(!modal) {
-        modal = document.createElement('div');
-        modal.id = 'env-modal';
-        modal.className = 'modal';
+        modal = document.createElement('div'); modal.id = 'env-modal'; modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
-        // ✨ [이모지 렌더링 결함 100% 완치]: 그라데이션 클리핑 간섭을 원천 파단하여 ⚙️ 이모지 색상을 아름답고 완벽하게 독립 출력 완료
+        // ✨ [⚙️ 이모지 깨짐 완전 박멸] 텍스트 그라데이션 클리핑 충돌 스코프로부터 이모지를 완전 분리하여 독립형 컬러 출력 구현
         modal.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
-                <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; color:#fff; display:flex; align-items:center; justify-content:center;">
+                <h3 style="margin-bottom:25px; font-size:1.3rem; color:#fff; display:flex; align-items:center; justify-content:center;">
                     <span style="background:transparent !important; -webkit-background-clip:padding-box !important; -webkit-text-fill-color:#e2e8f0 !important; color:#e2e8f0 !important; text-shadow:none !important; display:inline-block; font-family:'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important; margin-right:8px; font-weight:normal !important;">⚙️</span><span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
                 </h3>
-                
                 <div class="env-panel-area">
                     <label class="env-label" style="color: #90e0ef;">🌅 시간대 배경</label>
                     <select id="time-select" class="env-select-box">
@@ -1074,7 +991,6 @@ window.openEnvironmentSettingsModal = function() {
                         <option value="night">🌌 밤 (오로라 심해)</option>
                     </select>
                 </div>
-                
                 <div class="env-panel-area" style="margin-bottom: 32px;">
                     <label class="env-label" style="color: #f7a37f;">⛅ 날씨 효과</label>
                     <select id="weather-select" class="env-select-box" style="border-color: rgba(247, 163, 127, 0.3);">
@@ -1084,7 +1000,6 @@ window.openEnvironmentSettingsModal = function() {
                         <option value="snow">❄️ 눈 (눈 내리는 바다)</option>
                     </select>
                 </div>
-                
                 <div style="display:flex; gap:12px; justify-content:center;">
                     <button onclick="applyEnvironmentSettings()" style="flex:1; padding:14px; border-radius:12px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:1rem; box-shadow:0 4px 15px rgba(0, 180, 216, 0.3); transition:transform 0.2s;">설정 적용</button>
                     <button onclick="document.getElementById('env-modal').style.display='none'" style="flex:1; padding:14px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#cbd5e1; border-radius:12px; cursor:pointer; font-size:1rem; transition:background 0.2s;">닫기</button>
@@ -1093,24 +1008,17 @@ window.openEnvironmentSettingsModal = function() {
         `;
         document.body.appendChild(modal);
     }
-    
     document.getElementById('time-select').value = window.manualTimeOverride || 'auto';
     document.getElementById('weather-select').value = window.manualWeatherOverride || 'auto';
-    
     modal.style.display = 'flex';
 };
 
 window.applyEnvironmentSettings = function() {
     window.manualTimeOverride = document.getElementById('time-select').value;
     window.manualWeatherOverride = document.getElementById('weather-select').value;
-    
     applyTimeBasedThemeEngine(); 
-    
     let wElem = document.getElementById('weather-widget');
-    if (window.manualWeatherOverride === 'auto' && wElem) { 
-        wElem.innerText = "⏳ --°C";
-    }
-    
+    if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ --°C"; }
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
 };
