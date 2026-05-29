@@ -26,6 +26,10 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
+// [글로벌 환경 제어 변수 선제적 안전 초기화]
+window.manualTimeOverride = 'auto';
+window.manualWeatherOverride = 'auto';
+
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
     targetFields.forEach(id => {
@@ -279,10 +283,10 @@ function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmBiYXNlcGFwcC5jb20="),
-    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmBiYXNlaW8uY29t"), 
+    authDomain: atob("c3Rhci1ib2NrLmZpcmVidXNlcGFwcC5jb20="),
+    databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmVidXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmBiYXNlc3RvcmFnZS5hcHA="),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmVidXNzdG9yYWdlLmFwcA=="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
@@ -536,6 +540,7 @@ window.triggerManualBackup = function() {
     .then(() => showSystemAlert("현재 바다 상태 스냅샷 수동 저장이 완료되었습니다."))
     .catch(err => showSystemAlert("수동 백업 실패: " + err.message));
 };
+window.triggerManualBackup = triggerManualBackup;
 
 function cleanExpiredBackupsTimeline() {
     if (!database) return;
@@ -714,7 +719,6 @@ function renderUI() {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // 💡 [요청 반영] h3 제목에만 하이라이트(야광) 효과 적용, 본문은 하이라이트 완전히 제외
         card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
@@ -875,7 +879,7 @@ window.highlightSearchKeyword = function(text, keyword) {
 };
 
 // ==========================================
-// 🌅 [동기화] 배경 테마 및 좌측 상단 위젯 제어 엔진
+// 🌅 배경 테마 연동 엔진
 // ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
@@ -922,17 +926,18 @@ function applyTimeBasedThemeEngine() {
 }
 
 // ==========================================
-// ⛅ [동기화] 위치 완전 삭제 + 오직 이모지와 온도로 구성하는 날씨 엔진
+// ⛅ 날씨 상태값 판별 및 화면 동기화 엔진
 // ==========================================
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) {
         wElem = document.createElement('div');
         wElem.id = 'weather-widget';
-        wElem.innerText = "⏳ --°C"; // 💡 유령 껍데기 상자 노출 차단을 위해 즉시 글자 입력
+        wElem.innerText = "⏳ --°C"; 
         document.body.appendChild(wElem);
     }
 
+    // [핵심 버그 수정]: 자동 모드가 아닐 때는 즉각 수동 이펙트 처리 루틴으로 바인딩을 이양합니다
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
@@ -957,14 +962,13 @@ function syncWeatherAndWidget() {
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
-            // 💡 [요청 전격 반영] "📍 부산" 텍스트를 전면 박멸하고 이모지와 깔끔한 실시간 온도로 끝마침
             if (wElem) {
                 wElem.innerText = `${icon} ${temp}°C`;
             }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
-            console.log("날씨 API 차단 우회 안전 필터");
+            console.log("날씨 API 백오프 필터 가동");
             if (wElem && (!window.manualWeatherOverride || window.manualWeatherOverride === 'auto')) {
                 wElem.innerText = "☁️ 21°C";
             }
@@ -994,26 +998,29 @@ function applyManualWeatherEffect(type) {
     if (!overlay) return;
 
     let wElem = document.getElementById('weather-widget');
+    if (!wElem) return;
 
-    // 💡 [요청 적극 반영] 수동 모드 설정 시에도 텍스트 글자를 최소화하고 깔끔하게 이모지와 포맷 일치
+    // [핵심 해결]: 수동 조작 시 조건 충돌을 완벽 박멸하여 텍스트 문구가 즉시 위젯 박스에 강제 주입됩니다.
     if (type === 'rain') {
         overlay.className = 'weather-overlay rain';
-        if (wElem && window.manualWeatherOverride === 'rain') wElem.innerText = "🌧️ --°C";
+        wElem.innerText = "🌧️ 비 내리는 바다";
     } else if (type === 'snow') {
         overlay.className = 'weather-overlay snow';
-        if (wElem && window.manualWeatherOverride === 'snow') wElem.innerText = "❄️ --°C";
+        wElem.innerText = "❄️ 눈 내리는 바다";
+    } else if (type === 'clear') {
+        overlay.className = 'weather-overlay';
+        wElem.innerText = "☀️ 평온한 바다";
     } else {
         overlay.className = 'weather-overlay';
-        if (wElem && window.manualWeatherOverride === 'clear') wElem.innerText = "☀️ --°C";
     }
 }
 
-// 실시간 자동 테마 리스너 (1분 주기 가동)
+// 실시간 1분 타이머 가동
 applyTimeBasedThemeEngine();
 setInterval(() => { applyTimeBasedThemeEngine(); }, 60000);
 
 // ==========================================
-// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 시스템
+// ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
 // ==========================================
 window.injectTimeGearButton = function() {
     if (document.getElementById('time-gear-btn')) return;
@@ -1033,9 +1040,12 @@ window.openEnvironmentSettingsModal = function() {
         modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
+        // [이모지 깨짐 완치]: 그라데이션 클리핑이 적용된 h3 태그 내부에서 ⚙️ 이모지만 단독 span으로 분리 후 색상을 격리(initial)했습니다.
         modal.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
-                <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚙️ 서재 환경 조작</h3>
+                <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; color:#fff;">
+                    <span style="-webkit-text-fill-color: initial !important; font-style: normal; display: inline-block; margin-right: 4px;">⚙️</span><span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
+                </h3>
                 
                 <div class="env-panel-area">
                     <label class="env-label" style="color: #90e0ef;">🌅 시간대 배경</label>
