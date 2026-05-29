@@ -113,6 +113,58 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
+// ⛅ 날씨 위젯 비동기 페칭 엔진 조율
+function fetchWeatherWidget() {
+    const cacheKey = 'weather_cache_payload';
+    const cacheTimeKey = 'weather_cache_timestamp';
+    const now = Date.now();
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+
+    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
+        renderWeatherHTML(JSON.parse(cachedData));
+        return;
+    }
+
+    // 💡 데이터 수신 전 빈 상자(유령 현상)로 스타일만 뜨는 현상을 방지하기 위해 로딩 문구 즉시 선제 주입
+    let wElem = document.getElementById('weather-widget');
+    if(!wElem) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+    wElem.innerText = "⏳ 바다 읽는 중...";
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
+    .then(res => res.json())
+    .then(data => {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimeKey, String(now));
+        renderWeatherHTML(data);
+    }).catch(e => {
+        if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
+        else wElem.innerText = "☁️ 21°C";
+        console.log("기상 트래픽 백오프");
+    });
+}
+
+function renderWeatherHTML(data) {
+    const code = data.current_weather.weathercode;
+    let icon = '☁️';
+    if(code === 0) icon = '☀️';
+    else if(code > 0 && code <= 3) icon = '⛅';
+    else if(code >= 51 && code <= 67) icon = '🌧️';
+    else if(code >= 71 && code <= 77) icon = '❄️';
+    
+    let wElem = document.getElementById('weather-widget');
+    if(!wElem) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+    wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
+}
+
 function injectRandomMemoryButton() {
     if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
@@ -231,6 +283,17 @@ document.addEventListener('DOMContentLoaded', function() {
         initDraftAutoSaveEngine();
         injectRandomMemoryButton();
         injectTimeGearButton();
+        
+        // ⏳ 초기 구동 시 유령 박스를 전면 차단하기 위해 텍스트 수동 즉시 대입
+        let preWeather = document.getElementById('weather-widget');
+        if(!preWeather && document.body) {
+            preWeather = document.createElement('div');
+            preWeather.id = 'weather-widget';
+            document.body.appendChild(preWeather);
+        }
+        if(preWeather) preWeather.innerText = "⏳ 바다 읽는 중...";
+
+        fetchWeatherWidget();
         syncWeatherAndWidget(); 
         setInterval(syncWeatherAndWidget, 30 * 60000); 
         listenPosts();
@@ -295,7 +358,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
-const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaSMyNjA0MTY=") };
+const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaS#2MDQxNg==") };
 
 let isAdmin = false; let loggedInUser = ''; let currentView = 'posts'; let currentPage = 1; const postsPerPage = 6;
 let allPosts = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
@@ -602,7 +665,6 @@ function deleteSelectedBackups() {
 }
 window.deleteSelectedBackups = deleteSelectedBackups;
 
-// 🎁 [첨부파일 스크린샷 부분 단추 UI 대폭 개선] 답답하지 않게 여백을 넓히고 여유 공간 배치 완성
 function loadBackupTimelineList() {
     let container = document.getElementById('backup-list-container'); 
     if (!container) return; container.innerHTML = '';
@@ -624,7 +686,6 @@ function loadBackupTimelineList() {
             const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
             
-            // 버튼 인라인 스타일 정밀 교정 (답답함 완전 해소 및 세련된 디자인 주입)
             element.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%;">
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
@@ -705,13 +766,13 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
-    // ✨ [요청 사항 지침 문구 데코레이션 완료] 밤바다 오로라 야광 이펙트 장식 주입
+    // ✨ [버튼 여백 최적화] padding 및 inline-flex 조율 완치 포맷 유지
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
             : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
         let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
-        subtitleElem.innerHTML = subtitleText + `<div style="margin-top:14px;"><button onclick="window.toggleGridView()" style="font-size:0.8rem; background:rgba(255, 255, 255, 0.03); border:1px solid rgba(0, 180, 216, 0.15); color:#fff; padding:7px 16px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.3px; transition:0.2s; outline:none; box-shadow:0 2px 8px rgba(0,0,0,0.2);">${gridBtnText}</button></div>`;
+        subtitleElem.innerHTML = subtitleText + `<div style="margin-top:18px; display:flex; justify-content:center; width:100%;"><button onclick="window.toggleGridView()" style="font-size:0.85rem; background:rgba(255, 255, 255, 0.04); border:1px solid rgba(0, 180, 216, 0.2); color:#fff; padding:9px 22px; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.5px; transition:0.2s; outline:none; box-shadow:0 3px 10px rgba(0,0,0,0.3); display:inline-flex; align-items:center; gap:6px;">${gridBtnText}</button></div>`;
     }
 
     if (currentView === 'posts') {
@@ -927,6 +988,12 @@ function applyTimeBasedThemeEngine() {
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
+    
+    // 💡 동기화 시작 시점에 텍스트가 완전히 비어있거나 대기 상태일 때 유령 박스를 방지하기 위해 로딩 가이드 삽입
+    if (wElem && (!wElem.innerText || wElem.innerText.trim() === "")) {
+        wElem.innerText = "⏳ 바다 읽는 중...";
+    }
+    
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
     const defaultLat = 35.1796; const defaultLon = 129.0756;
     function fetchWeatherData(lat, lon) {
@@ -1021,7 +1088,7 @@ window.applyEnvironmentSettings = function() {
     window.manualWeatherOverride = document.getElementById('weather-select').value;
     applyTimeBasedThemeEngine(); 
     let wElem = document.getElementById('weather-widget');
-    if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ --°C"; }
+    if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ 바다 읽는 중..."; }
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
 };
