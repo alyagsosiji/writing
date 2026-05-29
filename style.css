@@ -229,45 +229,38 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 }
 
 /* ==========================================
-   📌 메인 지침서/안내 문구 영역 (미세 치우침 버그 완전 박멸)
+   📌 메인 지침서/안내 문구 영역 (1px 오차 없는 정중앙 강제 잠금)
    ========================================== */
 .section-subtitle {
     display: block !important;
-    text-align: center !important;    /* 텍스트 줄바꿈 시 정중앙 정렬 */
+    text-align: center !important;
     
-    /* 💡 [핵심] 왼쪽/오른쪽 마진을 완벽하게 등분(auto)하여 대칭 정렬 */
+    /* 좌우 마진을 완전히 똑같이 분배하여 대칭 정렬 */
     margin-left: auto !important;
     margin-right: auto !important;
     margin-top: 0 !important;
     margin-bottom: 24px !important;
 
-    /* 💡 [핵심 2] 미세하게 오른쪽으로 밀어내던 범인(기존 왼쪽 패딩)을 흔적도 없이 박멸 */
+    /* 미세하게 오른쪽으로 밀어내던 숨은 패딩 전면 박멸 */
     padding-left: 0 !important;
     padding-right: 0 !important;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     
     width: 100% !important;
-    max-width: 100% !important;        /* 부모 컨테이너 너비를 꽉 채워 비대칭 여백 차단 */
-    box-sizing: border-box !important; /* 패딩과 테두리를 너비 계산에 포함 */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    letter-spacing: 0px !important; /* 미세 유격 유발 방지 */
 }
 
-/* 지침서 내부의 모든 자식 요소(글자, div, 버튼 등)도 한 번 더 정중앙 정렬 */
-.section-subtitle * {
-    text-align: center !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-/* 갤러리/리스트 모드 전환 버튼 정렬 영역 */
+/* 지침서 하단의 모드 전환 버튼 정렬 영역 */
 .section-subtitle div {
     display: flex !important;
-    justify-content: center !important; /* 버튼 그룹을 가로축 기준 정중앙으로 배치 */
+    justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
     margin-top: 14px !important;
+    padding: 0 !important;
 }
 
 /* 🔍 검색창 및 필터 통합 레이아웃 */
@@ -550,64 +543,56 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ⚙️ 환경 설정 모달 - 커스텀 선택 박스 (양쪽 여백 대칭 및 오류 수정 완결판)
+   ⚙️ 환경 설정 모달 - 선택 박스 (화살표 위치 절대 고정)
    ========================================== */
 .env-select-box {
-    width: 100%;
-    box-sizing: border-box; /* 💡 [핵심] 패딩 팽창으로 인해 글자와 화살표가 화면 밖으로 밀려나 사라지는 현상 완벽 방어 */
-    padding: 14px 40px 14px 16px; 
-    border-radius: 10px;
-    background-color: rgba(3, 10, 23, 0.8);
-    border: 1px solid rgba(144, 224, 239, 0.3);
-    color: #ffffff !important; /* 💡 폰트 색상을 최우선 강제 지정하여 투명해지는 버그 방어 */
-    font-size: 0.95rem;
-    outline: none;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 14px 40px 14px 16px !important; 
+    border-radius: 10px !important;
+    background-color: rgba(3, 10, 23, 0.8) !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    outline: none !important;
+    cursor: pointer !important;
     
-    /* 투박한 브라우저 기본 화살표 완전히 숨기기 */
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
+    /* 브라우저 기본 UI 강제 무력화 */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
     
-    /* 감성적인 커스텀 화살표 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(144,224,239,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-    background-repeat: no-repeat;
-    background-position: right 14px center; 
-    background-size: 18px;
+    /* 💡 화살표의 반복 및 크기 기본 속성 고정 */
+    background-repeat: no-repeat !important;
+    background-size: 18px !important;
+    transition: border-color 0.3s, box-shadow 0.3s !important;
 }
 
-/* 💡 [핵심 추가] 드롭다운 클릭 시 열리는 옵션 리스트창 다크 테마로 통일 (PC/안드로이드) */
+/* 🌅 시간대 선택 박스 전용 화살표 위치 고정 (클릭/포커스 시에도 절대 안 움직임) */
+#time-select.env-select-box {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(144,224,239,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
+    background-position: calc(100% - 14px) center !important;
+}
+
+/* ⛅ 날씨 선택 박스 전용 산호색 화살표 위치 고정 */
+#weather-select.env-select-box {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(247,163,127,0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') !important;
+    background-position: calc(100% - 14px) center !important;
+}
+
+/* 💡 마우스를 올리거나 클릭(포커스)해도 화살표가 튀지 않도록 속성 유지 */
+.env-select-box:hover, .env-select-box:focus, .env-select-box:active {
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
+    background-color: rgba(6, 15, 31, 0.95) !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+}
+
 .env-select-box option {
-    background-color: #040d1c; /* 심해 바다색 배경 */
-    color: #ffffff; /* 하얀색 폰트 */
+    background-color: #040d1c;
+    color: #ffffff;
     padding: 10px;
-}
-
-.env-select-box:hover, .env-select-box:focus {
-    border-color: #00b4d8;
-    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2);
-    background-color: rgba(6, 15, 31, 0.95);
-}
-
-.env-panel-area {
-    margin-bottom: 25px; 
-    text-align: left; 
-    background: rgba(255, 255, 255, 0.02); 
-    padding: 18px 16px; 
-    border-radius: 14px; 
-    border: 1px solid rgba(255, 255, 255, 0.04); 
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.env-label {
-    font-size: 0.9rem; 
-    margin-bottom: 12px; 
-    display: flex; 
-    align-items: center; 
-    gap: 6px; 
-    font-weight: bold;
-    letter-spacing: 0.5px;
 }
 /* ==========================================
    ⚙️ 시간/날씨 수동 조작 톱니바퀴 버튼 디자인
