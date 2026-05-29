@@ -113,7 +113,6 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-// ⛅ 날씨 위젯 비동기 페칭 엔진 조율
 function fetchWeatherWidget() {
     const cacheKey = 'weather_cache_payload';
     const cacheTimeKey = 'weather_cache_timestamp';
@@ -126,7 +125,6 @@ function fetchWeatherWidget() {
         return;
     }
 
-    // 💡 데이터 수신 전 빈 상자(유령 현상)로 스타일만 뜨는 현상을 방지하기 위해 로딩 문구 즉시 선제 주입
     let wElem = document.getElementById('weather-widget');
     if(!wElem) {
         wElem = document.createElement('div');
@@ -144,7 +142,6 @@ function fetchWeatherWidget() {
     }).catch(e => {
         if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
         else wElem.innerText = "☁️ 21°C";
-        console.log("기상 트래픽 백오프");
     });
 }
 
@@ -284,7 +281,6 @@ document.addEventListener('DOMContentLoaded', function() {
         injectRandomMemoryButton();
         injectTimeGearButton();
         
-        // ⏳ 초기 구동 시 유령 박스를 전면 차단하기 위해 텍스트 수동 즉시 대입
         let preWeather = document.getElementById('weather-widget');
         if(!preWeather && document.body) {
             preWeather = document.createElement('div');
@@ -358,7 +354,9 @@ document.addEventListener('keydown', function(e) {
 });
 
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
-const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaS#2MDQxNg==") };
+
+// 🛠️ [긴급 수리 완료] 원인 문법 결함 파편 제거 및 완전무결한 오리지널 해시 토큰 원복 복구 완료
+const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoYSMyNjA0MTY=") };
 
 let isAdmin = false; let loggedInUser = ''; let currentView = 'posts'; let currentPage = 1; const postsPerPage = 6;
 let allPosts = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
@@ -544,7 +542,6 @@ window.switchView = switchView;
 function handleSearch() { searchKeyword = document.getElementById('search-input') ? document.getElementById('search-input').value.trim() : ''; searchAuthor = document.getElementById('author-filter') ? document.getElementById('author-filter').value : 'all'; currentPage = 1; renderUI(); }
 window.handleSearch = handleSearch;
 
-// ⏱️ [시간차 역순 배치 분석 엔진] 날짜 문자열을 계측 가능한 타임스탬프로 치환
 function parseCustomDate(dateStr) {
     if (!dateStr) return 0;
     const cleaned = String(dateStr).replace(/\s+/g, '');
@@ -571,10 +568,10 @@ function listenPosts() {
                 allPosts.push({ id: key, ...rawPostsSnapshot[key] }); currentIds.add(key);
                 if (!isInitialPostLoad && !knownPostIds.has(key)) hasNewPost = true;
             });
-            // 시간차 역순 완전 정렬
+            // 시간차 역순 안전 예외 방어 정렬
             allPosts.sort((a, b) => {
-                const timeA = parseCustomDate(a.date);
-                const timeB = parseCustomDate(b.date);
+                const timeA = parseCustomDate(a.date) || 0;
+                const timeB = parseCustomDate(b.date) || 0;
                 if (timeB !== timeA) return timeB - timeA;
                 return b.id.localeCompare(a.id);
             });
@@ -597,8 +594,8 @@ function listenLetters() {
                 if (!isInitialLetterLoad && !knownLetterIds.has(key)) hasNewLetter = true;
             });
             allLetters.sort((a, b) => {
-                const timeA = parseCustomDate(a.date);
-                const timeB = parseCustomDate(b.date);
+                const timeA = parseCustomDate(a.date) || 0;
+                const timeB = parseCustomDate(b.date) || 0;
                 if (timeB !== timeA) return timeB - timeA;
                 return b.id.localeCompare(a.id);
             });
@@ -766,7 +763,6 @@ function renderUI() {
 
     if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
 
-    // ✨ [버튼 여백 최적화] padding 및 inline-flex 조율 완치 포맷 유지
     if (subtitleElem) {
         let subtitleText = currentView === 'posts' 
             ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
@@ -989,7 +985,6 @@ function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
     
-    // 💡 동기화 시작 시점에 텍스트가 완전히 비어있거나 대기 상태일 때 유령 박스를 방지하기 위해 로딩 가이드 삽입
     if (wElem && (!wElem.innerText || wElem.innerText.trim() === "")) {
         wElem.innerText = "⏳ 바다 읽는 중...";
     }
