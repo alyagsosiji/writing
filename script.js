@@ -775,7 +775,7 @@ function renderUI() {
         subtitleElem.innerHTML = subtitleText + `
             <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
                 <button onclick="window.toggleGridView()" style="font-size:0.85rem; background:rgba(255, 255, 255, 0.04); border:1px solid rgba(0, 180, 216, 0.25); color:#fff; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.5px; transition:0.2s; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.35); display:inline-flex; align-items:center; justify-content:center; gap:8px; 
-                height: 34px !important; padding: 0 45px !important; line-height: 1 !important;">
+                height: 34px !important; padding: 0 35px !important; line-height: 1 !important;">
                     ${gridBtnText}
                 </button>
             </div>
