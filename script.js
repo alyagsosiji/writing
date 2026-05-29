@@ -783,16 +783,17 @@ function renderUI(isAppend = false) {
                 ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
                 : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
             
-            // 💡 단순 버튼 형태를 정렬(필터) 버튼과 같은 직관적인 select 드롭다운 UI로 교체 완료
+                        // 💡 단순 버튼 형태를 정렬(필터) 버튼과 같은 직관적인 select 드롭다운 UI로 교체 완료 (좌우 여백 완벽 균형)
             let selectHtml = `
                 <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
-                    <select onchange="window.setDisplayMode(this.value)" style="height: 38px; width: 100%; max-width: 180px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: rgba(255, 255, 255, 0.04); background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 15px center; background-size: 14px; border: 1px solid rgba(0, 180, 216, 0.25); color: #fff; padding: 0 35px 0 20px; border-radius: 25px; font-size: 0.85rem; font-weight:500; outline: none; cursor: pointer; transition: all 0.25s ease; text-align: center; box-shadow:0 4px 12px rgba(0,0,0,0.35); letter-spacing:0.5px;">
+                    <select onchange="window.setDisplayMode(this.value)" style="height: 38px; width: 100%; max-width: 180px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: rgba(255, 255, 255, 0.04); background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 15px center; background-size: 14px; border: 1px solid rgba(0, 180, 216, 0.25); color: #fff; padding: 0 35px; border-radius: 25px; font-size: 0.85rem; font-weight:500; outline: none; cursor: pointer; transition: all 0.25s ease; text-align: center; box-shadow:0 4px 12px rgba(0,0,0,0.35); letter-spacing:0.5px;">
                         <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
                         <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
                         <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
                     </select>
                 </div>
             `;
+
             
             subtitleElem.innerHTML = subtitleText + selectHtml;
         }
