@@ -957,96 +957,70 @@ window.addEventListener('online', () => {
     showSystemAlert('다시 수평선 너머로 연결되었습니다.');
 });
 
-// 🌅 [수정] 수동 설정을 감지하는 배경 테마 엔진
-function applyTimeBasedThemeEngine() {
-    const hour = new Date().getHours();
-    let bgStyle = "";
-    
-    let mode = window.manualTimeOverride || 'auto';
-    if (mode === 'auto') {
-        if (hour >= 6 && hour < 12) mode = 'morning';
-        else if (hour >= 12 && hour < 18) mode = 'day';
-        else if (hour >= 18 && hour < 20) mode = 'evening';
-        else mode = 'night';
+window.openEnvironmentSettingsModal = function() {
+    let modal = document.getElementById('env-modal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'env-modal';
+        modal.className = 'modal';
+        modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
+        
+        // ✨ 디자인 개선: 그라데이션, 은은한 테두리, 예쁜 폰트 크기 및 정렬 적용
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
+                <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">⚙️ 서재 환경 조작</h3>
+                
+                <div style="margin-bottom:25px; text-align:left; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                    <label style="color:#90e0ef; font-size:0.9rem; margin-bottom:10px; display:block; font-weight:bold;">🌅 시간대 배경</label>
+                    <select id="time-select" style="width:100%; padding:14px; border-radius:8px; background:rgba(3, 10, 23, 0.8); border:1px solid rgba(0, 180, 216, 0.2); color:#fff; outline:none; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">
+                        <option value="auto">⏱️ 자동 (실시간 동기화)</option>
+                        <option value="morning">🌅 아침 (물안개 청록)</option>
+                        <option value="day">☀️ 낮 (스카이 블루)</option>
+                        <option value="evening">🌇 저녁 (코랄빛 노을)</option>
+                        <option value="night">🌌 밤 (오로라 심해)</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom:30px; text-align:left; background:rgba(255,255,255,0.03); padding:15px; border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+                    <label style="color:#f7a37f; font-size:0.9rem; margin-bottom:10px; display:block; font-weight:bold;">⛅ 날씨 효과</label>
+                    <select id="weather-select" style="width:100%; padding:14px; border-radius:8px; background:rgba(3, 10, 23, 0.8); border:1px solid rgba(247, 163, 127, 0.2); color:#fff; outline:none; font-size:0.95rem; cursor:pointer; transition:all 0.3s;">
+                        <option value="auto">📍 자동 (현재 위치 기반)</option>
+                        <option value="clear">☀️ 맑음 (평온한 바다)</option>
+                        <option value="rain">🌧️ 비 (비 내리는 바다)</option>
+                        <option value="snow">❄️ 눈 (눈 내리는 바다)</option>
+                    </select>
+                </div>
+                
+                <div style="display:flex; gap:12px; justify-content:center;">
+                    <button onclick="applyEnvironmentSettings()" style="flex:1; padding:12px; border-radius:10px; background:linear-gradient(135deg, #00b4d8, #0077b6); color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:0.95rem; box-shadow:0 4px 15px rgba(0, 180, 216, 0.3); transition:transform 0.2s;">설정 적용</button>
+                    <button onclick="document.getElementById('env-modal').style.display='none'" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.05); color:#cbd5e1; border-radius:10px; cursor:pointer; font-size:0.95rem; transition:background 0.2s;">닫기</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
     }
+    document.getElementById('time-select').value = window.manualTimeOverride;
+    document.getElementById('weather-select').value = window.manualWeatherOverride;
+    modal.style.display = 'flex';
+};
 
-    if (mode === 'morning') bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-    else if (mode === 'day') bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-    else if (mode === 'evening') bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-    else bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+window.applyEnvironmentSettings = function() {
+    window.manualTimeOverride = document.getElementById('time-select').value;
+    window.manualWeatherOverride = document.getElementById('weather-select').value;
     
-    document.body.style.transition = "background 3s ease-in-out";
-    document.body.style.background = bgStyle;
-}
-
-// ⛅ [수정] 수동 설정을 감지하는 날씨 동기화 엔진
-function applyManualWeatherEffect(type) {
-    let overlay = document.getElementById('weather-overlay-layer');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'weather-overlay-layer';
-        overlay.className = 'weather-overlay';
-        document.body.insertBefore(overlay, document.body.firstChild);
-    }
+    // 1. 배경 업데이트 즉시 적용
+    applyTimeBasedThemeEngine(); 
+    
+    // 💡 [해결] '자동'으로 되돌렸을 때, 날씨 데이터가 불러와지기 전까지 기존 수동 텍스트("비 내리는 바다" 등)가 남는 버그 차단
     let wElem = document.getElementById('weather-widget');
-
-    if (type === 'rain') {
-        overlay.className = 'weather-overlay rain';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "🌧️ 비 내리는 바다";
-    } else if (type === 'snow') {
-        overlay.className = 'weather-overlay snow';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "❄️ 눈 내리는 바다";
-    } else {
-        overlay.className = 'weather-overlay';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "☀️ 평온한 바다";
+    if (window.manualWeatherOverride === 'auto' && wElem) {
+        wElem.innerText = "⏳ 기상 관측 중...";
     }
-}
-
-function syncWeatherAndWidget() {
-    if (window.manualWeatherOverride !== 'auto') {
-        applyManualWeatherEffect(window.manualWeatherOverride);
-        return;
-    }
-
-    const defaultLat = 35.1796;
-    const defaultLon = 129.0756;
     
-    function fetchWeatherData(lat, lon) {
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
-        .then(res => res.json())
-        .then(data => {
-            if (window.manualWeatherOverride !== 'auto') return; 
-            
-            const code = data.current_weather.weathercode;
-            const temp = data.current_weather.temperature;
-            let icon = '☁️';
-            let weatherType = 'clear';
-
-            if(code === 0) icon = '☀️';
-            else if(code > 0 && code <= 3) icon = '⛅';
-            else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
-            else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
-            
-            let wElem = document.getElementById('weather-widget');
-            if(!wElem) {
-                wElem = document.createElement('div');
-                wElem.id = 'weather-widget';
-                document.body.appendChild(wElem);
-            }
-            wElem.innerHTML = `${icon} ${temp}°C`;
-            applyManualWeatherEffect(weatherType);
-        })
-        .catch(err => console.log("날씨 정보를 불러오지 못했습니다."));
-    }
-
-    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
-
-    navigator.geolocation.getCurrentPosition(
-        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
-        (error) => fetchWeatherData(defaultLat, defaultLon),
-        { timeout: 7000 }
-    );
-}
+    // 2. 날씨 업데이트 트리거
+    syncWeatherAndWidget(); 
+    document.getElementById('env-modal').style.display = 'none';
+};
 // ==========================================
 // 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
 // ==========================================
