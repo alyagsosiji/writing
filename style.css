@@ -228,10 +228,26 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     text-shadow: 0 2px 12px rgba(0, 180, 216, 0.25); border-bottom: none !important; padding-bottom: 0 !important;
 }
 
+/* ==========================================
+   📌 메인 지침서/안내 문구 영역 (가로·세로 완전 중앙 정렬)
+   ========================================== */
 .section-subtitle {
-    text-align: center; font-size: 0.86rem; font-weight: 300; letter-spacing: 1.5px;
-    color: #ffbba2; opacity: 0.85; font-style: italic; text-shadow: 0 0 8px rgba(255, 107, 61, 0.4);
-    width: 100%; margin-bottom: 35px; border-bottom: 1px solid rgba(0, 180, 216, 0.15); padding-bottom: 24px;
+    display: flex !important;
+    flex-direction: column !important; /* 텍스트와 버튼이 위아래로 쌓이도록 설정 */
+    align-items: center !important;    /* 자식 요소들을 가로축 기준 정중앙으로 배치 */
+    justify-content: center !important;
+    text-align: center !important;     /* 텍스트 줄바꿈 시에도 행 전체 중앙 정렬 */
+    
+    margin: 0 auto 24px auto !important; /* 좌우 마진을 auto로 주어 컨테이너 자체를 중앙 배치 */
+    width: 100% !important;
+    max-width: 600px; /* 너무 퍼지지 않도록 가독성 좋은 폭 제한 */
+}
+
+/* 지침서 내부의 버튼 정렬 보강 */
+.section-subtitle div {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
 }
 
 /* 🔍 검색창 및 필터 통합 레이아웃 */
