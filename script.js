@@ -356,7 +356,7 @@ document.addEventListener('keydown', function(e) {
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
 // 🛠️ [긴급 수리 완료] 원인 문법 결함 파편 제거 및 완전무결한 오리지널 해시 토큰 원복 복구 완료
-const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoYSMyNjA0MTY=") };
+const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaSMyNjA0MTY=") };
 
 let isAdmin = false; let loggedInUser = ''; let currentView = 'posts'; let currentPage = 1; const postsPerPage = 6;
 let allPosts = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
