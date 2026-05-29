@@ -1125,18 +1125,6 @@ applyTimeBasedThemeEngine();
 setInterval(() => {
     applyTimeBasedThemeEngine();
 }, 60000);
-// ==========================================
-// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
-// ==========================================
-window.highlightSearchKeyword = function(text, keyword) {
-    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
-    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    if (!keyword) return escaped;
-    
-    // 검색어가 존재하면 야광 CSS를 씌워서 반환
-    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
-};
 
 // ==========================================
 // ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
