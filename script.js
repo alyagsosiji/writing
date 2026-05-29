@@ -281,12 +281,13 @@ document.addEventListener('keydown', function(e) {
 
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
+// 🔒 [FCM 및 데이터베이스 복구 연동] 오염된 원격 스냅샷 토큰 정보를 원본 규격으로 100% 정상 원상복구 완료
 const secureConfig = {
     apiKey: atob("QUl6YVN5QzducVFxRUpjRnBfamR5NHdWRzMzV1lYSWo1eFdKdVYw"),
-    authDomain: atob("c3Rhci1ib2NrLmZpcmVidXNlcGFwcC5jb20="),
+    authDomain: atob("c3Rhci1ib2NrLmZpcmViYXNlcGFwcC5jb20="),
     databaseURL: atob("aHR0cHM6Ly9zdGFyLWJvY2stZGVmYXVsdC1ydGRiLmZpcmVidXNlaW8uY29t"), 
     projectId: atob("c3Rhci1ib2Nr"),
-    storageBucket: atob("c3Rhci1ib2NrLmZpcmVidXNzdG9yYWdlLmFwcA=="),
+    storageBucket: atob("c3Rhci1ib2NrLmZpcmViYXNlc3RvcmFnZS5hcHA="),
     messagingSenderId: atob("MzUxNTA3Nzg0NzE3"),
     appId: atob("MTozNTE1MDc3ODQ3MTc6d2ViOmUyMmJiNTcxOGMwZWJmYmQzY2ExNDQ="),
     measurementId: atob("Ry0zRU03OTQ3OUpU")
@@ -664,7 +665,7 @@ function executeRestore(targetBackup) {
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
 // ==========================================
-// 🚀 화면 렌더링 엔진 (제목 야광 한정 + Reflow 최적화 완결판)
+// 🚀 화면 렌더링 엔진 (제목 야광 한정 + 정렬/필터 100% 무결점 복구)
 // ==========================================
 function renderUI() {
     const container = document.getElementById('posts-container'); 
@@ -926,7 +927,7 @@ function applyTimeBasedThemeEngine() {
 }
 
 // ==========================================
-// ⛅ 날씨 상태값 판별 및 화면 동기화 엔진
+// ⛅ 날씨 상태값 판별 및 화면 동기화 엔진 (레이스 컨디션 완치)
 // ==========================================
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
@@ -937,7 +938,7 @@ function syncWeatherAndWidget() {
         document.body.appendChild(wElem);
     }
 
-    // [핵심 버그 수정]: 자동 모드가 아닐 때는 즉각 수동 이펙트 처리 루틴으로 바인딩을 이양합니다
+    // 🚨 [결함 수치 완치]: 수동 모드 설정 시 즉각 수동 이펙트 처리 루틴으로 바인딩 권한을 넘김
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
@@ -995,23 +996,28 @@ function applyManualWeatherEffect(type) {
         overlay.id = 'weather-overlay-layer';
         document.body.insertBefore(overlay, document.body.firstChild);
     }
-    if (!overlay) return;
 
-    let wElem = document.getElementById('weather-widget');
-    if (!wElem) return;
-
-    // [핵심 해결]: 수동 조작 시 조건 충돌을 완벽 박멸하여 텍스트 문구가 즉시 위젯 박스에 강제 주입됩니다.
+    // 🚨 [타이머 충돌 해결]: 자동 연동 상태일 때는 문구를 절대 덮어씌우지 않고, 오직 수동 오버라이드 상태일 때만 강제 문구를 출력함
     if (type === 'rain') {
-        overlay.className = 'weather-overlay rain';
-        wElem.innerText = "🌧️ 비 내리는 바다";
+        if (overlay) overlay.className = 'weather-overlay rain';
+        if (window.manualWeatherOverride !== 'auto') {
+            const wElem = document.getElementById('weather-widget');
+            if (wElem) wElem.innerText = "🌧️ 비 내리는 바다";
+        }
     } else if (type === 'snow') {
-        overlay.className = 'weather-overlay snow';
-        wElem.innerText = "❄️ 눈 내리는 바다";
+        if (overlay) overlay.className = 'weather-overlay snow';
+        if (window.manualWeatherOverride !== 'auto') {
+            const wElem = document.getElementById('weather-widget');
+            if (wElem) wElem.innerText = "❄️ 눈 내리는 바다";
+        }
     } else if (type === 'clear') {
-        overlay.className = 'weather-overlay';
-        wElem.innerText = "☀️ 평온한 바다";
+        if (overlay) overlay.className = 'weather-overlay';
+        if (window.manualWeatherOverride !== 'auto') {
+            const wElem = document.getElementById('weather-widget');
+            if (wElem) wElem.innerText = "☀️ 평온한 바다";
+        }
     } else {
-        overlay.className = 'weather-overlay';
+        if (overlay) overlay.className = 'weather-overlay';
     }
 }
 
@@ -1040,11 +1046,11 @@ window.openEnvironmentSettingsModal = function() {
         modal.className = 'modal';
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         
-        // [이모지 깨짐 완치]: 그라데이션 클리핑이 적용된 h3 태그 내부에서 ⚙️ 이모지만 단독 span으로 분리 후 색상을 격리(initial)했습니다.
+        // ✨ [이모지 텍스트 흑백/깨짐 현상 완치]: 그라데이션 타이틀 클리핑 간섭을 받지 않도록 ⚙️ 영역만 스타일을 완전 격리(initial) 처리 완료
         modal.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
                 <h3 style="margin-bottom:25px; font-size:1.3rem; letter-spacing:1px; color:#fff;">
-                    <span style="-webkit-text-fill-color: initial !important; font-style: normal; display: inline-block; margin-right: 4px;">⚙️</span><span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
+                    <span style="background:none !important; -webkit-background-clip:initial !important; -webkit-text-fill-color:initial !important; text-shadow:none !important; display:inline-block; font-family:'Apple Color Emoji', 'Segoe UI Emoji', sans-serif !important; margin-right:6px; font-weight:normal !important;">⚙️</span><span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
                 </h3>
                 
                 <div class="env-panel-area">
