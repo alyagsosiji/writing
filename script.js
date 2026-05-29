@@ -930,6 +930,18 @@ window.addEventListener('online', () => {
     // 인터넷이 다시 연결되었을 때 띄우는 알림
     showSystemAlert('다시 수평선 너머로 연결되었습니다.');
 });
+// ==========================================
+// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
+// ==========================================
+window.highlightSearchKeyword = function(text, keyword) {
+    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
+    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (!keyword) return escaped;
+    
+    // 검색어가 존재하면 야광 CSS를 씌워서 반환
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
+};
 
 // 🌅 [수정] 수동 설정을 감지하는 배경 테마 엔진
 function applyTimeBasedThemeEngine() {
@@ -977,52 +989,18 @@ function applyManualWeatherEffect(type) {
 }
 
 // ==========================================
-// 🌅 [최종] 배경 테마 및 좌측 상단 위젯 연동 엔진
+// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
 // ==========================================
-function applyTimeBasedThemeEngine() {
-    const hour = new Date().getHours();
-    let bgStyle = "";
-    let themeText = "";
+window.highlightSearchKeyword = function(text, keyword) {
+    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
+    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (!keyword) return escaped;
     
-    let mode = window.manualTimeOverride || 'auto';
-    if (mode === 'auto') {
-        if (hour >= 6 && hour < 12) mode = 'morning';
-        else if (hour >= 12 && hour < 18) mode = 'day';
-        else if (hour >= 18 && hour < 20) mode = 'evening';
-        else mode = 'night';
-    }
+    // 검색어가 존재하면 야광 CSS를 씌워서 반환
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
+};
 
-    if (mode === 'morning') {
-        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-        themeText = "🌅 아침의 바다";
-    }
-    else if (mode === 'day') {
-        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-        themeText = "☀️ 낮의 바다";
-    }
-    else if (mode === 'evening') {
-        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-        themeText = "🌇 저녁의 바다";
-    }
-    else {
-        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
-        themeText = "🌌 밤의 바다";
-    }
-    
-    document.body.style.transition = "background 3s ease-in-out";
-    document.body.style.background = bgStyle;
-
-    // DOM이 완전히 로드된 후 좌측 상단 배지를 안전하게 생성 및 부착합니다.
-    let tElem = document.getElementById('theme-widget');
-    if (!tElem && document.body) {
-        tElem = document.createElement('div');
-        tElem.id = 'theme-widget';
-        document.body.appendChild(tElem);
-    }
-    if (tElem) {
-        tElem.innerText = themeText;
-    }
-}
 
 // ==========================================
 // ⛅ [최종] 날씨 위젯 연동 및 디폴트(자동/부산) 우회 엔진
