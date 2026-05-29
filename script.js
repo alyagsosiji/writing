@@ -250,11 +250,18 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
 let isRestMode = false; 
-let isGridView = false; 
+let currentDisplayMode = 'list'; // 💡 3가지 모드 제어: 'list', 'grid', 'infinite'
 let backupTriggerQueued = false; 
 
-window.toggleGridView = function() {
-    isGridView = !isGridView;
+// 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
+window.setDisplayMode = function(mode) {
+    currentDisplayMode = mode;
+    currentPage = 1; // 모드가 바뀌면 1페이지부터 다시 정렬
+    // 무한 스크롤 관찰자 초기화
+    if (window.infiniteObserver) {
+        window.infiniteObserver.disconnect();
+        window.infiniteObserver = null;
+    }
     renderUI();
 };
 
@@ -471,8 +478,8 @@ function login() {
     const haeunId = decodeData("7ZWY7J2A"); 
 
     let tempUser = null;
-    if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) { tempUser = "아시"; }
-    else if (inputId === haeunId && inputPw === atob("aGFldW4jMjYwNDE2")) { tempUser = "하은"; }
+    if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) { tempUser = decodeData("7JWE7Iuc"); }
+    else if (inputId === haeunId && inputPw === atob("aGFldW4jMjYwNDE2")) { tempUser = decodeData("7ZWY7J2A"); }
 
     if (tempUser) {
         isAdmin = true; loggedInUser = tempUser; 
@@ -750,7 +757,8 @@ function executeRestore(targetBackup) {
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
-function renderUI() {
+// 💡 무한 스크롤 append 처리를 위해 매개변수 isAppend 추가
+function renderUI(isAppend = false) {
     const container = document.getElementById('posts-container'); 
     const paginationContainer = document.getElementById('pagination-container');
     const subtitleElem = document.querySelector('.section-subtitle'); 
@@ -758,49 +766,68 @@ function renderUI() {
     const authorFilterContainer = document.getElementById('author-filter-container');
     
     if (!container || !paginationContainer) return; 
-    container.innerHTML = ''; 
-    paginationContainer.innerHTML = '';
 
-    if (isGridView) container.classList.add('posts-grid-view'); else container.classList.remove('posts-grid-view');
+    // 무한 스크롤 작동 중이 아닐 때만 화면을 비우고 새로 그림
+    if (!isAppend) {
+        container.innerHTML = ''; 
+        paginationContainer.innerHTML = '';
 
-                    if (subtitleElem) {
-        let subtitleText = currentView === 'posts' 
-            ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
-            : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
-        
-        let gridBtnText = isGridView ? '📄 리스트 모드로 보기' : '🔲 갤러리 모드로 보기';
-        
-        // 💡 height를 34px로 가두고 상하 패딩을 0으로 뭉개서 위아래 비대화를 완벽 차단했습니다.
-        // 💡 좌우 패딩만 45px로 넓게 밀어내어 글자가 테두리와 절대 붙지 않습니다.
-        subtitleElem.innerHTML = subtitleText + `
-            <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
-                <button onclick="window.toggleGridView()" style="font-size:0.85rem; background:rgba(255, 255, 255, 0.04); border:1px solid rgba(0, 180, 216, 0.25); color:#fff; border-radius:25px; cursor:pointer; font-weight:500; letter-spacing:0.5px; transition:0.2s; outline:none; box-shadow:0 4px 12px rgba(0,0,0,0.35); display:inline-flex; align-items:center; justify-content:center; gap:8px; 
-                height: 34px !important; padding: 0 35px !important; line-height: 1 !important;">
-                    ${gridBtnText}
-                </button>
-            </div>
-        `;
-    }
+        if (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite') {
+            container.classList.add('posts-grid-view'); 
+        } else {
+            container.classList.remove('posts-grid-view');
+        }
 
+        if (subtitleElem) {
+            let subtitleText = currentView === 'posts' 
+                ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
+                : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
+            
+            // 💡 단순 버튼 형태를 정렬(필터) 버튼과 같은 직관적인 select 드롭다운 UI로 교체 완료
+            let selectHtml = `
+                <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
+                    <select onchange="window.setDisplayMode(this.value)" style="height: 38px; width: 100%; max-width: 180px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: rgba(255, 255, 255, 0.04); background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 15px center; background-size: 14px; border: 1px solid rgba(0, 180, 216, 0.25); color: #fff; padding: 0 35px 0 20px; border-radius: 25px; font-size: 0.85rem; font-weight:500; outline: none; cursor: pointer; transition: all 0.25s ease; text-align: center; box-shadow:0 4px 12px rgba(0,0,0,0.35); letter-spacing:0.5px;">
+                        <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
+                        <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
+                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 무한 스크롤</option>
+                    </select>
+                </div>
+            `;
+            
+            subtitleElem.innerHTML = subtitleText + selectHtml;
+        }
 
-
-
-    if (currentView === 'posts') {
-        if (authorStatsContainer) authorStatsContainer.style.display = 'flex'; if (authorFilterContainer) authorFilterContainer.style.display = 'block';
-        let ashiCount = 0; let haeunCount = 0; allPosts.forEach(post => { if ((post.author || "").includes("하은")) haeunCount++; else ashiCount++; });
-        if (authorStatsContainer) authorStatsContainer.innerHTML = `<span class="stat-badge">아시 : ${ashiCount}개</span><span class="stat-badge">하은 : ${haeunCount}개</span>`;
-    } else {
-        if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
+        if (currentView === 'posts') {
+            if (authorStatsContainer) authorStatsContainer.style.display = 'flex'; if (authorFilterContainer) authorFilterContainer.style.display = 'block';
+            let ashiCount = 0; let haeunCount = 0; allPosts.forEach(post => { if ((post.author || "").includes("하은")) haeunCount++; else ashiCount++; });
+            if (authorStatsContainer) authorStatsContainer.innerHTML = `<span class="stat-badge">아시 : ${ashiCount}개</span><span class="stat-badge">하은 : ${haeunCount}개</span>`;
+        } else {
+            if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
+        }
     }
 
     let targetArray = (currentView === 'posts') ? allPosts : allLetters;
     if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
 
-    if (targetArray.length === 0) { container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px;">존재하지 않습니다.</p>`; return; }
+    if (targetArray.length === 0) { 
+        if (!isAppend) container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:40px;">존재하지 않습니다.</p>`; 
+        return; 
+    }
 
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
-    const currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+    let currentItems = [];
+
+    // 무한 스크롤일 때 배열 보존 분기 처리
+    if (currentDisplayMode === 'infinite') {
+        if (isAppend) {
+            currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+        } else {
+            currentItems = targetArray.slice(0, currentPage * postsPerPage);
+        }
+    } else {
+        currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
+    }
 
     const cardFragment = document.createDocumentFragment();
 
@@ -820,18 +847,54 @@ function renderUI() {
         card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
+    
+    // 깜빡임 없이 리스트 맨 뒤에 이어붙이기
     container.appendChild(cardFragment);
 
-    if (totalPages > 1) {
-        const pageFragment = document.createDocumentFragment();
-        const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
-        let startPage = (currentGroup - 1) * maxPageButtons + 1; let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
-        
-        if (startPage > 1) { const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;'; prevBtn.onclick = () => { currentPage = startPage - 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(prevBtn); }
-        for (let i = startPage; i <= endPage; i++) { const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i; btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; pageFragment.appendChild(btn); }
-        if (endPage < totalPages) { const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;'; nextBtn.onclick = () => { currentPage = endPage + 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(nextBtn); }
-        
-        paginationContainer.appendChild(pageFragment);
+    // 💡 하단 페이지네이션 및 무한 스크롤 교차 관찰자(Observer) 동작 로직
+    if (currentDisplayMode === 'infinite') {
+        if (!isAppend) {
+            paginationContainer.innerHTML = '';
+            // 페이지가 남았다면 스크롤 감지 센서(Sentinel) 이식
+            if (currentPage < totalPages) {
+                const sentinel = document.createElement('div');
+                sentinel.id = 'infinite-sentinel';
+                sentinel.style.cssText = 'width: 100%; height: 20px; grid-column: 1/-1; margin-top: 20px; background: transparent;';
+                paginationContainer.appendChild(sentinel);
+
+                if (window.infiniteObserver) window.infiniteObserver.disconnect();
+                window.infiniteObserver = new IntersectionObserver((entries) => {
+                    // 유저가 밑바닥 센서 근처(150px)에 도달하면 다음 페이지 조용히 로드
+                    if (entries[0].isIntersecting) {
+                        if (currentPage < Math.ceil(targetArray.length / postsPerPage)) {
+                            currentPage++;
+                            renderUI(true);
+                        }
+                    }
+                }, { rootMargin: '150px' });
+                window.infiniteObserver.observe(sentinel);
+            }
+        } else {
+            // 끝까지 스크롤하여 더 이상 불러올 게 없으면 관찰자 제거
+            if (currentPage >= totalPages && window.infiniteObserver) {
+                window.infiniteObserver.disconnect();
+                const sentinel = document.getElementById('infinite-sentinel');
+                if (sentinel) sentinel.remove();
+            }
+        }
+    } else {
+        // 기존 리스트, 갤러리 모드의 버튼식 페이지네이션 생성
+        if (!isAppend && totalPages > 1) {
+            const pageFragment = document.createDocumentFragment();
+            const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
+            let startPage = (currentGroup - 1) * maxPageButtons + 1; let endPage = Math.min(currentGroup * maxPageButtons, totalPages);
+            
+            if (startPage > 1) { const prevBtn = document.createElement('div'); prevBtn.className = 'page-btn'; prevBtn.innerHTML = '&#139;'; prevBtn.onclick = () => { currentPage = startPage - 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(prevBtn); }
+            for (let i = startPage; i <= endPage; i++) { const btn = document.createElement('div'); btn.className = `page-btn ${i === currentPage ? 'active' : ''}`; btn.innerText = i; btn.onclick = () => { currentPage = i; renderUI(); scrollToPosts(); }; pageFragment.appendChild(btn); }
+            if (endPage < totalPages) { const nextBtn = document.createElement('div'); nextBtn.className = 'page-btn'; nextBtn.innerHTML = '&#155;'; nextBtn.onclick = () => { currentPage = endPage + 1; renderUI(); scrollToPosts(); }; pageFragment.appendChild(nextBtn); }
+            
+            paginationContainer.appendChild(pageFragment);
+        }
     }
 }
 
