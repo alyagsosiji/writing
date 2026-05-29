@@ -770,8 +770,8 @@ function renderUI() {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // ✨ 검색어 하이라이트 기능(야광 플랑크톤) 적용 유지
-        card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${highlightSearchKeyword(item.content, searchKeyword)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+       // ✨ 야광 플랑크톤 효과를 제목(title)에만 씌우고, 본문(content)은 하이라이트 없이 깔끔하게 출력
+card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
     container.appendChild(cardFragment); // 화면에 단 한 번만 그리기 적용 완료!
