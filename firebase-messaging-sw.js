@@ -1,6 +1,6 @@
 /* firebase-messaging-sw.js - PWA 렌더링 최적화 및 백그라운드 푸시 통합 최종 완결판 */
 
-const CACHE_NAME = 'writing-final-v6.1'; // 버전을 올려 기존 꼬인 캐시를 즉시 파기합니다.
+const CACHE_NAME = 'writing-final-v6.2'; // 버전을 올려 기존 꼬인 캐시를 즉시 파기합니다.
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
