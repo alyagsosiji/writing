@@ -485,3 +485,32 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     0% { background-position: 0 0; transform: translateY(-20px); }
     100% { background-position: 25px 50px; transform: translateY(0); }
 }
+/* ==========================================
+   ⚙️ 시간/날씨 수동 조작 톱니바퀴 버튼
+   ========================================== */
+#time-gear-btn {
+    position: fixed; z-index: 9999; cursor: pointer; 
+    display: flex; align-items: center; justify-content: center; 
+    background: rgba(6, 15, 31, 0.9); border: 1px solid rgba(144, 224, 239, 0.25); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* 소라게(로그인 시)와 완벽히 대칭되는 우측 위치 및 크기 */
+    bottom: 95px; right: 38px; 
+    width: 40px; height: 40px; 
+    border-radius: 50%;
+    font-size: 18px; 
+}
+#time-gear-btn:hover {
+    transform: scale(1.1); border-color: #00b4d8; box-shadow: 0 6px 20px rgba(0, 180, 216, 0.3);
+}
+
+@media (max-width: 768px) {
+    #time-gear-btn { 
+        bottom: 75px !important; 
+        right: 26px !important; 
+        width: 36px !important; 
+        height: 36px !important; 
+        font-size: 16px !important; 
+    }
+}
