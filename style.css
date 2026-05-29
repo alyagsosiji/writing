@@ -453,38 +453,40 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     }
 }
 /* ==========================================
-   ⛅ 실시간 날씨 동기화 오버레이 (비/눈)
+   ⛅ 실시간 날씨 동기화 오버레이 (자연스러운 다중 레이어 비/눈 효과)
    ========================================== */
 .weather-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0; /* 배경과 본문 내용 사이에서 부드럽게 흩날림 */
-    pointer-events: none; /* 터치를 방해하지 않음 */
-    overflow: hidden;
-    opacity: 0;
-    transition: opacity 2s ease-in-out;
+    z-index: 0; pointer-events: none; overflow: hidden;
+    opacity: 0; transition: opacity 2s ease-in-out;
 }
 
-/* 비가 내리는 효과 (투명한 빗줄기) */
+/* 🌧️ 빗줄기: 다중 레이어로 앞/뒤 공간감과 랜덤 속도 부여 (바람 부는 각도 적용) */
 .weather-overlay.rain {
     opacity: 0.7;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="100" viewBox="0 0 10 100"><line x1="5" y1="0" x2="5" y2="20" stroke="rgba(144,224,239,0.35)" stroke-width="1.5" stroke-linecap="round"/></svg>') repeat;
-    animation: rainDrop 0.4s linear infinite;
+    background-image: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="150" viewBox="0 0 40 150"><line x1="20" y1="0" x2="20" y2="25" stroke="rgba(144,224,239,0.3)" stroke-width="1" stroke-linecap="round"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="90" height="250" viewBox="0 0 90 250"><line x1="45" y1="0" x2="45" y2="35" stroke="rgba(144,224,239,0.5)" stroke-width="2" stroke-linecap="round"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="350" viewBox="0 0 160 350"><line x1="80" y1="0" x2="80" y2="50" stroke="rgba(144,224,239,0.2)" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    animation: rainDrop1 0.4s linear infinite, rainDrop2 0.6s linear infinite, rainDrop3 0.5s linear infinite;
+    transform: rotate(6deg) scale(1.1); /* 약간 기울여서 바람이 불며 주르륵 내리는 느낌 */
 }
-@keyframes rainDrop {
-    0% { background-position: 0 0; }
-    100% { background-position: 10px 100px; }
-}
+@keyframes rainDrop1 { 0% { background-position: 0 0; } 100% { background-position: -20px 300px; } }
+@keyframes rainDrop2 { 0% { background-position: 0 0; } 100% { background-position: -30px 500px; } }
+@keyframes rainDrop3 { 0% { background-position: 0 0; } 100% { background-position: 10px 700px; } }
 
-/* 눈이 내리는 효과 (부드러운 눈송이) */
+/* ❄️ 눈송이: 크기와 속도가 다른 3가지 레이어로 눈이 흩날림 */
 .weather-overlay.snow {
     opacity: 0.8;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><circle cx="25" cy="25" r="2.5" fill="rgba(255,255,255,0.6)"/></svg>') repeat;
-    animation: snowFall 4s linear infinite;
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="rgba(255,255,255,0.4)"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><circle cx="100" cy="100" r="2.5" fill="rgba(255,255,255,0.7)"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><circle cx="150" cy="150" r="3.5" fill="rgba(255,255,255,0.5)"/></svg>');
+    animation: snowFall1 6s linear infinite, snowFall2 9s linear infinite, snowFall3 12s linear infinite;
 }
-@keyframes snowFall {
-    0% { background-position: 0 0; transform: translateY(-20px); }
-    100% { background-position: 25px 50px; transform: translateY(0); }
-}
+@keyframes snowFall1 { 0% { background-position: 0 0; } 100% { background-position: 50px 300px; } }
+@keyframes snowFall2 { 0% { background-position: 0 0; } 100% { background-position: -40px 600px; } }
+@keyframes snowFall3 { 0% { background-position: 0 0; } 100% { background-position: 80px 900px; } }
 /* ==========================================
    ⚙️ 시간/날씨 수동 조작 톱니바퀴 버튼
    ========================================== */
