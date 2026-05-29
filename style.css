@@ -553,7 +553,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     
     /* 우측 하단에 예쁘게 고정 */
-    bottom: 95px; right: 38px; 
+    bottom: 105px; right: 38px; 
     width: 40px; height: 40px; 
     border-radius: 50%;
     font-size: 18px; 
