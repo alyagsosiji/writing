@@ -943,10 +943,13 @@ window.highlightSearchKeyword = function(text, keyword) {
     return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
 };
 
-// 🌅 [수정] 수동 설정을 감지하는 배경 테마 엔진
+// ==========================================
+// 🌅 [최종] 배경 테마 및 좌측 상단 위젯 연동 엔진
+// ==========================================
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = "";
+    let themeText = "";
     
     let mode = window.manualTimeOverride || 'auto';
     if (mode === 'auto') {
@@ -956,65 +959,60 @@ function applyTimeBasedThemeEngine() {
         else mode = 'night';
     }
 
-    if (mode === 'morning') bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
-    else if (mode === 'day') bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
-    else if (mode === 'evening') bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
-    else bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+    if (mode === 'morning') {
+        bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)";
+        themeText = "🌅 아침의 바다";
+    }
+    else if (mode === 'day') {
+        bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)";
+        themeText = "☀️ 낮의 바다";
+    }
+    else if (mode === 'evening') {
+        bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)";
+        themeText = "🌇 저녁의 바다";
+    }
+    else {
+        bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)";
+        themeText = "🌌 밤의 바다";
+    }
     
-    document.body.style.transition = "background 3s ease-in-out";
-    document.body.style.background = bgStyle;
+    if (document.body) {
+        document.body.style.transition = "background 3s ease-in-out";
+        document.body.style.background = bgStyle;
+
+        let tElem = document.getElementById('theme-widget');
+        if (!tElem) {
+            tElem = document.createElement('div');
+            tElem.id = 'theme-widget';
+            document.body.appendChild(tElem);
+        }
+        tElem.innerText = themeText;
+    }
 }
 
-// ⛅ [수정] 수동 설정을 감지하는 날씨 동기화 엔진
-function applyManualWeatherEffect(type) {
-    let overlay = document.getElementById('weather-overlay-layer');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'weather-overlay-layer';
-        overlay.className = 'weather-overlay';
-        document.body.insertBefore(overlay, document.body.firstChild);
-    }
-    let wElem = document.getElementById('weather-widget');
-
-    if (type === 'rain') {
-        overlay.className = 'weather-overlay rain';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "🌧️ 비 내리는 바다";
-    } else if (type === 'snow') {
-        overlay.className = 'weather-overlay snow';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "❄️ 눈 내리는 바다";
-    } else {
-        overlay.className = 'weather-overlay';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "☀️ 평온한 바다";
-    }
-}
-
 // ==========================================
-// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
-// ==========================================
-window.highlightSearchKeyword = function(text, keyword) {
-    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
-    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    if (!keyword) return escaped;
-    
-    // 검색어가 존재하면 야광 CSS를 씌워서 반환
-    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
-};
-
-
-// ==========================================
-// ⛅ [최종] 날씨 위젯 연동 및 디폴트(자동/부산) 우회 엔진
+// ⛅ [최종] 위치 표기 차단, 오직 이모지와 온도로만 끝내는 날씨 엔진
 // ==========================================
 function syncWeatherAndWidget() {
+    let wElem = document.getElementById('weather-widget');
+    if (!wElem && document.body) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+
     if (window.manualWeatherOverride !== 'auto') {
         applyManualWeatherEffect(window.manualWeatherOverride);
         return;
     }
 
-    const defaultLat = 35.1796; // 디폴트: 부산 좌표
+    // 자동 모드 가동 시 위치명 없이 이모지 대기 상태 표시
+    if (wElem) wElem.innerText = "⏳ --°C";
+
+    const defaultLat = 35.1796; // 부산 좌표
     const defaultLon = 129.0756;
     
-    function fetchWeatherData(lat, lon, isDefaultCall = false) {
+    function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
         .then(res => res.json())
         .then(data => {
@@ -1030,46 +1028,36 @@ function syncWeatherAndWidget() {
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
             
-            let wElem = document.getElementById('weather-widget');
-            if(!wElem) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
-            
-            // 위치 거부 등으로 부산 날씨를 부른 경우 '📍 부산'을 명시하고, 승인 시에는 기상 아이콘과 온도만 노출
-            if (isDefaultCall) {
-                wElem.innerHTML = `📍 부산 ${icon} ${temp}°C`;
-            } else {
-                wElem.innerHTML = `${icon} ${temp}°C`;
+            // 💡 [요청 반영] 부산이든 어디든 위치 텍스트 완전 삭제! 오직 이모지와 실시간 온도만 표기
+            if (wElem) {
+                wElem.innerText = `${icon} ${temp}°C`;
             }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
             console.log("날씨 API 호출 실패");
-            let wElem = document.getElementById('weather-widget');
             if (wElem && window.manualWeatherOverride === 'auto') {
-                wElem.innerText = "☁️ 부산 (기상청 연결 실패)";
+                wElem.innerText = "☁️ 21°C"; // 인터넷 단절 시 텍스트 없이 깔끔하게 디폴트 포맷 출력
             }
             applyManualWeatherEffect('clear');
         });
     }
 
-    // 브라우저 위치 권한 확인 및 자동 분기 처리
     if (!navigator.geolocation) { 
-        fetchWeatherData(defaultLat, defaultLon, true); 
+        fetchWeatherData(defaultLat, defaultLon); 
         return; 
     }
 
     navigator.geolocation.getCurrentPosition(
-        (position) => {
-            // 위치 승인 시 -> 유저의 현재 실시간 위치 기반 날씨 출력
-            fetchWeatherData(position.coords.latitude, position.coords.longitude, false);
-        },
-        (error) => {
-            // 위치 거부 시 -> 즉시 실시간 '부산 날씨'와 온도를 가져와 디폴트로 출력!
-            fetchWeatherData(defaultLat, defaultLon, true);
-        },
-        { timeout: 7000 }
+        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude),
+        (error) => fetchWeatherData(defaultLat, defaultLon), // 위치 권한 거부 시 조용히 부산 데이터 가져옴 (텍스트 표시 없음)
+        { timeout: 5000 }
     );
 }
 
+// ==========================================
+// ⛅ 날씨 오버레이 애니메이션 제어 엔진
+// ==========================================
 function applyManualWeatherEffect(type) {
     let overlay = document.getElementById('weather-overlay-layer');
     if (!overlay && document.body) {
@@ -1083,15 +1071,34 @@ function applyManualWeatherEffect(type) {
 
     if (type === 'rain') {
         overlay.className = 'weather-overlay rain';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "🌧️ 비 내리는 바다";
+        // 수동 모드일 때만 텍스트 적용, 자동(auto) 모드일 때는 위에서 세팅한 기상청 온도를 절대 건드리지 않음
+        if (wElem && window.manualWeatherOverride === 'rain') wElem.innerText = "🌧️ 비 내리는 바다";
     } else if (type === 'snow') {
         overlay.className = 'weather-overlay snow';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "❄️ 눈 내리는 바다";
+        if (wElem && window.manualWeatherOverride === 'snow') wElem.innerText = "❄️ 눈 내리는 바다";
     } else {
         overlay.className = 'weather-overlay';
-        if (wElem && window.manualWeatherOverride !== 'auto') wElem.innerText = "☀️ 평온한 바다";
+        if (wElem && window.manualWeatherOverride === 'clear') wElem.innerText = "☀️ 평온한 바다";
     }
 }
+
+// ==========================================
+// ⚙️ 모달창 설정 적용 함수
+// ==========================================
+window.applyEnvironmentSettings = function() {
+    window.manualTimeOverride = document.getElementById('time-select').value;
+    window.manualWeatherOverride = document.getElementById('weather-select').value;
+    
+    applyTimeBasedThemeEngine(); 
+    
+    let wElem = document.getElementById('weather-widget');
+    if (window.manualWeatherOverride === 'auto' && wElem) { 
+        wElem.innerText = "⏳"; // 깔끔한 이모지 포맷으로 로딩 초기화
+    }
+    
+    syncWeatherAndWidget(); 
+    document.getElementById('env-modal').style.display = 'none';
+};
 // ---------------------------------------------------------
 // ✨ 실시간 자동 테마 변경 로직 (새로고침 불필요)
 // ---------------------------------------------------------
@@ -1103,6 +1110,19 @@ applyTimeBasedThemeEngine();
 setInterval(() => {
     applyTimeBasedThemeEngine();
 }, 60000);
+
+// ==========================================
+// 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
+// ==========================================
+window.highlightSearchKeyword = function(text, keyword) {
+    // 보안을 위해 먼저 HTML 태그를 무력화(이스케이프) 합니다.
+    const escaped = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    if (!keyword) return escaped;
+    
+    // 검색어가 존재하면 야광 CSS를 씌워서 반환
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.25); color: #fff; box-shadow: 0 0 8px rgba(144, 224, 239, 0.6); border-radius: 3px; padding: 0 3px;">${match}</span>`);
+};
 
 // ==========================================
 // ⚙️ 2. 환경 수동 조작 톱니바퀴 모달 엔진
