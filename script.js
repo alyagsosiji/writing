@@ -802,7 +802,8 @@ function renderUI() {
         let readBadgeHtml = ''; if (currentView === 'letters' && item.read === true) { readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; }
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
-        card.innerHTML = `<h3>${escapeHtml(item.title)}${readBadgeHtml}</h3><div class="post-content-area">${escapeHtml(item.content)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        // ✨ escapeHtml 대신 highlightSearchKeyword로 변경! (전역 변수 searchKeyword를 그대로 씁니다)
+        card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${highlightSearchKeyword(item.content, searchKeyword)}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         container.appendChild(card);
     });
 
@@ -821,9 +822,8 @@ function openDetailModal(key) {
 
     if (currentView === 'letters' && isAdmin && !item.read) database.ref('letters/' + key).update({ read: true });
 
-    if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
+    if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = highlightSearchKeyword(item.title, searchKeyword);
     
-    // 🛠️ [작성자가 안 뜨는 문제 수정 완료] 글 모드일 때 작성자 정보가 날짜와 함께 바인딩되도록 교정
     if (document.getElementById('detail-date')) {
         const displayInfo = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         document.getElementById('detail-date').innerText = displayInfo;
