@@ -293,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         applyTimeBasedThemeEngine();
         initDraftAutoSaveEngine();
         injectRandomMemoryButton();
+        injectTimeGearButton();
         fetchWeatherWidget();
         syncWeatherAndWidget(); // 💡 처음에 한 번 날씨 불러오기
         setInterval(syncWeatherAndWidget, 30 * 60000); // 💡 30분마다 날씨 갱신
