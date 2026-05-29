@@ -789,7 +789,7 @@ function renderUI(isAppend = false) {
                     <select onchange="window.setDisplayMode(this.value)" style="height: 38px; width: 100%; max-width: 180px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: rgba(255, 255, 255, 0.04); background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 15px center; background-size: 14px; border: 1px solid rgba(0, 180, 216, 0.25); color: #fff; padding: 0 35px 0 20px; border-radius: 25px; font-size: 0.85rem; font-weight:500; outline: none; cursor: pointer; transition: all 0.25s ease; text-align: center; box-shadow:0 4px 12px rgba(0,0,0,0.35); letter-spacing:0.5px;">
                         <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
                         <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
-                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 무한 스크롤</option>
+                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
                     </select>
                 </div>
             `;
