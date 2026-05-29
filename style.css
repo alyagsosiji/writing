@@ -458,7 +458,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     opacity: 0; transition: opacity 1s;
 }
 
-/* 🌧️ 비 (Rain): 강한 중력과 사선 궤적 */
+/* 🌧️ 비 (Rain): 강한 중력 och 사선 궤적 */
 .weather-overlay.rain { opacity: 1; transform: rotate(15deg) scale(1.1); }
 .weather-overlay.rain::before {
     opacity: 1;
@@ -536,7 +536,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌅 ⛅ 상단 좌우 위젯 공용 통합 디자인 (inline-flex로 높이 단차 100% 일치)
+   🌅 ⛅ 상단 좌우 위젯 공용 통합 디자인 (inline-flex 고정으로 어긋남 완전 치료)
    ========================================== */
 #theme-widget, #weather-widget {
     position: fixed !important;
@@ -545,7 +545,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     
     padding: 0 16px !important;
     height: 35px !important;
-    display: inline-flex !important;
+    display: inline-flex !important; /* 🚨 기존의 무의미한 block 분기 충돌 규칙을 제거하고 flex 정렬로 대칭 잠금 */
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
