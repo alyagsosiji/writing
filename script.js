@@ -1092,7 +1092,18 @@ applyTimeBasedThemeEngine();
 setInterval(() => {
     applyTimeBasedThemeEngine();
 }, 60000);
-
+// ==========================================
+// ⚙️ [복구 완료] 환경 수동 조작 톱니바퀴 버튼 생성 함수
+// ==========================================
+window.injectTimeGearButton = function() {
+    if (document.getElementById('time-gear-btn')) return;
+    const btn = document.createElement('div');
+    btn.id = 'time-gear-btn';
+    btn.innerHTML = '⚙️';
+    btn.title = "환경 설정 (시간/날씨 수동 조작)";
+    btn.onclick = openEnvironmentSettingsModal;
+    document.body.appendChild(btn);
+};
 // ==========================================
 // 🌟 1. 검색어 야광 플랑크톤(하이라이트) 엔진
 // ==========================================
