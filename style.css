@@ -125,7 +125,7 @@ body {
 .library-core-icon { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #90e0ef 0%, #0284c7 100%); display: flex; justify-content: center; align-items: center; flex-shrink: 0; font-size: 1.15rem; }
 
 /* ==========================================
-   🐚 소라게 (랜덤 메모리) 버튼 둥글기 일치화
+   🐚 소라게 (랜덤 메모리) 버튼
    ========================================== */
 #random-memory-btn {
     position: fixed; z-index: 9999; cursor: pointer; 
@@ -184,7 +184,17 @@ header .main-title {
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     text-shadow: 0 4px 15px rgba(0, 180, 216, 0.2), 0 15px 35px rgba(2, 6, 15, 0.95);
 }
-header .subtitle { color: #cbd5e1; font-size: 0.95rem; letter-spacing: 2px; opacity: 0.75; }
+
+/* ✨ [요청 사항 반영] 노을지는 서재 타이틀 장식 효과 부여 */
+header .subtitle { 
+    font-size: 1rem; 
+    letter-spacing: 2px; 
+    font-weight: 500;
+    background: linear-gradient(135deg, #ffb796 0%, #ffffff 50%, #90e0ef 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(255, 183, 150, 0.35);
+}
 
 .auth-box { margin-top: 25px; display: flex; justify-content: center; align-items: center; width: 100%; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; }
@@ -309,7 +319,14 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:f
     color: #cbd5e1; cursor: pointer; white-space: nowrap; flex-shrink: 0; 
 }
 
-.posts-grid-view { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; gap: 20px !important; width: 100% !important; box-sizing: border-box; }
+/* 🔄 [갤러리 모드 원본 규격 완벽 롤백] 이전 요청서 양식대로 조밀한 배치 크기 복구 완료 */
+.posts-grid-view { 
+    display: grid !important; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important; 
+    gap: 20px !important; 
+    width: 100% !important; 
+    box-sizing: border-box; 
+}
 .posts-grid-view .post-card { margin: 0 !important; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
 
 /* ==========================================
@@ -491,7 +508,7 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 .section-subtitle div { display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; margin-top: 14px !important; }
 
 /* ==========================================
-   🌅 ⛅ 상단 위젯 공용 통합 디자인 (원본 스타일 100% 완벽 원복)
+   🌅 ⛅ 상단 위젯 공용 통합 디자인 (원본 스타일 100% 완벽 유지)
    ========================================== */
 #theme-widget {
     position: fixed;
