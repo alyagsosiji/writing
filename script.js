@@ -906,15 +906,26 @@ function openDetailModal(key) {
 
     if (currentView === 'letters' && isAdmin && !item.read) database.ref('letters/' + key).update({ read: true });
 
-    if (document.getElementById('detail-title')) document.getElementById('detail-title').innerHTML = highlightSearchKeyword(item.title, searchKeyword);
+    // 💡 1. 제목: 모든 야광/하이라이트 효과를 완전히 제거하고 원본 텍스트만 깔끔하게 출력
+    if (document.getElementById('detail-title')) {
+        document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
+    }
     
+    // 💡 2. 날짜 정보
     if (document.getElementById('detail-date')) {
         const displayInfo = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         document.getElementById('detail-date').innerText = displayInfo;
     }
     
-    if (document.getElementById('detail-text')) document.getElementById('detail-text').innerHTML = escapeHtml(item.content); 
-    if (document.getElementById('detail-modal')) { document.getElementById('detail-modal').style.display = 'flex'; document.body.classList.add('no-scroll'); }
+    // 💡 3. 본문(내용): 본문 역시 검색어 강조 효과를 완전히 빼고 원본 그대로 출력
+    if (document.getElementById('detail-text')) {
+        document.getElementById('detail-text').innerHTML = escapeHtml(item.content);
+    } 
+
+    if (document.getElementById('detail-modal')) { 
+        document.getElementById('detail-modal').style.display = 'flex'; 
+        document.body.classList.add('no-scroll'); 
+    }
 }
 
 function triggerBottleAnimation(callback) {
