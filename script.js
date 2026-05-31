@@ -1092,7 +1092,7 @@ function syncWeatherAndWidget() {
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
     const defaultLat = 35.1796; const defaultLon = 129.0756;
     function fetchWeatherData(lat, lon) {
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
         .then(res => res.json())
         .then(data => {
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
