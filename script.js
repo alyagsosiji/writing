@@ -115,43 +115,6 @@ window.togglePlayPause = togglePlayPause;
 
 
 
-    let wElem = document.getElementById('weather-widget');
-    if(!wElem) {
-        wElem = document.createElement('div');
-        wElem.id = 'weather-widget';
-        document.body.appendChild(wElem);
-    }
-    wElem.innerText = "⏳ 바다 읽는 중...";
-
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true')
-    .then(res => res.json())
-    .then(data => {
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        localStorage.setItem(cacheTimeKey, String(now));
-        renderWeatherHTML(data);
-    }).catch(e => {
-        if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
-        else wElem.innerText = "☁️ 21°C";
-    });
-}
-
-function renderWeatherHTML(data) {
-    const code = data.current_weather.weathercode;
-    let icon = '☁️';
-    if(code === 0) icon = '☀️';
-    else if(code > 0 && code <= 3) icon = '⛅';
-    else if(code >= 51 && code <= 67) icon = '🌧️';
-    else if(code >= 71 && code <= 77) icon = '❄️';
-    
-    let wElem = document.getElementById('weather-widget');
-    if(!wElem) {
-        wElem = document.createElement('div');
-        wElem.id = 'weather-widget';
-        document.body.appendChild(wElem);
-    }
-    wElem.innerHTML = `${icon} ${data.current_weather.temperature}°C`;
-}
-
 function injectRandomMemoryButton() {
     if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
