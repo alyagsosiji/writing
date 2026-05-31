@@ -1034,18 +1034,14 @@ function applyTimeBasedThemeEngine() {
     }
 }
 
-// 💡 1. 캐시 키를 v3로 변경하고, &timezone=auto를 추가했습니다.
+// 💡 1. 캐시 경쟁 차단: 이제 여기서 몰래 네트워크 통신(fetch)을 시도하지 않습니다.
+// 기존에 저장된 캐시(v4)만 빠르게 읽어서 화면 멈춤만 방지합니다.
 function fetchWeatherWidget() {
-    const cacheKey = 'weather_cache_payload_v3';
-    const cacheTimeKey = 'weather_cache_timestamp_v3';
+    const cacheKey = 'weather_cache_payload_v4';
+    const cacheTimeKey = 'weather_cache_timestamp_v4';
     const now = Date.now();
     const cachedData = localStorage.getItem(cacheKey);
     const cachedTime = localStorage.getItem(cacheTimeKey);
-
-    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
-        renderWeatherHTML(JSON.parse(cachedData));
-        return;
-    }
 
     let wElem = document.getElementById('weather-widget');
     if(!wElem) {
@@ -1053,21 +1049,15 @@ function fetchWeatherWidget() {
         wElem.id = 'weather-widget';
         document.body.appendChild(wElem);
     }
-    wElem.innerText = "⏳ 바다 읽는 중...";
 
-    fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true&timezone=auto')
-    .then(res => res.json())
-    .then(data => {
-        localStorage.setItem(cacheKey, JSON.stringify(data));
-        localStorage.setItem(cacheTimeKey, String(now));
-        renderWeatherHTML(data);
-    }).catch(e => {
-        if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
-        else wElem.innerText = "☁️ 21°C";
-    });
+    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
+        renderWeatherHTML(JSON.parse(cachedData));
+    } else {
+        wElem.innerText = "⏳ 바다 읽는 중...";
+    }
 }
 
-// 💡 (직전 답변에서 누락된 부분 원상복구) + 온도를 Math.round로 정수 처리합니다.
+// 💡 2. 렌더링 함수: 소수점을 예쁜 정수로 반올림 처리합니다.
 function renderWeatherHTML(data) {
     const code = data.current_weather.weathercode;
     let icon = '☁️';
@@ -1085,31 +1075,33 @@ function renderWeatherHTML(data) {
     wElem.innerHTML = `${icon} ${Math.round(data.current_weather.temperature)}°C`;
 }
 
-// 💡 2. 시간대 오차 정정 및 3. 온도 정수 반올림을 적용했습니다.
+// 💡 3. 유일한 메인 통신 함수: 여기서만 정확하게 한 번 위치를 파악하고 통신합니다.
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
     
-    if (wElem && (!wElem.innerText || wElem.innerText.trim() === "")) {
-        wElem.innerText = "⏳ 바다 읽는 중...";
-    }
-    
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
+    
+    // GPS 거부 시 기본값 (부산)
     const defaultLat = 35.1796; const defaultLon = 129.0756;
+    
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
         .then(res => res.json())
         .then(data => {
+            // 💡 통신에 성공한 진짜 날씨 데이터를 캐시(v4)에 덮어씌웁니다.
+            localStorage.setItem('weather_cache_payload_v4', JSON.stringify(data));
+            localStorage.setItem('weather_cache_timestamp_v4', String(Date.now()));
+
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
+            
+            renderWeatherHTML(data); // 💡 화면 반영
+            
             const code = data.current_weather.weathercode; 
-            const temp = Math.round(data.current_weather.temperature);
+            let weatherType = 'clear';
+            if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { weatherType = 'rain'; }
+            else if((code >= 71 && code <= 77) || code === 85 || code === 86) { weatherType = 'snow'; }
             
-            let icon = '☁️'; let weatherType = 'clear';
-            if(code === 0) icon = '☀️'; else if(code > 0 && code <= 3) icon = '⛅';
-            else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
-            else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
-            
-            if (wElem) { wElem.innerText = `${icon} ${temp}°C`; }
             applyManualWeatherEffect(weatherType);
         })
         .catch(err => {
@@ -1117,8 +1109,13 @@ function syncWeatherAndWidget() {
             applyManualWeatherEffect('clear');
         });
     }
+    
     if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
-    navigator.geolocation.getCurrentPosition((position) => fetchWeatherData(position.coords.latitude, position.coords.longitude), (error) => fetchWeatherData(defaultLat, defaultLon), { timeout: 5000 });
+    navigator.geolocation.getCurrentPosition(
+        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude), 
+        (error) => fetchWeatherData(defaultLat, defaultLon), 
+        { timeout: 5000 }
+    );
 }
 
 function applyManualWeatherEffect(type) {
