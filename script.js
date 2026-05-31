@@ -6,7 +6,7 @@ const NOTIFICATION_CONFIG = {
     postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
     letterTitle: "수평선 너머의 서재",
     letterBody: "새로운 편지가 수평선 너머, 바다 위로 띄워졌습니다.",
-    icon: "글_하은.png",                         
+    icon: "글_하은.png",                           
     badge: "글_하은.png",                        
     vibrate: [200, 100, 200]                 
 };
@@ -1034,6 +1034,58 @@ function applyTimeBasedThemeEngine() {
     }
 }
 
+// 💡 1. 캐시 키를 v3로 변경하고, &timezone=auto를 추가했습니다.
+function fetchWeatherWidget() {
+    const cacheKey = 'weather_cache_payload_v3';
+    const cacheTimeKey = 'weather_cache_timestamp_v3';
+    const now = Date.now();
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+
+    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
+        renderWeatherHTML(JSON.parse(cachedData));
+        return;
+    }
+
+    let wElem = document.getElementById('weather-widget');
+    if(!wElem) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+    wElem.innerText = "⏳ 바다 읽는 중...";
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=35.1796&longitude=129.0756&current_weather=true&timezone=auto')
+    .then(res => res.json())
+    .then(data => {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(cacheTimeKey, String(now));
+        renderWeatherHTML(data);
+    }).catch(e => {
+        if (cachedData) renderWeatherHTML(JSON.parse(cachedData));
+        else wElem.innerText = "☁️ 21°C";
+    });
+}
+
+// 💡 (직전 답변에서 누락된 부분 원상복구) + 온도를 Math.round로 정수 처리합니다.
+function renderWeatherHTML(data) {
+    const code = data.current_weather.weathercode;
+    let icon = '☁️';
+    if(code === 0) icon = '☀️';
+    else if(code > 0 && code <= 3) icon = '⛅';
+    else if(code >= 51 && code <= 67) icon = '🌧️';
+    else if(code >= 71 && code <= 77) icon = '❄️';
+    
+    let wElem = document.getElementById('weather-widget');
+    if(!wElem) {
+        wElem = document.createElement('div');
+        wElem.id = 'weather-widget';
+        document.body.appendChild(wElem);
+    }
+    wElem.innerHTML = `${icon} ${Math.round(data.current_weather.temperature)}°C`;
+}
+
+// 💡 2. 시간대 오차 정정 및 3. 온도 정수 반올림을 적용했습니다.
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
@@ -1049,11 +1101,14 @@ function syncWeatherAndWidget() {
         .then(res => res.json())
         .then(data => {
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
-            const code = data.current_weather.weathercode; const temp = data.current_weather.temperature;
+            const code = data.current_weather.weathercode; 
+            const temp = Math.round(data.current_weather.temperature);
+            
             let icon = '☁️'; let weatherType = 'clear';
             if(code === 0) icon = '☀️'; else if(code > 0 && code <= 3) icon = '⛅';
             else if((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) { icon = '🌧️'; weatherType = 'rain'; }
             else if((code >= 71 && code <= 77) || code === 85 || code === 86) { icon = '❄️'; weatherType = 'snow'; }
+            
             if (wElem) { wElem.innerText = `${icon} ${temp}°C`; }
             applyManualWeatherEffect(weatherType);
         })
