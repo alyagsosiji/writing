@@ -113,17 +113,7 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-function fetchWeatherWidget() {
-    const cacheKey = 'weather_cache_payload';
-    const cacheTimeKey = 'weather_cache_timestamp';
-    const now = Date.now();
-    const cachedData = localStorage.getItem(cacheKey);
-    const cachedTime = localStorage.getItem(cacheTimeKey);
 
-    if (cachedData && cachedTime && (now - parseInt(cachedTime) < 15 * 60 * 1000)) {
-        renderWeatherHTML(JSON.parse(cachedData));
-        return;
-    }
 
     let wElem = document.getElementById('weather-widget');
     if(!wElem) {
