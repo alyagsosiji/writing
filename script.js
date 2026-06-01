@@ -472,8 +472,8 @@ function login() {
             showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${inputId}님.`);
         })
         .catch((error) => {
-            // 구글 서버가 보내는 상세한 영문 에러 원인을 팝업으로 띄웁니다!
-            showSystemAlert('에러 상세: ' + error.message);
+            console.error("인증 에러:", error);
+            showSystemAlert('서재의 열쇠가 맞지 않습니다.');
         });
 }
 window.login = login;
