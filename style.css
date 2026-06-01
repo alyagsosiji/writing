@@ -506,38 +506,40 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌧️ [비 효과 완전판] 픽셀 진동(Crawling) 제어 및 모션 블러 최적화
+   🌧️ [비 효과 최종 보정] 필터 제거(렉 박멸) 및 대형 무작위 패턴(이질감 제거)
    ========================================== */
 .weather-overlay.rain { opacity: 1; }
 
 .weather-overlay.rain::before {
     opacity: 1;
-    /* 촘촘한 배경 비 (패턴 규격: 가로 200px * 세로 400px) */
-    top: -400px; left: 0; width: calc(100% + 200px); height: calc(100% + 400px);
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="150" y1="20" x2="130" y2="60" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/><line x1="50" y1="150" x2="30" y2="190" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/><line x1="180" y1="280" x2="160" y2="320" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/></svg>');
+    /* 💡 기계적인 반복을 숨기기 위해 가로세로 크기를 2배(400px * 800px)로 대폭 확장 */
+    top: -800px; left: 0; width: calc(100% + 400px); height: calc(100% + 800px);
+    /* 💡 선의 두께와 투명도 자체를 조절하여, blur 필터 없이도 부드럽고 투명한 원경 비 묘사 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="800"><line x1="320" y1="50" x2="295" y2="100" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/><line x1="120" y1="280" x2="95" y2="330" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/><line x1="260" y1="480" x2="235" y2="530" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/><line x1="70" y1="680" x2="45" y2="730" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/></svg>');
     
-    /* 💡 [핵심] 원경 비에 미세한 모션 블러를 주어 대각선 이동 시 픽셀이 지지직거리는 떨림 현상을 원천 차단 */
-    filter: blur(0.5px); 
+    /* 🚨 렉 유발의 주범이었던 물리 필터 완전 삭제 -> 100% 순수 하드웨어 가속 복구 */
+    filter: none !important;
     
-    /* 낙하 속도를 아주 살짝 서정적으로 늦춰 기계적인 서행 느낌을 제거 */
-    animation: rain-diagonal-back 1.9s linear infinite;
+    /* 원경 비의 속도를 서정적이고 잔잔하게 조율 */
+    animation: rain-diagonal-back-opt 2.2s linear infinite;
 }
 
 .weather-overlay.rain::after {
     opacity: 1;
-    /* 굵은 전경 장대비 (패턴 규격: 가로 300px * 세로 600px) */
+    /* 전경 비 (패턴 규격: 가로 300px * 세로 600px) */
     top: -600px; left: 0; width: calc(100% + 300px); height: calc(100% + 600px);
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="250" y1="30" x2="220" y2="90" stroke="rgba(144,224,239,0.24)" stroke-width="1.5" stroke-linecap="round"/><line x1="90" y1="250" x2="60" y2="310" stroke="rgba(144,224,239,0.28)" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="450" x2="170" y2="510" stroke="rgba(144,224,239,0.22)" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    /* 빗줄기 위치를 겹치지 않게 완전히 무작위로 재배치 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="220" y1="40" x2="190" y2="100" stroke="rgba(144,224,239,0.22)" stroke-width="1.2" stroke-linecap="round"/><line x1="60" y1="260" x2="30" y2="320" stroke="rgba(144,224,239,0.26)" stroke-width="1.5" stroke-linecap="round"/><line x1="180" y1="450" x2="150" y2="510" stroke="rgba(144,224,239,0.20)" stroke-width="1.2" stroke-linecap="round"/></svg>');
     
-    /* 💡 [핵심] 근경 비 역시 날카로운 테두리를 부드럽게 감싸 필름 효과를 연출하고 잔상을 스무스하게 연결 */
-    filter: blur(0.3px); 
+    filter: none !important;
     
-    animation: rain-diagonal-front 1.25s linear infinite;
+    /* 앞쪽 비와 뒤쪽 비의 속도 차이(시차)를 2배 이상 벌려, 정적인 종이가 내려오는 느낌을 지우고 입체감 부여 */
+    animation: rain-diagonal-front-opt 1.1s linear infinite;
 }
 
-/* 💡 대각선 픽셀 정수배 동기화 트랜스폼 */
-@keyframes rain-diagonal-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200px, 400px, 0); } }
-@keyframes rain-diagonal-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-300px, 600px, 0); } }
+/* 💡 확장된 대형 패턴 크기 단위에 맞춰 픽셀 오차 없이 정확히 순환 트랜스폼 */
+@keyframes rain-diagonal-back-opt  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-400px, 800px, 0); } }
+@keyframes rain-diagonal-front-opt { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-300px, 600px, 0); } }
 
 
 /* ❄️ [눈 효과] 기존의 자연스러운 상태 유지 및 여백 보정 동기화 */
