@@ -506,33 +506,36 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌧️ [비 효과 최종 최적화] 빗줄기 축소 및 각도 일치(↙)로 렉·끊김 박멸
+   🌧️ [비 효과 완전판] 픽셀 진동(Crawling) 제어 및 모션 블러 최적화
    ========================================== */
 .weather-overlay.rain { opacity: 1; }
 
 .weather-overlay.rain::before {
     opacity: 1;
     /* 촘촘한 배경 비 (패턴 규격: 가로 200px * 세로 400px) */
-    /* 💡 왼쪽 아래(↙)로 이동하므로 상단(-400px)과 우측에 여유 공간을 주어 테두리 빔 현상 방지 */
     top: -400px; left: 0; width: calc(100% + 200px); height: calc(100% + 400px);
-    /* 💡 빗줄기 길이를 40px로 콤팩트하게 줄이고 기울기를 정확히 -2(가로20, 세로40)로 고정 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="150" y1="20" x2="130" y2="60" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/><line x1="50" y1="150" x2="30" y2="190" stroke="rgba(144,224,239,0.2)" stroke-width="1" stroke-linecap="round"/><line x1="180" y1="280" x2="160" y2="320" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/></svg>');
-    /* 루프 속도를 부드럽게 조절하여 프레임 드랍(렉) 방지 */
-    animation: rain-diagonal-back 1.5s linear infinite;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="150" y1="20" x2="130" y2="60" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/><line x1="50" y1="150" x2="30" y2="190" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/><line x1="180" y1="280" x2="160" y2="320" stroke="rgba(144,224,239,0.13)" stroke-width="1" stroke-linecap="round"/></svg>');
+    
+    /* 💡 [핵심] 원경 비에 미세한 모션 블러를 주어 대각선 이동 시 픽셀이 지지직거리는 떨림 현상을 원천 차단 */
+    filter: blur(0.5px); 
+    
+    /* 낙하 속도를 아주 살짝 서정적으로 늦춰 기계적인 서행 느낌을 제거 */
+    animation: rain-diagonal-back 1.9s linear infinite;
 }
 
 .weather-overlay.rain::after {
     opacity: 1;
     /* 굵은 전경 장대비 (패턴 규격: 가로 300px * 세로 600px) */
     top: -600px; left: 0; width: calc(100% + 300px); height: calc(100% + 600px);
-    /* 💡 전경 비도 길이를 60px로 자연스럽게 다듬고 기울기를 정확히 -2(가로30, 세로60)로 일치 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="250" y1="30" x2="220" y2="90" stroke="rgba(144,224,239,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="90" y1="250" x2="60" y2="310" stroke="rgba(144,224,239,0.32)" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="450" x2="170" y2="510" stroke="rgba(144,224,239,0.25)" stroke-width="1.5" stroke-linecap="round"/></svg>');
-    animation: rain-diagonal-front 0.95s linear infinite;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="250" y1="30" x2="220" y2="90" stroke="rgba(144,224,239,0.24)" stroke-width="1.5" stroke-linecap="round"/><line x1="90" y1="250" x2="60" y2="310" stroke="rgba(144,224,239,0.28)" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="450" x2="170" y2="510" stroke="rgba(144,224,239,0.22)" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    
+    /* 💡 [핵심] 근경 비 역시 날카로운 테두리를 부드럽게 감싸 필름 효과를 연출하고 잔상을 스무스하게 연결 */
+    filter: blur(0.3px); 
+    
+    animation: rain-diagonal-front 1.25s linear infinite;
 }
 
-/* 💡 [수학적 정렬 알고리즘] 
-     패턴 크기(가로 200/300, 세로 400/600)와 이동 거리를 완벽하게 일치시켜
-     루프가 리셋되는 경계선에서 단 1픽셀의 오차도 없이 스무스하게 이어집니다. (뚝뚝 끊김 영구 소멸) */
+/* 💡 대각선 픽셀 정수배 동기화 트랜스폼 */
 @keyframes rain-diagonal-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200px, 400px, 0); } }
 @keyframes rain-diagonal-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-300px, 600px, 0); } }
 
