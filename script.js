@@ -458,7 +458,7 @@ function login() {
     // UI에서 한글 이름 입력 시 뒤에서 이메일로 매핑
     let targetEmail = "";
     if (inputId === "아시") targetEmail = "haeunchan0114@naver.com";
-    else if (inputId === "하은") targetEmail = "alyagsosjo@gmail.com";
+    else if (inputId === "하은") targetEmail = "alyagsosiji@gmail.com";
     else {
         showSystemAlert('올바른 접근이 아닙니다.');
         return;
@@ -471,10 +471,6 @@ function login() {
             idElem.value = ''; pwElem.value = '';
             showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${inputId}님.`);
         })
-        .catch((error) => {
-            // 🚨 이 부분을 잠시 수정합니다! 어떤 에러인지 화면에 직접 띄웁니다.
-            showSystemAlert('에러 원인: ' + error.code);
-        });
         .catch((error) => {
             console.error("인증 에러:", error);
             showSystemAlert('서재의 열쇠가 맞지 않습니다.');
