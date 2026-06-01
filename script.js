@@ -424,26 +424,67 @@ function toggleRestMode() {
 }
 window.toggleRestMode = toggleRestMode;
 
+// 💡 [추가] Firebase 인증 상태 실시간 감지 리스너 (기존 DOMContentLoaded 밖이나 안에 배치)
+firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+        isAdmin = true;
+        // 이메일로 접속자 식별 후 기존 변수(loggedInUser) 동기화
+        if (user.email === 'ashi@myocean.com') loggedInUser = '아시';
+        else if (user.email === 'haeun@myocean.com') loggedInUser = '하은';
+        
+        localStorage.setItem('isAdminLoggedIn', 'true'); 
+        localStorage.setItem('loggedInUser', loggedInUser);
+        
+        requestNotificationPermission();
+        updateUI(); // 기존의 화려한 CSS 트리거 및 권한 뷰 전환 기능 정상 작동
+    } else {
+        isAdmin = false;
+        loggedInUser = '';
+        localStorage.removeItem('isAdminLoggedIn'); 
+        localStorage.removeItem('loggedInUser');
+        updateUI();
+    }
+});
+
+// 💡 [수정] 로그인 함수 완전 교체
 function login() {
-    const idElem = document.getElementById('admin-id'); const pwElem = document.getElementById('admin-pw');
+    const idElem = document.getElementById('admin-id'); 
+    const pwElem = document.getElementById('admin-pw');
     if (!idElem || !pwElem) return;
-    const inputId = idElem.value.trim(); const inputPw = pwElem.value;
-    const haeunId = decodeData("7ZWY7J2A"); 
+    
+    const inputId = idElem.value.trim(); 
+    const inputPw = pwElem.value;
+    
+    // UI에서 한글 이름 입력 시 뒤에서 이메일로 매핑
+    let targetEmail = "";
+    if (inputId === "아시") targetEmail = "ashi@myocean.com";
+    else if (inputId === "하은") targetEmail = "haeun@myocean.com";
+    else {
+        showSystemAlert('올바른 접근이 아닙니다.');
+        return;
+    }
 
-    let tempUser = null;
-    if (inputId === secureAdmin.id && inputPw === secureAdmin.pw) { tempUser = decodeData("7JWE7Iuc"); }
-    else if (inputId === haeunId && inputPw === atob("aGFldW4jMjYwNDE2")) { tempUser = decodeData("7ZWY7J2A"); }
-
-    if (tempUser) {
-        isAdmin = true; loggedInUser = tempUser; 
-        localStorage.setItem('isAdminLoggedIn', 'true'); localStorage.setItem('loggedInUser', loggedInUser);
-        closeModal(); idElem.value = ''; pwElem.value = ''; requestNotificationPermission();
-        showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`, function() { updateUI(); });
-    } else showSystemAlert('올바른 접근이 아닙니다.');
+    // Firebase Auth 백엔드 로그인 요청
+    firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
+        .then(() => {
+            closeModal(); 
+            idElem.value = ''; pwElem.value = '';
+            showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${inputId}님.`);
+        })
+        .catch((error) => {
+            console.error("인증 에러:", error);
+            showSystemAlert('서재의 열쇠가 맞지 않습니다.');
+        });
 }
 window.login = login;
 
-function logout() { isAdmin = false; loggedInUser = ''; localStorage.removeItem('isAdminLoggedIn'); localStorage.removeItem('loggedInUser'); cancelEdit(); showSystemAlert('로그아웃 되었습니다.', function() { updateUI(); }); }
+// 💡 [수정] 로그아웃 함수 완전 교체
+function logout() { 
+    firebase.auth().signOut().then(() => {
+        cancelEdit(); 
+        showSystemAlert('로그아웃 되었습니다.'); 
+    });
+}
 window.logout = logout;
 
 function updateUI() {
