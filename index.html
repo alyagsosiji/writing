@@ -287,7 +287,15 @@
             <button id="update-dismiss-btn" class="cancel-btn">나중에</button>
         </div>
     </div>
-
+    <script>
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("스크립트 고장 원인: " + message + "\n에러 발생 줄 번호: " + lineno + "번째 줄");
+        };
+    </script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
     <script src="script.js"></script>
 </body>
 </html>
