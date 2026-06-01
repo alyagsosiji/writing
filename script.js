@@ -1102,12 +1102,21 @@ function applyTimeBasedThemeEngine() {
     else if (mode === 'day') { bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)"; themeText = "☀️ 낮의 바다"; }
     else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
     else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
+    
     if (document.body) {
-        document.body.style.transition = "background 3s ease-in-out"; document.body.style.background = bgStyle;
+        document.body.style.transition = "background 3s ease-in-out"; 
+        document.body.style.background = bgStyle;
+        
+        // 💡 [핵심 보완] 스크롤을 아무리 길게 내려도 그라데이션이 끊기거나 검은 직각 네모가 생기지 않도록 고정
+        document.body.style.backgroundAttachment = "fixed";
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundRepeat = "no-repeat";
+        
         let tElem = document.getElementById('theme-widget'); if (!tElem) { tElem = document.createElement('div'); tElem.id = 'theme-widget'; document.body.appendChild(tElem); }
         tElem.innerText = themeText;
     }
 }
+
 
 // 💡 1. 캐시 경쟁 차단: 이제 여기서 몰래 네트워크 통신(fetch)을 시도하지 않습니다.
 // 기존에 저장된 캐시(v4)만 빠르게 읽어서 화면 멈춤만 방지합니다.
