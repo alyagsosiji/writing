@@ -475,10 +475,6 @@ function login() {
             // 🚨 이 부분을 잠시 수정합니다! 어떤 에러인지 화면에 직접 띄웁니다.
             showSystemAlert('에러 원인: ' + error.code);
         });
-        .catch((error) => {
-            console.error("인증 에러:", error);
-            showSystemAlert('서재의 열쇠가 맞지 않습니다.');
-        });
 }
 window.login = login;
 
