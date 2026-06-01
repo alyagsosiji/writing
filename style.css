@@ -46,13 +46,7 @@ button:active, input:active, textarea:active, select:active, a:active { outline:
 :focus-visible { outline: none !important; }
 
 html { height: 100%; overflow: hidden; }
-html, body {
-    min-height: 100% !important;
-    height: auto !important;
-    background-attachment: fixed !important;
-    /* 모바일 바운스 시 흰색/검은색 직각 네모가 튀는 현상 원천 차단 */
-    overflow-x: hidden;
-}
+html, body { height: 100%; background-color: #02050d; }
 
 body {
     color: #f1f5f9; overflow-x: hidden; position: relative;
