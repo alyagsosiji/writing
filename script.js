@@ -429,8 +429,8 @@ firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         isAdmin = true;
         // 이메일로 접속자 식별 후 기존 변수(loggedInUser) 동기화
-        if (user.email === 'ashi@myocean.com') loggedInUser = '아시';
-        else if (user.email === 'haeun@myocean.com') loggedInUser = '하은';
+        if (user.email === 'alyagsosiji@gmail.com') loggedInUser = '아시';
+        else if (user.email === 'haeunchan0114@naver.com') loggedInUser = '하은';
         
         localStorage.setItem('isAdminLoggedIn', 'true'); 
         localStorage.setItem('loggedInUser', loggedInUser);
@@ -457,8 +457,8 @@ function login() {
     
     // UI에서 한글 이름 입력 시 뒤에서 이메일로 매핑
     let targetEmail = "";
-    if (inputId === "아시") targetEmail = "ashi@myocean.com";
-    else if (inputId === "하은") targetEmail = "haeun@myocean.com";
+    if (inputId === "아시") targetEmail = "haeunchan0114@naver.com";
+    else if (inputId === "하은") targetEmail = "alyagsosjo@gmail.com";
     else {
         showSystemAlert('올바른 접근이 아닙니다.');
         return;
