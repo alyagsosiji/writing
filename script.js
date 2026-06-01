@@ -1226,9 +1226,15 @@ window.openEnvironmentSettingsModal = function() {
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2, 6, 15, 0.85); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);';
         modal.innerHTML = `
             <div class="modal-content" style="width: 90%; max-width:360px; padding:35px; background:linear-gradient(145deg, #0a1b36, #040d1c); border:1px solid rgba(0, 180, 216, 0.3); border-radius:18px; box-shadow:0 20px 50px rgba(0,0,0,0.7); text-align:center;">
+                
                 <h3 style="margin-bottom:25px; font-size:1.3rem; color:#fff; display:flex; align-items:center; justify-content:center;">
-                    <span style="background:transparent !important; -webkit-background-clip:padding-box !important; -webkit-text-fill-color:#e2e8f0 !important; color:#e2e8f0 !important; text-shadow:none !important; display:inline-block; font-family:'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important; margin-right:8px; font-weight:normal !important;">⚙️</span><span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
+                    <span style="background:transparent !important; -webkit-background-clip:padding-box !important; -webkit-text-fill-color:#e2e8f0 !important; color:#e2e8f0 !important; text-shadow:none !important; display:inline-block; font-family:'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important; margin-right:8px; font-weight:normal !important;">⚙️</span>
+                    
+                    <span style="background:linear-gradient(135deg, #a9efff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight: bold;">서재 환경 조작</span>
+                    
+                    <span style="background:transparent !important; -webkit-background-clip:padding-box !important; -webkit-text-fill-color:#e2e8f0 !important; color:#e2e8f0 !important; text-shadow:none !important; display:inline-block; font-family:'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif !important; margin-left:8px; font-weight:normal !important; opacity:0; pointer-events:none;">⚙️</span>
                 </h3>
+                
                 <div class="env-panel-area">
                     <label class="env-label" style="color: #90e0ef;">🌅 시간대 배경</label>
                     <select id="time-select" class="env-select-box">
