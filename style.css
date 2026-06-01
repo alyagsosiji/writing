@@ -505,33 +505,35 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     opacity: 0; transition: opacity 1s;
 }
 
-/* 🌧️ [비 효과] 착시 현상을 깨부수고 빗줄기 각도대로 자연스럽게 낙하 */
+/* ==========================================
+   🌧️ [비 효과 최종본] 방향 완전 전환(↙) 및 60fps 무한 순환 연산
+   ========================================== */
 .weather-overlay.rain { opacity: 1; }
 
 .weather-overlay.rain::before {
     opacity: 1;
-    /* 촘촘한 배경 비 (패턴 규격: 200px * 500px) */
-    /* 💡 이동하는 거리만큼 상단(-500px)과 좌측(-200px)에 완벽한 사전 여유 공간 확보 (여백 빔 현상 해결) */
-    top: -500px; left: -200px; width: calc(100% + 200px); height: calc(100% + 500px);
-    /* 💡 사선 각도(Slope = 2.5)에 정확히 맞춘 빗줄기 디자인 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="500"><line x1="20" y1="20" x2="60" y2="120" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/><line x1="100" y1="150" x2="140" y2="250" stroke="rgba(144,224,239,0.18)" stroke-width="1" stroke-linecap="round"/><line x1="50" y1="300" x2="90" y2="400" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/></svg>');
-    /* 현실적인 속도로 밸런싱하여 연산 피로도 최소화 */
-    animation: rain-diagonal-back 1.2s linear infinite;
+    /* 촘촘한 배경 비 (패턴 규격: 가로 200px * 세로 400px) */
+    /* 💡 왼쪽 아래로 이동하므로 우측(+200px)과 상단(-400px)에 정밀 여백 배치하여 화면 빔 현상 해결 */
+    top: -400px; right: -200px; left: auto; width: calc(100% + 200px); height: calc(100% + 400px);
+    /* 💡 빗줄기 선(Line) 자체를 오른쪽 위에서 왼쪽 아래 방향(/)으로 완벽하게 새로 정렬 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="180" y1="10" x2="20" y2="390" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/><line x1="90" y1="50" x2="10" y2="210" stroke="rgba(144,224,239,0.18)" stroke-width="1" stroke-linecap="round"/><line x1="190" y1="200" x2="110" y2="360" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/></svg>');
+    /* 연산량을 줄여 저사양 폰/PC 렉 제거 */
+    animation: rain-diagonal-back 1.3s linear infinite;
 }
 
 .weather-overlay.rain::after {
     opacity: 1;
-    /* 굵고 시원한 전경 비 (패턴 규격: 300px * 600px) */
-    top: -600px; left: -300px; width: calc(100% + 300px); height: calc(100% + 600px);
-    /* 💡 사선 각도(Slope = 2.0)에 정확히 맞춘 전경 장대비 디자인 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="40" y1="30" x2="115" y2="180" stroke="rgba(144,224,239,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="150" y1="250" x2="225" y2="400" stroke="rgba(144,224,239,0.32)" stroke-width="2" stroke-linecap="round"/><line x1="80" y1="420" x2="155" y2="570" stroke="rgba(144,224,239,0.25)" stroke-width="1.5" stroke-linecap="round"/></svg>');
-    animation: rain-diagonal-front 0.8s linear infinite;
+    /* 굵고 시원한 전경 장대비 (패턴 규격: 가로 300px * 세로 600px) */
+    top: -600px; right: -300px; left: auto; width: calc(100% + 300px); height: calc(100% + 600px);
+    /* 💡 시각적 속도감을 극대화하기 위해 전경 장대비도 결을 맞춰(/) 재디자인 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="260" y1="20" x2="20" y2="500" stroke="rgba(144,224,239,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="150" y1="100" x2="30" y2="340" stroke="rgba(144,224,239,0.32)" stroke-width="2" stroke-linecap="round"/></svg>');
+    animation: rain-diagonal-front 0.85s linear infinite;
 }
 
-/* 💡 [핵심 알고리즘] 패턴의 크기(너비/높이)만큼 X축과 Y축을 동시에 밀어내어 
-     빗줄기 선을 따라 비가 '진짜 아래로 미끄러지듯' 떨어지게 만듭니다. 루프 리셋 시 툭툭 끊김 100% 소멸 */
-@keyframes rain-diagonal-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(200px, 500px, 0); } }
-@keyframes rain-diagonal-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(300px, 600px, 0); } }
+/* 💡 [핵심 알고리즘] 타일 너비(200px/300px)와 높이(400px/600px)만큼만 정확하게 왼쪽 아래(X축 -, Y축 +)로 견인합니다.
+     이로 인해 이발소 간판 착시 현상이 완전히 깨지며, 비가 궤적을 타고 진짜 아래로 '스르륵' 자연스럽게 미끄러집니다. */
+@keyframes rain-diagonal-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200px, 400px, 0); } }
+@keyframes rain-diagonal-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-300px, 600px, 0); } }
 
 
 /* ❄️ [눈 효과] 기존의 자연스러운 상태 유지 및 여백 보정 동기화 */
