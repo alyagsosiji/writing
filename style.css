@@ -499,50 +499,53 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     opacity: 0; transition: opacity 2s ease-in-out;
 }
 .weather-overlay::before, .weather-overlay::after {
-    content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    content: ""; position: absolute; left: 0; right: 0;
     pointer-events: none; background-repeat: repeat;
-    /* 💡 브라우저에게 하드웨어 가속 레이어를 상시 대기하도록 명령 */
-    will-change: transform; 
+    will-change: transform; /* 브라우저 하드웨어 가속 강제 활성화 */
     opacity: 0; transition: opacity 1s;
 }
 
-/* 🌧️ [비 효과] 레이어를 돌리지 않고 SVG 내부 선에 각도를 주어 60fps 보장 */
+/* 🌧️ [비 효과] 텍스처 자체에 각도를 주어 렉 없이 빗줄기가 사선으로 무한 낙하 */
 .weather-overlay.rain { opacity: 1; }
 .weather-overlay.rain::before {
     opacity: 1;
-    /* 촘촘하고 먼 비 (배경 레이어) - 높이 400px */
+    /* 촘촘하고 은은한 배경 비 (패턴 높이: 400px) */
+    top: -400px; height: calc(100% + 400px); /* 💡 위쪽 여유 공간 확보로 상단 빔 현상 해결 */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="20" y1="0" x2="35" y2="40" stroke="rgba(144,224,239,0.18)" stroke-width="1" stroke-linecap="round"/><line x1="100" y1="150" x2="115" y2="190" stroke="rgba(144,224,239,0.22)" stroke-width="1" stroke-linecap="round"/><line x1="160" y1="280" x2="175" y2="320" stroke="rgba(144,224,239,0.18)" stroke-width="1" stroke-linecap="round"/></svg>');
-    animation: rain-fall-back 0.8s linear infinite;
+    animation: rain-fall-back 0.9s linear infinite;
 }
 .weather-overlay.rain::after {
     opacity: 1;
-    /* 굵고 가까운 비 (전경 레이어) - 높이 600px */
+    /* 굵고 역동적인 전경 비 (패턴 높이: 600px) */
+    top: -600px; height: calc(100% + 600px); /* 💡 위쪽 여유 공간 확보 */
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="50" y1="0" x2="70" y2="60" stroke="rgba(144,224,239,0.35)" stroke-width="1.5" stroke-linecap="round"/><line x1="180" y1="200" x2="200" y2="260" stroke="rgba(144,224,239,0.4)" stroke-width="2" stroke-linecap="round"/><line x1="250" y1="400" x2="270" y2="460" stroke="rgba(144,224,239,0.3)" stroke-width="1.5" stroke-linecap="round"/></svg>');
-    animation: rain-fall-front 0.55s linear infinite;
+    animation: rain-fall-front 0.65s linear infinite;
 }
 
-/* 💡 정확히 이미지 높이만큼만 수직 이동하여 '뚝뚝' 끊기는 리셋 현상 제거 */
+/* 💡 패턴 높이(400px, 600px)와 Y축 이동 거리를 완벽히 일치시켜 리셋 시 끊김 현상 타파 */
 @keyframes rain-fall-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, 400px, 0); } }
 @keyframes rain-fall-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, 600px, 0); } }
 
-/* ❄️ [눈 효과] 다단계 키프레임을 제거하고 직선 선율로 변경하여 부드럽게 낙하 */
+/* ❄️ [눈 효과] 불규칙한 흔들림 연산을 빼고, 수직 보정 낙하로 뚝뚝 끊기는 잔상 완전 제거 */
 .weather-overlay.snow { opacity: 1; }
 .weather-overlay.snow::before {
     opacity: 1;
-    /* 작은 눈 (배경 레이어) - 높이 300px */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300"><circle cx="40" cy="40" r="1.2" fill="rgba(255,255,255,0.35)"/><circle cx="150" cy="120" r="1.8" fill="rgba(255,255,255,0.25)"/><circle cx="90" cy="220" r="1.5" fill="rgba(255,255,255,0.35)"/></svg>');
-    animation: snow-fall-back 14s linear infinite;
+    /* 은은하게 내리는 작은 눈 (패턴 높이: 300px) */
+    top: -300px; height: calc(100% + 300px);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300"><circle cx="40" cy="40" r="1.2" fill="rgba(255,255,255,0.4)"/><circle cx="150" cy="120" r="1.8" fill="rgba(255,255,255,0.3)"/><circle cx="90" cy="220" r="1.5" fill="rgba(255,255,255,0.4)"/></svg>');
+    animation: snow-fall-back 16s linear infinite;
 }
 .weather-overlay.snow::after {
     opacity: 1;
-    /* 큰 눈 (전경 레이어) - 높이 400px */
+    /* 눈송이가 선명한 전경 눈 (패턴 높이: 400px) */
+    top: -400px; height: calc(100% + 400px);
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><circle cx="80" cy="60" r="2.5" fill="rgba(255,255,255,0.65)"/><circle cx="280" cy="160" r="3.5" fill="rgba(255,255,255,0.45)"/><circle cx="180" cy="300" r="2" fill="rgba(255,255,255,0.55)"/><circle cx="340" cy="360" r="3" fill="rgba(255,255,255,0.6)"/></svg>');
-    animation: snow-fall-front 8.5s linear infinite;
+    animation: snow-fall-front 9.5s linear infinite;
 }
 
-/* 💡 완벽하게 정렬된 대각선 선율 연산으로 끊김 없는 낙조 연출 */
-@keyframes snow-fall-back  { 0% { transform: translate3d(-30px, 0, 0); } 100% { transform: translate3d(30px, 300px, 0); } }
-@keyframes snow-fall-front { 0% { transform: translate3d(-40px, 0, 0); } 100% { transform: translate3d(40px, 400px, 0); } }
+/* 💡 X축 스냅 글리치 현상을 소멸시키고 y축 정수배 스크롤로 유기적 흐름 연출 */
+@keyframes snow-fall-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, 300px, 0); } }
+@keyframes snow-fall-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(0, 400px, 0); } }
 
 .section-subtitle {
     display: block !important;
