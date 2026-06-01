@@ -472,8 +472,8 @@ function login() {
             showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${inputId}님.`);
         })
         .catch((error) => {
-            // 🚨 이 부분을 잠시 수정합니다! 어떤 에러인지 화면에 직접 띄웁니다.
-            showSystemAlert('에러 원인: ' + error.code);
+            // 구글 서버가 보내는 상세한 영문 에러 원인을 팝업으로 띄웁니다!
+            showSystemAlert('에러 상세: ' + error.message);
         });
 }
 window.login = login;
