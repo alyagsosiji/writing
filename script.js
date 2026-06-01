@@ -457,8 +457,8 @@ function login() {
     
     // UI에서 한글 이름 입력 시 뒤에서 이메일로 매핑
     let targetEmail = "";
-    if (inputId === "아시") targetEmail = "haeunchan0114@naver.com";
-    else if (inputId === "하은") targetEmail = "alyagsosiji@gmail.com";
+    if (inputId === "아시") targetEmail = "alyagsosiji@gmail.com";
+    else if (inputId === "하은") targetEmail = "haeunchan0114@naver.com";
     else {
         showSystemAlert('올바른 접근이 아닙니다.');
         return;
