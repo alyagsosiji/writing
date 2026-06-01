@@ -206,11 +206,8 @@ function hideLoadingScreen() {
 if (document.readyState === 'complete' || document.readyState === 'interactive') { hideLoadingScreen(); } 
 else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
-let isRestMode = false; 
-let currentDisplayMode = 'list'; // 💡 3가지 모드 제어: 'list', 'grid', 'infinite'
-let backupTriggerQueued = false; 
 
-// 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
+
 // 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
 window.setDisplayMode = function(mode) {
     currentDisplayMode = mode;
