@@ -506,32 +506,33 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌧️ [비 효과 최종본] 방향 완전 전환(↙) 및 60fps 무한 순환 연산
+   🌧️ [비 효과 최종 최적화] 빗줄기 축소 및 각도 일치(↙)로 렉·끊김 박멸
    ========================================== */
 .weather-overlay.rain { opacity: 1; }
 
 .weather-overlay.rain::before {
     opacity: 1;
     /* 촘촘한 배경 비 (패턴 규격: 가로 200px * 세로 400px) */
-    /* 💡 왼쪽 아래로 이동하므로 우측(+200px)과 상단(-400px)에 정밀 여백 배치하여 화면 빔 현상 해결 */
-    top: -400px; right: -200px; left: auto; width: calc(100% + 200px); height: calc(100% + 400px);
-    /* 💡 빗줄기 선(Line) 자체를 오른쪽 위에서 왼쪽 아래 방향(/)으로 완벽하게 새로 정렬 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="180" y1="10" x2="20" y2="390" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/><line x1="90" y1="50" x2="10" y2="210" stroke="rgba(144,224,239,0.18)" stroke-width="1" stroke-linecap="round"/><line x1="190" y1="200" x2="110" y2="360" stroke="rgba(144,224,239,0.15)" stroke-width="1" stroke-linecap="round"/></svg>');
-    /* 연산량을 줄여 저사양 폰/PC 렉 제거 */
-    animation: rain-diagonal-back 1.3s linear infinite;
+    /* 💡 왼쪽 아래(↙)로 이동하므로 상단(-400px)과 우측에 여유 공간을 주어 테두리 빔 현상 방지 */
+    top: -400px; left: 0; width: calc(100% + 200px); height: calc(100% + 400px);
+    /* 💡 빗줄기 길이를 40px로 콤팩트하게 줄이고 기울기를 정확히 -2(가로20, 세로40)로 고정 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="400"><line x1="150" y1="20" x2="130" y2="60" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/><line x1="50" y1="150" x2="30" y2="190" stroke="rgba(144,224,239,0.2)" stroke-width="1" stroke-linecap="round"/><line x1="180" y1="280" x2="160" y2="320" stroke="rgba(144,224,239,0.16)" stroke-width="1" stroke-linecap="round"/></svg>');
+    /* 루프 속도를 부드럽게 조절하여 프레임 드랍(렉) 방지 */
+    animation: rain-diagonal-back 1.5s linear infinite;
 }
 
 .weather-overlay.rain::after {
     opacity: 1;
-    /* 굵고 시원한 전경 장대비 (패턴 규격: 가로 300px * 세로 600px) */
-    top: -600px; right: -300px; left: auto; width: calc(100% + 300px); height: calc(100% + 600px);
-    /* 💡 시각적 속도감을 극대화하기 위해 전경 장대비도 결을 맞춰(/) 재디자인 */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="260" y1="20" x2="20" y2="500" stroke="rgba(144,224,239,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="150" y1="100" x2="30" y2="340" stroke="rgba(144,224,239,0.32)" stroke-width="2" stroke-linecap="round"/></svg>');
-    animation: rain-diagonal-front 0.85s linear infinite;
+    /* 굵은 전경 장대비 (패턴 규격: 가로 300px * 세로 600px) */
+    top: -600px; left: 0; width: calc(100% + 300px); height: calc(100% + 600px);
+    /* 💡 전경 비도 길이를 60px로 자연스럽게 다듬고 기울기를 정확히 -2(가로30, 세로60)로 일치 */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="600"><line x1="250" y1="30" x2="220" y2="90" stroke="rgba(144,224,239,0.28)" stroke-width="1.5" stroke-linecap="round"/><line x1="90" y1="250" x2="60" y2="310" stroke="rgba(144,224,239,0.32)" stroke-width="2" stroke-linecap="round"/><line x1="200" y1="450" x2="170" y2="510" stroke="rgba(144,224,239,0.25)" stroke-width="1.5" stroke-linecap="round"/></svg>');
+    animation: rain-diagonal-front 0.95s linear infinite;
 }
 
-/* 💡 [핵심 알고리즘] 타일 너비(200px/300px)와 높이(400px/600px)만큼만 정확하게 왼쪽 아래(X축 -, Y축 +)로 견인합니다.
-     이로 인해 이발소 간판 착시 현상이 완전히 깨지며, 비가 궤적을 타고 진짜 아래로 '스르륵' 자연스럽게 미끄러집니다. */
+/* 💡 [수학적 정렬 알고리즘] 
+     패턴 크기(가로 200/300, 세로 400/600)와 이동 거리를 완벽하게 일치시켜
+     루프가 리셋되는 경계선에서 단 1픽셀의 오차도 없이 스무스하게 이어집니다. (뚝뚝 끊김 영구 소멸) */
 @keyframes rain-diagonal-back  { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-200px, 400px, 0); } }
 @keyframes rain-diagonal-front { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-300px, 600px, 0); } }
 
