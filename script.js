@@ -26,9 +26,13 @@ let asmrEngine = new Audio("waves.mp3");
 asmrEngine.loop = true;
 let isAsmrPlaying = false;
 
-// [글로벌 환경 제어 변수 선제적 안전 초기화]
-window.manualTimeOverride = 'auto';
-window.manualWeatherOverride = 'auto';
+// [글로벌 환경 제어 변수 로컬 스토리지 연동 및 안전 초기화]
+window.manualTimeOverride = localStorage.getItem('env_time_override') || 'auto';
+window.manualWeatherOverride = localStorage.getItem('env_weather_override') || 'auto';
+
+let currentDisplayMode = localStorage.getItem('env_display_mode') || 'list'; // 💡 기존 'list'에서 업그레이드
+let isRestMode = false; 
+let backupTriggerQueued = false;
 
 function initDraftAutoSaveEngine() {
     const targetFields = ['post-title', 'post-content', 'letter-title', 'letter-content'];
@@ -207,9 +211,14 @@ let currentDisplayMode = 'list'; // 💡 3가지 모드 제어: 'list', 'grid', 
 let backupTriggerQueued = false; 
 
 // 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
+// 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
 window.setDisplayMode = function(mode) {
     currentDisplayMode = mode;
     currentPage = 1; // 모드가 바뀌면 1페이지부터 다시 정렬
+    
+    // 💾 보기 모드 설정 브라우저에 영구 저장
+    localStorage.setItem('env_display_mode', mode);
+    
     // 무한 스크롤 관찰자 초기화
     if (window.infiniteObserver) {
         window.infiniteObserver.disconnect();
@@ -217,7 +226,6 @@ window.setDisplayMode = function(mode) {
     }
     renderUI();
 };
-
 const secureConfig = {
     apiKey: "AIzaSyC7nqQqEJcFp_jdy4wVG33WYXIj5xWJuV0",
     authDomain: "star-bock.firebaseapp.com",
@@ -1256,6 +1264,11 @@ window.openEnvironmentSettingsModal = function() {
 window.applyEnvironmentSettings = function() {
     window.manualTimeOverride = document.getElementById('time-select').value;
     window.manualWeatherOverride = document.getElementById('weather-select').value;
+    
+    // 💾 시간대 및 날씨 설정 브라우저에 영구 저장
+    localStorage.setItem('env_time_override', window.manualTimeOverride);
+    localStorage.setItem('env_weather_override', window.manualWeatherOverride);
+    
     applyTimeBasedThemeEngine(); 
     let wElem = document.getElementById('weather-widget');
     if (window.manualWeatherOverride === 'auto' && wElem) { wElem.innerText = "⏳ 바다 읽는 중..."; }
