@@ -1,5 +1,4 @@
-# © 2026. alyagsosiji.
-(atritime 동일인물.)
+# © 2026. alyagsosiji. (atritime 동일인물.)
 --- 
 # CC-BY-4.0
 * 저작권자 표기 시 코드의 모든 방식의 사용 허용
