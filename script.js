@@ -1089,7 +1089,6 @@ function highlightSearchKeyword(text, keyword) {
 window.highlightSearchKeyword = highlightSearchKeyword;
 
 function applyTimeBasedThemeEngine() {
-function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = ""; let themeText = "";
     let mode = window.manualTimeOverride || 'auto';
