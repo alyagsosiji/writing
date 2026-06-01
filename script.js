@@ -778,15 +778,44 @@ function renderUI(isAppend = false) {
                 : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
             
                        // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
-            let selectHtml = `
-                <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
-                    <select onchange="window.setDisplayMode(this.value)" style="height: 38px; width: 100%; max-width: 180px; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: rgba(255, 255, 255, 0.04); background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'), url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat, no-repeat; background-position: left 15px center, right 15px center; background-size: 14px, 14px; border: 1px solid rgba(0, 180, 216, 0.25); color: #fff; padding: 0 35px; border-radius: 25px; font-size: 0.85rem; font-weight:500; outline: none; cursor: pointer; transition: all 0.25s ease; text-align: center; text-align-last: center; box-shadow:0 4px 12px rgba(0,0,0,0.35); letter-spacing:0.5px;">
-                        <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
-                        <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
-                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
-                    </select>
-                </div>
-            `;
+            // 💡 [수정] 크기는 기존 규격을 유지하되, 반응형 인터랙션(야광 테두리 및 배경)만 정렬 버튼과 동기화
+let selectHtml = `
+    <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
+        <select onchange="window.setDisplayMode(this.value)" style="
+            height: 38px; 
+            width: 100%; 
+            max-width: 180px; 
+            -webkit-appearance: none; 
+            -moz-appearance: none; 
+            appearance: none; 
+            background-color: rgba(255, 255, 255, 0.04); 
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'), url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); 
+            background-repeat: no-repeat, no-repeat; 
+            background-position: left 15px center, right 15px center; 
+            background-size: 14px, 14px; 
+            border: 1px solid rgba(0, 180, 216, 0.25); 
+            color: #fff; 
+            padding: 0 35px; 
+            border-radius: 25px; 
+            font-size: 0.85rem; 
+            font-weight: 500; 
+            outline: none; 
+            cursor: pointer; 
+            transition: all 0.25s ease; 
+            text-align: center; 
+            text-align-last: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35); 
+            letter-spacing: 0.5px;
+        "
+        onfocus="this.style.borderColor='#00b4d8'; this.style.backgroundColor='rgba(3, 10, 23, 0.85)'; this.style.boxShadow='0 0 10px rgba(0, 180, 216, 0.2)';"
+        onblur="this.style.borderColor='rgba(0, 180, 216, 0.25)'; this.style.backgroundColor='rgba(255, 255, 255, 0.04)'; this.style.boxShadow='none';"
+        >
+            <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
+            <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
+            <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
+        </select>
+    </div>
+`;
 
 
             
