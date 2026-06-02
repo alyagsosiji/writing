@@ -1026,3 +1026,35 @@ html, body {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
     }
 }
+
+/* ==========================================
+   ✨ 전환 탭 (기록된 바다 / 띄워진 편지) 호버 시 글자 흔들림 방지
+   ========================================== */
+
+/* 1. 탭 버튼의 기본 상태와 호버 상태의 렌더링 엔진 강제 고정 */
+#view-tab-container div,
+#tab-posts,
+#tab-letters {
+    /* 💡 브라우저가 글자를 그릴 때 하드웨어 가속을 써서 호버 시에도 글자가 안 흐려지게 고정 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    backface-visibility: hidden !important;
+    transform: translate3d(0, 0, 0) !important;
+    
+    /* 💡 호버 전후 두께 격차로 글자가 옆으로 밀리는 현상을 원천 차단하기 위해 두께를 통일 */
+    font-weight: 600 !important; 
+    letter-spacing: 0.5px !important;
+    transition: color 0.25s ease, text-shadow 0.25s ease !important;
+}
+
+/* 2. 호버 및 활성화(.active) 시 글자 굵기를 키우는 대신, 은은한 야광 효과로 세련되게 대체 */
+#tab-posts:hover, 
+#tab-letters:hover,
+#tab-posts.active,
+#tab-letters.active {
+    font-weight: 600 !important; /* 굵기는 그대로 유지하여 레이아웃 팅김 방지 */
+    color: #ffffff !important;
+    
+    /* 물리적 크기를 키우는 대신 서재 테마에 맞는 은은한 푸른 발광 효과로 시선 집중 */
+    text-shadow: 0 0 8px rgba(144, 224, 239, 0.45) !important; 
+}
