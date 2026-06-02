@@ -790,3 +790,19 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 #detail-title {
     color: rgba(255, 255, 255, 0.95) !important;
 }
+
+/* 💧 1. 물방울 스크롤바 커스텀 */
+::-webkit-scrollbar {
+    width: 6px; /* 스크롤바를 얇고 세련되게 */
+}
+::-webkit-scrollbar-track {
+    background: rgba(2, 5, 12, 0.3); /* 스크롤바 길(트랙)은 바다처럼 어둡게 */
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(144, 224, 239, 0.3); /* 평소엔 반투명한 물빛 */
+    border-radius: 10px; /* 위아래를 둥글게 */
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(144, 224, 239, 0.8); /* 마우스를 올리면 빛남 */
+    box-shadow: 0 0 10px rgba(144, 224, 239, 0.5);
+}
