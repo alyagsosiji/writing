@@ -938,3 +938,41 @@ html, body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65), 
                 0 0 20px rgba(144, 224, 239, 0.15) !important;
 }
+
+/* ==========================================
+   📱 모바일 하단 하얀 네모 및 가로 스크롤바 잔상 완전 제거
+   ========================================== */
+
+/* 1. 140% 크기의 파도 리플이 화면 밖으로 넘쳐 유령 영역을 만드는 것을 완벽 차단 */
+.ocean-background {
+    overflow: hidden !important;
+}
+
+/* 2. 모바일 기기(768px 이하) 전용 방어벽 세팅 */
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden !important; /* 가로 스크롤 절대 불가 */
+        overscroll-behavior-x: none !important;
+        
+        /* iOS 등에서 화면을 끝까지 내렸을 때 브라우저 기본 하얀 바닥이 비치는 현상 방지 */
+        background-color: #02050d !important; 
+    }
+
+    /* 하단 가로 스크롤바를 모바일에서는 완전히 삭제하여 하얀 네모 유발 원인 차단 */
+    ::-webkit-scrollbar:horizontal {
+        height: 0px !important;
+        display: none !important;
+    }
+    
+    /* 💡 일부 모바일 브라우저가 특정 태그에 강제로 입히는 하얀색 네모 형태의 appearance 기본 스타일 초기화 */
+    input, textarea, select, button {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* 혹시 모를 빈 센티넬이나 고정 푸터 영역의 높이 오차로 인한 가림막 현상 방지 */
+    #infinite-sentinel {
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+}
