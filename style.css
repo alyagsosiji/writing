@@ -790,29 +790,28 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   ✂️ 2. 리스트 모드 글자 밑동 싹둑 잘림 원천 차단
+   📦 카드 밖 넘침 방지 + 글자 밑동 살리기 (최종 교정)
    ========================================== */
-.post-card h3 {
-    /* 폰트가 숨을 쉴 수 있는 상하 여백과 줄간격 강제 확보 */
-    line-height: 1.6 !important; 
-    padding-bottom: 4px !important; 
-    margin-bottom: 8px !important;
-    
-    /* 글자 크기에 맞춰 상자 높이가 자동으로 늘어나도록 고정 높이 해제 */
-    height: auto !important; 
-    max-height: none !important;
-}
 
-.post-content-area {
-    line-height: 1.6 !important;
-    padding-bottom: 4px !important;
+/* 1. 카드는 다시 깔끔하게 테두리 안으로 가두기 (넘침 방지) */
+.post-card {
+    overflow: hidden !important; 
     height: auto !important;
+    padding-bottom: 15px !important; /* 카드 하단의 넉넉한 여백 */
 }
 
-/* 💡 혹시 '말줄임표(...)' 기능 때문에 글자가 잘리는 중이라면 아래 코드가 밑동을 살려냅니다 */
-.post-card h3, .post-content-area {
-    /* 말줄임표가 적용된 상태에서도 패딩 여백이 잘려나가지 않게 상자 테두리 기준 변경 */
-    box-sizing: content-box !important; 
+/* 2. 글자 텍스트 박스 교정 (밑동 받침이 잘리지 않게 방어) */
+.post-card h3, 
+.post-content-area {
+    /* 카드 밖으로 나가는 글자는 다시 숨김 (또는 말줄임표 처리) */
+    overflow: hidden !important; 
+    
+    /* 폰트가 겹치지 않는 안정적인 줄간격 */
+    line-height: 1.6 !important; 
+    
+    /* 💡 이 부분이 핵심: 글자 아랫부분(받침)이 잘리지 않도록 텍스트 상자 하단에만 3px의 투명한 숨구멍을 뚫어줌 */
+    padding-bottom: 3px !important; 
+    margin-bottom: 8px !important;
 }
 /* ==========================================
    💎 4가지 배경 완벽 호환: 유리알 스크롤바 (강제 적용)
