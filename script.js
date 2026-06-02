@@ -822,7 +822,7 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [대수술 구역] 검색창 규격(max-width: 450px, height: 44px)과 100% 일치하는 통합 유리알 캡슐 바 레이아웃
+            // 💡 [대수술 디자인 완성 구역] 양쪽 버튼 캡슐화 및 완벽 대칭 레이아웃
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
                 <div id="letter-batch-controls" style="
@@ -830,12 +830,12 @@ function renderUI(isAppend = false) {
                     align-items: center !important;
                     justify-content: space-between !important;
                     width: 100% !important;
-                    max-width: 450px !important; /* 검색창 가로 크기와 완벽 일치 */
-                    height: 44px !important;     /* 검색창 세로 높이와 완벽 일치 */
+                    max-width: 450px !important;
+                    height: 44px !important;
                     background: rgba(255, 255, 255, 0.03) !important;
                     border: 1px solid rgba(0, 180, 216, 0.15) !important;
                     border-radius: 25px !important;
-                    padding: 0 6px 0 20px !important; /* 내부 단추 밀착 방지 여백 */
+                    padding: 0 6px !important; /* 양쪽 버튼 대칭 마진 여백 균등 배분 */
                     margin: 20px auto 10px auto !important;
                     box-sizing: border-box !important;
                     user-select: none !important;
@@ -845,26 +845,30 @@ function renderUI(isAppend = false) {
                 onmouseleave="this.style.borderColor='rgba(0, 180, 216, 0.15)'; this.style.boxShadow='none';"
                 >
                     <label style="
-                        color: #94a3b8 !important;
-                        font-size: 0.85rem !important;
-                        cursor: pointer !important;
                         display: inline-flex !important;
                         align-items: center !important;
-                        gap: 8px !important;
-                        font-weight: 500 !important;
+                        justify-content: center !important;
+                        height: 32px !important;
+                        padding: 0 14px !important;
+                        font-size: 0.78rem !important;
+                        font-weight: 700 !important;
+                        border-radius: 20px !important;
+                        background: rgba(144, 224, 239, 0.06) !important;
+                        color: #90e0ef !important; /* 야광 청록빛 글자색 */
+                        border: 1px solid rgba(144, 224, 239, 0.2) !important;
+                        cursor: pointer !important;
                         letter-spacing: 0.5px !important;
-                        height: 100% !important;
-                        transition: color 0.2s !important;
+                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                     "
-                    onmouseenter="this.style.color='#90e0ef';"
-                    onmouseleave="this.style.color='#94a3b8';"
+                    onmouseenter="this.style.background='rgba(144, 224, 239, 0.25)'; this.style.borderColor='#00b4d8'; this.style.color='#fff'; this.style.boxShadow='0 0 12px rgba(144, 224, 239, 0.45)';"
+                    onmouseleave="this.style.background='rgba(144, 224, 239, 0.06)'; this.style.borderColor='rgba(144, 224, 239, 0.2)'; this.style.color='#90e0ef'; this.style.boxShadow='none';"
                     >
                         <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="
                             accent-color: #00b4d8 !important;
-                            width: 15px !important;
-                            height: 15px !important;
+                            width: 14px !important;
+                            height: 14px !important;
                             cursor: pointer !important;
-                            margin: 0 !important;
+                            margin: 0 6px 0 0 !important;
                         "> 전체 선택
                     </label>
 
