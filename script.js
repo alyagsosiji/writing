@@ -783,7 +783,6 @@ function renderUI(isAppend = false) {
                 : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
             
             // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
-            // 💡 [수정] 크기는 기존 규격을 유지하되, 반응형 인터랙션(야광 테두리 및 배경)만 정렬 버튼과 동기화
             let selectHtml = `
             <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:15px;">
                 <div style="display:flex; justify-content:center; width:100%;">
@@ -823,64 +822,71 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [완벽 디자인 통합 구역] 전역 스타일 강제 오버라이딩 패치
+            // 💡 [대수술 구역] 검색창 규격(max-width: 450px, height: 44px)과 100% 일치하는 통합 유리알 캡슐 바 레이아웃
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
                 <div id="letter-batch-controls" style="
-                    display: flex !important; 
-                    justify-content: center !important; 
-                    align-items: center !important; 
-                    gap: 24px !important; 
-                    width: 100% !important; 
-                    user-select: none !important; 
-                    margin: 28px 0 12px 0 !important; /* 🚨 위아래 요소들과 절대 겹치지 않게 여백을 시원하게 벌림 */
-                    animation: popupScale 0.2s ease !important;
-                ">
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    width: 100% !important;
+                    max-width: 450px !important; /* 검색창 가로 크기와 완벽 일치 */
+                    height: 44px !important;     /* 검색창 세로 높이와 완벽 일치 */
+                    background: rgba(255, 255, 255, 0.03) !important;
+                    border: 1px solid rgba(0, 180, 216, 0.15) !important;
+                    border-radius: 25px !important;
+                    padding: 0 6px 0 20px !important; /* 내부 단추 밀착 방지 여백 */
+                    margin: 20px auto 10px auto !important;
+                    box-sizing: border-box !important;
+                    user-select: none !important;
+                    transition: all 0.25s ease !important;
+                "
+                onmouseenter="this.style.borderColor='rgba(0, 180, 216, 0.4)'; this.style.boxShadow='0 0 10px rgba(0, 180, 216, 0.1)';"
+                onmouseleave="this.style.borderColor='rgba(0, 180, 216, 0.15)'; this.style.boxShadow='none';"
+                >
                     <label style="
-                        color: #94a3b8 !important; 
-                        font-size: 0.82rem !important; 
-                        cursor: pointer !important; 
-                        display: inline-flex !important; 
-                        align-items: center !important; 
-                        gap: 8px !important; 
+                        color: #94a3b8 !important;
+                        font-size: 0.85rem !important;
+                        cursor: pointer !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        gap: 8px !important;
                         font-weight: 500 !important;
                         letter-spacing: 0.5px !important;
+                        height: 100% !important;
                         transition: color 0.2s !important;
                     "
                     onmouseenter="this.style.color='#90e0ef';"
                     onmouseleave="this.style.color='#94a3b8';"
                     >
                         <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="
-                            accent-color: #00b4d8 !important; 
-                            width: 15px !important; 
-                            height: 15px !important; 
+                            accent-color: #00b4d8 !important;
+                            width: 15px !important;
+                            height: 15px !important;
                             cursor: pointer !important;
+                            margin: 0 !important;
                         "> 전체 선택
                     </label>
 
-                    <button onclick="window.deleteSelectedLetters()" style="
-                        all: unset !important;
-                        box-sizing: border-box !important;
+                    <div id="batch-delete-btn-custom" onclick="window.deleteSelectedLetters()" style="
                         display: inline-flex !important;
                         align-items: center !important;
                         justify-content: center !important;
-                        padding: 3px 14px !important; 
-                        font-size: 0.72rem !important; 
-                        font-weight: 600 !important; 
-                        height: 26px !important; 
-                        border-radius: 6px !important; 
-                        background: rgba(5, 12, 25, 0.95) !important;
-                        backdrop-filter: blur(4px) !important;
-                        -webkit-backdrop-filter: blur(4px) !important;
+                        height: 32px !important;
+                        padding: 0 16px !important;
+                        font-size: 0.78rem !important;
+                        font-weight: 700 !important;
+                        border-radius: 20px !important;
+                        background: rgba(239, 68, 68, 0.1) !important;
                         color: #fca5a5 !important;
-                        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+                        border: 1px solid rgba(239, 68, 68, 0.25) !important;
                         cursor: pointer !important;
-                        transition: all 0.3s ease !important;
                         letter-spacing: 0.5px !important;
+                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                     "
-                    onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#fff'; this.style.boxShadow='0 0 10px rgba(239, 68, 68, 0.45)';"
-                    onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.35)'; this.style.color='#fca5a5'; this.style.boxShadow='none';"
-                    >선택 소멸</button>
+                    onmouseenter="this.style.background='rgba(239, 68, 68, 0.25)'; this.style.borderColor='#ef4444'; this.style.color='#fff'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.45)';"
+                    onmouseleave="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.borderColor='rgba(239, 68, 68, 0.25)'; this.style.color='#fca5a5'; this.style.boxShadow='none';"
+                    >선택 소멸</div>
                 </div>
                 `;
             }
@@ -936,10 +942,9 @@ function renderUI(isAppend = false) {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // 💡 [디자인 국경 분리] 카드 내부에 배치되는 개별 체크박스 규격도 통일
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:15px; height:15px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
         card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
