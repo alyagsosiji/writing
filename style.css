@@ -815,35 +815,48 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🏷️ '...' 숨기고 [더보기] 야광 네모 버튼 추가 (검은 그림자 제거)
+   🚫 '...' 완벽 파괴 및 [더보기] 야광 네모 버튼
    ========================================== */
 
-/* 1. 텍스트 구역의 위치 기준점을 잡아줍니다 */
+/* 1. 끈질긴 '...' (말줄임표) 강제 삭제 및 상자 높이 고정 */
 .post-content-area {
+    /* 말줄임표를 생성하는 브라우저 엔진 3대장 완벽 해제 */
+    display: block !important; 
+    -webkit-line-clamp: unset !important; 
+    text-overflow: clip !important; 
+    
+    /* 줄간격 1.6 기준으로 딱 3줄(4.8em)까지만 보이게 높이를 강제 고정 */
+    max-height: 4.8em !important; 
+    overflow: hidden !important; 
     position: relative !important;
 }
 
-/* 2. 오른쪽 아래에 예쁜 더보기 네모를 만듭니다 */
+/* 2. 혹시 제목(h3)에도 '...'이 있다면 같이 파괴 */
+.post-card h3 {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    text-overflow: clip !important;
+    white-space: normal !important;
+}
+
+/* 3. 오른쪽 아래에 예쁜 더보기 네모 배치 (검은 그림자 없음) */
 .post-content-area::before {
     content: '더보기 🌊';
     position: absolute;
     bottom: 0px;
     right: 0px;
     
-    /* 버튼 자체의 짙은 배경과 유리 효과는 유지 */
+    /* 버튼 자체 배경과 유리 효과 */
     background: rgba(5, 12, 25, 0.95);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     
-    /* 야광 물빛 글자 디자인 */
     color: #90e0ef;
     font-size: 0.75rem;
     font-weight: 600;
     padding: 3px 10px;
     border: 1px solid rgba(144, 224, 239, 0.3);
     border-radius: 6px;
-    
-    /* 🚨 칙칙하게 번지던 검은 그림자 완전 삭제 */
     box-shadow: none;
     
     z-index: 5;
@@ -851,12 +864,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     pointer-events: none;
 }
 
-/* 3. 마우스를 올리거나 터치했을 때 버튼이 빛나는 효과 */
+/* 4. 마우스 오버 시 발광 효과 */
 .post-card:hover .post-content-area::before {
     background: rgba(144, 224, 239, 0.15);
     color: #fff;
     border-color: rgba(144, 224, 239, 0.6);
-    /* 호버 시 예쁜 야광 빛(파란색) 그림자만 켜지도록 설정 */
     box-shadow: 0 0 10px rgba(144, 224, 239, 0.3);
 }
 /* ==========================================
