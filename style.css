@@ -815,23 +815,25 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🚫 '...' 완벽 파괴 및 [더보기] 야광 네모 버튼
+   🌟 지능형 [더보기] 및 글자 수 제어 (모드별 자동 전환)
    ========================================== */
 
-/* 1. 끈질긴 '...' (말줄임표) 강제 삭제 및 상자 높이 고정 */
+/* -----------------------------------
+   1. 기본 설정 (리스트 모드)
+----------------------------------- */
+/* 리스트 모드: 글을 5줄(8.0em)까지 넉넉하게 보여줌 */
 .post-content-area {
-    /* 말줄임표를 생성하는 브라우저 엔진 3대장 완벽 해제 */
     display: block !important; 
     -webkit-line-clamp: unset !important; 
     text-overflow: clip !important; 
+    line-height: 1.6 !important;
     
-    /* 줄간격 1.6 기준으로 딱 3줄(4.8em)까지만 보이게 높이를 강제 고정 */
-    max-height: 4.8em !important; 
+    max-height: 8.0em !important; /* 💡 1.6 * 5줄 = 8.0em */
     overflow: hidden !important; 
     position: relative !important;
 }
 
-/* 2. 혹시 제목(h3)에도 '...'이 있다면 같이 파괴 */
+/* 제목 '...' 해제는 공통 유지 */
 .post-card h3 {
     display: block !important;
     -webkit-line-clamp: unset !important;
@@ -839,33 +841,73 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     white-space: normal !important;
 }
 
-/* 3. 오른쪽 아래에 예쁜 더보기 네모 배치 (검은 그림자 없음) */
-.post-content-area::before {
+/* 리스트 모드 더보기: 텍스트 박스 오른쪽 아래에 배치 */
+.post-content-area::after {
     content: '더보기 🌊';
     position: absolute;
     bottom: 0px;
     right: 0px;
-    
-    /* 버튼 자체 배경과 유리 효과 */
     background: rgba(5, 12, 25, 0.95);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    
     color: #90e0ef;
     font-size: 0.75rem;
     font-weight: 600;
     padding: 3px 10px;
     border: 1px solid rgba(144, 224, 239, 0.3);
     border-radius: 6px;
-    box-shadow: none;
-    
     z-index: 5;
     transition: all 0.3s ease;
     pointer-events: none;
 }
 
-/* 4. 마우스 오버 시 발광 효과 */
-.post-card:hover .post-content-area::before {
+/* 리스트 모드 더보기 마우스 오버 발광 */
+.post-card:hover .post-content-area::after {
+    background: rgba(144, 224, 239, 0.15);
+    color: #fff;
+    border-color: rgba(144, 224, 239, 0.6);
+    box-shadow: 0 0 10px rgba(144, 224, 239, 0.3);
+}
+
+/* 혹시 남아있을지 모르는 이전 코드(before) 찌꺼기 완벽 차단 */
+.post-content-area::before { display: none !important; }
+
+
+/* -----------------------------------
+   2. 갤러리 / 스크롤 모드 전용 설정 (.posts-grid-view)
+----------------------------------- */
+/* 갤러리 모드: 카드가 너무 길어지지 않게 3줄(4.8em)까지만 보여줌 */
+.posts-grid-view .post-content-area {
+    max-height: 4.8em !important; 
+}
+
+/* 갤러리 모드: 본문 오른쪽 아래의 [더보기] 숨기기 */
+.posts-grid-view .post-content-area::after {
+    display: none !important;
+}
+
+/* 💡 갤러리 모드: 대신 날짜(.date) 바로 옆(오른쪽)에 [더보기] 생성 */
+.posts-grid-view .post-footer .date::after {
+    content: '더보기 🌊';
+    display: inline-block;
+    margin-left: 10px; /* 날짜와 버튼 사이 간격 */
+    vertical-align: middle;
+    
+    background: rgba(5, 12, 25, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #90e0ef;
+    font-size: 0.7rem; /* 날짜 옆이라 살짝 더 작게 앙증맞게 */
+    font-weight: 600;
+    padding: 2px 8px;
+    border: 1px solid rgba(144, 224, 239, 0.3);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+/* 날짜 옆 [더보기] 마우스 오버 발광 */
+.posts-grid-view .post-card:hover .post-footer .date::after {
     background: rgba(144, 224, 239, 0.15);
     color: #fff;
     border-color: rgba(144, 224, 239, 0.6);
