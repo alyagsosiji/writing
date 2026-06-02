@@ -755,28 +755,38 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     100% { transform: translate(-50%, -50%) scale(6); opacity: 0; border-width: 0px; }
 }
 /* ==========================================
-   🌌 심해 몰입 모드 (상세 글/편지 읽기 창)
+   🌌 심해 몰입 모드 (가독성 최적화 버전)
    ========================================== */
-/* 1. 모달 배경을 기존보다 훨씬 어둡고 묵직한 심해 색상으로 강제 덮어씌우기 */
+/* 1. 모달 배경: 차분하고 묵직한 심해 유지 */
 #detail-modal {
-    background: rgba(2, 5, 12, 0.96) !important; /* 빛이 닿지 않는 어두운 남색 */
+    background: rgba(2, 5, 12, 0.96) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
-    transition: background 0.6s ease;
+    transition: background 0.4s ease;
 }
 
-/* 2. 글이 담긴 중앙 박스에 은은한 스포트라이트 켜기 및 수면 부유 효과 */
+/* 2. 글 읽기 창: 둥실거림 제거 및 시선 집중 */
 #detail-modal > div {
-    /* 바다 밑에서 빛나는 조개껍데기 같은 테두리 그림자 */
-    box-shadow: 0 0 50px rgba(144, 224, 239, 0.12), 
-                inset 0 0 20px rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(144, 224, 239, 0.25) !important;
+    /* 🚨 눈을 피로하게 하던 둥실거림 애니메이션 완전 삭제 */
+    animation: none !important;
+    transform: none !important;
     
-    /* 물속에 있는 것처럼 미세하게 둥실둥실 떠다니는 애니메이션 */
-    animation: float-focus 4s ease-in-out infinite alternate;
+    /* 글자가 허공에 뜨지 않도록 어두운 남색 배경을 덧대어 안정감 부여 */
+    background: rgba(10, 18, 35, 0.9) !important;
+    
+    /* 테두리와 빛 번짐을 확 줄이고, 대신 어두운 그림자를 깔아 창을 입체적으로 분리 */
+    border: 1px solid rgba(144, 224, 239, 0.15) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 
+                0 0 15px rgba(144, 224, 239, 0.05) !important;
 }
 
-@keyframes float-focus {
-    0% { transform: translateY(0px); }
-    100% { transform: translateY(-5px); }
+/* 3. 텍스트 가독성 최적화 (눈이 편안한 밝기와 줄간격) */
+#detail-text {
+    color: rgba(255, 255, 255, 0.85) !important; /* 너무 쨍하지 않은 편안한 흰색 */
+    line-height: 1.7 !important; /* 줄 간격을 넓혀 읽기 편하게 */
+    letter-spacing: 0.3px !important;
+}
+
+#detail-title {
+    color: rgba(255, 255, 255, 0.95) !important;
 }
