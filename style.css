@@ -918,3 +918,74 @@ html, body {
     background: rgba(255, 255, 255, 0.8) !important; /* 마우스 올리면 선명한 흰색으로 발광 */
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.6) !important;
 }
+/* ==========================================
+   ✨ 서재 분위기 고도화 마이크로 패치 (기능/가독성 완벽 보존)
+   ========================================== */
+
+/* 🌊 1. 글 카드 부유 및 심해 윤슬 호버 효과 */
+.post-card {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                box-shadow 0.4s ease, 
+                border-color 0.4s ease !important;
+}
+
+.post-card:hover {
+    /* 기존 -4px 이동을 유지하면서, 조금 더 부드러운 하드웨어 가속 적용 */
+    transform: translateY(-5px) translateZ(0) !important;
+    
+    /* 가독성을 해치지 않는 선에서 카드 주변에 은은한 심해 야광 물빛 번짐 효과 부여 */
+    border-color: rgba(144, 224, 239, 0.4) !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65), 
+                0 0 20px rgba(144, 224, 239, 0.15) !important;
+}
+
+/* 🌬️ 2. 숨 쉬는 수평선 대문 타이틀 애니메이션 */
+header .main-title {
+    animation: oceanTitleBreath 6s infinite alternate ease-in-out !important;
+    will-change: text-shadow;
+}
+
+header .subtitle {
+    animation: oceanSubtitleBreath 6s infinite alternate ease-in-out !important;
+    will-change: text-shadow;
+}
+
+@keyframes oceanTitleBreath {
+    0% {
+        text-shadow: 0 4px 15px rgba(0, 180, 216, 0.15), 0 15px 35px rgba(2, 6, 15, 0.95);
+    }
+    100% {
+        text-shadow: 0 4px 25px rgba(144, 224, 239, 0.55), 0 0 40px rgba(247, 163, 127, 0.25), 0 15px 35px rgba(2, 6, 15, 0.95);
+    }
+}
+
+@keyframes oceanSubtitleBreath {
+    0% {
+        text-shadow: 0 0 10px rgba(255, 183, 150, 0.2);
+    }
+    100% {
+        text-shadow: 0 0 20px rgba(255, 183, 150, 0.5), 0 0 30px rgba(144, 224, 239, 0.3);
+    }
+}
+
+/* ✨ 3. 글 읽기 몰입감을 주는 야광 물빛 텍스트 드래그 */
+::selection {
+    background: rgba(144, 224, 239, 0.2) !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(144, 224, 239, 0.6) !important;
+}
+::-moz-selection {
+    background: rgba(144, 224, 239, 0.2) !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 8px rgba(144, 224, 239, 0.6) !important;
+}
+
+/* ⚙️ 4. 고정 위젯(오디오, 백업 등) 마우스 오버 시 미세 맥박 효과 */
+.mini-audio-player:hover, 
+.mini-backup-manager:hover, 
+.mini-library-btn:hover,
+#time-gear-btn:hover,
+#random-memory-btn:hover {
+    letter-spacing: 1px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
