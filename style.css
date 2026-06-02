@@ -721,4 +721,15 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     }
 }
 
+/* ==========================================
+   ✂️ 리스트 모드 글자(받침) 잘림 방지 패치
+   ========================================== */
+.post-card h3 {
+    line-height: 1.5 !important;
+    padding-bottom: 3px !important;
+}
 
+.post-content-area {
+    line-height: 1.6 !important;
+    padding-bottom: 3px !important;
+}
