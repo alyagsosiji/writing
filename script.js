@@ -756,7 +756,7 @@ function executeRestore(targetBackup) {
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
 
-// 💡 무한 스크롤 append 처리를 위해 매개변수 isAppend 추가
+
 function renderUI(isAppend = false) {
     const container = document.getElementById('posts-container'); 
     const paginationContainer = document.getElementById('pagination-container');
@@ -782,48 +782,59 @@ function renderUI(isAppend = false) {
                 ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
                 : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
             
-                       // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
-            // 💡 [수정] 크기는 기존 규격을 유지하되, 반응형 인터랙션(야광 테두리 및 배경)만 정렬 버튼과 동기화
-let selectHtml = `
-    <div style="margin-top:20px; display:flex; justify-content:center; width:100%;">
-        <select onchange="window.setDisplayMode(this.value)" style="
-            height: 38px; 
-            width: 100%; 
-            max-width: 180px; 
-            -webkit-appearance: none; 
-            -moz-appearance: none; 
-            appearance: none; 
-            background-color: rgba(255, 255, 255, 0.04); 
-            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'), url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); 
-            background-repeat: no-repeat, no-repeat; 
-            background-position: left 15px center, right 15px center; 
-            background-size: 14px, 14px; 
-            border: 1px solid rgba(0, 180, 216, 0.25); 
-            color: #fff; 
-            padding: 0 35px; 
-            border-radius: 25px; 
-            font-size: 0.85rem; 
-            font-weight: 500; 
-            outline: none; 
-            cursor: pointer; 
-            transition: all 0.25s ease; 
-            text-align: center; 
-            text-align-last: center; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35); 
-            letter-spacing: 0.5px;
-        "
-        onfocus="this.style.borderColor='#00b4d8'; this.style.backgroundColor='rgba(3, 10, 23, 0.85)'; this.style.boxShadow='0 0 10px rgba(0, 180, 216, 0.2)';"
-        onblur="this.style.borderColor='rgba(0, 180, 216, 0.25)'; this.style.backgroundColor='rgba(255, 255, 255, 0.04)'; this.style.boxShadow='none';"
-        >
-            <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
-            <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
-            <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
-        </select>
-    </div>
-`;
+            // 💡 정렬 셀렉트 박스와 일괄 처리 제어바가 아래로 예쁘게 정렬되도록 레이아웃 정밀 고도화
+            let selectHtml = `
+            <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:15px;">
+                <div style="display:flex; justify-content:center; width:100%;">
+                    <select onchange="window.setDisplayMode(this.value)" style="
+                        height: 38px; 
+                        width: 100%; 
+                        max-width: 180px; 
+                        -webkit-appearance: none; 
+                        -moz-appearance: none; 
+                        appearance: none; 
+                        background-color: rgba(255, 255, 255, 0.04); 
+                        background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'), url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23fff\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3E%3Cpolyline points=\\'6 9 12 15 18 9\\'%3E%3C/polyline%3E%3C/svg%3E'); 
+                        background-repeat: no-repeat, no-repeat; 
+                        background-position: left 15px center, right 15px center; 
+                        background-size: 14px, 14px; 
+                        border: 1px solid rgba(0, 180, 216, 0.25); 
+                        color: #fff; 
+                        padding: 0 35px; 
+                        border-radius: 25px; 
+                        font-size: 0.85rem; 
+                        font-weight: 500; 
+                        outline: none; 
+                        cursor: pointer; 
+                        transition: all 0.25s ease; 
+                        text-align: center; 
+                        text-align-last: center; 
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.35); 
+                        letter-spacing: 0.5px;
+                    "
+                    onfocus="this.style.borderColor='#00b4d8'; this.style.backgroundColor='rgba(3, 10, 23, 0.85)'; this.style.boxShadow='0 0 10px rgba(0, 180, 216, 0.2)';"
+                    onblur="this.style.borderColor='rgba(0, 180, 216, 0.25)'; this.style.backgroundColor='rgba(255, 255, 255, 0.04)'; this.style.boxShadow='none';"
+                    >
+                        <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background: #030a16; color: #fff;">📄 리스트 모드</option>
+                        <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background: #030a16; color: #fff;">🔲 갤러리 모드</option>
+                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background: #030a16; color: #fff;">🌊 스크롤 모드</option>
+                    </select>
+                </div>
+            `;
 
+            // 💡 [신규 결합] '편지 보기' 모드이면서 '관리자 로그인 상태'일 때만 일괄 선택 바 노출
+            if (currentView === 'letters' && isAdmin) {
+                selectHtml += `
+                <div id="letter-batch-controls" style="display:flex; justify-content:center; align-items:center; gap:16px; width:100%; user-select:none; animation: popupScale 0.2s ease;">
+                    <label style="color:#94a3b8; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-weight:500;">
+                        <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="accent-color:#00b4d8; width:15px; height:15px; cursor:pointer;"> 전체 선택
+                    </label>
+                    <button onclick="window.deleteSelectedLetters()" class="danger-btn" style="padding:4px 14px; font-size:0.78rem; border-radius:20px; font-weight:bold; height:28px; display:inline-flex; align-items:center;">선택 소멸</button>
+                </div>
+                `;
+            }
 
-            
+            selectHtml += `</div>`;
             subtitleElem.innerHTML = subtitleText + selectHtml;
         }
 
@@ -874,7 +885,13 @@ let selectHtml = `
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        card.innerHTML = `<h3>${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        // 💡 [신규 결합] 관리자 편지뷰일 때 카드 제목 옆에 체크박스를 이식하되, 카드 본체 클릭 이벤트와 겹치지 않게 방어(stopPropagation)
+        let selectLetterCbHtml = '';
+        if (isAdmin && currentView === 'letters') {
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:10px; accent-color:#00b4d8; width:15px; height:15px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
+        }
+
+        card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         cardFragment.appendChild(card);
     });
     
@@ -1309,3 +1326,47 @@ document.addEventListener('pointerdown', function(e) {
         ripple.remove();
     }, 800);
 }, true); // 캡처링 유지
+
+// ==========================================
+// 📬 [신규 기능] 편지 일괄 다중 선택 및 원자적 소멸 엔진
+// ==========================================
+window.toggleAllLetters = function(source) {
+    const checkboxes = document.querySelectorAll('.letter-checkbox');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+};
+
+window.deleteSelectedLetters = function() {
+    if (!isAdmin || !database) return;
+    
+    const checkboxes = document.querySelectorAll('.letter-checkbox:checked');
+    const keysToDelete = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (keysToDelete.length === 0) {
+        return showSystemAlert('소멸시키고자 하는 편지들을 먼저 선택해 주세요.');
+    }
+    
+    showSystemConfirm(`선택하신 ${keysToDelete.length}개의 편지를 바다에서 완전히 소멸시키겠습니까?`, function() {
+        // Firebase 원자적 다중 경로 업데이트(Multi-path update) 처리 객체 생성
+        const batchUpdates = {};
+        keysToDelete.forEach(key => {
+            batchUpdates['letters/' + key] = null; // 해당 노드를 데이터베이스에서 완전히 날림
+        });
+        
+        database.ref().update(batchUpdates)
+        .then(() => {
+            showSystemAlert('선택하신 편지 조각들이 완벽히 소멸되었습니다.');
+            
+            // 삭제 후 현재 페이지 번호가 최대 페이지수를 넘지 않도록 자동 보정
+            const totalPagesAfterDelete = Math.ceil((allLetters.length - keysToDelete.length) / postsPerPage);
+            if (currentPage > totalPagesAfterDelete && currentPage > 1) {
+                currentPage = totalPagesAfterDelete;
+            }
+            
+            // 데이터가 유실되지 않도록 변경 사항을 클라우드 백업 엔진에 즉시 동기화
+            setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        })
+        .catch(err => {
+            showSystemAlert('일괄 소멸 동기화 실패 : ' + err.message);
+        });
+    });
+};
