@@ -815,101 +815,64 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🚫 '...' (말줄임표) 영구 삭제 & 더보기 버튼
+   🌟 [더보기] 날짜 우측 통합 & 그림자/가짜 버튼 완전 폐기
    ========================================== */
 
 /* -----------------------------------
-   1. 기본 설정 (리스트 모드: 5줄 완벽 고정)
+   1. 본문 텍스트 영역 깔끔하게 복구
 ----------------------------------- */
 .post-content-area {
-    /* 💡 핵심: 브라우저의 말줄임표 엔진(-webkit-box)을 일반 블록으로 강제 해제 */
-    display: block !important; 
-    
-    line-height: 1.65 !important; 
-    /* 1.65 * 5줄 = 8.25. 수학적으로 정확히 5줄 높이만 허용하여 밑동 잘림 방지 */
-    max-height: 8.25em !important; 
-    
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 5 !important; /* 리스트 모드는 5줄까지만 깔끔하게 나옴 */
     overflow: hidden !important; 
-    position: relative !important;
+    line-height: 1.6 !important; 
+    margin-bottom: 12px !important;
 }
 
-/* 제목(h3)의 말줄임표(...)도 강제로 잘라버리기 */
-.post-card h3 {
-    display: block !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: clip !important; /* ellipsis(말줄임) 대신 무조건 자름(clip) */
+/* 갤러리 모드일 때는 4줄까지만 나오도록 설정 */
+.posts-grid-view .post-content-area {
+    -webkit-line-clamp: 4 !important; 
 }
 
-/* 2. 리스트 모드 더보기: 절대 안 겹침 + 텍스트 가림막 */
-.post-content-area::after {
-    content: '더보기 🌊';
-    position: absolute;
-    bottom: 0px;
-    right: 0px;
-    
-    /* 🚨 뒷배경과 완전히 똑같은 불투명 색상으로 밑에 깔린 글자를 짓누름 */
-    background: #050c18 !important; 
-    
-    color: #90e0ef;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 3px 10px;
-    border: 1px solid rgba(144, 224, 239, 0.3);
-    border-radius: 6px;
-    
-    /* 💡 버튼 왼쪽에 보이지 않는 벽(그림자)을 세워, 글자가 닿기 전에 스르륵 가려지게 함 */
-    box-shadow: -10px 0 0px #050c18, -20px 0 10px #050c18 !important;
-    
-    z-index: 5;
-    pointer-events: none;
+/* 🚨 지저분했던 본문 위 가짜 버튼과 검은 그림자 완벽하게 삭제 */
+.post-content-area::after,
+.post-content-area::before {
+    display: none !important;
+    box-shadow: none !important;
 }
-
-/* 리스트 모드 마우스 오버 발광 */
-.post-card:hover .post-content-area::after {
-    color: #fff;
-    border-color: rgba(144, 224, 239, 0.6);
-    /* 호버 시 발광 효과와 가림막 효과를 동시에 유지 */
-    box-shadow: -10px 0 0px #050c18, -20px 0 10px #050c18, 0 0 10px rgba(144, 224, 239, 0.3) !important;
-}
-
-.post-content-area::before { display: none !important; }
-
 
 /* -----------------------------------
-   3. 갤러리 / 스크롤 모드 전용 (4줄)
+   2. [더보기] 버튼 날짜/시간 오른쪽으로 통합 이동
 ----------------------------------- */
-.posts-grid-view .post-content-area {
-    max-height: 6.6em !important; /* 1.65 * 4줄 = 정확히 4줄 고정 */
-}
-
-.posts-grid-view .post-content-area::after {
-    display: none !important; /* 갤러리에선 본문 쪽 버튼 제거 */
-}
-
-/* 날짜와 [더보기] 가로 정렬 */
-.posts-grid-view .post-footer .date {
+/* 날짜와 버튼이 나란히 한 줄에 예쁘게 서 있도록 정렬 */
+.post-footer .date {
     display: inline-flex !important;
     align-items: center !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
 }
 
-/* 갤러리 모드: 날짜 우측에 부착 */
-.posts-grid-view .post-footer .date::after {
+/* 리스트, 갤러리 상관없이 모든 모드에서 날짜 옆에 [더보기] 생성 */
+.post-footer .date::after {
     content: '더보기 🌊';
     display: inline-block !important;
     background: rgba(5, 12, 25, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     color: #90e0ef;
     font-size: 0.7rem; 
     font-weight: 600;
     padding: 2px 8px;
     border: 1px solid rgba(144, 224, 239, 0.3);
     border-radius: 6px;
+    transition: all 0.3s ease;
     pointer-events: none;
+    margin-left: 2px; /* 날짜와 버튼 사이 간격 */
 }
 
-.posts-grid-view .post-card:hover .post-footer .date::after {
+/* 마우스 올렸을 때 버튼 발광 효과 (모든 모드 공통) */
+.post-card:hover .post-footer .date::after {
     background: rgba(144, 224, 239, 0.15);
     color: #fff;
     border-color: rgba(144, 224, 239, 0.6);
