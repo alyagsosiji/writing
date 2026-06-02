@@ -815,52 +815,57 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌟 지능형 [더보기] 및 글자 수 제어 (완벽판)
+   🛡️ 절대 잘림 방지 & 더보기 레이아웃 완벽판
    ========================================== */
 
 /* -----------------------------------
-   1. 기본 설정 (리스트 모드)
+   1. 기본 설정 (리스트 모드: 5줄 완벽 고정)
 ----------------------------------- */
 .post-content-area {
-    display: block !important; 
-    -webkit-line-clamp: unset !important; 
-    text-overflow: clip !important; 
-    
-    /* ✂️ 한글 받침(우, 유 등)이 잘리지 않도록 줄간격을 미세하게 확장 */
-    line-height: 1.65 !important; 
-    
-    /* 💡 리스트 모드: 5줄(8.25em) + 버튼이 놓일 방석 공간(30px)을 따로 만듦 */
-    max-height: calc(8.25em + 30px) !important; 
-    padding-bottom: 30px !important; /* 글자와 버튼이 절대 겹치지 않게 방어 */
+    /* 💡 브라우저 내장 줄 계산기 가동 (밑동 잘림 절대 발생 안 함) */
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 5 !important; /* 정확히 5줄까지만 출력 */
     
     overflow: hidden !important; 
+    line-height: 1.6 !important; 
+    
+    /* 기존에 있던 하단 여백(방석) 전부 제거하여 계산 오류 차단 */
+    padding-bottom: 0px !important; 
+    margin-bottom: 8px !important;
     position: relative !important;
-    box-sizing: content-box !important;
 }
 
-/* 제목 받침 잘림 추가 방어 */
+/* 제목(h3)도 한 줄로 깔끔하게 떨어지게 보호 */
 .post-card h3 {
     display: block !important;
-    -webkit-line-clamp: unset !important;
-    text-overflow: clip !important;
-    white-space: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important; /* 제목은 1줄로 고정 */
     line-height: 1.5 !important;
-    padding-bottom: 5px !important; 
+    padding-bottom: 4px !important;
 }
 
-/* 리스트 모드 더보기: 확보해둔 방석 공간(padding) 맨 아래에 안착 */
+/* 리스트 모드 [더보기]: 불투명하게 만들어서 아래 글자와 '...'을 완벽히 덮음 */
 .post-content-area::after {
     content: '더보기 🌊';
     position: absolute;
-    bottom: 0px;  /* 텍스트 위가 아니라 빈 공간에 배치됨 */
-    right: 0px;
-    background: rgba(5, 12, 25, 0.95);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    bottom: 0;
+    right: 0;
+    
+    /* 🚨 유리 효과를 빼고 완전 불투명한 남색으로 칠해 밑을 완벽 차단 */
+    background: #050c18; 
+    
     color: #90e0ef;
     font-size: 0.75rem;
     font-weight: 600;
-    padding: 3px 10px;
+    
+    /* 왼쪽 여백(padding-left)을 넓게 주어 텍스트가 버튼 글자에 닿기 2px 전에 잘리는 효과 연출 */
+    padding: 3px 10px 3px 14px; 
+    
+    /* 버튼 왼쪽에 테두리 색과 동일한 방어벽을 쳐서 공간 확보 */
+    box-shadow: -6px 0 0 #050c18; 
+    
     border: 1px solid rgba(144, 224, 239, 0.3);
     border-radius: 6px;
     z-index: 5;
@@ -868,31 +873,29 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     pointer-events: none;
 }
 
+/* 리스트 모드 마우스 오버 시 발광 */
 .post-card:hover .post-content-area::after {
-    background: rgba(144, 224, 239, 0.15);
     color: #fff;
     border-color: rgba(144, 224, 239, 0.6);
-    box-shadow: 0 0 10px rgba(144, 224, 239, 0.3);
+    box-shadow: -6px 0 0 #050c18, 0 0 10px rgba(144, 224, 239, 0.3);
 }
 
 .post-content-area::before { display: none !important; }
 
 
 /* -----------------------------------
-   2. 갤러리 / 스크롤 모드 전용 설정
+   2. 갤러리 / 스크롤 모드 전용 설정 (4줄 고정)
 ----------------------------------- */
-/* 갤러리 모드: 약 4줄(6.6em)로 텍스트 확장 및 하단 방석 공간 철거 */
 .posts-grid-view .post-content-area {
-    max-height: 6.6em !important; 
-    padding-bottom: 4px !important; 
+    -webkit-line-clamp: 4 !important; /* 갤러리는 4줄로 세팅 */
 }
 
-/* 갤러리 모드: 본문 쪽 [더보기] 완전 삭제 */
+/* 갤러리 모드: 본문 쪽 [더보기] 숨김 */
 .posts-grid-view .post-content-area::after {
     display: none !important;
 }
 
-/* 💡 날짜와 [더보기]가 무조건 한 줄(오른쪽)에 붙도록 강제 정렬 */
+/* 갤러리 모드: 날짜와 [더보기] 가로 정렬 */
 .posts-grid-view .post-footer .date {
     display: inline-flex !important;
     align-items: center !important;
@@ -900,13 +903,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     gap: 8px !important;
 }
 
-/* 갤러리 모드: 날짜 시간 우측에 찰싹 붙는 [더보기] 생성 */
+/* 갤러리 모드: 날짜 시간 우측에 찰싹 붙는 [더보기] */
 .posts-grid-view .post-footer .date::after {
     content: '더보기 🌊';
     display: inline-block !important;
     background: rgba(5, 12, 25, 0.95);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
     color: #90e0ef;
     font-size: 0.7rem; 
     font-weight: 600;
