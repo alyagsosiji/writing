@@ -976,3 +976,41 @@ html, body {
         background-color: transparent !important;
     }
 }
+
+/* ==========================================
+   ⚙️ 고정 위젯 호버 반응 전체 통일 (디자인 일체화)
+   ========================================== */
+
+/* 1. 모든 고정 위젯의 호버 색상 및 야광 발광 효과 통일 */
+.mini-audio-player:hover,
+.mini-backup-manager:hover,
+.mini-library-btn:hover,
+#random-memory-btn:hover,
+#time-gear-btn:hover {
+    border-color: #90e0ef !important; /* 은은한 야광 물빛으로 통일 */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
+                0 0 18px rgba(144, 224, 239, 0.45) !important; /* 푸른 빛 번짐 효과 */
+    color: #ffffff !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. 일반 고정 위젯들의 크기 확장 비율 통일 (1.05 배율) */
+.mini-audio-player:hover,
+.mini-backup-manager:hover,
+#random-memory-btn:hover,
+#time-gear-btn:hover {
+    transform: scale(1.05) !important;
+}
+
+/* 3. 정중앙 고정 위젯(지침서)의 비율 통일 및 정렬 축 유지 */
+.mini-library-btn:hover {
+    /* 💡 중앙 정렬(left: 50%) 상태를 깨뜨리지 않으면서 위로 살짝 뜨고 커지도록 제어 */
+    transform: translate3d(-50%, -3px, 0) scale(1.05) !important;
+}
+
+/* 모바일 화면 호버 변형 최적화 대응 */
+@media (max-width: 768px) {
+    .mini-library-btn:hover {
+        transform: translate3d(-50%, -1px, 0) scale(1.02) !important;
+    }
+}
