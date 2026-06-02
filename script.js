@@ -785,7 +785,7 @@ function renderUI(isAppend = false) {
             // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
             // 💡 [수정] 크기는 기존 규격을 유지하되, 반응형 인터랙션(야광 테두리 및 배경)만 정렬 버튼과 동기화
             let selectHtml = `
-            <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:18px;">
+            <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:15px;">
                 <div style="display:flex; justify-content:center; width:100%;">
                     <select onchange="window.setDisplayMode(this.value)" style="
                         height: 38px; 
@@ -823,63 +823,63 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [디자인 패치 완료] 주변 UI와 완벽 호환되는 반투명 유리알 컨트롤바 레이아웃
+            // 💡 [완벽 디자인 통합 구역] 전역 스타일 강제 오버라이딩 패치
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
                 <div id="letter-batch-controls" style="
-                    display: flex; 
-                    justify-content: center; 
-                    align-items: center; 
-                    gap: 20px; 
-                    width: 100%; 
-                    user-select: none; 
-                    animation: popupScale 0.2s ease;
-                    margin-top: 5px;
+                    display: flex !important; 
+                    justify-content: center !important; 
+                    align-items: center !important; 
+                    gap: 24px !important; 
+                    width: 100% !important; 
+                    user-select: none !important; 
+                    margin: 28px 0 12px 0 !important; /* 🚨 위아래 요소들과 절대 겹치지 않게 여백을 시원하게 벌림 */
+                    animation: popupScale 0.2s ease !important;
                 ">
                     <label style="
-                        color: #cbd5e1; 
-                        font-size: 0.85rem; 
-                        cursor: pointer; 
-                        display: inline-flex; 
-                        align-items: center; 
-                        gap: 8px; 
-                        font-weight: 500;
-                        letter-spacing: 0.5px;
-                        transition: color 0.2s;
+                        color: #94a3b8 !important; 
+                        font-size: 0.82rem !important; 
+                        cursor: pointer !important; 
+                        display: inline-flex !important; 
+                        align-items: center !important; 
+                        gap: 8px !important; 
+                        font-weight: 500 !important;
+                        letter-spacing: 0.5px !important;
+                        transition: color 0.2s !important;
                     "
                     onmouseenter="this.style.color='#90e0ef';"
-                    onmouseleave="this.style.color='#cbd5e1';"
+                    onmouseleave="this.style.color='#94a3b8';"
                     >
                         <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="
-                            accent-color: #00b4d8; 
-                            width: 16px; 
-                            height: 16px; 
-                            cursor: pointer;
-                            border: 1px solid rgba(0, 180, 216, 0.4);
-                            border-radius: 4px;
+                            accent-color: #00b4d8 !important; 
+                            width: 15px !important; 
+                            height: 15px !important; 
+                            cursor: pointer !important;
                         "> 전체 선택
                     </label>
 
-                    <button onclick="window.deleteSelectedLetters()" class="danger-btn" style="
-                        padding: 3px 14px; 
-                        font-size: 0.78rem; 
-                        border-radius: 20px; 
-                        font-weight: bold; 
-                        height: 28px; 
-                        display: inline-flex; 
-                        align-items: center;
-                        background: rgba(6, 15, 31, 0.85);
-                        border: 1px solid rgba(239, 68, 68, 0.35);
-                        color: #fca5a5;
-                        backdrop-filter: blur(4px);
-                        -webkit-backdrop-filter: blur(4px);
-                        cursor: pointer;
-                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-                        letter-spacing: 0.5px;
+                    <button onclick="window.deleteSelectedLetters()" style="
+                        all: unset !important;
+                        box-sizing: border-box !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        padding: 3px 14px !important; 
+                        font-size: 0.72rem !important; 
+                        font-weight: 600 !important; 
+                        height: 26px !important; 
+                        border-radius: 6px !important; 
+                        background: rgba(5, 12, 25, 0.95) !important;
+                        backdrop-filter: blur(4px) !important;
+                        -webkit-backdrop-filter: blur(4px) !important;
+                        color: #fca5a5 !important;
+                        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+                        cursor: pointer !important;
+                        transition: all 0.3s ease !important;
+                        letter-spacing: 0.5px !important;
                     "
-                    onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#fff'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.45)'; this.style.transform='translateY(-1px)';"
-                    onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.35)'; this.style.color='#fca5a5'; this.style.boxShadow='none'; this.style.transform='none';"
+                    onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#fff'; this.style.boxShadow='0 0 10px rgba(239, 68, 68, 0.45)';"
+                    onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.35)'; this.style.color='#fca5a5'; this.style.boxShadow='none';"
                     >선택 소멸</button>
                 </div>
                 `;
@@ -936,10 +936,10 @@ function renderUI(isAppend = false) {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // 💡 [디자인 패치] 카드 내부에 배치되는 개별 체크박스도 크기 및 정렬 축을 깔끔하게 일치
+        // 💡 [디자인 국경 분리] 카드 내부에 배치되는 개별 체크박스 규격도 통일
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:15px; height:15px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
         card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
