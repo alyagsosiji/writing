@@ -782,9 +782,10 @@ function renderUI(isAppend = false) {
                 ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
                 : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
             
-            // 💡 정렬 셀렉트 박스와 일괄 처리 제어바가 아래로 예쁘게 정렬되도록 레이아웃 정밀 고도화
+            // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
+            // 💡 [수정] 크기는 기존 규격을 유지하되, 반응형 인터랙션(야광 테두리 및 배경)만 정렬 버튼과 동기화
             let selectHtml = `
-            <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:15px;">
+            <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:18px;">
                 <div style="display:flex; justify-content:center; width:100%;">
                     <select onchange="window.setDisplayMode(this.value)" style="
                         height: 38px; 
@@ -822,14 +823,64 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [신규 결합] '편지 보기' 모드이면서 '관리자 로그인 상태'일 때만 일괄 선택 바 노출
+            // 💡 [디자인 패치 완료] 주변 UI와 완벽 호환되는 반투명 유리알 컨트롤바 레이아웃
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
-                <div id="letter-batch-controls" style="display:flex; justify-content:center; align-items:center; gap:16px; width:100%; user-select:none; animation: popupScale 0.2s ease;">
-                    <label style="color:#94a3b8; font-size:0.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px; font-weight:500;">
-                        <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="accent-color:#00b4d8; width:15px; height:15px; cursor:pointer;"> 전체 선택
+                <div id="letter-batch-controls" style="
+                    display: flex; 
+                    justify-content: center; 
+                    align-items: center; 
+                    gap: 20px; 
+                    width: 100%; 
+                    user-select: none; 
+                    animation: popupScale 0.2s ease;
+                    margin-top: 5px;
+                ">
+                    <label style="
+                        color: #cbd5e1; 
+                        font-size: 0.85rem; 
+                        cursor: pointer; 
+                        display: inline-flex; 
+                        align-items: center; 
+                        gap: 8px; 
+                        font-weight: 500;
+                        letter-spacing: 0.5px;
+                        transition: color 0.2s;
+                    "
+                    onmouseenter="this.style.color='#90e0ef';"
+                    onmouseleave="this.style.color='#cbd5e1';"
+                    >
+                        <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="
+                            accent-color: #00b4d8; 
+                            width: 16px; 
+                            height: 16px; 
+                            cursor: pointer;
+                            border: 1px solid rgba(0, 180, 216, 0.4);
+                            border-radius: 4px;
+                        "> 전체 선택
                     </label>
-                    <button onclick="window.deleteSelectedLetters()" class="danger-btn" style="padding:4px 14px; font-size:0.78rem; border-radius:20px; font-weight:bold; height:28px; display:inline-flex; align-items:center;">선택 소멸</button>
+
+                    <button onclick="window.deleteSelectedLetters()" class="danger-btn" style="
+                        padding: 3px 14px; 
+                        font-size: 0.78rem; 
+                        border-radius: 20px; 
+                        font-weight: bold; 
+                        height: 28px; 
+                        display: inline-flex; 
+                        align-items: center;
+                        background: rgba(6, 15, 31, 0.85);
+                        border: 1px solid rgba(239, 68, 68, 0.35);
+                        color: #fca5a5;
+                        backdrop-filter: blur(4px);
+                        -webkit-backdrop-filter: blur(4px);
+                        cursor: pointer;
+                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                        letter-spacing: 0.5px;
+                    "
+                    onmouseenter="this.style.borderColor='#ef4444'; this.style.color='#fff'; this.style.boxShadow='0 0 12px rgba(239, 68, 68, 0.45)'; this.style.transform='translateY(-1px)';"
+                    onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.35)'; this.style.color='#fca5a5'; this.style.boxShadow='none'; this.style.transform='none';"
+                    >선택 소멸</button>
                 </div>
                 `;
             }
@@ -885,10 +936,10 @@ function renderUI(isAppend = false) {
 
         const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
-        // 💡 [신규 결합] 관리자 편지뷰일 때 카드 제목 옆에 체크박스를 이식하되, 카드 본체 클릭 이벤트와 겹치지 않게 방어(stopPropagation)
+        // 💡 [디자인 패치] 카드 내부에 배치되는 개별 체크박스도 크기 및 정렬 축을 깔끔하게 일치
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:10px; accent-color:#00b4d8; width:15px; height:15px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
         card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
