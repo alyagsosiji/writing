@@ -1293,14 +1293,13 @@ window.applyEnvironmentSettings = function() {
     document.getElementById('env-modal').style.display = 'none';
 };
 // ==========================================
-// 💧 수면 위 마우스 파문 효과 (버튼 클릭 포함 완벽 호환)
+// 💧 수면 위 마우스 파문 효과 (버튼/모달 무시 강제 터치 반응)
 // ==========================================
-// 💡 세 번째 인자로 'true(캡처링)'를 주어, 버튼이 클릭을 먹어버리기 전에 미리 파문부터 터뜨립니다.
-document.addEventListener('click', function(e) {
+document.addEventListener('pointerdown', function(e) {
     const ripple = document.createElement('div');
     ripple.className = 'water-ripple';
     
-    // 마우스/터치 X, Y 좌표
+    // 화면 위치 정확도 보정
     ripple.style.left = e.clientX + 'px';
     ripple.style.top = e.clientY + 'px';
     
@@ -1309,4 +1308,4 @@ document.addEventListener('click', function(e) {
     setTimeout(() => {
         ripple.remove();
     }, 800);
-}, true); // 🚨 핵심: true를 넣어야 버튼 클릭 시에도 파문이 무조건 생깁니다.
+}, true); // 캡처링 유지
