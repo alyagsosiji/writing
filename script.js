@@ -1293,22 +1293,20 @@ window.applyEnvironmentSettings = function() {
     document.getElementById('env-modal').style.display = 'none';
 };
 // ==========================================
-// 💧 수면 위 마우스 파문 효과 (Water Ripple Effect)
+// 💧 수면 위 마우스 파문 효과 (버튼 클릭 포함 완벽 호환)
 // ==========================================
+// 💡 세 번째 인자로 'true(캡처링)'를 주어, 버튼이 클릭을 먹어버리기 전에 미리 파문부터 터뜨립니다.
 document.addEventListener('click', function(e) {
-    // 1. 파문 효과를 낼 요소를 생성합니다.
     const ripple = document.createElement('div');
     ripple.className = 'water-ripple';
     
-    // 2. 클릭한 마우스의 X, Y 좌표를 가져와 위치를 맞춥니다.
+    // 마우스/터치 X, Y 좌표
     ripple.style.left = e.clientX + 'px';
     ripple.style.top = e.clientY + 'px';
     
-    // 3. 화면에 추가합니다.
     document.body.appendChild(ripple);
     
-    // 4. 애니메이션이 끝날 즈음(800ms) 찌꺼기가 남지 않게 깔끔히 지워줍니다.
     setTimeout(() => {
         ripple.remove();
     }, 800);
-});
+}, true); // 🚨 핵심: true를 넣어야 버튼 클릭 시에도 파문이 무조건 생깁니다.
