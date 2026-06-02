@@ -978,39 +978,51 @@ html, body {
 }
 
 /* ==========================================
-   ⚙️ 고정 위젯 호버 반응 전체 통일 (디자인 일체화)
+   ⚙️ 고정 위젯 호버 반응 완전 통일 & 그림자 완화 (최종형)
    ========================================== */
 
-/* 1. 모든 고정 위젯의 호버 색상 및 야광 발광 효과 통일 */
-.mini-audio-player:hover,
-.mini-backup-manager:hover,
-.mini-library-btn:hover,
-#random-memory-btn:hover,
-#time-gear-btn:hover {
-    border-color: #90e0ef !important; /* 은은한 야광 물빛으로 통일 */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 
-                0 0 18px rgba(144, 224, 239, 0.45) !important; /* 푸른 빛 번짐 효과 */
+/* 1. 모든 고정 아이콘들의 기본 전환 속도 및 부드러움 통일 */
+#mini-audio-trigger, .mini-audio-player,
+#mini-backup-trigger, .mini-backup-manager,
+#mini-library-btn, .mini-library-btn,
+#random-memory-btn, #time-gear-btn {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important; /* 기본 그림자 */
+}
+
+/* 2. 호버 시 반응 통일 (그림자 세기를 줄여 은은하고 세련된 물빛만 남김) */
+#mini-audio-trigger:hover, .mini-audio-player:hover,
+#mini-backup-trigger:hover, .mini-backup-manager:hover,
+#random-memory-btn:hover, #time-gear-btn:hover {
+    border-color: #90e0ef !important;
     color: #ffffff !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    /* 💡 기존 30px -> 15px, 야광 세기 0.45 -> 0.22로 줄여 눈의 피로를 낮춤 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55), 
+                0 0 10px rgba(144, 224, 239, 0.22) !important;
+    /* 💡 똑같이 위로 2px 뜨면서 1.05배 커지도록 규칙 통일 */
+    transform: translateY(-2px) scale(1.05) !important;
 }
 
-/* 2. 일반 고정 위젯들의 크기 확장 비율 통일 (1.05 배율) */
-.mini-audio-player:hover,
-.mini-backup-manager:hover,
-#random-memory-btn:hover,
-#time-gear-btn:hover {
-    transform: scale(1.05) !important;
+/* 3. 정중앙 [지침서] 버튼의 호버 정렬 축 유지 및 이질감 해소 */
+#mini-library-btn:hover, .mini-library-btn:hover {
+    border-color: #90e0ef !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.55), 
+                0 0 10px rgba(144, 224, 239, 0.22) !important;
+    /* 💡 중앙 정렬(left:50%) 축을 유지하며 다른 아이콘들과 똑같은 높이(-2px)와 크기(1.05배) 적용 */
+    transform: translate3d(-50%, -2px, 0) scale(1.05) !important;
 }
 
-/* 3. 정중앙 고정 위젯(지침서)의 비율 통일 및 정렬 축 유지 */
-.mini-library-btn:hover {
-    /* 💡 중앙 정렬(left: 50%) 상태를 깨뜨리지 않으면서 위로 살짝 뜨고 커지도록 제어 */
-    transform: translate3d(-50%, -3px, 0) scale(1.05) !important;
-}
-
-/* 모바일 화면 호버 변형 최적화 대응 */
+/* 📱 모바일 터치 환경 호버 튕김 현상 방어 */
 @media (max-width: 768px) {
-    .mini-library-btn:hover {
-        transform: translate3d(-50%, -1px, 0) scale(1.02) !important;
+    #mini-audio-trigger:hover, .mini-audio-player:hover,
+    #mini-backup-trigger:hover, .mini-backup-manager:hover,
+    #random-memory-btn:hover, #time-gear-btn:hover {
+        transform: translateY(0) scale(1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    }
+    #mini-library-btn:hover, .mini-library-btn:hover {
+        transform: translate3d(-50%, 0, 0) scale(1) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
     }
 }
