@@ -815,45 +815,51 @@ body.no-scroll { overflow: hidden; touch-action: none; }
 }
 
 /* ==========================================
-   🌟 [더보기] 날짜 우측 통합 & 그림자/가짜 버튼 완전 폐기
+   🌟 [더보기] 줄바꿈 방지 및 텍스트 칼단절 패치
    ========================================== */
 
 /* -----------------------------------
-   1. 본문 텍스트 영역 깔끔하게 복구
+   1. 본문 텍스트 '애매한 잘림' 완벽 교정
 ----------------------------------- */
 .post-content-area {
-    display: -webkit-box !important;
-    -webkit-box-orient: vertical !important;
-    -webkit-line-clamp: 5 !important; /* 리스트 모드는 5줄까지만 깔끔하게 나옴 */
-    overflow: hidden !important; 
+    /* '...'을 억지로 만드는 엔진을 끄고 기본 블록으로 변경 */
+    display: block !important; 
     line-height: 1.6 !important; 
+    
+    /* 💡 1.6 * 5줄 = 8.0em. 딱 5줄까지만 보이고 다음 줄은 칼같이 가려버림 */
+    max-height: 8.0em !important; 
+    
+    overflow: hidden !important; 
     margin-bottom: 12px !important;
+    padding-bottom: 0 !important; /* 불필요한 여백을 없애서 반 줄이 걸치는 현상 차단 */
 }
 
-/* 갤러리 모드일 때는 4줄까지만 나오도록 설정 */
+/* 갤러리/스크롤 모드일 때는 정확히 4줄까지만 보이게 세팅 */
 .posts-grid-view .post-content-area {
-    -webkit-line-clamp: 4 !important; 
+    /* 💡 1.6 * 4줄 = 6.4em. */
+    max-height: 6.4em !important; 
 }
 
-/* 🚨 지저분했던 본문 위 가짜 버튼과 검은 그림자 완벽하게 삭제 */
+/* 혹시 남아있을지 모르는 가짜 버튼, 그림자 완전 삭제 확인사살 */
 .post-content-area::after,
 .post-content-area::before {
     display: none !important;
-    box-shadow: none !important;
 }
 
 /* -----------------------------------
-   2. [더보기] 버튼 날짜/시간 오른쪽으로 통합 이동
+   2. [더보기] 버튼 날짜 아래로 떨어짐 방지
 ----------------------------------- */
-/* 날짜와 버튼이 나란히 한 줄에 예쁘게 서 있도록 정렬 */
 .post-footer .date {
     display: inline-flex !important;
     align-items: center !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+    
+    /* 🚨 핵심: 공간이 좁아도 절대 밑으로 떨어지지 않게 강제 한 줄 고정 */
+    flex-wrap: nowrap !important; 
+    white-space: nowrap !important; 
+    
+    gap: 8px !important; 
 }
 
-/* 리스트, 갤러리 상관없이 모든 모드에서 날짜 옆에 [더보기] 생성 */
 .post-footer .date::after {
     content: '더보기 🌊';
     display: inline-block !important;
@@ -868,10 +874,11 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     border-radius: 6px;
     transition: all 0.3s ease;
     pointer-events: none;
-    margin-left: 2px; /* 날짜와 버튼 사이 간격 */
+    
+    /* 💡 줄바꿈을 막았을 때 버튼이 찌그러지는 현상 방지 */
+    flex-shrink: 0 !important; 
 }
 
-/* 마우스 올렸을 때 버튼 발광 효과 (모든 모드 공통) */
 .post-card:hover .post-footer .date::after {
     background: rgba(144, 224, 239, 0.15);
     color: #fff;
