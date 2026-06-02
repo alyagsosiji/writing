@@ -813,6 +813,51 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     padding-bottom: 3px !important; 
     margin-bottom: 8px !important;
 }
+
+/* ==========================================
+   🏷️ '...' 숨기고 [더보기] 야광 네모 버튼 추가
+   ========================================== */
+
+/* 1. 텍스트 구역의 위치 기준점을 잡아줍니다 */
+.post-content-area {
+    position: relative !important;
+}
+
+/* 2. 오른쪽 아래에 예쁜 더보기 네모를 만듭니다 */
+.post-content-area::before {
+    content: '더보기 🌊';
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    
+    /* 심해와 어울리는 짙은 남색 배경 + 반투명 유리 효과 */
+    background: rgba(5, 12, 25, 0.95);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    
+    /* 야광 물빛 글자 디자인 */
+    color: #90e0ef;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border: 1px solid rgba(144, 224, 239, 0.3);
+    border-radius: 6px;
+    
+    /* 💡 핵심: 왼쪽으로 짙은 그림자를 쏴서 밑에 깔린 '...'을 스르륵 가려버립니다 */
+    box-shadow: -20px 0 15px rgba(5, 12, 25, 0.95);
+    
+    z-index: 5;
+    transition: all 0.3s ease;
+    pointer-events: none; /* 클릭은 부모인 카드가 통째로 인식하도록 방해 금지 */
+}
+
+/* 3. 마우스를 올리거나 터치했을 때 버튼이 빛나는 효과 */
+.post-card:hover .post-content-area::before {
+    background: rgba(144, 224, 239, 0.15);
+    color: #fff;
+    border-color: rgba(144, 224, 239, 0.6);
+    box-shadow: -20px 0 15px rgba(5, 12, 25, 0.95), 0 0 10px rgba(144, 224, 239, 0.3);
+}
 /* ==========================================
    💎 4가지 배경 완벽 호환: 유리알 스크롤바 (강제 적용)
    ========================================== */
