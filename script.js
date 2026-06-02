@@ -1292,3 +1292,23 @@ window.applyEnvironmentSettings = function() {
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
 };
+// ==========================================
+// 💧 수면 위 마우스 파문 효과 (Water Ripple Effect)
+// ==========================================
+document.addEventListener('click', function(e) {
+    // 1. 파문 효과를 낼 요소를 생성합니다.
+    const ripple = document.createElement('div');
+    ripple.className = 'water-ripple';
+    
+    // 2. 클릭한 마우스의 X, Y 좌표를 가져와 위치를 맞춥니다.
+    ripple.style.left = e.clientX + 'px';
+    ripple.style.top = e.clientY + 'px';
+    
+    // 3. 화면에 추가합니다.
+    document.body.appendChild(ripple);
+    
+    // 4. 애니메이션이 끝날 즈음(800ms) 찌꺼기가 남지 않게 깔끔히 지워줍니다.
+    setTimeout(() => {
+        ripple.remove();
+    }, 800);
+});
