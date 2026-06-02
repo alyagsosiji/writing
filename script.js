@@ -822,7 +822,7 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [대수술 디자인 완성 구역] 양쪽 버튼 캡슐화 및 완벽 대칭 레이아웃
+            // 💡 [배경틀 제거 완료] 위치와 양끝 정렬은 그대로 유지하되, 투명 배경 처리로 단추만 심플하게 노출
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
                 <div id="letter-batch-controls" style="
@@ -830,20 +830,16 @@ function renderUI(isAppend = false) {
                     align-items: center !important;
                     justify-content: space-between !important;
                     width: 100% !important;
-                    max-width: 450px !important;
-                    height: 44px !important;
-                    background: rgba(255, 255, 255, 0.03) !important;
-                    border: 1px solid rgba(0, 180, 216, 0.15) !important;
-                    border-radius: 25px !important;
-                    padding: 0 6px !important; /* 양쪽 버튼 대칭 마진 여백 균등 배분 */
-                    margin: 20px auto 10px auto !important;
+                    max-width: 450px !important; /* 기존 자석 정렬 범위 유지 */
+                    height: 36px !important;
+                    background: transparent !important; /* 🚨 기존 유리알 배경 완벽 삭제 */
+                    border: none !important;             /* 🚨 기존 테두리 완벽 삭제 */
+                    box-shadow: none !important;
+                    padding: 0 !important;
+                    margin: 25px auto 10px auto !important; /* 시원한 상하 여백 고정 */
                     box-sizing: border-box !important;
                     user-select: none !important;
-                    transition: all 0.25s ease !important;
-                "
-                onmouseenter="this.style.borderColor='rgba(0, 180, 216, 0.4)'; this.style.boxShadow='0 0 10px rgba(0, 180, 216, 0.1)';"
-                onmouseleave="this.style.borderColor='rgba(0, 180, 216, 0.15)'; this.style.boxShadow='none';"
-                >
+                ">
                     <label style="
                         display: inline-flex !important;
                         align-items: center !important;
@@ -854,7 +850,7 @@ function renderUI(isAppend = false) {
                         font-weight: 700 !important;
                         border-radius: 20px !important;
                         background: rgba(144, 224, 239, 0.06) !important;
-                        color: #90e0ef !important; /* 야광 청록빛 글자색 */
+                        color: #90e0ef !important;
                         border: 1px solid rgba(144, 224, 239, 0.2) !important;
                         cursor: pointer !important;
                         letter-spacing: 0.5px !important;
