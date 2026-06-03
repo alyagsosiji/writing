@@ -1111,3 +1111,70 @@ html, body {
         font-size: 0.75rem !important;
     }
 }
+/* ==========================================
+   📱 모바일 왼쪽 가장자리 하얀색 들뜸/네모 잔상 차단
+   ========================================== */
+
+/* 1. 웹페이지의 가장 밑바닥(뼈대)을 하얀색 -> 심해색으로 강제 교체 */
+html, body {
+    background-color: #02050d !important; /* 브라우저 기본 하얀 배경을 아예 심해색으로 칠함 */
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+/* 2. 아이폰(iOS) 등 모바일 기기의 왼쪽 노치/안전영역(Safe Area)에서 하얀색이 비치는 현상 방어 */
+@supports (padding: max(0px)) {
+    html, body {
+        padding-left: env(safe-area-inset-left) !important;
+        padding-right: env(safe-area-inset-right) !important;
+        background: #02050d !important;
+    }
+}
+
+/* 3. 혹시나 내부 컨테이너가 화면을 왼쪽으로 밀어내고 있다면 강제로 제자리 고정 */
+.ocean-background, 
+#posts-container {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+/* ==========================================
+   📱 모바일 시간대 배경화면 증발 버그 영구 해결
+   ========================================== */
+
+/* 1. 혹시 이전에 들어갔던 가짜 주소 강제 적용 코드를 완벽히 무력화 (기존 스크립트 엔진 복구) */
+@media (max-width: 768px) {
+    body.dawn-bg, .ocean-background.dawn-bg { background-image: inherit; }
+    body.day-bg, .ocean-background.day-bg { background-image: inherit; }
+    body.sunset-bg, .ocean-background.sunset-bg { background-image: inherit; }
+    body.night-bg, .ocean-background.night-bg { background-image: inherit; }
+}
+
+/* 2. iOS/모바일 브라우저의 배경 고정(Fixed) 렌더링 버그 물리적 파괴 */
+.ocean-background {
+    position: fixed !important; /* 배경 이미지를 화면에 물리적으로 못 박음 */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important; /* 높이를 모바일 화면에 정확히 맞춤 */
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    
+    /* 🚨 핵심: 버그를 유발하는 attachment 속성을 풀고 요소 자체를 고정 */
+    background-attachment: initial !important; 
+    
+    /* 배경이 글이나 버튼을 가리지 않도록 가장 깊은 심해(-999)로 보냄 */
+    z-index: -999 !important; 
+    pointer-events: none !important;
+}
+
+/* 3. 모바일에서 배경이 스크롤될 때 찢어지거나 튕기는 현상 방지 */
+html, body {
+    height: 100%;
+    min-height: 100vh;
+    background-color: #02050d !important;
+}
