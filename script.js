@@ -1161,39 +1161,55 @@ function highlightSearchKeyword(text, keyword) {
 }
 window.highlightSearchKeyword = highlightSearchKeyword;
 
+// 💡 [완전 교체] 모바일 튕김 현상 및 렌더링 버그를 원천 차단하는 강력한 배경 엔진
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = ""; let themeText = "";
     let mode = window.manualTimeOverride || 'auto';
+    
     if (mode === 'auto') {
         if (hour >= 6 && hour < 12) mode = 'morning';
         else if (hour >= 12 && hour < 18) mode = 'day';
         else if (hour >= 18 && hour < 20) mode = 'evening';
         else mode = 'night';
     }
+    
     if (mode === 'morning') { bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)"; themeText = "🌅 아침의 바다"; }
     else if (mode === 'day') { bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)"; themeText = "☀️ 낮의 바다"; }
     else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
     else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
     
-    // 💡 [핵심] body 대신 html(최상단)에 그라데이션을 부여하면 모바일 터치 스크롤을 절대로 건드리지 않습니다.
-    if (document.documentElement) {
-        document.documentElement.style.transition = "background 3s ease-in-out"; 
-        document.documentElement.style.background = bgStyle;
-        document.documentElement.style.backgroundAttachment = "fixed";
-        document.documentElement.style.backgroundSize = "cover";
+    // 1. 모바일 환경에서 렌더링 우선권을 확실하게 쥐는 고정 배경 레이어 강제 주입
+    let oceanBg = document.querySelector('.ocean-background');
+    if (!oceanBg) {
+        oceanBg = document.createElement('div');
+        oceanBg.className = 'ocean-background';
+        // 모바일 스크롤 튕김에 방해받지 않도록 화면 맨 뒤에 물리적으로 못을 박음
+        oceanBg.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-999; pointer-events:none; transition:background 3s ease-in-out;";
+        document.body.insertBefore(oceanBg, document.body.firstChild);
     }
     
-    // 원래의 body 배경색은 투명하게 열어주어 html의 그라데이션이 비쳐 보이게 만듭니다.
+    // 2. 물리적 액자에 시간대별 배경 스타일 강제 투입
+    oceanBg.style.background = bgStyle;
+    
+    // 3. 브라우저 바닥 뼈대인 html과 body의 충돌 방어 처리 (모바일 안전 영역 대응)
+    if (document.documentElement) {
+        document.documentElement.style.background = "#02050d"; // 하얀 네모가 뜰 수 있는 가장 바닥은 심해색으로 봉인
+        document.documentElement.style.minHeight = "100vh";
+    }
     if (document.body) {
-        document.body.style.background = "transparent";
+        document.body.style.background = "transparent"; // 배경 레이어가 비쳐 보이도록 투명화
     }
 
+    // 4. 시간대 텍스트 업데이트
     let tElem = document.getElementById('theme-widget'); 
-    if (!tElem && document.body) { tElem = document.createElement('div'); tElem.id = 'theme-widget'; document.body.appendChild(tElem); }
+    if (!tElem && document.body) { 
+        tElem = document.createElement('div'); 
+        tElem.id = 'theme-widget'; 
+        document.body.appendChild(tElem); 
+    }
     if (tElem) tElem.innerText = themeText;
 }
-
 
 
 // 💡 1. 캐시 경쟁 차단: 이제 여기서 몰래 네트워크 통신(fetch)을 시도하지 않습니다.
