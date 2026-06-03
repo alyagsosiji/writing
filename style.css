@@ -1179,29 +1179,28 @@ html, body {
 }
 
 /* ==========================================
-   🚨 모바일 왼쪽 기다란 네모(로딩 잔상) 영구 삭제
+   🚨 로딩 0.1초 딜레이 모바일 왼쪽 잔상 물리적 파괴
    ========================================== */
 
-/* 1. 이전에 노치 방어용으로 들어갔던 왼쪽 강제 여백(틈새의 원인)을 완전히 박멸 */
-@supports (padding: max(0px)) {
-    html, body {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-}
-
-/* 2. 화면 뼈대의 모든 여백을 0으로 깎고, 로딩 중에도 심해색을 유지하여 잔상 노출 방어 */
 html, body {
+    /* 모바일 브라우저의 악질적인 기본 여백/패딩 강제 압수 */
     margin: 0 !important;
     padding: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    
+    /* 화면 너비 고정 및 가로 스크롤 완전 차단 */
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
     overscroll-behavior-x: none !important;
+    
+    /* 자바스크립트가 배경을 그리기 전, 찰나의 순간에도 심해색 유지 */
     background-color: #02050d !important;
 }
 
-/* 3. JS가 배경을 그리기 전 0.1초 동안에도 빈틈이 보이지 않도록 배경 액자 기본색 세팅 */
-#ocean-bg-layer {
-    background-color: #02050d; /* 배경 이미지가 로딩되기 전 기본 베이스를 심해색으로 칠함 */
+/* 혹시 모를 내부 요소의 팽창으로 인한 왼쪽 밀림 현상 방어 */
+* {
+    box-sizing: border-box !important;
+    -webkit-tap-highlight-color: transparent !important;
 }
