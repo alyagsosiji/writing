@@ -1178,29 +1178,48 @@ html, body {
     display: none !important;
 }
 
+
+
 /* ==========================================
-   🚨 로딩 0.1초 딜레이 모바일 왼쪽 잔상 물리적 파괴
+   🚨 화면 전체 왼쪽 밀림 & 투명 기둥 완벽 파괴
    ========================================== */
 
-html, body {
-    /* 모바일 브라우저의 악질적인 기본 여백/패딩 강제 압수 */
+/* 1. 최상단 뿌리부터 왼쪽 밀림 현상 강제 압수 (모든 여백 0으로 초기화) */
+:root, html, body {
     margin: 0 !important;
     padding: 0 !important;
-    margin-left: 0 !important;
-    padding-left: 0 !important;
-    
-    /* 화면 너비 고정 및 가로 스크롤 완전 차단 */
-    width: 100% !important;
+    border: 0 !important;
+    left: 0 !important;
+    transform: none !important; /* 바디 전체가 옆으로 밀리는 것 절대 금지 */
+    width: 100vw !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
-    overscroll-behavior-x: none !important;
-    
-    /* 자바스크립트가 배경을 그리기 전, 찰나의 순간에도 심해색 유지 */
+    box-sizing: border-box !important;
     background-color: #02050d !important;
 }
 
-/* 혹시 모를 내부 요소의 팽창으로 인한 왼쪽 밀림 현상 방어 */
-* {
-    box-sizing: border-box !important;
-    -webkit-tap-highlight-color: transparent !important;
+/* 2. 기기 자체에서 억지로 밀어넣는 안전 여백(Safe Area) 강제 무력화 */
+@supports (padding-left: env(safe-area-inset-left)) {
+    :root, html, body, #ocean-bg-layer, #posts-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* 3. 배경 액자를 브라우저 창(Viewport) 자체에 절대 밀착 고정 */
+#ocean-bg-layer {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+    /* 하드웨어 가속을 켜서 배경을 화면에 1픽셀의 오차도 없이 강제 접착시킴 */
+    transform: translateZ(0) !important; 
 }
