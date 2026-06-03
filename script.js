@@ -1188,7 +1188,8 @@ function applyTimeBasedThemeEngine() {
     if (!oceanBg) {
         oceanBg = document.createElement('div');
         oceanBg.id = 'ocean-bg-layer';
-        oceanBg.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-999; pointer-events:none; transition:background 2.5s ease-in-out;";
+        // 🚨 [핵심 타격] 너비와 높이를 120%로 늘리고, 왼쪽(-10%)과 위(-10%)로 완전히 끌어당겨서 틈새를 멸망시킴
+        oceanBg.style.cssText = "position:fixed; top:-10vh; left:-10vw; width:120vw; height:120vh; z-index:-999; pointer-events:none; transition:background 1.5s ease-in-out;";
         document.body.insertBefore(oceanBg, document.body.firstChild);
     }
     oceanBg.style.background = bgStyle;
