@@ -1161,47 +1161,39 @@ function highlightSearchKeyword(text, keyword) {
 }
 window.highlightSearchKeyword = highlightSearchKeyword;
 
-// 💡 [완전 교체] 모바일 튕김 현상 및 렌더링 버그를 원천 차단하는 강력한 배경 엔진
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let bgStyle = ""; let themeText = "";
     let mode = window.manualTimeOverride || 'auto';
-    
+
     if (mode === 'auto') {
         if (hour >= 6 && hour < 12) mode = 'morning';
-        else if (hour >= 12 && hour < 18) mode = 'day';
+        else if (mode >= 12 && hour < 18) mode = 'day';
         else if (hour >= 18 && hour < 20) mode = 'evening';
         else mode = 'night';
     }
-    
+
     if (mode === 'morning') { bgStyle = "linear-gradient(135deg, #061121 0%, #153b50 50%, #00b4d8 100%)"; themeText = "🌅 아침의 바다"; }
     else if (mode === 'day') { bgStyle = "linear-gradient(135deg, #000428 0%, #004e92 60%, #90e0ef 100%)"; themeText = "☀️ 낮의 바다"; }
     else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
     else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
-    
-    // 1. 모바일 환경에서 렌더링 우선권을 확실하게 쥐는 고정 배경 레이어 강제 주입
-    let oceanBg = document.querySelector('.ocean-background');
+
+    // 💡 1. 꼬였던 브라우저 배경 초기화: html은 까맣게, body는 투명하게 열어둠
+    document.documentElement.style.setProperty('background-color', '#02050d', 'important');
+    document.body.style.setProperty('background-color', 'transparent', 'important');
+    document.body.style.setProperty('background-image', 'none', 'important');
+
+    // 💡 2. 어떤 상황에서도 스크롤에 튕기지 않는 절대적인 배경 액자 설치
+    let oceanBg = document.getElementById('ocean-bg-layer');
     if (!oceanBg) {
         oceanBg = document.createElement('div');
-        oceanBg.className = 'ocean-background';
-        // 모바일 스크롤 튕김에 방해받지 않도록 화면 맨 뒤에 물리적으로 못을 박음
-        oceanBg.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-999; pointer-events:none; transition:background 3s ease-in-out;";
+        oceanBg.id = 'ocean-bg-layer';
+        oceanBg.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-999; pointer-events:none; transition:background 2.5s ease-in-out;";
         document.body.insertBefore(oceanBg, document.body.firstChild);
     }
-    
-    // 2. 물리적 액자에 시간대별 배경 스타일 강제 투입
     oceanBg.style.background = bgStyle;
-    
-    // 3. 브라우저 바닥 뼈대인 html과 body의 충돌 방어 처리 (모바일 안전 영역 대응)
-    if (document.documentElement) {
-        document.documentElement.style.background = "#02050d"; // 하얀 네모가 뜰 수 있는 가장 바닥은 심해색으로 봉인
-        document.documentElement.style.minHeight = "100vh";
-    }
-    if (document.body) {
-        document.body.style.background = "transparent"; // 배경 레이어가 비쳐 보이도록 투명화
-    }
 
-    // 4. 시간대 텍스트 업데이트
+    // 💡 3. 테마 텍스트 업데이트
     let tElem = document.getElementById('theme-widget'); 
     if (!tElem && document.body) { 
         tElem = document.createElement('div'); 
