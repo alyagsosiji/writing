@@ -1058,3 +1058,56 @@ html, body {
     /* 물리적 크기를 키우는 대신 서재 테마에 맞는 은은한 푸른 발광 효과로 시선 집중 */
     text-shadow: 0 0 8px rgba(144, 224, 239, 0.45) !important; 
 }
+/* ==========================================
+   📱 모바일 환경 최적화 및 스크롤바/하얀 네모 오류 완벽 제거
+   ========================================== */
+
+/* 1. 가로 스크롤 절대 방어 및 스크롤바 교차점(하얀 네모) 원천 차단 */
+html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none !important;
+}
+
+/* 브라우저 우측 하단에 생기는 흉측한 스크롤바 코너(네모 잔상) 완벽 투명화 및 삭제 */
+::-webkit-scrollbar-corner {
+    background: transparent !important;
+    background-color: transparent !important;
+    display: none !important;
+}
+
+/* 2. 모바일 기기(너비 768px 이하) 전용 디테일 교정 */
+@media (max-width: 768px) {
+    /* 모바일에서는 터치 스크롤이 기본이므로, 좁은 화면을 차지하는 커스텀 스크롤바를 숨겨 앱처럼 깔끔하게 만듦 */
+    ::-webkit-scrollbar {
+        width: 0px !important; 
+        height: 0px !important;
+        background: transparent !important;
+        display: none !important;
+    }
+
+    /* 최근 추가한 컨트롤 바(전체선택/소멸)가 작은 폰 화면 밖으로 삐져나가 가로 스크롤을 유발하지 않도록 자동 축소 */
+    #letter-batch-controls {
+        max-width: 100% !important;
+        padding: 0 10px !important;
+        margin: 20px 10px 10px 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 화면 밖으로 넘칠 수 있는 제목이나 탭 메뉴 구역의 너비 안전선 확보 */
+    .section-subtitle, 
+    #view-tab-container {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* 모바일에서 버튼들 사이의 간격이 너무 넓어 화면이 깨지는 것 방지 */
+    #letter-batch-controls label {
+        font-size: 0.75rem !important;
+        gap: 4px !important;
+    }
+    #batch-delete-btn-custom {
+        padding: 0 12px !important;
+        font-size: 0.75rem !important;
+    }
+}
