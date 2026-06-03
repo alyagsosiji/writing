@@ -1168,7 +1168,7 @@ function applyTimeBasedThemeEngine() {
 
     if (mode === 'auto') {
         if (hour >= 6 && hour < 12) mode = 'morning';
-        else if (mode >= 12 && hour < 18) mode = 'day';
+        else if (hour >= 12 && hour < 18) mode = 'day';
         else if (hour >= 18 && hour < 20) mode = 'evening';
         else mode = 'night';
     }
