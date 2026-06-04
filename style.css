@@ -868,40 +868,45 @@ select option, #author-filter option {
     max-height: 6.4em !important; 
 }
 /* ==========================================
-   🛠️ 드롭다운(모드/정렬) 글자 겹침 해결 & 완벽 중앙 정렬
+   🛠️ 정렬(전체보기) 및 모드 선택 완벽 중앙 정렬
    ========================================== */
 select, #author-filter {
     appearance: none !important;
     -webkit-appearance: none !important;
+    -moz-appearance: none !important;
     
-    /* 평소엔 얌전하게! (탁한 배경/그림자 제거) */
+    /* 1. 양쪽 화살표 완벽 대칭 배치 */
+    background-image: 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: left 16px center, right 16px center !important;
+    background-size: 14px, 14px !important;
+    
+    /* 🚨 2. 핵심 교정: 중앙 정렬 틀어짐 완벽 해결 */
+    text-align: center !important;
+    text-align-last: center !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 44px !important;  /* 왼쪽 화살표 여백 */
+    padding-right: 44px !important; /* 오른쪽 화살표 여백 (완벽하게 똑같은 픽셀 부여) */
+    text-indent: 0px !important;    /* 브라우저가 몰래 넣는 들여쓰기 강제 삭제 */
+    
+    /* 3. 배경과 테두리는 얌전하게! */
     background-color: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(0, 180, 216, 0.15) !important;
     box-shadow: none !important;
     color: #e2e8f0 !important;
     
-    /* 🚨 화살표 겹침 해결: 화살표를 양쪽 끝(14px)으로 바짝 밀어내어 글자와 떨어뜨림 */
-    background-image: 
-        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
-        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat, no-repeat !important;
-    background-position: left 14px center, right 14px center !important;
-    background-size: 14px, 14px !important;
-    
-    /* 🚨 중앙 정렬 쏠림 차단: 좌우 여백을 넓게(40px) 주고 박스 최소 너비를 늘림 */
-    text-align: center !important;
-    text-align-last: center !important;
-    padding: 0 40px !important; 
-    min-width: 170px !important; /* 박스가 좁아져서 글씨가 화살표에 찔리는 현상 방지 */
+    min-width: 170px !important; 
     height: 44px !important;
     border-radius: 25px !important;
-    
     cursor: pointer !important;
     outline: none !important;
     transition: all 0.25s ease !important;
 }
 
-/* 눌렀을 때만 예쁘게 빛나는 효과 */
+/* 4. 눌렀을 때만 예쁘게 빛나는 효과 */
 select:hover, select:focus, 
 #author-filter:hover, #author-filter:focus {
     border-color: #00b4d8 !important;
@@ -913,11 +918,13 @@ select:hover, select:focus,
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,180,216,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
 }
 
-/* 🚨 드롭다운 목록 안쪽의 미세한 삐뚤어짐 원천 차단 */
+/* 🚨 5. 드롭다운 열었을 때 안쪽 리스트 글자 중앙 쏠림 해결 */
 select option, #author-filter option {
     background-color: #030a16 !important;
     color: #ffffff !important;
     text-align: center !important;
-    text-indent: 0 !important; /* 기본 들여쓰기 무시 */
-    padding: 10px 0 !important;
+    text-align-last: center !important;
+    text-indent: 0px !important; /* 크롬 등에서 글씨를 밀어버리는 현상 원천 차단 */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
