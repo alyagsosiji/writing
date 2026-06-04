@@ -868,20 +868,18 @@ select option, #author-filter option {
     max-height: 6.4em !important; 
 }
 /* ==========================================
-   🛠️ 드롭다운: 원본 .tab-btn 스타일 완벽 복사 (호버 없음)
+   🛠️ 드롭다운: 검색창 눌림 효과 & 화살표 픽스
    ========================================== */
 
-/* 1. 기본 상태: 원본 .tab-btn 수치 100% 동일 적용 */
+/* 1. 기본 상태: 얌전한 버튼 형태 유지 (화살표 양쪽 고정) */
 select, #author-filter {
-    /* 🚨 아시님 원본 .tab-btn 색상 및 형태 */
-    background: rgba(255, 255, 255, 0.02) !important; 
+    background-color: rgba(255, 255, 255, 0.02) !important; 
     border: 1px solid rgba(255, 255, 255, 0.06) !important;
     color: #94a3b8 !important; 
     border-radius: 30px !important; 
     font-size: 0.92rem !important;
     letter-spacing: 0.5px !important;
     
-    /* 화살표 양쪽 고정 (색상도 #94a3b8로 맞춤) */
     background-image: 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
@@ -889,7 +887,6 @@ select, #author-filter {
     background-position: left 16px center, right 16px center !important;
     background-size: 14px, 14px !important;
     
-    /* 중앙 정렬 유지 */
     text-align: center !important;
     text-align-last: center !important;
     padding: 10px 44px !important; 
@@ -900,32 +897,36 @@ select, #author-filter {
     cursor: pointer !important;
     outline: none !important;
     box-shadow: none !important;
+    transition: all 0.25s ease !important;
 }
 
-/* 2. 🚨 호버 시 아무 변화 없음 (절대 고정) */
+/* 2. 호버(Hover) 시 아무 변화 없음 */
 select:hover, #author-filter:hover {
-    background: rgba(255, 255, 255, 0.02) !important; 
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    background-color: rgba(255, 255, 255, 0.02) !important; 
+    border-color: rgba(255, 255, 255, 0.06) !important;
     color: #94a3b8 !important; 
     box-shadow: none !important;
 }
 
-/* 3. 클릭(Focus) 시: 원본 .tab-btn.active 수치 100% 동일 적용 */
+/* 3. 🚨 클릭(Focus) 시: 검색창 눌림 효과 적용 & 도배 방지 */
 select:focus, #author-filter:focus {
-    /* 🚨 아시님 원본 .tab-btn.active 색상 및 효과 */
-    background: linear-gradient(135deg, rgba(0, 180, 216, 0.2), rgba(247, 163, 127, 0.1)) !important;
-    border-color: #00b4d8 !important; 
-    color: #00b4d8 !important; 
+    /* 🚨 검색창과 똑같은 딥다크 블루 배경 + 테두리 발광 */
+    background-color: rgba(3, 10, 23, 0.85) !important;
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.2) !important;
+    color: #ffffff !important; 
     font-weight: bold !important; 
-    box-shadow: 0 0 15px rgba(0, 180, 216, 0.15) !important;
     
-    /* 화살표 색상도 활성화 색상(#00b4d8)으로 변경 */
+    /* 🚨 도배 방지: 화살표 색상을 바꾸면서 위치와 반복 방지를 명시적으로 다시 고정! */
     background-image: 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300b4d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300b4d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: left 16px center, right 16px center !important;
+    background-size: 14px, 14px !important;
 }
 
-/* 4. 드롭다운 내부 리스트 글자 중앙 쏠림 완전 차단 */
+/* 4. 드롭다운 내부 글자 정렬 유지 */
 select option, #author-filter option {
     background-color: #030a16 !important;
     color: #ffffff !important;
