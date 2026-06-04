@@ -805,3 +805,43 @@ select option, #author-filter option {
     text-align: center !important;
     padding: 10px !important;
 }
+/* ==========================================
+   🌟 [더보기] 버튼 및 호버 애니메이션 원본 복구
+   ========================================== */
+
+/* 1. 날짜와 더보기 버튼이 좁은 화면에서도 절대 밑으로 떨어지지 않게 한 줄 고정 */
+.post-footer .date {
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important; 
+    white-space: nowrap !important; 
+    gap: 8px !important; 
+}
+
+/* 2. 더보기 🌊 버튼 디자인 원본 그대로 롤백 */
+.post-footer .date::after {
+    content: '더보기 🌊' !important;
+    display: inline-block !important;
+    background: rgba(5, 12, 25, 0.95) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    color: #90e0ef !important;
+    font-size: 0.7rem !important; 
+    font-weight: 600 !important;
+    padding: 2px 8px !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+    pointer-events: none !important;
+    
+    /* 줄바꿈을 막았을 때 버튼이 찌그러지는 현상 방지 */
+    flex-shrink: 0 !important; 
+}
+
+/* 3. 카드에 마우스 올렸을 때 발광하는 원본 호버 효과 */
+.post-card:hover .post-footer .date::after {
+    background: rgba(144, 224, 239, 0.15) !important;
+    color: #fff !important;
+    border-color: rgba(144, 224, 239, 0.6) !important;
+    box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
+}
