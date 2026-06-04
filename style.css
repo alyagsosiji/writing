@@ -990,3 +990,22 @@ select option, #author-filter option {
     transform: translate3d(0, 0, 0) !important;
     text-rendering: optimizeLegibility !important; /* 글꼴 선명도 최적화 */
 }
+/* ==========================================
+   🔒 오직 본문 및 타이틀 글자 반짝임(깨짐)만 정밀 타격 해결
+   ========================================== */
+.post-card h3, 
+.post-content-area, 
+.post-card .date,
+#detail-text, 
+#detail-text *, 
+.detail-popup-header h3, 
+.detail-popup-header span {
+    /* 🚨 부모 상자는 일절 건드리지 않고, 글자 자체의 선명도 모드만 상시 고정 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+    
+    /* 🚨 애니메이션 작동 시 브라우저가 글자를 다시 그리면서 튀는 현상 차단 */
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
