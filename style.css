@@ -938,3 +938,28 @@ select option, #author-filter option {
     text-indent: 0px !important; 
     font-weight: normal !important;
 }
+/* ==========================================
+   🚨 2. 오른쪽으로 밀리는 현상 (브라우저 고유 여백) 완벽 초기화
+   ========================================== */
+
+select, #author-filter {
+    /* 브라우저가 몰래 잡고 있는 우측 공간을 0으로 강제 철거 (이것이 우측 밀림의 원인입니다!) */
+    padding-left: 0 !important;
+    padding-right: 0 !important; 
+    
+    text-align: center !important;
+    text-align-last: center !important;
+    text-indent: 0px !important;
+    box-sizing: border-box !important;
+}
+
+select option, #author-filter option {
+    /* 열렸을 때 안쪽 리스트 글자들의 여백도 똑같이 0으로 초기화 */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    
+    text-align: center !important;
+    text-align-last: center !important;
+    text-indent: 0px !important;
+    margin: 0 !important;
+}
