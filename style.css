@@ -127,7 +127,7 @@ body {
 }
 
 .mini-library-btn:hover {
-    transform: translate3d(-50%, -7px, 0) scale(1.03) !important;
+    transform: translate3d(-50%, -8px, 0) scale(1.03) !important;
     border-color: #90e0ef !important;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45) !important;
 }
@@ -758,6 +758,50 @@ select {
     text-align: center !important;
     text-align-last: center !important;
 }
-select option {
-    text-align: center !important; /* 드롭다운 메뉴 내부의 글자도 중앙 정렬로 예쁘게 통일 */
+/* ==========================================
+   🛠️ 드롭다운(셀렉트 박스) 환경설정 모드 스타일로 완벽 통일
+   ========================================== */
+select, #author-filter {
+    /* 1. 기본 브라우저의 못생긴 스타일과 화살표 완전 제거 */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    
+    /* 2. 글씨 완벽한 정중앙 정렬 */
+    text-align: center !important;
+    text-align-last: center !important;
+    
+    /* 3. 모드 선택(환경설정)과 동일한 심해 배경 및 테두리 적용 */
+    background-color: rgba(3, 10, 23, 0.8) !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    color: #ffffff !important;
+    
+    /* 4. 예쁜 물빛 화살표 아이콘 추가 */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important; /* 화살표를 우측에 배치 */
+    background-size: 16px !important;
+    
+    /* 🚨 핵심: 글자가 진짜 정중앙에 오도록 좌우 여백을 대칭(40px)으로 맞춤 */
+    /* 우측 화살표가 차지하는 공간만큼 좌측도 띄워주어야 글자가 쏠리지 않습니다. */
+    padding: 10px 40px 10px 40px !important; 
+    
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 5. 마우스를 올리거나 클릭했을 때 발광 효과도 동일하게! */
+select:hover, select:focus, #author-filter:hover, #author-filter:focus {
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
+    background-color: rgba(6, 15, 31, 0.95) !important;
+    outline: none !important;
+}
+
+/* 6. 드롭다운을 클릭해서 열었을 때 나오는 목록(옵션)들도 까맣고 예쁘게 중앙 정렬 */
+select option, #author-filter option {
+    background-color: #040d1c !important;
+    color: #ffffff !important;
+    text-align: center !important;
+    padding: 10px !important;
 }
