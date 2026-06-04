@@ -127,7 +127,7 @@ body {
 }
 
 .mini-library-btn:hover {
-    transform: translate3d(-50%, -4px, 0) scale(1.03) !important;
+    transform: translate3d(-50%, -7px, 0) scale(1.03) !important;
     border-color: #90e0ef !important;
     box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45) !important;
 }
