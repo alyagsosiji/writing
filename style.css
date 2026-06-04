@@ -964,32 +964,7 @@ select option, #author-filter option {
     margin: 0 !important;
 }
 
-/* ==========================================
-   🔒 마우스 올렸을 때 글자 반짝임/깨짐(폰트 잔상) 최종 해결
-   ========================================== */
 
-/* 1. 카드와 모달 내부의 모든 텍스트 요소에 안티앨리어싱 및 하드웨어 가속 완전 고정 */
-.post-card,
-.post-card *,
-.modal-content,
-.modal-content * {
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
-    -webkit-transform: translate3d(0, 0, 0) !important;
-    transform: translate3d(0, 0, 0) !important;
-}
-
-/* 2. 마우스를 올리거나 애니메이션이 동작할 때 브라우저가 텍스트를 다시 그리는 현상 원천 차단 */
-.post-card:hover,
-.post-card:hover *,
-.modal-content *,
-#detail-text * {
-    -webkit-font-smoothing: antialiased !important;
-    transform: translate3d(0, 0, 0) !important;
-    text-rendering: optimizeLegibility !important; /* 글꼴 선명도 최적화 */
-}
 /* ==========================================
    🔒 오직 본문 및 타이틀 글자 반짝임(깨짐)만 정밀 타격 해결
    ========================================== */
