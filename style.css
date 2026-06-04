@@ -986,150 +986,110 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   📱 1. 모바일 최적화 및 오류/잔상(Ghosting) 해결
+   📱 1. 모바일 렌더링 오류(잔상/깜빡임) 및 터치 최적화
 ==================================================== */
-/* 모바일에서 터치 시 파란색 하이라이트 깜빡임 제거 및 스크롤 최적화 */
+/* 모바일에서 버튼 누를 때 파란색 배경 깜빡임 제거 */
 * {
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
-html, body {
-    overscroll-behavior-y: none;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* 🚨 핵심 해결: backdrop-filter(블러) 사용 시 발생하는 모바일 잔상 및 화면 깨짐 방지 
-   하드웨어 가속(3D 렌더링)을 강제 활성화하여 그래픽 충돌을 없앱니다.
-*/
+/* 모바일 GPU 하드웨어 가속을 강제하여 잔상(Ghosting)과 겹침 완벽 방지 */
 .modal-content, 
-.system-modal-box,
-.auth-box,
-#view-tab-container,
-.update-toast,
-.ocean-background,
-.list-item,
+.system-modal-box, 
+.detail-popup-body,
+.list-item, 
 .gallery-item,
 .letter-selection-bar {
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
 }
+
 
 /* ====================================================
-   📝 2. 글 모드 마다 줄 제한 (Text Clamp) 적용
+   📝 2. 글 모드별 줄 제한 (말줄임표) 강제 적용
 ==================================================== */
-/* JS에서 지정한 line-clamp 클래스가 실제로 텍스트를 자르도록(말줄임표) 활성화 */
-.line-clamp-1, .line-clamp-2, .line-clamp-3, .line-clamp-4, .line-clamp-5 {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-break: break-all;
+/* 자바스크립트나 HTML에서 클래스만 부여하면 무조건 말줄임(...) 처리되도록 강제 */
+.line-clamp-1, .line-clamp-2, .line-clamp-3, .line-clamp-4, .line-clamp-5,
+.text-clamp-1, .text-clamp-2, .text-clamp-3, .text-clamp-4, .text-clamp-5 {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word !important;
 }
 
-.line-clamp-1 { -webkit-line-clamp: 1; }
-.line-clamp-2 { -webkit-line-clamp: 2; }
-.line-clamp-3 { -webkit-line-clamp: 3; }
-.line-clamp-4 { -webkit-line-clamp: 4; }
-.line-clamp-5 { -webkit-line-clamp: 5; }
+.line-clamp-1, .text-clamp-1 { -webkit-line-clamp: 1 !important; }
+.line-clamp-2, .text-clamp-2 { -webkit-line-clamp: 2 !important; }
+.line-clamp-3, .text-clamp-3 { -webkit-line-clamp: 3 !important; }
+.line-clamp-4, .text-clamp-4 { -webkit-line-clamp: 4 !important; }
+.line-clamp-5, .text-clamp-5 { -webkit-line-clamp: 5 !important; }
+
 
 /* ====================================================
-   ✉️ 3. 편지 전체 선택 바 & 개별 체크박스 위치 정렬
+   ✉️ 3. 편지 전체 선택 바 & 개별 체크박스 위치 완벽 정렬
 ==================================================== */
-/* 체크박스의 부모가 되는 카드에 기준점(relative) 부여 */
-.list-item, .gallery-item {
-    position: relative !important; 
-    padding-right: 45px !important; /* 체크박스가 글자를 가리지 않도록 우측 여백 확보 */
-}
-
-/* 상단 전체선택 메뉴 박스 */
+/* 상단 전체선택 영역 (가로 정렬 및 간격 조정) */
 .letter-selection-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(15, 23, 42, 0.75); /* 바다 테마에 맞춘 반투명 네이비 */
-    border: 1px solid rgba(56, 189, 248, 0.4);
-    border-radius: 12px;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 16px !important;
+    margin-bottom: 20px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
+/* '전체 선택' 글자와 체크박스 묶음 */
 .select-all-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
 }
 
-/* 전체선택 체크박스 및 글 목록 체크박스 디자인 */
-.select-all-wrap input[type="checkbox"],
-.letter-checkbox {
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    accent-color: #38bdf8; /* 바다 테마 라이트블루 포인트 */
-    margin: 0;
-    position: relative;
-    z-index: 10;
+/* 개별 편지(글) 카드를 감싸는 부모에게 기준점(relative) 부여 및 우측 여백 확보 */
+.list-item, 
+.gallery-item {
+    position: relative !important;
+    padding-right: 45px !important; /* 글씨가 체크박스를 침범하지 않게 방어 */
 }
 
-.select-all-wrap label {
-    color: #cbd5e1;
-    font-size: 1.05rem;
-    cursor: pointer;
-    font-weight: bold;
-    user-select: none;
-}
-
-/* 선택 소멸(삭제) 버튼 */
-.danger-btn {
-    background: rgba(239, 68, 68, 0.9);
-    color: white;
-    border: 1px solid #ef4444;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25);
-    transition: background 0.3s, transform 0.2s;
-}
-
-.danger-btn:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-}
-
-/* 개별 글(편지) 마다 우측 상단에 체크박스 고정 배치 */
+/* 개별 편지 우측 상단 체크박스 절대 위치 고정 */
 .letter-checkbox {
     position: absolute !important;
-    top: 15px;
-    right: 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    border-radius: 4px;
+    top: 16px !important;
+    right: 16px !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3) !important;
 }
 
-/* 모바일 화면 전용 체크박스 접근성 미세 조정 */
+/* 전체선택 체크박스 크기 통일 */
+.select-all-wrap input[type="checkbox"] {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+}
+
+/* 모바일 전용 체크박스 터치 최적화 */
 @media screen and (max-width: 768px) {
     .letter-selection-bar {
-        padding: 10px 15px;
+        padding: 10px 12px !important;
     }
-    
-    .select-all-wrap label {
-        font-size: 0.95rem;
-    }
-    
-    /* 모바일에서는 손가락으로 누르기 쉽게 체크박스 크기를 살짝 키움 */
-    .select-all-wrap input[type="checkbox"],
     .letter-checkbox {
-        width: 26px;
-        height: 26px;
+        width: 26px !important; 
+        height: 26px !important; /* 모바일에서 손가락으로 누르기 쉽게 확대 */
+        top: 12px !important;
+        right: 12px !important;
     }
-    
-    .letter-checkbox {
-        top: 12px;
-        right: 12px;
+    .select-all-wrap input[type="checkbox"] {
+        width: 26px !important;
+        height: 26px !important;
     }
 }
