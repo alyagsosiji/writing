@@ -847,78 +847,85 @@ select option, #author-filter option {
     box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
 }
 /* ==========================================
-   🛠️ 모드 선택 & 정렬 선택 (드롭다운) 디자인 최종 교정
+   🌟 [복구] 본문 5줄 / 4줄 제한 및 반 줄 잘림 완벽 해결
    ========================================== */
+.post-content-area {
+    /* 기존에 꼬여있던 높이 제한을 풀고 웹킷 엔진으로 원상복구 */
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 5 !important; /* 기본 (리스트 모드 & 스크롤 모드): 5줄 제한 */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    word-break: break-all !important;
+    
+    /* 🚨 높이를 강제로 자르면 반 줄이 잘리므로 해제 (이게 문제의 원인이었습니다) */
+    max-height: none !important; 
+    line-height: 1.6 !important;
+}
 
+/* 갤러리 모드 전용 (4줄 제한) */
+.posts-grid-view .post-content-area {
+    -webkit-line-clamp: 4 !important;
+}
+
+/* 모바일 화면 공통 (3줄 제한) */
+@media (max-width: 768px) {
+    .post-content-area {
+        -webkit-line-clamp: 3 !important;
+    }
+}
+/* ==========================================
+   🛠️ 드롭다운(모드/정렬) 글자 겹침 해결 & 완벽 중앙 정렬
+   ========================================== */
 select, #author-filter {
     appearance: none !important;
     -webkit-appearance: none !important;
-    -moz-appearance: none !important;
     
-    /* 1. 기본 상태 (안 눌렀을 때): 탁한 배경과 야광을 빼고 얌전하게! */
+    /* 평소엔 얌전하게! (탁한 배경/그림자 제거) */
     background-color: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(0, 180, 216, 0.15) !important;
     box-shadow: none !important;
     color: #e2e8f0 !important;
     
-    /* 2. 양쪽 화살표 대칭 배치 (왼쪽, 오른쪽 모두 화살표 삽입) */
+    /* 🚨 화살표 겹침 해결: 화살표를 양쪽 끝(14px)으로 바짝 밀어내어 글자와 떨어뜨림 */
     background-image: 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
     background-repeat: no-repeat, no-repeat !important;
-    background-position: left 20px center, right 20px center !important;
-    background-size: 16px, 16px !important;
+    background-position: left 14px center, right 14px center !important;
+    background-size: 14px, 14px !important;
     
-    /* 3. 완벽한 중앙 정렬: 높이를 검색창(44px)과 맞추고, 좌우 여백을 똑같이 부여 */
+    /* 🚨 중앙 정렬 쏠림 차단: 좌우 여백을 넓게(40px) 주고 박스 최소 너비를 늘림 */
     text-align: center !important;
     text-align-last: center !important;
+    padding: 0 40px !important; 
+    min-width: 170px !important; /* 박스가 좁아져서 글씨가 화살표에 찔리는 현상 방지 */
     height: 44px !important;
     border-radius: 25px !important;
-    padding: 0 45px !important; /* 양옆 화살표 공간 확보 */
     
     cursor: pointer !important;
     outline: none !important;
     transition: all 0.25s ease !important;
 }
 
-/* 4. 눌렀을 때(focus) 또는 올렸을 때(hover)만 야광 발광 (눌린 효과) */
+/* 눌렀을 때만 예쁘게 빛나는 효과 */
 select:hover, select:focus, 
 #author-filter:hover, #author-filter:focus {
     border-color: #00b4d8 !important;
     box-shadow: 0 0 10px rgba(0, 180, 216, 0.2) !important;
     background-color: rgba(3, 10, 23, 0.85) !important;
     color: #ffffff !important;
-    
-    /* 눌렸을 때는 화살표 색상도 예쁜 물빛으로 변경 */
     background-image: 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,180,216,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
         url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,180,216,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
 }
 
-/* 5. 드롭다운 하단 옵션 목록 디자인 */
+/* 🚨 드롭다운 목록 안쪽의 미세한 삐뚤어짐 원천 차단 */
 select option, #author-filter option {
     background-color: #030a16 !important;
     color: #ffffff !important;
     text-align: center !important;
-}
-/* ==========================================
-   🌟 [복구] 본문 5줄 / 4줄 제한 및 말줄임표 원상복구
-   ========================================== */
-.post-content-area {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important; /* 리스트 모드: 원래대로 5줄 제한 */
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    max-height: none !important; /* 제가 잘못 넣었던 높이 강제 제한 삭제 */
-}
-
-.posts-grid-view .post-content-area {
-    -webkit-line-clamp: 4 !important; /* 갤러리 모드: 원래대로 4줄 제한 */
-}
-
-@media (max-width: 768px) {
-    .post-content-area {
-        -webkit-line-clamp: 3 !important; /* 모바일은 3줄 */
-    }
+    text-indent: 0 !important; /* 기본 들여쓰기 무시 */
+    padding: 10px 0 !important;
 }
