@@ -963,3 +963,42 @@ select option, #author-filter option {
     text-indent: 0px !important;
     margin: 0 !important;
 }
+/* ==========================================
+   🌊 팝업창 원래 심해 느낌 완벽 고정 + 글자 흔들림만 차단
+   ========================================== */
+
+/* 1. 🚨 원래 있던 영롱한 심해 배경 무조건 사수 (호버 시에도 절대 안 변함) */
+.modal-content {
+    background: linear-gradient(145deg, #0a1b36, #040d1c) !important;
+    border: 1px solid rgba(0, 180, 216, 0.2) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+    
+    /* 브라우저가 레이어를 재계산하면서 깜빡이지 않도록 하드웨어 가속 적용 */
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
+
+/* 마우스를 올렸을 때 배경이 투명해지던 문제를 막고 원래 심해 톤 그대로 유지 */
+.modal-content:hover {
+    background: linear-gradient(145deg, #0a1b36, #040d1c) !important;
+    border: 1px solid rgba(0, 180, 216, 0.2) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7) !important;
+    transform: translateZ(0) scale(1) !important; /* 미세 크기 변화 완벽 차단 */
+    transition: none !important;
+}
+
+/* 2. 글씨 위에 마우스 올렸을 때 글꼴이 두꺼워지거나 흐려지는 현상만 차단 */
+#detail-text, #detail-text * {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
+
+/* 글씨 자체에 마우스가 올라가도 색상이나 텍스트 자체 배경이 튀지 않게 원본 고정 */
+#detail-text:hover, #detail-text *:hover {
+    color: #cbd5e1 !important; /* 원래 글씨 색상 박제 */
+    background: transparent !important;
+}
