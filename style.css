@@ -759,46 +759,47 @@ select {
     text-align-last: center !important;
 }
 /* ==========================================
-   🛠️ 드롭다운(셀렉트 박스) 환경설정 모드 스타일로 완벽 통일
+   🛠️ 리스트/갤러리(모드) & 전체보기(정렬) 대칭 중앙정렬 패치
    ========================================== */
+
 select, #author-filter {
-    /* 1. 기본 브라우저의 못생긴 스타일과 화살표 완전 제거 */
     appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     
-    /* 2. 글씨 완벽한 정중앙 정렬 */
-    text-align: center !important;
-    text-align-last: center !important;
-    
-    /* 3. 모드 선택(환경설정)과 동일한 심해 배경 및 테두리 적용 */
-    background-color: rgba(3, 10, 23, 0.8) !important;
-    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    /* 1. 기본 상태: 눌린 표기(탁한 배경/그림자) 완전 제거 */
+    background-color: rgba(3, 10, 23, 0.4) !important;
+    border: 1px solid rgba(144, 224, 239, 0.15) !important;
+    box-shadow: none !important;
     color: #ffffff !important;
     
-    /* 4. 예쁜 물빛 화살표 아이콘 추가 */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
-    background-repeat: no-repeat !important;
-    background-position: right 15px center !important; /* 화살표를 우측에 배치 */
-    background-size: 16px !important;
+    /* 🚨 2. 양쪽 화살표 대칭 배치 (왼쪽과 오른쪽에 똑같은 물빛 다운 화살표 삽입) */
+    background-image: 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: left 15px center, right 15px center !important;
+    background-size: 16px, 16px !important;
     
-    /* 🚨 핵심: 글자가 진짜 정중앙에 오도록 좌우 여백을 대칭(40px)으로 맞춤 */
-    /* 우측 화살표가 차지하는 공간만큼 좌측도 띄워주어야 글자가 쏠리지 않습니다. */
-    padding: 10px 40px 10px 40px !important; 
+    /* 🚨 3. 글자 완벽 정중앙 고정: 좌우 패딩을 똑같이 45px로 대칭시켜 쏠림 원천 차단 */
+    text-align: center !important;
+    text-align-last: center !important;
+    padding: 10px 45px 10px 45px !important;
     
     cursor: pointer !important;
+    outline: none !important;
     transition: all 0.3s ease !important;
 }
 
-/* 5. 마우스를 올리거나 클릭했을 때 발광 효과도 동일하게! */
-select:hover, select:focus, #author-filter:hover, #author-filter:focus {
+/* 4. 마우스를 올리거나 클릭(포커스)했을 때만 빛나게 처리 */
+select:hover, select:focus, 
+#author-filter:hover, #author-filter:focus {
     border-color: #00b4d8 !important;
-    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.3) !important;
     background-color: rgba(6, 15, 31, 0.95) !important;
-    outline: none !important;
 }
 
-/* 6. 드롭다운을 클릭해서 열었을 때 나오는 목록(옵션)들도 까맣고 예쁘게 중앙 정렬 */
+/* 5. 드롭다운 하단 목록 디자인 */
 select option, #author-filter option {
     background-color: #040d1c !important;
     color: #ffffff !important;
@@ -844,4 +845,59 @@ select option, #author-filter option {
     color: #fff !important;
     border-color: rgba(144, 224, 239, 0.6) !important;
     box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
+}
+/* ==========================================
+   🛠️ 모드 선택 & 정렬 선택 (드롭다운) 디자인 최종 교정
+   ========================================== */
+
+select, #author-filter {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    
+    /* 1. 기본 상태 (안 눌렀을 때): 탁한 배경과 야광을 빼고 얌전하게! */
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(0, 180, 216, 0.15) !important;
+    box-shadow: none !important;
+    color: #e2e8f0 !important;
+    
+    /* 2. 양쪽 화살표 대칭 배치 (왼쪽, 오른쪽 모두 화살표 삽입) */
+    background-image: 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: left 20px center, right 20px center !important;
+    background-size: 16px, 16px !important;
+    
+    /* 3. 완벽한 중앙 정렬: 높이를 검색창(44px)과 맞추고, 좌우 여백을 똑같이 부여 */
+    text-align: center !important;
+    text-align-last: center !important;
+    height: 44px !important;
+    border-radius: 25px !important;
+    padding: 0 45px !important; /* 양옆 화살표 공간 확보 */
+    
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all 0.25s ease !important;
+}
+
+/* 4. 눌렀을 때(focus) 또는 올렸을 때(hover)만 야광 발광 (눌린 효과) */
+select:hover, select:focus, 
+#author-filter:hover, #author-filter:focus {
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.2) !important;
+    background-color: rgba(3, 10, 23, 0.85) !important;
+    color: #ffffff !important;
+    
+    /* 눌렸을 때는 화살표 색상도 예쁜 물빛으로 변경 */
+    background-image: 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,180,216,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"), 
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(0,180,216,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+
+/* 5. 드롭다운 하단 옵션 목록 디자인 */
+select option, #author-filter option {
+    background-color: #030a16 !important;
+    color: #ffffff !important;
+    text-align: center !important;
 }
