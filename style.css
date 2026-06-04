@@ -901,3 +901,24 @@ select option, #author-filter option {
     color: #ffffff !important;
     text-align: center !important;
 }
+/* ==========================================
+   🌟 [복구] 본문 5줄 / 4줄 제한 및 말줄임표 원상복구
+   ========================================== */
+.post-content-area {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important; /* 리스트 모드: 원래대로 5줄 제한 */
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-height: none !important; /* 제가 잘못 넣었던 높이 강제 제한 삭제 */
+}
+
+.posts-grid-view .post-content-area {
+    -webkit-line-clamp: 4 !important; /* 갤러리 모드: 원래대로 4줄 제한 */
+}
+
+@media (max-width: 768px) {
+    .post-content-area {
+        -webkit-line-clamp: 3 !important; /* 모바일은 3줄 */
+    }
+}
