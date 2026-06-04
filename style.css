@@ -1119,60 +1119,34 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   ⚙️ 2. 관리자(로그인) 전용 하단 레이아웃 (Grid 적용)
+   ⚙️ 2. 관리자(로그인) 전용 하단 2줄 레이아웃 (Grid 적용)
 ==================================================== */
-/* 날짜 옆 더보기 / 그 밑에 시간 옆 수정, 소멸 버튼을 완벽하게 배치합니다. */
+/* 관리자 모드일 때만 생성되는 2줄 전용 푸터 */
 .admin-card-footer {
     display: grid !important;
-    grid-template-columns: 1fr auto !important; /* 좌측 공간은 넓게, 우측 버튼 공간은 내용만큼 */
-    grid-template-rows: auto auto !important; /* 2줄(Enter) 처리 */
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto !important;
     row-gap: 8px !important;
     column-gap: 10px !important;
     align-items: center !important;
     width: 100% !important;
     margin-top: auto !important;
     padding-top: 12px !important;
-    border-top: 1px dashed rgba(199, 164, 255, 0.3) !important; /* 기존 테마에 어울리는 구분선 */
+    border-top: 1px dashed rgba(199, 164, 255, 0.3) !important;
 }
 
-/* 1행 1열: 날짜 */
-.admin-card-footer .footer-date {
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    text-align: left;
-    font-size: 0.95rem;
-    color: #e5d9f2;
-}
+.admin-card-footer .footer-date { grid-column: 1 / 2; grid-row: 1 / 2; text-align: left; font-size: 0.95rem; color: #e5d9f2; }
+.admin-card-footer .footer-more { grid-column: 2 / 3; grid-row: 1 / 2; text-align: right; }
+.admin-card-footer .footer-time { grid-column: 1 / 2; grid-row: 2 / 3; text-align: left; font-size: 0.85rem; color: #bcafd0; }
+.admin-card-footer .footer-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; gap: 8px; }
+.admin-card-footer button { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; white-space: nowrap; }
 
-/* 1행 2열: 더보기 버튼 영역 */
-.admin-card-footer .footer-more {
-    grid-column: 2 / 3;
-    grid-row: 1 / 2;
-    text-align: right;
-}
-
-/* 2행 1열: 시간 (엔터 처리된 효과) */
-.admin-card-footer .footer-time {
-    grid-column: 1 / 2;
-    grid-row: 2 / 3;
-    text-align: left;
-    font-size: 0.85rem;
-    color: #bcafd0;
-}
-
-/* 2행 2열: 수정 & 소멸 버튼 그룹 */
-.admin-card-footer .footer-actions {
-    grid-column: 2 / 3;
-    grid-row: 2 / 3;
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px; /* 버튼 사이 간격 */
-}
-
-/* 수정/소멸/더보기 버튼 테마 맞춤 기본 스타일링 보정 */
-.admin-card-footer button {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    border-radius: 6px;
-    white-space: nowrap;
+/* 일반 방문자(비로그인)용 기존 1줄 푸터 (기존 디자인 완벽 유지) */
+.normal-card-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin-top: auto !important;
+    padding-top: 12px !important;
 }
