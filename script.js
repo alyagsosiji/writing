@@ -763,6 +763,43 @@ function renderUI(isAppend = false) {
     const subtitleElem = document.querySelector('.section-subtitle'); 
     const authorStatsContainer = document.getElementById('author-stats'); 
     const authorFilterContainer = document.getElementById('author-filter-container');
+
+    // script.js 내부의 카드 HTML 생성 부분 예시
+
+let footerHTML = '';
+
+if (isAdmin) {
+    // 👑 로그인 상태: 2줄 레이아웃 (날짜/더보기 엔터 시간/수정/소멸)
+    footerHTML = `
+        <div class="admin-card-footer">
+            <div class="footer-date">${item.date}</div>
+            <div class="footer-more">
+                <button onclick="openDetailModal('${item.id}')">더보기</button>
+            </div>
+            <div class="footer-time">${item.time}</div>
+            <div class="footer-actions">
+                <button onclick="editPost('${item.id}')">수정</button>
+                <button class="danger-btn" onclick="deletePost('${item.id}')">소멸</button>
+            </div>
+        </div>
+    `;
+} else {
+    // 👤 비로그인 상태: 기존 1줄 레이아웃 유지 (날짜+시간 옆에 더보기)
+    footerHTML = `
+        <div class="normal-card-footer">
+            <span class="date">${item.date} ${item.time}</span>
+            <button onclick="openDetailModal('${item.id}')">더보기</button>
+        </div>
+    `;
+}
+
+// 최종적으로 카드 HTML에 합치기
+const cardHTML = `
+    <div class="gallery-item">
+        <h3 class="item-title">${item.title}</h3>
+        <p class="item-desc">${item.content}</p>
+        ${footerHTML} </div>
+`;
     
     if (!container || !paginationContainer) return; 
 
