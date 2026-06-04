@@ -499,3 +499,80 @@ body.no-scroll { overflow: hidden; touch-action: none; }
     #letter-batch-controls label { font-size: 0.75rem !important; gap: 4px !important; }
     #batch-delete-btn-custom { padding: 0 12px !important; font-size: 0.75rem !important; }
 }
+/* ==========================================
+   💧 1. 4개 테마 완벽 호환: 투명 물방울(유리) 스크롤바
+   ========================================== */
+::-webkit-scrollbar { 
+    width: 8px !important; 
+    height: 0px !important; 
+    display: block !important; 
+}
+
+/* 스크롤 길(트랙)은 바다가 잘 보이게 거의 투명하게 처리 */
+::-webkit-scrollbar-track { 
+    background: rgba(0, 0, 0, 0.05) !important; 
+    border-radius: 10px !important; 
+}
+
+/* 스크롤 막대(Thumb): 위아래는 투명하고 가운데는 맺힌 물방울 같은 입체적 그라데이션 */
+::-webkit-scrollbar-thumb { 
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.05) 100%) !important; 
+    border: 1px solid rgba(255, 255, 255, 0.15) !important; 
+    border-radius: 10px !important; 
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2) !important; /* 유리 내부 반사광 */
+}
+
+/* 마우스 올렸을 때 발광 효과 */
+::-webkit-scrollbar-thumb:hover { 
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.1) 100%) !important; 
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.4), 0 0 10px rgba(255, 255, 255, 0.2) !important; 
+}
+
+/* ==========================================
+   📖 2. 지침서 버튼 위치 및 호버 애니메이션 원본 복구
+   ========================================== */
+.mini-library-btn {
+    position: fixed !important;
+    bottom: 30px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important; /* 🚨 중앙 정렬 축 원상 복구 */
+    z-index: 9999 !important;
+    padding: 10px 22px !important;
+    border-radius: 30px !important;
+    background: rgba(6, 15, 31, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    cursor: pointer !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 15px rgba(0, 180, 216, 0.2) !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s !important;
+}
+
+.mini-library-btn:hover {
+    transform: translate3d(-50%, -4px, 0) scale(1.03) !important; /* 🚨 호버 시에도 축 틀어짐 완벽 방어 */
+    border-color: #90e0ef !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5), 0 0 20px rgba(144, 224, 239, 0.45) !important;
+}
+
+/* 데스크탑 스크롤바 오프셋 보정 */
+@media (min-width: 769px) { 
+    .mini-library-btn { left: calc(50% - 7px) !important; } 
+}
+
+/* 모바일 디바이스 위치 복구 */
+@media (max-width: 768px) {
+    .mini-library-btn { 
+        bottom: 20px !important; 
+        padding: 8px 16px !important; 
+        left: 50% !important; 
+        transform: translateX(-50%) !important;
+    }
+    .mini-library-btn:hover { 
+        transform: translate3d(-50%, -2px, 0) scale(1.02) !important; 
+    }
+}
