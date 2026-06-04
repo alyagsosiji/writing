@@ -965,35 +965,28 @@ select option, #author-filter option {
 }
 
 /* ==========================================
-   🔒 글 목록 호버 및 팝업 노출 시 글자 흔들림/두꺼워짐 방지
+   🔒 마우스 올렸을 때 글자 반짝임/깨짐(폰트 잔상) 최종 해결
    ========================================== */
 
-/* 1. 글 카드 목록: 마우스 올릴 때(Hover) 본문 글자 및 타이틀 렌더링 상태를 상시 고정 */
-.post-card {
-    will-change: transform, box-shadow !important; /* 브라우저에 움직임을 미리 예고하여 깜빡임 방지 */
-}
-
-.post-content-area, 
-.post-card h3, 
-    background: transparent !important;
-.post-card .date {
+/* 1. 카드와 모달 내부의 모든 텍스트 요소에 안티앨리어싱 및 하드웨어 가속 완전 고정 */
+.post-card,
+.post-card *,
+.modal-content,
+.modal-content * {
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    transform: translateZ(0) !important; /* 💡 항상 GPU 가속 레이어를 쓰게 만들어 호버 시 글자 변형을 원천 차단 */
+    -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
 }
 
-/* 2. 글 팝업(모달): 창이 뜰 때나 내부 마우스 움직임 시 서체 및 레이아웃 강제 박제 */
-.modal-content {
-    will-change: transform, opacity !important;
-}
-
-#detail-text, 
-#detail-text *, 
-.detail-popup-header h3, 
-.detail-popup-header span {
+/* 2. 마우스를 올리거나 애니메이션이 동작할 때 브라우저가 텍스트를 다시 그리는 현상 원천 차단 */
+.post-card:hover,
+.post-card:hover *,
+.modal-content *,
+#detail-text * {
     -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    transform: translateZ(0) !important; /* 💡 팝업 내부 텍스트 렌더링 모드 고정 */
-    backface-visibility: hidden !important;
+    transform: translate3d(0, 0, 0) !important;
+    text-rendering: optimizeLegibility !important; /* 글꼴 선명도 최적화 */
 }
