@@ -1479,3 +1479,17 @@ window.deleteSelectedLetters = function() {
         });
     });
 };
+// ====================================================
+// 🔒 백업창 및 지침서창 화면 밖(배경) 클릭 시 닫힘 방지 패치
+// ====================================================
+document.addEventListener('click', function(event) {
+    const backupModal = document.getElementById('backup-modal');
+    const libraryModal = document.getElementById('library-modal');
+    
+    // 클릭한 대상이 모달창의 바깥 배경(디밍 레이어) 자체일 경우,
+    // 기존에 심겨 있던 외부 클릭 닫기 이벤트가 발동하기 전에 최상위에서 가로채서 파괴합니다.
+    if (event.target === backupModal || event.target === libraryModal) {
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+    }
+}, true); // 💡 캡처링(true) 모드를 적용하여 기존 닫기 기능보다 무조건 먼저 실행되도록 방어막을 칩니다.
