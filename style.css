@@ -1223,32 +1223,32 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 최종 교정: 호버 애니메이션, 기본 흰색, 폰트 완벽 고정
+   🔒 탭 버튼 클릭 및 호버 시 폰트 변형(깨짐) 완벽 방지
 ==================================================== */
-.tab-btn {
-    /* 1. 기본 상태일 때 어두운 회색이 아닌 선명한 '하얀색' 고정 */
+.tab-btn,
+.tab-btn:hover,
+.tab-btn.active {
+    /* 1. 폰트를 흐릿하게 만들거나 다르게 보이게 했던 모든 가속 속성 강제 해제(원본 복구) */
+    transform: none;
+    -webkit-transform: none;
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    
+    /* 2. 글꼴 및 선명도를 브라우저 기본 최적값으로 복원 */
+    -webkit-font-smoothing: subpixel-antialiased !important;
+    -moz-osx-font-smoothing: auto !important;
+    text-rendering: auto !important;
+
+    /* 3. 기본 상태일 때 하얀색 유지 */
     color: #ffffff !important;
-    
-    /* 2. 폰트(글씨체)가 다르게 보이는 현상 해결 (사이트 전체 기본 폰트로 강제 고정) */
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
-    
-    /* 3. 호버나 클릭 시 폰트 두께가 미묘하게 얇아지거나 깨지는 현상 원천 차단 */
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    backface-visibility: hidden !important;
-    -webkit-backface-visibility: hidden !important;
-    
-    /* 4. 애니메이션 부드럽게 유지 (글자가 이상하게 뭉개지지 않도록 제한) */
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease !important;
 }
 
-/* 활성화(클릭된) 상태는 원래 쓰시던 예쁜 파란색과 볼드체 유지 */
+/* 4. 클릭(활성화) 상태일 때 원본 파란색 효과 적용 */
 .tab-btn.active {
     color: #00b4d8 !important;
-    font-weight: bold !important;
 }
 
-/* 마우스를 올렸을 때 버튼이 위로 살짝 떠오르는 원본 기능 부활 */
+/* 5. 마우스를 올렸을 때 위로 살짝 떠오르는 원본 호버 기능 원상복구 */
 .tab-btn:hover {
     transform: translateY(-1.5px) !important;
     -webkit-transform: translateY(-1.5px) !important;
