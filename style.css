@@ -1204,12 +1204,20 @@ select option, #author-filter option {
     box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
 }
 /* ====================================================
-   🔒 카드 호버 시 글자 렌더링 깨짐(깜빡임/잔상) 완벽 방지
+   🔒 카드 호버 시 글자 깜빡임(잔상) 최종 완벽 해결
 ==================================================== */
 .post-card {
-    /* 카드를 상시 3D 가속 레이어로 분리하여 호버 시 렌더링 방식이 변하는 것을 원천 차단 */
+    /* 1. 카드를 상시 GPU 가속 레이어로 고정 (깜빡임 대비) */
+    will-change: transform !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: translate3d(0, 0, 0) !important;
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
-    -webkit-transform: translateZ(0); 
-    transform: translateZ(0);
+}
+
+.post-card:hover {
+    /* 2. 마우스를 올려 카드가 위로 뜰 때 GPU 가속이 풀리는 현상 원천 차단 */
+    /* 기존 translateY(-4px)를 3D 좌표계로 변경하여 렌더링 깨짐 방어 */
+    -webkit-transform: translate3d(0, -4px, 0) !important;
+    transform: translate3d(0, -4px, 0) !important;
 }
