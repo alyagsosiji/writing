@@ -1223,30 +1223,16 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 & 카드 호버/클릭 시 글자 깜빡임(깨짐)만 완벽 방지
+   🔒 탭 버튼 클릭(전환) 시 글자 미묘한 변형/깜빡임 최종 해결
 ==================================================== */
-.tab-btn, 
-.post-card, 
-.post-card * {
-    /* 기존 효과는 1%도 건드리지 않고, 브라우저의 글자 렌더링 방식만 상시 고정 */
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
-}
-/* ====================================================
-   🔒 탭 버튼 클릭(활성화) 및 호버 시 글자 미묘한 변형(잔상) 방지
-==================================================== */
-.tab-btn, 
-.tab-btn:hover, 
-.tab-btn.active {
-    /* 기존 색상과 효과는 그대로 두되, 브라우저의 글자 렌더링 방식만 상시 고정 */
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
+.tab-btn {
+    /* 브라우저가 0.3초 동안 글자 렌더링까지 애니메이션 먹이려는 버그 차단 */
+    /* transition: all 대신 색상과 테두리, 그림자만 부드럽게 변하도록 명시 */
+    transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
     
-    /* 3D 가속 레이어에 항시 고정하여 배경이 변할 때 글자가 다시 그려지는 현상 원천 차단 */
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
+    /* 글자 렌더링 상시 고정 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
     -webkit-transform: translateZ(0) !important;
     transform: translateZ(0) !important;
 }
