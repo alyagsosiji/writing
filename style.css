@@ -1234,3 +1234,19 @@ select option, #author-filter option {
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
 }
+/* ====================================================
+   🔒 탭 버튼 클릭(활성화) 및 호버 시 글자 미묘한 변형(잔상) 방지
+==================================================== */
+.tab-btn, 
+.tab-btn:hover, 
+.tab-btn.active {
+    /* 기존 색상과 효과는 그대로 두되, 브라우저의 글자 렌더링 방식만 상시 고정 */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    
+    /* 3D 가속 레이어에 항시 고정하여 배경이 변할 때 글자가 다시 그려지는 현상 원천 차단 */
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-transform: translateZ(0) !important;
+    transform: translateZ(0) !important;
+}
