@@ -1133,9 +1133,10 @@ select option, #author-filter option {
     margin-bottom: 15px !important;
 }
 
+/* 관리자 2줄 푸터 레이아웃 */
 .admin-grid-footer {
     display: grid !important;
-    grid-template-columns: 1fr auto !important;
+    grid-template-columns: 1fr auto !important; /* 좌측 넓게, 우측 내용만큼 */
     grid-template-rows: auto auto !important;
     row-gap: 8px !important;
     column-gap: 10px !important;
@@ -1147,32 +1148,23 @@ select option, #author-filter option {
 }
 
 .admin-grid-footer .grid-date { grid-column: 1 / 2; grid-row: 1 / 2; text-align: left; font-size: 0.85rem; color: #e5d9f2; }
-.admin-grid-footer .grid-more { grid-column: 2 / 3; grid-row: 1 / 2; text-align: right; }
+.admin-grid-footer .grid-more { grid-column: 2 / 3; grid-row: 1 / 2; text-align: right; } /* 더보기 우측 정렬 */
 .admin-grid-footer .grid-time { grid-column: 1 / 2; grid-row: 2 / 3; text-align: left; font-size: 0.8rem; color: #bcafd0; }
-.admin-grid-footer .grid-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; gap: 8px; }
+.admin-grid-footer .grid-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; }
 
-.normal-grid-footer {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin-top: auto !important;
-    padding-top: 12px !important;
-    border-top: 1px dashed rgba(144, 224, 239, 0.3) !important;
-}
-.normal-grid-footer .date { font-size: 0.85rem; color: #e5d9f2; }
 
 /* ====================================================
-   ✉️ 편지 전체선택 체크박스 수직 정렬 완벽 해결
+   ✉️ 편지 전체선택 체크박스 & 글자 수직 중앙 완벽 정렬
 ==================================================== */
 #letter-batch-controls label {
     display: inline-flex !important;
     align-items: center !important;
+    gap: 6px !important; /* 체크박스와 글자 사이 간격 */
+    line-height: 1 !important;
 }
 
-/* 글자 폰트 베이스라인과 체크박스 박스를 강제로 일치시킵니다 */
 #letter-select-all {
-    margin: 0 6px 0 0 !important;
-    position: relative !important;
-    transform: translateY(-2px) !important; /* 체크박스만 위로 살짝 들어올림 */
+    margin: 0 !important;
+    transform: none !important; 
+    position: static !important;
 }
