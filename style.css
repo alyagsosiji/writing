@@ -1119,16 +1119,15 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   🖼️ 갤러리 & 스크롤 모드 전용 5줄 제한 및 2줄 레이아웃
+   🖼️ 1. 갤러리/스크롤 4줄 제한 (말줄임표 삭제 & 엔터 유지)
 ==================================================== */
 .grid-text-clamp {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important;
-    -webkit-box-orient: vertical !important;
+    /* 기존 말줄임표 관련 속성을 모두 폐기하고 원본 방식(높이 제한)으로 복구 */
+    display: block !important; 
+    line-height: 1.6 !important; 
+    max-height: 6.4em !important; /* 💡 정확히 4줄(1.6 * 4) 분량까지만 출력 */
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    word-break: break-all !important;
-    white-space: normal !important;
+    white-space: pre-line !important; /* 엔터(줄바꿈) 정상 적용 */
     flex-grow: 1 !important;
     margin-bottom: 15px !important;
 }
@@ -1222,18 +1221,16 @@ select option, #author-filter option {
     transform: translate3d(0, -4px, 0) !important;
 }
 
+
 /* ====================================================
-   🔒 탭 버튼(글/편지 전환) 호버 및 클릭 시 글자 잔상(깜빡임) 완벽 고정
+   🔒 탭 버튼 & 카드 호버/클릭 시 글자 깜빡임(깨짐)만 완벽 방지
 ==================================================== */
-.tab-btn {
-    /* 버튼을 항상 3D 가속 레이어에 띄워두어 호버/클릭 시 렌더링이 변형되는 현상 원천 차단 */
-    will-change: transform !important;
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
-    -webkit-transform: translate3d(0, 0, 0) !important;
-    transform: translate3d(0, 0, 0) !important;
-    
-    /* 어떤 상태에서도 부드러운 글자 테두리 상시 유지 */
+.tab-btn, 
+.post-card, 
+.post-card * {
+    /* 기존 효과는 1%도 건드리지 않고, 브라우저의 글자 렌더링 방식만 상시 고정 */
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
 }
