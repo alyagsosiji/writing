@@ -1480,15 +1480,16 @@ window.deleteSelectedLetters = function() {
     });
 };
 // ====================================================
-// 🔒 백업창 및 지침서창 화면 밖(배경) 클릭 시 닫힘 방지 패치
+// 🔒 백업창, 지침서창, 글 상세보기창 화면 밖(배경) 클릭 시 닫힘 방지 패치
 // ====================================================
 document.addEventListener('click', function(event) {
     const backupModal = document.getElementById('backup-modal');
     const libraryModal = document.getElementById('library-modal');
+    const detailModal = document.getElementById('detail-modal'); // 💡 글 상세보기 모달 추가
     
-    // 클릭한 대상이 모달창의 바깥 배경(디밍 레이어) 자체일 경우,
+    // 클릭한 대상이 모달창들의 바깥 배경(디밍 레이어) 자체일 경우,
     // 기존에 심겨 있던 외부 클릭 닫기 이벤트가 발동하기 전에 최상위에서 가로채서 파괴합니다.
-    if (event.target === backupModal || event.target === libraryModal) {
+    if (event.target === backupModal || event.target === libraryModal || event.target === detailModal) {
         event.stopPropagation();
         event.stopImmediatePropagation();
     }
