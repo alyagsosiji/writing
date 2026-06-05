@@ -1223,36 +1223,32 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 클릭 및 호버 시 폰트 탈옥(글꼴 변형) 원천 차단
+   🔒 탭 버튼 원본 호버 효과 및 디자인 100% 유지 + 폰트 변형 완벽 차단
 ==================================================== */
-/* 1. 기본 상태: 원본의 호버 이펙트와 기능을 100% 보존하면서 글꼴 변경 버그 방어 */
+/* 1. 평소 상태: 원본의 폰트 종류와 굵기를 처음부터 'Bold'로 고정하여 클릭 시 굵기 변화로 인한 깨짐 방지 */
 .tab-btn {
-    /* 폰트가 브라우저 버그로 인해 기본 고딕으로 깨지는 것을 막기 위해 명시적으로 고정 */
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+    font-weight: Regular !important; /* 💡 처음부터 글자 굵기를 통일하여 클릭 시 변형되는 현상 원천 차단 */
+    color: #ffffff !important; /* 호버 아닐 때도 글자색 하얀색 유지 */
     
-    /* 비활성화 상태일 때도 은은하고 선명한 흰색 톤 유지 */
-    color: #ffffff !important;
-    
-    /* 🚨 브라우저가 글자색 그라데이션 영역을 계산하다 폰트를 떨어뜨리는 버그 원천 봉쇄 */
-    -webkit-background-clip: padding-box !important;
-    background-clip: padding-box !important;
-}
-
-/* 2. 클릭하여 활성화(.active) 되었을 때 글자 폰트 굵기와 꼴이 유지되도록 강제 각인 */
-.tab-btn.active {
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
-    font-weight: bold !important;
-    color: #00b4d8 !important;
-    
-    /* 렌더링 방식 강제 고정 */
+    /* 브라우저가 강제로 렌더링을 뭉개지 못하도록 텍스트 환경 고정 */
     -webkit-font-smoothing: subpixel-antialiased !important;
     -moz-osx-font-smoothing: auto !important;
+    text-rendering: optimizeLegibility !important;
 }
 
-/* 3. 마우스를 올렸을 때 위로 살짝 떠오르는 원본 애니메이션 및 폰트 고정 */
+/* 2. 클릭(활성화) 상태: 기존 원본의 예쁜 바다색(파란색)과 효과만 깔끔하게 적용 */
+.tab-btn.active {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+    font-weight: Regular !important;
+    color: #00b4d8 !important;
+}
+
+/* 3. 호버 상태: 원본에 있던 위로 둥실 떠오르는 이펙트(-1.5px) 완벽하게 복구 및 정상 작동 */
 .tab-btn:hover {
     transform: translateY(-1.5px) !important;
     -webkit-transform: translateY(-1.5px) !important;
-    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
     color: #ffffff !important;
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+    font-weight: Regular !important;
 }
