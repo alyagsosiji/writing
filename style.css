@@ -1203,3 +1203,13 @@ select option, #author-filter option {
     border-color: rgba(144, 224, 239, 0.6) !important;
     box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
 }
+/* ====================================================
+   🔒 카드 호버 시 글자 렌더링 깨짐(깜빡임/잔상) 완벽 방지
+==================================================== */
+.post-card {
+    /* 카드를 상시 3D 가속 레이어로 분리하여 호버 시 렌더링 방식이 변하는 것을 원천 차단 */
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    -webkit-transform: translateZ(0); 
+    transform: translateZ(0);
+}
