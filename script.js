@@ -951,16 +951,16 @@ function renderUI(isAppend = false) {
         
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
+            // 💡 개별 편지 카드의 체크박스도 텍스트와 어긋나지 않게 미세 조정 (top:-2px)
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0; position:relative; top:-2px;">`;
         }
 
-        // 🟢 기본값: 회원님의 원본 레이아웃 100% 유지 (리스트 모드, 편지 등)
+        // 🟢 기본값: 편지 모드, 리스트 모드는 원본 100% 유지 (건드리지 않음)
         let footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         let contentHtml = `<div class="post-content-area">${item.content}</div>`;
 
-        // 🚨 오직 "글(posts)" 이면서 "갤러리/스크롤" 모드일 때만 새로운 레이아웃 덮어쓰기
+        // 🚨 오직 "글(posts)" 이면서 "갤러리(grid) 또는 스크롤(infinite)" 모드일 때만 적용!
         if (currentView === 'posts' && (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite')) {
-            // 날짜와 시간 분리
             let fullDateStr = displayDate;
             let datePart = fullDateStr; 
             let timePart = "";
@@ -970,15 +970,14 @@ function renderUI(isAppend = false) {
                 datePart = fullDateStr.replace(timePart, '').trim();
             }
 
-            // 본문 5줄 말줄임 클래스 추가
             contentHtml = `<div class="post-content-area grid-text-clamp">${item.content}</div>`;
 
-            // 관리자 2줄 / 일반 방문자 1줄 푸터 분리 적용
             if (isAdmin) {
+                // 💡 더보기 버튼의 class="mgmt-btn" 삭제 -> 원본 디자인으로 완벽 복구
                 footerHtml = `
                     <div class="admin-grid-footer" onclick="event.stopPropagation();">
                         <div class="grid-date">${datePart}</div>
-                        <div class="grid-more"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
+                        <div class="grid-more"><button onclick="window.openDetailModal('${item.id}')">더보기</button></div>
                         <div class="grid-time">${timePart}</div>
                         <div class="grid-actions">
                             <button class="mgmt-btn" onclick="window.prepareEdit('${item.id}')">수정</button>
@@ -987,16 +986,16 @@ function renderUI(isAppend = false) {
                     </div>
                 `;
             } else {
+                // 💡 더보기 버튼의 class="mgmt-btn" 삭제 -> 원본 디자인으로 완벽 복구
                 footerHtml = `
                     <div class="normal-grid-footer" onclick="event.stopPropagation();">
                         <span class="date">${fullDateStr}</span>
-                        <button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button>
+                        <button onclick="window.openDetailModal('${item.id}')">더보기</button>
                     </div>
                 `;
             }
         }
 
-        // 카드 최종 조립
         card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3>${contentHtml}${footerHtml}`;
         cardFragment.appendChild(card);
     });
