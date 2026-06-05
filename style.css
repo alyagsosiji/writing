@@ -1121,7 +1121,6 @@ select option, #author-filter option {
 /* ====================================================
    🖼️ 갤러리 & 스크롤 모드 전용 5줄 제한 및 2줄 레이아웃
 ==================================================== */
-/* 5줄 텍스트 말줄임 (JS에서 지정한 곳에만 발동) */
 .grid-text-clamp {
     display: -webkit-box !important;
     -webkit-line-clamp: 5 !important;
@@ -1134,7 +1133,6 @@ select option, #author-filter option {
     margin-bottom: 15px !important;
 }
 
-/* 관리자(로그인) 전용 2줄 푸터 (그리드 정렬 강제) */
 .admin-grid-footer {
     display: grid !important;
     grid-template-columns: 1fr auto !important;
@@ -1153,7 +1151,6 @@ select option, #author-filter option {
 .admin-grid-footer .grid-time { grid-column: 1 / 2; grid-row: 2 / 3; text-align: left; font-size: 0.8rem; color: #bcafd0; }
 .admin-grid-footer .grid-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; gap: 8px; }
 
-/* 일반 방문자 전용 1줄 푸터 */
 .normal-grid-footer {
     display: flex !important;
     justify-content: space-between !important;
@@ -1165,26 +1162,17 @@ select option, #author-filter option {
 }
 .normal-grid-footer .date { font-size: 0.85rem; color: #e5d9f2; }
 
-
 /* ====================================================
-   ✉️ 체크박스 디자인 & 전체선택 글자 완벽 정렬
+   ✉️ 편지 전체선택 체크박스 수직 정렬 완벽 해결
 ==================================================== */
-/* 전체선택 박스 내부 텍스트와 체크박스 수직 중앙 정렬 */
 #letter-batch-controls label {
-    display: flex !important;
+    display: inline-flex !important;
     align-items: center !important;
 }
 
+/* 글자 폰트 베이스라인과 체크박스 박스를 강제로 일치시킵니다 */
 #letter-select-all {
     margin: 0 6px 0 0 !important;
     position: relative !important;
-    top: -1px !important; /* 폰트 기준선에 맞춰 체크박스를 살짝 위로 당김 */
-}
-
-/* 체크박스를 기존 바다 테마에 어울리도록 수정 (네온 그림자 효과) */
-.letter-checkbox, 
-#letter-select-all {
-    accent-color: #00b4d8 !important;
-    filter: drop-shadow(0 0 3px rgba(0, 180, 216, 0.5)) !important;
-    cursor: pointer !important;
+    transform: translateY(-2px) !important; /* 체크박스만 위로 살짝 들어올림 */
 }
