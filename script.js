@@ -931,24 +931,61 @@ function renderUI(isAppend = false) {
     const cardFragment = document.createDocumentFragment();
 
     currentItems.forEach((item) => {
-        const card = document.createElement('div'); card.className = 'post-card'; card.onclick = () => openDetailModal(item.id);
-        let mgmtButtonsHtml = '';
-        if (isAdmin) {
-            mgmtButtonsHtml = currentView === 'posts' 
-                ? `<div class="card-mgmt-btns"><button class="mgmt-btn" onclick="event.stopPropagation(); window.prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deletePost('${item.id}')">소멸</button></div>`
-                : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deleteLetter('${item.id}')">소멸</button></div>`;
+        const card = document.createElement('div'); 
+        // 💡 이전에 드린 CSS(.gallery-item)가 작동하도록 클래스 추가 결합
+        card.className = 'post-card gallery-item'; 
+        card.onclick = () => openDetailModal(item.id);
+        
+        let readBadgeHtml = ''; 
+        if (currentView === 'letters' && item.read === true) { 
+            readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; 
         }
-        
-        let readBadgeHtml = ''; if (currentView === 'letters' && item.read === true) { readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; }
 
-        const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
-        
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
             selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
-        card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area">${item.content}</div><div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        // 💡 날짜와 시간을 분리 (로그인 시 엔터 효과를 위해)
+        let fullDateStr = formatTo24Hour(item.date);
+        let authorPrefix = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ` : ``;
+        let datePart = fullDateStr; 
+        let timePart = "";
+        let timeMatch = fullDateStr.match(/\d{1,2}:\d{2}(:\d{2})?$/);
+        if (timeMatch) {
+            timePart = timeMatch[0];
+            datePart = fullDateStr.replace(timePart, '').trim();
+        }
+
+        let footerHTML = '';
+
+        if (isAdmin) {
+            // 👑 관리자 로그인 시: 2줄 푸터 (날짜 옆 더보기 / [엔터] / 시간 옆 수정·소멸)
+            let mgmtButtonsHtml = currentView === 'posts' 
+                ? `<button class="mgmt-btn" onclick="event.stopPropagation(); window.prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deletePost('${item.id}')">소멸</button>`
+                : `<button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deleteLetter('${item.id}')">소멸</button>`;
+
+            footerHTML = `
+                <div class="admin-card-footer" onclick="event.stopPropagation();">
+                    <div class="footer-date">${authorPrefix}${datePart}</div>
+                    <div class="footer-more"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
+                    <div class="footer-time">${timePart}</div>
+                    <div class="footer-actions">${mgmtButtonsHtml}</div>
+                </div>
+            `;
+        } else {
+            // 👤 비로그인 일반 방문자 시: 기존 1줄 푸터 유지 (날짜시간 옆 더보기)
+            footerHTML = `
+                <div class="normal-card-footer" onclick="event.stopPropagation();">
+                    <span class="date">${authorPrefix}${fullDateStr}</span>
+                    <button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button>
+                </div>
+            `;
+        }
+
+        // 💡 완성된 카드 조립 (본문을 .item-desc 클래스로 감싸 5줄 말줄임 CSS 적용 강제)
+        card.innerHTML = `<h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3><div class="post-content-area item-desc">${item.content}</div>${footerHTML}`;
+        
         cardFragment.appendChild(card);
     });
     
