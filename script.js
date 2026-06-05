@@ -951,15 +951,15 @@ function renderUI(isAppend = false) {
         
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            // 💡 개별 편지 카드의 체크박스도 텍스트와 어긋나지 않게 미세 조정 (top:-2px)
+            // 개별 체크박스 위치도 어긋나지 않게 보정
             selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0; position:relative; top:-2px;">`;
         }
 
-        // 🟢 기본값: 편지 모드, 리스트 모드는 원본 100% 유지 (건드리지 않음)
+        // 🟢 편지 / 리스트 모드: 기존 원본 구조 100% 유지
         let footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         let contentHtml = `<div class="post-content-area">${item.content}</div>`;
 
-        // 🚨 오직 "글(posts)" 이면서 "갤러리(grid) 또는 스크롤(infinite)" 모드일 때만 적용!
+        // 🚨 오직 글(posts) + 갤러리/스크롤 모드일 때만 적용!
         if (currentView === 'posts' && (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite')) {
             let fullDateStr = displayDate;
             let datePart = fullDateStr; 
@@ -973,24 +973,28 @@ function renderUI(isAppend = false) {
             contentHtml = `<div class="post-content-area grid-text-clamp">${item.content}</div>`;
 
             if (isAdmin) {
-                // 💡 더보기 버튼의 class="mgmt-btn" 삭제 -> 원본 디자인으로 완벽 복구
+                // 💡 더보기 버튼을 리스트의 원본 버튼처럼 mgmt-btn 클래스를 먹여 동일하게 출력
                 footerHtml = `
                     <div class="admin-grid-footer" onclick="event.stopPropagation();">
                         <div class="grid-date">${datePart}</div>
-                        <div class="grid-more"><button onclick="window.openDetailModal('${item.id}')">더보기</button></div>
+                        <div class="grid-more">
+                            <div class="card-mgmt-btns"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
+                        </div>
                         <div class="grid-time">${timePart}</div>
                         <div class="grid-actions">
-                            <button class="mgmt-btn" onclick="window.prepareEdit('${item.id}')">수정</button>
-                            <button class="mgmt-btn danger-btn" onclick="window.deletePost('${item.id}')">소멸</button>
+                            <div class="card-mgmt-btns">
+                                <button class="mgmt-btn" onclick="window.prepareEdit('${item.id}')">수정</button>
+                                <button class="mgmt-btn danger-btn" onclick="window.deletePost('${item.id}')">소멸</button>
+                            </div>
                         </div>
                     </div>
                 `;
             } else {
-                // 💡 더보기 버튼의 class="mgmt-btn" 삭제 -> 원본 디자인으로 완벽 복구
+                // 일반 방문자용 원본 유지
                 footerHtml = `
                     <div class="normal-grid-footer" onclick="event.stopPropagation();">
                         <span class="date">${fullDateStr}</span>
-                        <button onclick="window.openDetailModal('${item.id}')">더보기</button>
+                        <div class="card-mgmt-btns"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
                     </div>
                 `;
             }
