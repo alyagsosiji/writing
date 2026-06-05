@@ -1119,10 +1119,23 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   ⚙️ 2. 관리자(로그인) 전용 하단 2줄 레이아웃 (Grid 적용)
+   🖼️ 갤러리 & 스크롤 모드 전용 5줄 제한 및 2줄 레이아웃
 ==================================================== */
-/* 관리자 모드일 때만 생성되는 2줄 전용 푸터 */
-.admin-card-footer {
+/* 5줄 텍스트 말줄임 (JS에서 지정한 곳에만 발동) */
+.grid-text-clamp {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-all !important;
+    white-space: normal !important;
+    flex-grow: 1 !important;
+    margin-bottom: 15px !important;
+}
+
+/* 관리자(로그인) 전용 2줄 푸터 (그리드 정렬 강제) */
+.admin-grid-footer {
     display: grid !important;
     grid-template-columns: 1fr auto !important;
     grid-template-rows: auto auto !important;
@@ -1132,21 +1145,38 @@ select option, #author-filter option {
     width: 100% !important;
     margin-top: auto !important;
     padding-top: 12px !important;
-    border-top: 1px dashed rgba(199, 164, 255, 0.3) !important;
+    border-top: 1px dashed rgba(144, 224, 239, 0.3) !important;
 }
 
-.admin-card-footer .footer-date { grid-column: 1 / 2; grid-row: 1 / 2; text-align: left; font-size: 0.95rem; color: #e5d9f2; }
-.admin-card-footer .footer-more { grid-column: 2 / 3; grid-row: 1 / 2; text-align: right; }
-.admin-card-footer .footer-time { grid-column: 1 / 2; grid-row: 2 / 3; text-align: left; font-size: 0.85rem; color: #bcafd0; }
-.admin-card-footer .footer-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; gap: 8px; }
-.admin-card-footer button { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; white-space: nowrap; }
+.admin-grid-footer .grid-date { grid-column: 1 / 2; grid-row: 1 / 2; text-align: left; font-size: 0.85rem; color: #e5d9f2; }
+.admin-grid-footer .grid-more { grid-column: 2 / 3; grid-row: 1 / 2; text-align: right; }
+.admin-grid-footer .grid-time { grid-column: 1 / 2; grid-row: 2 / 3; text-align: left; font-size: 0.8rem; color: #bcafd0; }
+.admin-grid-footer .grid-actions { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; justify-content: flex-end; gap: 8px; }
 
-/* 일반 방문자(비로그인)용 기존 1줄 푸터 (기존 디자인 완벽 유지) */
-.normal-card-footer {
+/* 일반 방문자 전용 1줄 푸터 */
+.normal-grid-footer {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
     margin-top: auto !important;
     padding-top: 12px !important;
+    border-top: 1px dashed rgba(144, 224, 239, 0.3) !important;
+}
+.normal-grid-footer .date { font-size: 0.85rem; color: #e5d9f2; }
+
+
+/* ====================================================
+   ✉️ 편지 전체선택 체크박스 수직 정렬 어긋남 해결
+==================================================== */
+#letter-batch-controls label {
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important; /* 텍스트 높이 균일화 */
+}
+
+#letter-select-all {
+    margin: 0 6px 0 0 !important;
+    vertical-align: middle !important;
+    transform: translateY(-1px) !important; /* 체크박스를 위로 살짝 올려 글자와 완벽하게 수평을 맞춤 */
 }
