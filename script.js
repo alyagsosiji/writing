@@ -951,50 +951,41 @@ function renderUI(isAppend = false) {
         
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
-            // 개별 체크박스 위치도 어긋나지 않게 보정
-            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0; position:relative; top:-2px;">`;
+            selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
-        // 🟢 편지 / 리스트 모드: 기존 원본 구조 100% 유지
+        // 🟢 편지 모드 및 리스트 모드: 기존 원본 구조 100% 동일 (건드리지 않음)
         let footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         let contentHtml = `<div class="post-content-area">${item.content}</div>`;
 
-        // 🚨 오직 글(posts) + 갤러리/스크롤 모드일 때만 적용!
+        // 🚨 오직 글(posts) + 갤러리/스크롤 모드일 때만 적용 (5줄 제한 & 2줄 정렬)
         if (currentView === 'posts' && (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite')) {
-            let fullDateStr = displayDate;
-            let datePart = fullDateStr; 
-            let timePart = "";
-            let timeMatch = fullDateStr.match(/\d{1,2}:\d{2}(:\d{2})?$/);
-            if (timeMatch) {
-                timePart = timeMatch[0];
-                datePart = fullDateStr.replace(timePart, '').trim();
-            }
-
             contentHtml = `<div class="post-content-area grid-text-clamp">${item.content}</div>`;
 
+            let datePart = displayDate;
+            let timePart = "";
+            let timeMatch = displayDate.match(/\d{1,2}:\d{2}(:\d{2})?$/);
+            if (timeMatch) {
+                timePart = timeMatch[0];
+                datePart = displayDate.replace(timePart, '').trim();
+            }
+
             if (isAdmin) {
-                // 💡 더보기 버튼을 리스트의 원본 버튼처럼 mgmt-btn 클래스를 먹여 동일하게 출력
+                // 관리자 로그인 시 2줄 레이아웃 (우측 상단에 원본 스타일의 더보기 버튼 배치)
                 footerHtml = `
                     <div class="admin-grid-footer" onclick="event.stopPropagation();">
                         <div class="grid-date">${datePart}</div>
-                        <div class="grid-more">
-                            <div class="card-mgmt-btns"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
-                        </div>
+                        <div class="grid-more"><button onclick="window.openDetailModal('${item.id}')">더보기</button></div>
                         <div class="grid-time">${timePart}</div>
-                        <div class="grid-actions">
-                            <div class="card-mgmt-btns">
-                                <button class="mgmt-btn" onclick="window.prepareEdit('${item.id}')">수정</button>
-                                <button class="mgmt-btn danger-btn" onclick="window.deletePost('${item.id}')">소멸</button>
-                            </div>
-                        </div>
+                        <div class="grid-actions">${mgmtButtonsHtml}</div>
                     </div>
                 `;
             } else {
-                // 일반 방문자용 원본 유지
+                // 일반 방문자용 하단 레이아웃 (날짜 및 더보기 버튼)
                 footerHtml = `
-                    <div class="normal-grid-footer" onclick="event.stopPropagation();">
-                        <span class="date">${fullDateStr}</span>
-                        <div class="card-mgmt-btns"><button class="mgmt-btn" onclick="window.openDetailModal('${item.id}')">더보기</button></div>
+                    <div class="post-footer" onclick="event.stopPropagation();">
+                        <span class="date">${displayDate}</span>
+                        <button onclick="window.openDetailModal('${item.id}')">더보기</button>
                     </div>
                 `;
             }
