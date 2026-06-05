@@ -1223,16 +1223,34 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 클릭(전환) 시 글자 미묘한 변형/깜빡임 최종 해결
+   🔒 탭 버튼 최종 교정: 호버 애니메이션, 기본 흰색, 폰트 완벽 고정
 ==================================================== */
 .tab-btn {
-    /* 브라우저가 0.3초 동안 글자 렌더링까지 애니메이션 먹이려는 버그 차단 */
-    /* transition: all 대신 색상과 테두리, 그림자만 부드럽게 변하도록 명시 */
-    transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease !important;
+    /* 1. 기본 상태일 때 어두운 회색이 아닌 선명한 '하얀색' 고정 */
+    color: #ffffff !important;
     
-    /* 글자 렌더링 상시 고정 */
+    /* 2. 폰트(글씨체)가 다르게 보이는 현상 해결 (사이트 전체 기본 폰트로 강제 고정) */
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+    
+    /* 3. 호버나 클릭 시 폰트 두께가 미묘하게 얇아지거나 깨지는 현상 원천 차단 */
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
-    -webkit-transform: translateZ(0) !important;
-    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    
+    /* 4. 애니메이션 부드럽게 유지 (글자가 이상하게 뭉개지지 않도록 제한) */
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease !important;
+}
+
+/* 활성화(클릭된) 상태는 원래 쓰시던 예쁜 파란색과 볼드체 유지 */
+.tab-btn.active {
+    color: #00b4d8 !important;
+    font-weight: bold !important;
+}
+
+/* 마우스를 올렸을 때 버튼이 위로 살짝 떠오르는 원본 기능 부활 */
+.tab-btn:hover {
+    transform: translateY(-1.5px) !important;
+    -webkit-transform: translateY(-1.5px) !important;
+    color: #ffffff !important;
 }
