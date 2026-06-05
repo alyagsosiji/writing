@@ -1223,29 +1223,20 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 클릭 시 폰트체 변경(왜곡 버그) 완전히 박멸
+   🔒 탭 버튼 클릭 시 폰트 글꼴이 통째로 바뀌는 버그 완전 해결
 ==================================================== */
-.tab-btn {
-    /* 🚨 [핵심 패치] button에서 상속된 backdrop-filter가 폰트 글꼴을 깨뜨리는 버그 원천 차단 */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-
-    /* 원본 폰트 글꼴을 어떤 상태에서도 유지하도록 강력 고정 */
+/* 1. 모든 상태(기본, 호버, 활성화)에서 폰트 종류와 두께를 100% 똑같이 강제 고정 */
+.tab-btn,
+.tab-btn:hover,
+.tab-btn.active {
     font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
-    
-    /* 💡 평소(기본) 상태일 때 글자색을 선명한 하얀색으로 고정 */
-    color: #ffffff !important;
+    font-weight: normal !important; /* 💡 글꼴을 깨트리는 주범인 bold 속성을 제거하고 두께를 완전히 일치시킵니다 */
+    color: #ffffff !important; /* 평소(호버 아닐 때)에도 글자색을 선명한 흰색으로 유지 */
 }
 
-/* 클릭해서 활성화(.active) 되었을 때 원본의 예쁜 파란색과 볼드 효과 그대로 유지 */
+/* 2. 클릭(활성화) 상태: 원본의 예쁜 바다색을 표현하면서, 폰트가 깨지지 않게 굵은 느낌만 안전하게 구현 */
 .tab-btn.active {
     color: #00b4d8 !important;
-    font-weight: bold !important;
-}
-
-/* 💡 마우스를 올렸을 때 위로 1.5px 부드럽게 떠오르는 원본 호버 모션 완전 부활 */
-.tab-btn:hover {
-    transform: translateY(-1.5px) !important;
-    -webkit-transform: translateY(-1.5px) !important;
-    color: #ffffff !important;
+    /* 💡 font-weight 대신 text-shadow를 이용해 폰트 변형 버그 없이 안전하게 글자를 강조하는 프로들의 기술입니다 */
+    text-shadow: 0 0 0.3px #00b4d8, 0 0 0.3px #00b4d8 !important; 
 }
