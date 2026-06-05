@@ -1223,34 +1223,36 @@ select option, #author-filter option {
 
 
 /* ====================================================
-   🔒 탭 버튼 클릭 및 호버 시 폰트 변형(깨짐) 완벽 방지
+   🔒 탭 버튼 클릭 및 호버 시 폰트 탈옥(글꼴 변형) 원천 차단
 ==================================================== */
-.tab-btn,
-.tab-btn:hover,
-.tab-btn.active {
-    /* 1. 폰트를 흐릿하게 만들거나 다르게 보이게 했던 모든 가속 속성 강제 해제(원본 복구) */
-    transform: none;
-    -webkit-transform: none;
-    backface-visibility: visible;
-    -webkit-backface-visibility: visible;
+/* 1. 기본 상태: 원본의 호버 이펙트와 기능을 100% 보존하면서 글꼴 변경 버그 방어 */
+.tab-btn {
+    /* 폰트가 브라우저 버그로 인해 기본 고딕으로 깨지는 것을 막기 위해 명시적으로 고정 */
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
     
-    /* 2. 글꼴 및 선명도를 브라우저 기본 최적값으로 복원 */
+    /* 비활성화 상태일 때도 은은하고 선명한 흰색 톤 유지 */
+    color: #ffffff !important;
+    
+    /* 🚨 브라우저가 글자색 그라데이션 영역을 계산하다 폰트를 떨어뜨리는 버그 원천 봉쇄 */
+    -webkit-background-clip: padding-box !important;
+    background-clip: padding-box !important;
+}
+
+/* 2. 클릭하여 활성화(.active) 되었을 때 글자 폰트 굵기와 꼴이 유지되도록 강제 각인 */
+.tab-btn.active {
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
+    font-weight: bold !important;
+    color: #00b4d8 !important;
+    
+    /* 렌더링 방식 강제 고정 */
     -webkit-font-smoothing: subpixel-antialiased !important;
     -moz-osx-font-smoothing: auto !important;
-    text-rendering: auto !important;
-
-    /* 3. 기본 상태일 때 하얀색 유지 */
-    color: #ffffff !important;
 }
 
-/* 4. 클릭(활성화) 상태일 때 원본 파란색 효과 적용 */
-.tab-btn.active {
-    color: #00b4d8 !important;
-}
-
-/* 5. 마우스를 올렸을 때 위로 살짝 떠오르는 원본 호버 기능 원상복구 */
+/* 3. 마우스를 올렸을 때 위로 살짝 떠오르는 원본 애니메이션 및 폰트 고정 */
 .tab-btn:hover {
     transform: translateY(-1.5px) !important;
     -webkit-transform: translateY(-1.5px) !important;
+    font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
     color: #ffffff !important;
 }
