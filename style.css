@@ -1168,3 +1168,38 @@ select option, #author-filter option {
     transform: none !important; 
     position: static !important;
 }
+/* ====================================================
+   🌟 [더보기] 버튼 디자인 완전 원본 롤백 (갤러리 2줄 모드 우측)
+==================================================== */
+/* 갤러리 2줄 모드(우측)에 있는 더보기 버튼을 원본(::after) 디자인과 100% 똑같이 강제 적용 */
+.admin-grid-footer .grid-more button,
+.normal-grid-footer button {
+    background: rgba(5, 12, 25, 0.95) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    color: #90e0ef !important;
+    font-size: 0.7rem !important; 
+    font-weight: 600 !important;
+    padding: 2px 8px !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+    display: inline-block !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+/* 🌊 원본처럼 버튼 글자 뒤에 파도 이모지 추가 */
+.admin-grid-footer .grid-more button::after,
+.normal-grid-footer button::after {
+    content: ' 🌊' !important;
+}
+
+/* ✨ 카드에 마우스 올렸을 때 발광하는 원본 호버 효과 똑같이 복구 */
+.post-card:hover .admin-grid-footer .grid-more button,
+.post-card:hover .normal-grid-footer button {
+    background: rgba(144, 224, 239, 0.15) !important;
+    color: #fff !important;
+    border-color: rgba(144, 224, 239, 0.6) !important;
+    box-shadow: 0 0 10px rgba(144, 224, 239, 0.3) !important;
+}
