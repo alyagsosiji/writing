@@ -1093,30 +1093,7 @@ select option, #author-filter option {
         height: 26px !important;
     }
 }
-/* ====================================================
-   🖼️ 1. 갤러리 모드 5줄 말줄임 강제 적용 & 레이아웃 밀림 방지
-==================================================== */
-/* 갤러리 카드를 Flex 구조로 만들어 내부 요소들이 밖으로 삐져나가는 것을 막습니다. */
-.gallery-item {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    height: 100% !important; 
-}
 
-/* 갤러리 본문 내용 5줄 제한 및 남는 공간 자동 채움 */
-.gallery-item .item-desc, 
-.gallery-item p {
-    flex-grow: 1 !important; /* 남는 공간을 본문이 차지하여 하단 버튼들을 바닥으로 일정하게 밀어냅니다. */
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    word-break: break-word !important;
-    white-space: normal !important;
-    margin-bottom: 15px !important;
-}
 
 /* ====================================================
    🖼️ 1. 갤러리/스크롤 4줄 제한 (말줄임표 삭제 & 엔터 유지)
@@ -1241,16 +1218,26 @@ select option, #author-filter option {
     text-shadow: 0 0 0.3px #00b4d8, 0 0 0.3px #00b4d8 !important; 
 }
 /* ====================================================
-   📱 리스트 모드 본문 5줄 글자 밑부분 잘림 현상 완벽 해결
+   🖼️ 1. 갤러리 모드 5줄 말줄임 강제 적용 & 레이아웃 밀림 방지
 ==================================================== */
-.post-content-area:not(.grid-text-clamp) {
-    display: block !important;
-    line-height: 1.6 !important;
-    
-    /* 💡 5줄 딱 맞춘 8.0em은 글자 받침을 자르므로, 8.4em으로 여유를 주어 
-       5번째 줄 글자를 완전히 살리고 6줄째부터 깨끗하게 숨깁니다. */
-    max-height: 8.4em !important; 
-    
+/* 갤러리 카드를 Flex 구조로 만들어 내부 요소들이 밖으로 삐져나가는 것을 막습니다. */
+.gallery-item {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    height: 100% !important; 
+}
+
+/* 갤러리 본문 내용 5줄 제한 및 남는 공간 자동 채움 */
+.gallery-item .item-desc, 
+.gallery-item p {
+    flex-grow: 1 !important; /* 남는 공간을 본문이 차지하여 하단 버튼들을 바닥으로 일정하게 밀어냅니다. */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    white-space: pre-line !important; /* 엔터 줄바꿈 유지 */
+    text-overflow: ellipsis !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    margin-bottom: 15px !important;
 }
