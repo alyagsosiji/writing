@@ -981,11 +981,10 @@ function renderUI(isAppend = false) {
                     </div>
                 `;
             } else {
-                // 일반 방문자용 하단 레이아웃 (날짜 및 더보기 버튼)
+                // ✨ [수정] 일반 방문자용 하단 레이아웃: 중복되던 추가 <button> 제거 (원본 구조 100% 복구)
                 footerHtml = `
-                    <div class="post-footer" onclick="event.stopPropagation();">
+                    <div class="post-footer">
                         <span class="date">${displayDate}</span>
-                        <button onclick="window.openDetailModal('${item.id}')">더보기</button>
                     </div>
                 `;
             }
