@@ -1218,3 +1218,25 @@ select option, #author-filter option {
     text-shadow: 0 0 0.3px #00b4d8, 0 0 0.3px #00b4d8 !important; 
 }
 
+/* ====================================================
+   🔒 리스트 모드 본문 5줄 제한 및 글자 받침(밑부분) 잘림 완벽 해결
+==================================================== */
+.post-content-area:not(.grid-text-clamp) {
+    /* 1. 컴퓨터에게 정확히 5줄 분량의 글자만 화면에 생성하라고 명령 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    white-space: pre-line !important; /* 원본 엔터 줄바꿈 유지 */
+    
+    /* 2. 글자 간격 설정 */
+    line-height: 1.6 !important;
+    
+    /* 🚨 [핵심 패치] 
+       5줄 제한은 유지하되, 박스 최대 높이(max-height)와 밑단 패딩에 미세한 보너스 공간을 줍니다.
+       이러면 5번째 줄의 글자 받침들이 잘리지 않고 온전하게 아래까지 다 그려집니다. 
+       6번째 줄은 위의 line-clamp가 아예 삭제해버렸기 때문에 삐져나올 일이 절대 없습니다. */
+    height: auto !important;
+    max-height: 8.5em !important; 
+    padding-bottom: 6px !important; /* 글자 밑꼬리, 받침용 안전지대 확보 */
+}
