@@ -1217,27 +1217,4 @@ select option, #author-filter option {
     /* 💡 font-weight 대신 text-shadow를 이용해 폰트 변형 버그 없이 안전하게 글자를 강조하는 프로들의 기술입니다 */
     text-shadow: 0 0 0.3px #00b4d8, 0 0 0.3px #00b4d8 !important; 
 }
-/* ====================================================
-   🖼️ 1. 갤러리 모드 5줄 말줄임 강제 적용 & 레이아웃 밀림 방지
-==================================================== */
-/* 갤러리 카드를 Flex 구조로 만들어 내부 요소들이 밖으로 삐져나가는 것을 막습니다. */
-.gallery-item {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
-    height: 100% !important; 
-}
 
-/* 갤러리 본문 내용 5줄 제한 및 남는 공간 자동 채움 */
-.gallery-item .item-desc, 
-.gallery-item p {
-    flex-grow: 1 !important; /* 남는 공간을 본문이 차지하여 하단 버튼들을 바닥으로 일정하게 밀어냅니다. */
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    word-break: break-word !important;
-    white-space: normal !important;
-    margin-bottom: 15px !important;
-}
