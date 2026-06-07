@@ -1219,24 +1219,30 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   🔒 리스트 모드 본문 5줄 제한 및 글자 받침(밑부분) 잘림 완벽 해결
+   🔒 [최종 해결] 리스트 모드 본문 5번째 줄 글자 반토막(잘림) 완벽 해결
 ==================================================== */
 .post-content-area:not(.grid-text-clamp) {
-    /* 1. 컴퓨터에게 정확히 5줄 분량의 글자만 화면에 생성하라고 명령 */
+    /* 1. 6번째 줄은 흔적도 없이 사라지게 만들고 끝에 '...'을 붙이는 절대 공식 */
     display: -webkit-box !important;
     -webkit-line-clamp: 5 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    white-space: pre-line !important; /* 원본 엔터 줄바꿈 유지 */
+    white-space: pre-line !important; /* 원본 엔터(줄바꿈) 효과 완벽 유지 */
     
-    /* 2. 글자 간격 설정 */
+    /* 2. 표준 글자 높이 설정 */
     line-height: 1.6 !important;
     
-    /* 🚨 [핵심 패치] 
-       5줄 제한은 유지하되, 박스 최대 높이(max-height)와 밑단 패딩에 미세한 보너스 공간을 줍니다.
-       이러면 5번째 줄의 글자 받침들이 잘리지 않고 온전하게 아래까지 다 그려집니다. 
-       6번째 줄은 위의 line-clamp가 아예 삭제해버렸기 때문에 삐져나올 일이 절대 없습니다. */
+    /* 🚨 [핵심 패치] 5번째 줄 글자의 다리(받침)가 반토막 나는 현상 차단
+       브라우저의 지독한 subpixel 계산 오류를 강제로 누르기 위해 박스를 content-box로 선언하고,
+       바닥에 5px의 미세한 안전 패딩(보호 구역)을 부여합니다.
+       6번째 줄은 line-clamp가 이미 증발시켰기 때문에 공간을 열어줘도 절대 나타나지 않으며,
+       오직 5번째 줄의 글자들만 받침까지 잘림 없이 온전하고 깨끗하게 출력됩니다! */
+    box-sizing: content-box !important;
     height: auto !important;
-    max-height: 8.5em !important; 
-    padding-bottom: 6px !important; /* 글자 밑꼬리, 받침용 안전지대 확보 */
+    max-height: none !important;
+    padding-top: 0 !important;
+    padding-bottom: 5px !important; /* 5번째 줄 글자 받침 보호용 안전 구역 */
+    
+    /* 하단 푸터(날짜) 영역과의 예쁜 간격 유지 */
+    margin-bottom: 12px !important; 
 }
