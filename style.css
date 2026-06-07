@@ -1240,3 +1240,17 @@ select option, #author-filter option {
     /* 💡 font-weight 대신 text-shadow를 이용해 폰트 변형 버그 없이 안전하게 글자를 강조하는 프로들의 기술입니다 */
     text-shadow: 0 0 0.3px #00b4d8, 0 0 0.3px #00b4d8 !important; 
 }
+/* ====================================================
+   📱 리스트 모드 본문 5줄 글자 밑부분 잘림 현상 완벽 해결
+==================================================== */
+.post-content-area:not(.grid-text-clamp) {
+    display: block !important;
+    line-height: 1.6 !important;
+    
+    /* 💡 5줄 딱 맞춘 8.0em은 글자 받침을 자르므로, 8.4em으로 여유를 주어 
+       5번째 줄 글자를 완전히 살리고 6줄째부터 깨끗하게 숨깁니다. */
+    max-height: 8.4em !important; 
+    
+    overflow: hidden !important;
+    white-space: pre-line !important; /* 엔터 줄바꿈 유지 */
+}
