@@ -1219,30 +1219,44 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   🔒 [최종 해결] 리스트 모드 본문 5번째 줄 글자 반토막(잘림) 완벽 해결
+   🔒 [최종 해결] 리스트 모드 딱 5줄 고정 (... 제거 및 글자 반토막 완벽 방어)
 ==================================================== */
 .post-content-area:not(.grid-text-clamp) {
-    /* 1. 6번째 줄은 흔적도 없이 사라지게 만들고 끝에 '...'을 붙이는 절대 공식 */
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    white-space: pre-line !important; /* 원본 엔터(줄바꿈) 효과 완벽 유지 */
+    /* 1. 말줄임표(...)를 강제로 만들고 글자 밑동을 자르던 특수 엔진 완전 해제 */
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
     
-    /* 2. 표준 글자 높이 설정 */
-    line-height: 1.6 !important;
-    
-    /* 🚨 [핵심 패치] 5번째 줄 글자의 다리(받침)가 반토막 나는 현상 차단
-       브라우저의 지독한 subpixel 계산 오류를 강제로 누르기 위해 박스를 content-box로 선언하고,
-       바닥에 5px의 미세한 안전 패딩(보호 구역)을 부여합니다.
-       6번째 줄은 line-clamp가 이미 증발시켰기 때문에 공간을 열어줘도 절대 나타나지 않으며,
-       오직 5번째 줄의 글자들만 받침까지 잘림 없이 온전하고 깨끗하게 출력됩니다! */
-    box-sizing: content-box !important;
+    /* 2. 정확히 5줄 높이만큼만 픽셀 오차 없이 깔끔하게 보여주기 */
+    /* 공식: 1줄 높이(1.6em) × 5줄 = 최대 높이(8.0em) */
+    line-height: 1.6em !important; 
     height: auto !important;
-    max-height: none !important;
-    padding-top: 0 !important;
-    padding-bottom: 5px !important; /* 5번째 줄 글자 받침 보호용 안전 구역 */
+    max-height: 8.0em !important; 
+    overflow: hidden !important;
     
-    /* 하단 푸터(날짜) 영역과의 예쁜 간격 유지 */
+    /* 3. 원본 줄바꿈(엔터) 감성 유지 및 내부 여백 제거로 6번째 줄 밀어올림 방지 */
+    white-space: pre-line !important; 
+    padding: 0 !important; 
+    box-sizing: content-box !important;
+    
+    /* 4. 하단 푸터(날짜) 버튼들과의 여유 간격 */
     margin-bottom: 12px !important; 
+}
+
+/* ====================================================
+   ⚙️ 환경 조작 창: 셀렉트 박스 글자 하단 잘림 완벽 해결
+==================================================== */
+.env-select-box {
+    /* 1. 상자 높이를 기존보다 넉넉하게 확장하여 글자 발목이 잘리지 않게 방어 */
+    height: 44px !important; 
+    
+    /* 2. 글자가 상자 정중앙에 예쁘게 오도록 줄 높이를 상자 높이와 동일하게 일치 */
+    line-height: 44px !important; 
+    
+    /* 3. 엉뚱한 내부 여백(패딩)이 글자를 위아래로 밀어내서 자르는 현상 원천 차단 */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    
+    /* 4. 박스 크기 계산 오류 방지 */
+    box-sizing: border-box !important;
 }
