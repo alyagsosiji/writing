@@ -1244,19 +1244,42 @@ select option, #author-filter option {
 }
 
 /* ====================================================
-   ⚙️ 환경 조작 창: 셀렉트 박스 글자 하단 잘림 완벽 해결
+   ⚙️ 1. 환경 조작 창: 클릭 시 글자가 굵어지는(Bold) 현상 완벽 차단
 ==================================================== */
-.env-select-box {
-    /* 1. 상자 높이를 기존보다 넉넉하게 확장하여 글자 발목이 잘리지 않게 방어 */
-    height: 44px !important; 
+.env-select-box, 
+.env-select-box:focus, 
+.env-select-box:active {
+    /* 클릭하여 활성화되어도 원래 굵기(normal/500)를 강제로 유지 */
+    font-weight: 500 !important; 
+    text-shadow: none !important;
+    outline: none !important;
+    -webkit-appearance: none !important;
+}
+
+.env-select-box option {
+    font-weight: normal !important;
+}
+
+/* ====================================================
+   📝 2. 리스트 모드: 5번째 줄 글자 밑부분 잘림 최후의 해결책
+==================================================== */
+.post-content-area:not(.grid-text-clamp) {
+    /* 컴퓨터에게 정확히 5줄까지만 표시하도록 지시 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
     
-    /* 2. 글자가 상자 정중앙에 예쁘게 오도록 줄 높이를 상자 높이와 동일하게 일치 */
-    line-height: 44px !important; 
+    /* 기존 줄바꿈 유지하되, 렌더링 충돌이 덜한 pre-wrap으로 교체 */
+    white-space: pre-wrap !important; 
+    line-height: 1.6 !important;
     
-    /* 3. 엉뚱한 내부 여백(패딩)이 글자를 위아래로 밀어내서 자르는 현상 원천 차단 */
+    /* 🚨 [핵심 패치] 글자를 잘라먹던 '높이 강제 제한(max-height)'을 완전히 삭제합니다. */
+    height: auto !important;
+    max-height: none !important; 
+    
+    /* 5번째 줄 글자의 '받침(밑동)'이 썰려나가지 않도록 바닥에 4px의 보호용 쿠션을 깔아줍니다. */
     padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    
-    /* 4. 박스 크기 계산 오류 방지 */
-    box-sizing: border-box !important;
+    padding-bottom: 4px !important; 
+    margin-bottom: 15px !important; 
 }
