@@ -1283,3 +1283,58 @@ select option, #author-filter option {
     padding-bottom: 4px !important; 
     margin-bottom: 15px !important; 
 }
+/* ====================================================
+   📝 [최종 해결] 리스트 모드 5줄 글자 밑동(받침) 잘림 완벽 방어
+==================================================== */
+.post-content-area:not(.grid-text-clamp) {
+    /* 5줄 제한을 깔끔하게 걸어줍니다 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    
+    /* 5줄이 넘어갈 경우 자연스럽게 '...' 처리되도록 설정 */
+    text-overflow: ellipsis !important; 
+
+    /* 엔터(줄바꿈)는 살리면서 렌더링 꼬임을 막습니다 */
+    white-space: pre-line !important; 
+    line-height: 1.6 !important;
+    font-size: 0.92rem !important;
+
+    height: auto !important;
+    max-height: none !important; 
+
+    /* 🚨 렌더링 박스를 찌그러뜨려 밑동을 자르던 범인(padding)을 완전히 제거합니다 */
+    padding: 0 !important;
+    margin-bottom: 15px !important;
+    
+    /* 단어 단위로 잘려 레이아웃이 튀는 현상 방지 */
+    word-break: break-all !important; 
+}
+
+/* ====================================================
+   ⚙️ [최종 해결] 환경 조작 모달 선택(Select) 버튼 글자 잘림 정상화
+==================================================== */
+.env-select-box {
+    /* 🚨 전역 select 태그에 걸려있던 height: 44px 제한을 풀고 숨통을 틔워줍니다 */
+    height: auto !important;
+    min-height: 52px !important; 
+    
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 14px 40px 14px 16px !important; 
+    border-radius: 10px !important;
+    
+    /* 글자가 가로로 너무 길어질 경우 잘리지 않고 '...' 처리되도록 방어 */
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+
+    /* 폰트 및 행간 정렬 */
+    font-size: 0.95rem !important;
+    line-height: 1.4 !important; /* 행간을 정상화하여 상하 중앙에 예쁘게 배치 */
+    
+    background-color: rgba(3, 10, 23, 0.8) !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    color: #ffffff !important;
+}
