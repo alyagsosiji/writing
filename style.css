@@ -1365,3 +1365,36 @@ select option, #author-filter option {
     margin-bottom: 15px !important;
     word-break: break-all !important;
 }
+/* ====================================================
+   🚨 [진짜 원인 해결] 카드 고정 높이 해제 및 5줄 온전한 공간 확보
+==================================================== */
+
+/* 1. 카드의 높이를 고정(250px)하지 않고, 내용물(5줄)에 맞춰 자연스럽게 늘어나도록 허용합니다. */
+.post-card {
+    height: auto !important; 
+    min-height: 250px !important; /* 최소 높이는 유지하여 디자인이 망가지지 않게 방어 */
+}
+
+/* 2. 모바일 화면에서도 마찬가지로 고정 높이를 풀어줍니다. */
+@media (max-width: 768px) {
+    .post-card {
+        min-height: 230px !important; 
+    }
+}
+
+/* 3. 글 본문 영역이 주변 요소에 밀려 강제로 찌그러지는(썰리는) 현상을 원천 차단합니다. */
+.post-content-area {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    
+    white-space: pre-line !important; 
+    line-height: 1.6 !important;
+    
+    /* 🚨 flexbox에 의해 텍스트 상자 높이가 강제로 줄어드는 것을 방어! */
+    flex-shrink: 0 !important; 
+    
+    margin-bottom: 15px !important;
+}
