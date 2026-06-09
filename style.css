@@ -1338,3 +1338,30 @@ select option, #author-filter option {
     border: 1px solid rgba(144, 224, 239, 0.3) !important;
     color: #ffffff !important;
 }
+
+/* ====================================================
+   📝 [사진 교정] 리스트 모드 5번째 줄 글자 가로 잘림(반토막) 완벽 해결
+==================================================== */
+.post-content-area:not(.grid-text-clamp) {
+    /* 1. 브라우저 엔진이 정확히 5줄까지만 인식하고 말줄임표(...)를 찍도록 강제 */
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5 !important;
+    -webkit-box-orient: vertical !important;
+    
+    /* 2. 글자가 상자를 넘어가면 숨김 처리 */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    
+    /* 3. 렌더링을 꼬이게 만드는 불필요한 줄바꿈/여백 방어 */
+    white-space: pre-line !important; 
+    line-height: 1.6 !important;
+    
+    /* 🚨 4. 글자를 가로로 썰어버리는 주범인 '고정 높이' 완전 해제 */
+    height: auto !important;
+    max-height: none !important; 
+    
+    /* 🚨 5. 글자를 아래로 밀어내던 내부 쿠션(패딩) 완전 제거 */
+    padding: 0 !important;
+    margin-bottom: 15px !important;
+    word-break: break-all !important;
+}
