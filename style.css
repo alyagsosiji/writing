@@ -1499,3 +1499,69 @@ html body div[class*="modal"] select option {
     padding: 8px !important;
     background-color: #040d1c !important;
 }
+/* ====================================================
+   ⚙️ [최종 교정] 환경 조작 모달창 정렬 및 화살표 어긋남 완벽 해결
+==================================================== */
+/* 전역 select 속성의 간섭을 완벽히 차단하는 초강력 선택자 */
+html body .modal-content .env-select-box,
+html body div[class*="modal"] .env-select-box {
+    /* 1. 박스 규격 및 여백 강제 초기화 */
+    width: 100% !important;
+    height: 48px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+
+    /* 🚨 2. 글자는 깔끔하게 좌측 정렬하고, 아이콘과 부딪히지 않게 여백 설정 */
+    text-align: left !important;
+    text-align-last: left !important; /* 선택된 텍스트 좌측 고정 */
+    padding: 0 40px 0 20px !important; /* 오른쪽은 화살표 공간, 왼쪽은 글자 여백 */
+    line-height: 46px !important; /* 텍스트 수직 정중앙 고정 */
+
+    /* 🚨 3. 기본 브라우저 화살표(글자 옆에 달라붙는 주범) 완벽 삭제 */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+
+    /* 4. 글꼴 및 디자인 유지 */
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: #ffffff !important;
+    background-color: rgba(3, 10, 23, 0.8) !important;
+    border: 1px solid rgba(144, 224, 239, 0.3) !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+/* 🚨 5. 겹치거나 엉뚱한 곳에 뜨던 화살표를 '우측 끝'에 예쁘게 독립 고정 */
+html body .modal-content #time-select.env-select-box {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 16px center !important; /* 우측 16px 지점에 단독 고정 */
+    background-size: 16px !important;
+}
+
+html body .modal-content #weather-select.env-select-box {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(247,163,127,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 16px center !important;
+    background-size: 16px !important;
+}
+
+/* 6. 호버/포커스 시 시각적 반응 */
+html body .modal-content .env-select-box:hover,
+html body .modal-content .env-select-box:focus {
+    border-color: #00b4d8 !important;
+    background-color: rgba(6, 15, 31, 0.95) !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2) !important;
+    outline: none !important;
+}
+
+/* 7. 옵션(드롭다운 목록) 텍스트도 편안한 좌측 정렬로 통일 */
+html body .modal-content .env-select-box option {
+    text-align: left !important;
+    padding: 10px 20px !important;
+    background-color: #040d1c !important;
+    color: #ffffff !important;
+}
