@@ -1438,50 +1438,53 @@ html body #app .post-card .post-content-area:not(.grid-text-clamp) {
     margin-bottom: 12px !important;
 }
 /* ====================================================
-   🔧 [완벽 교정] 백업 모달창 '기간 선택' 네모 반듯한 디자인 통일
+   🎛️ [최종 교정] 백업 모달창 버튼 3형제 완벽 규격 및 호버 통일
 ==================================================== */
 html body .modal-content select,
 html body .backup-modal-content select {
-    /* 1. 글자가 숨 쉴 수 있는 네모난 버튼 규격으로 여백 조정 */
-    padding: 8px 30px 8px 14px !important; 
-    height: auto !important;
-    min-height: 35px !important;
+    /* 1. 박스 크기를 양옆 버튼과 100% 동일하게 맞추는 강제 규격 */
+    height: 34px !important; /* 주변 버튼과 똑같은 높이로 명시적 고정 */
+    padding: 0 28px 0 14px !important; /* 위아래 여백 대신 높이 자체로 맞춰 찌그러짐 방지 */
+    line-height: 32px !important; /* 텍스트 수직 중앙 완벽 정렬 */
     width: auto !important;
     min-width: 100px !important;
     
-    /* 🚨 2. 동그란 알약 모양을 깎아내고, 옆 버튼들과 똑같은 '네모(8px)'로 강제 고정! */
+    /* 2. 네모 반듯한 모서리 유지 */
     border-radius: 8px !important; 
-    
     font-size: 0.85rem !important;
-    font-weight: normal !important;
     color: #e2e8f0 !important;
     
-    /* 3. 버튼과 동일한 배경 및 테두리 색상 */
+    /* 3. 디자인 질감 통일 */
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)) !important;
     border: 1px solid rgba(0, 180, 216, 0.2) !important;
     
     /* 4. 화살표 우측 배치 */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 10px center !important;
+    background-position: right 8px center !important;
     background-size: 14px !important;
     
-    /* 5. 가운데 정렬 및 브라우저 기본 스타일(그림자 등) 제거 */
+    /* 5. 브라우저 기본 스타일 제거 및 부드러운 애니메이션 준비 */
+    box-sizing: border-box !important;
     text-align: center !important;
     text-align-last: center !important;
-    box-shadow: none !important;
     appearance: none !important;
     -webkit-appearance: none !important;
-    transition: all 0.25s ease !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    
+    /* 🚨 호버 시 부드러운 움직임을 위한 트랜지션 (옆 버튼과 완벽 동일) */
+    transition: border-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s !important;
 }
 
-/* 6. 호버 시 빛나는 효과 통일 */
+/* 🚨 6. 양옆 버튼과 완전히 똑같이 위로 살짝 뜨는 호버(Hover) 액션 동기화 */
 html body .modal-content select:hover,
 html body .backup-modal-content select:hover {
     border-color: #00b4d8 !important; 
     color: #fff !important; 
     box-shadow: 0 0 12px rgba(0, 180, 216, 0.35) !important; 
     background-color: transparent !important;
+    transform: translateY(-1.5px) !important; /* 옆 버튼처럼 공중으로 살짝 떠오름 */
 }
 
 /* 옵션 창 텍스트 중앙 정렬 */
