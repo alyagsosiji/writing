@@ -185,9 +185,32 @@ function requestNotificationPermission() {
     });
 }
 
+// ==========================================
+// 🔒 [오류 해결] 알림 중복 트리거 완벽 방어 및 진동 엔진 연동
+// ==========================================
 function sendNotification(title, body) {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
-    new Notification(title, { body: body, icon: NOTIFICATION_CONFIG.icon });
+
+    // 1. 다중 탭(창) 중복 실행 방어를 위한 시간/내용 캐시 불러오기
+    const now = Date.now();
+    const lastNotiTime = localStorage.getItem('last_noti_time') || 0;
+    const lastNotiBody = localStorage.getItem('last_noti_body') || '';
+
+    // 🚨 핵심: 똑같은 내용의 알림이 5초(5000ms) 이내에 연달아 요청되면 단칼에 무시합니다!
+    if (now - lastNotiTime < 5000 && lastNotiBody === body) return;
+
+    // 알림 기록 갱신 (저장하는 즉시 다른 탭/창에도 공유되어 중복 발생 원천 차단)
+    localStorage.setItem('last_noti_time', now.toString());
+    localStorage.setItem('last_noti_body', body);
+
+    // 2. 알림 발생 및 상단 CONFIG에 세팅해두신 모바일 진동 효과 적용
+    const notificationOptions = {
+        body: body,
+        icon: NOTIFICATION_CONFIG.icon,
+        vibrate: NOTIFICATION_CONFIG.vibrate // 💡 세팅만 해두고 안 쓰이던 진동 배열 활성화
+    };
+
+    new Notification(title, notificationOptions);
 }
 
 function hideLoadingScreen() {
