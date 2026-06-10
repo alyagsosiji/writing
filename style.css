@@ -1399,97 +1399,94 @@ select option, #author-filter option {
     margin-bottom: 15px !important;
 }
 /* ====================================================
-   🔥 [끝장 패치] 5번째 줄 받침 썰림 & 카드 압축 최종 방어선
+   🔥 [말줄임표 제거 버전] 5줄에서 '...' 없이 깔끔하게 자르기 (+받침 보호)
 ==================================================== */
-/* 1. 카드의 숨통을 틔워줍니다 (기존 250px 족쇄 해제) */
+
+/* 1. 카드의 숨통 틔워주기 (유지) */
 html body #app .posts-grid .post-card {
     height: auto !important; 
-    min-height: 270px !important; /* 5줄과 여백이 넉넉히 들어갈 수 있는 최소 높이 */
+    min-height: 270px !important; 
 }
 
-/* 2. 글자 썰림을 막는 폰트 여백 및 강제 압축 해제 */
-html body #app .post-card .post-content-area:not(.grid-text-clamp) {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 5 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    
-    /* 🚨 핵심 1: 한국어 폰트의 '받침'이 잘리지 않도록 줄간격(line-height)을 1.7로 살짝 늘려 공간을 확보합니다 */
-    line-height: 1.7 !important;
-    
-    /* 🚨 핵심 2: 브라우저가 공간이 없다고 글자 박스를 위아래로 찌그러뜨리는 현상을 원천 차단합니다 */
-    flex-shrink: 0 !important;
-    height: auto !important;
-    max-height: none !important;
-
-    /* 렌더링 충돌이 적은 pre-wrap 강제 */
-    white-space: pre-wrap !important;
-    
-    /* 🚨 핵심 3: 잘리기 쉬운 맨 아랫줄 바닥에 2px의 보호용 투명 쿠션을 덧댑니다 */
-    padding-top: 0 !important;
-    padding-bottom: 2px !important;
-    margin-bottom: 12px !important;
-}
-
-/* 모바일 디바이스용 높이 추가 교정 */
 @media (max-width: 768px) {
     html body #app .posts-grid .post-card {
         min-height: 240px !important; 
     }
 }
+
+/* 2. '...' 없이 정확히 5줄만 보여주기 */
+html body #app .post-card .post-content-area:not(.grid-text-clamp) {
+    /* 🚨 '...'을 강제로 생성하는 웹킷 엔진 완전 정지 */
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: unset !important;
+    text-overflow: clip !important; 
+    
+    /* 🚨 5줄 높이 정밀 계산 (줄간격 1.7 × 5줄 = 최대 높이 8.5em) */
+    line-height: 1.7 !important;
+    height: auto !important;
+    max-height: 8.5em !important; 
+    
+    /* 상자를 넘어가는 6번째 줄부터는 '...' 없이 투명하게 잘라냄 */
+    overflow: hidden !important;
+    white-space: pre-wrap !important;
+    
+    /* 카드 압축 방어 및 여백 설정 */
+    flex-shrink: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important; /* 정확한 계산을 위해 내부 쿠션은 뺍니다 */
+    margin-bottom: 12px !important;
+}
 /* ====================================================
-   🔧 [사진 교정] 백업 모달창 '기간 선택' 셀렉트 박스 버튼 디자인 통일
+   🔧 [완벽 교정] 백업 모달창 '기간 선택' 네모 반듯한 디자인 통일
 ==================================================== */
-.modal-buttons select,
-.backup-modal-content select {
-    /* 1. 글자를 찌그러뜨리던 전역 거대 패딩(45px) 무효화 및 버튼 규격(8px 24px)으로 통일 */
-    padding: 8px 32px 8px 20px !important; /* 오른쪽은 화살표를 위해 조금 더 비워둠 */
+html body .modal-content select,
+html body .backup-modal-content select {
+    /* 1. 글자가 숨 쉴 수 있는 네모난 버튼 규격으로 여백 조정 */
+    padding: 8px 30px 8px 14px !important; 
     height: auto !important;
     min-height: 35px !important;
     width: auto !important;
-    min-width: 110px !important;
+    min-width: 100px !important;
     
-    /* 2. 옆 버튼들과 완벽히 똑같은 둥글기(20px)와 폰트 크기 적용 */
-    border-radius: 20px !important; 
+    /* 🚨 2. 동그란 알약 모양을 깎아내고, 옆 버튼들과 똑같은 '네모(8px)'로 강제 고정! */
+    border-radius: 8px !important; 
+    
     font-size: 0.85rem !important;
     font-weight: normal !important;
     color: #e2e8f0 !important;
     
-    /* 3. 버튼과 완전히 동일한 그라데이션 배경 및 테두리 */
+    /* 3. 버튼과 동일한 배경 및 테두리 색상 */
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)) !important;
     border: 1px solid rgba(0, 180, 216, 0.2) !important;
     
-    /* 4. 양쪽에 도배되었던 화살표를 없애고, 오른쪽에만 깔끔하게 하나 배치 */
+    /* 4. 화살표 우측 배치 */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(144,224,239,0.8)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
-    background-position: right 12px center !important;
+    background-position: right 10px center !important;
     background-size: 14px !important;
     
-    /* 5. 중앙 정렬이 아닌 자연스러운 좌측 정렬로 텍스트 잘림 방어 */
-    text-align: left !important;
-    text-align-last: left !important;
+    /* 5. 가운데 정렬 및 브라우저 기본 스타일(그림자 등) 제거 */
+    text-align: center !important;
+    text-align-last: center !important;
     box-shadow: none !important;
-    
-    /* 기본 브라우저 스타일링 완전 제거 */
     appearance: none !important;
     -webkit-appearance: none !important;
-    transition: border-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s !important;
+    transition: all 0.25s ease !important;
 }
 
-/* 6. 마우스를 올렸을 때 옆 버튼들과 똑같이 위로 살짝 뜨며 빛나는 호버 효과 */
-.modal-buttons select:hover,
-.backup-modal-content select:hover {
+/* 6. 호버 시 빛나는 효과 통일 */
+html body .modal-content select:hover,
+html body .backup-modal-content select:hover {
     border-color: #00b4d8 !important; 
     color: #fff !important; 
     box-shadow: 0 0 12px rgba(0, 180, 216, 0.35) !important; 
-    transform: translateY(-1.5px) !important;
     background-color: transparent !important;
 }
 
-/* 드롭다운 옵션 글씨 정렬 정상화 */
-.modal-buttons select option,
-.backup-modal-content select option {
-    text-align: left !important;
+/* 옵션 창 텍스트 중앙 정렬 */
+html body .modal-content select option,
+html body .backup-modal-content select option {
+    text-align: center !important;
     padding: 8px !important;
 }
