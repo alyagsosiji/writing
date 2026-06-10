@@ -186,31 +186,42 @@ function requestNotificationPermission() {
 }
 
 // ==========================================
-// 🔒 [오류 해결] 알림 중복 트리거 완벽 방어 및 진동 엔진 연동
+// 🔒 [최종 해결] 웹앱 설치 시 중복 알림 방지 & 서비스 워커 알림 위임
 // ==========================================
 function sendNotification(title, body) {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-    // 1. 다중 탭(창) 중복 실행 방어를 위한 시간/내용 캐시 불러오기
+    // 1. 단기 쿨다운 방어막 (이전 코드와 동일)
     const now = Date.now();
     const lastNotiTime = localStorage.getItem('last_noti_time') || 0;
     const lastNotiBody = localStorage.getItem('last_noti_body') || '';
 
-    // 🚨 핵심: 똑같은 내용의 알림이 5초(5000ms) 이내에 연달아 요청되면 단칼에 무시합니다!
     if (now - lastNotiTime < 5000 && lastNotiBody === body) return;
 
-    // 알림 기록 갱신 (저장하는 즉시 다른 탭/창에도 공유되어 중복 발생 원천 차단)
     localStorage.setItem('last_noti_time', now.toString());
     localStorage.setItem('last_noti_body', body);
 
-    // 2. 알림 발생 및 상단 CONFIG에 세팅해두신 모바일 진동 효과 적용
+    // 2. 알림 세팅
     const notificationOptions = {
         body: body,
         icon: NOTIFICATION_CONFIG.icon,
-        vibrate: NOTIFICATION_CONFIG.vibrate // 💡 세팅만 해두고 안 쓰이던 진동 배열 활성화
+        badge: NOTIFICATION_CONFIG.badge,
+        vibrate: NOTIFICATION_CONFIG.vibrate,
+        tag: 'library-notification' // 🚨 핵심: 기기(OS) 레벨에서 중복 알림을 하나로 묶어주는 고유 이름표
     };
 
-    new Notification(title, notificationOptions);
+    // 3. 브라우저 기본 알림 대신, 웹앱 서비스 워커(Service Worker)를 통해 전송
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(function(registration) {
+            // 설치된 웹앱의 권한으로 알림을 띄워 브라우저 중복 간섭을 완벽히 차단합니다.
+            registration.showNotification(title, notificationOptions);
+        }).catch(function() {
+            // 만약 서비스 워커 연결이 지연될 경우를 대비한 안전 장치
+            new Notification(title, notificationOptions);
+        });
+    } else {
+        new Notification(title, notificationOptions);
+    }
 }
 
 function hideLoadingScreen() {
