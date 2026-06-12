@@ -841,34 +841,175 @@ function downloadBackupFile(key, format) {
         const data = snapshot.val();
         if (!data) return showSystemAlert("백업 파일이 유실되었습니다.");
         
-        // 🚨 비밀 기록 (horizons) 추가
-        const posts = data.posts || {}; const horizons = data.horizons || {}; const letters = data.letters || {};
+        // 데이터 추출
+        const posts = data.posts || {}; 
+        const horizons = data.horizons || {}; 
+        const letters = data.letters || {};
         
+        // =====================================
+        // 📄 1. TXT 포맷 (정렬 및 가독성 극대화)
+        // =====================================
         if (format === 'txt') {
-            let textResult = `=========================================\n  수평선 너머의 서재 백업 기록 파일 (${key})\n=========================================\n\n[1. 바다의 기록 (글)]\n`;
-            Object.keys(posts).forEach(k => { textResult += `▶ 제목: ${posts[k].title}\n▶ 기록자: ${posts[k].author || '기록자'}\n▶ 날짜: ${posts[k].date}\n▶ 내용:\n${posts[k].content}\n-----------------------------------------\n`; });
+            let textResult = `=========================================================\n`;
+            textResult += `                 🌊 수평선 너머의 서재 백업 🌊\n`;
+            textResult += `=========================================================\n`;
+            textResult += `▶ 스냅샷 기준 시점 : ${key}\n\n`;
+
+            textResult += `─────────────────────────────────────────────────────────\n`;
+            textResult += ` [1. 바다의 기록]\n`;
+            textResult += `─────────────────────────────────────────────────────────\n`;
+            Object.keys(posts).forEach(k => { 
+                textResult += `\n ◈ 제목 : ${posts[k].title}\n`;
+                textResult += ` ◈ 기록자 : ${posts[k].author || '기록자'}  |  작성일 : ${posts[k].date}\n`;
+                textResult += ` --------------------------------------------------------\n`;
+                // 본문 내용이 들여쓰기 되도록 줄바꿈 문자 뒤에 공백 추가
+                textResult += `  ${posts[k].content.replace(/\n/g, '\n  ')}\n`; 
+                textResult += ` --------------------------------------------------------\n`;
+            });
             
-            textResult += `\n[2. 수평선 너머 (비밀 기록)]\n`;
-            Object.keys(horizons).forEach(k => { textResult += `▶ 제목: ${horizons[k].title}\n▶ 기록자: ${horizons[k].author || '기록자'}\n▶ 날짜: ${horizons[k].date}\n▶ 내용:\n${horizons[k].content}\n-----------------------------------------\n`; });
+            textResult += `\n\n─────────────────────────────────────────────────────────\n`;
+            textResult += ` [2. 수평선 너머 (비밀 기록)]\n`;
+            textResult += `─────────────────────────────────────────────────────────\n`;
+            Object.keys(horizons).forEach(k => { 
+                textResult += `\n ◈ 제목 : ${horizons[k].title}\n`;
+                textResult += ` ◈ 기록자 : ${horizons[k].author || '기록자'}  |  작성일 : ${horizons[k].date}\n`;
+                textResult += ` --------------------------------------------------------\n`;
+                textResult += `  ${horizons[k].content.replace(/\n/g, '\n  ')}\n`; 
+                textResult += ` --------------------------------------------------------\n`;
+            });
             
-            textResult += `\n[3. 띄워진 편지]\n`;
-            Object.keys(letters).forEach(k => { textResult += `▶ 제목: ${letters[k].title}\n▶ 날짜: ${letters[k].date}\n▶ 상태: ${letters[k].read ? '수거됨' : '미수거'}\n▶ 내용:\n${letters[k].content}\n-----------------------------------------\n`; });
+            textResult += `\n\n─────────────────────────────────────────────────────────\n`;
+            textResult += ` [3. 띄워진 편지]\n`;
+            textResult += `─────────────────────────────────────────────────────────\n`;
+            Object.keys(letters).forEach(k => { 
+                textResult += `\n ◈ 제목 : ${letters[k].title}\n`;
+                textResult += ` ◈ 상태 : ${letters[k].read ? '수거됨' : '미수거'}  |  작성일 : ${letters[k].date}\n`;
+                textResult += ` --------------------------------------------------------\n`;
+                textResult += `  ${letters[k].content.replace(/\n/g, '\n  ')}\n`; 
+                textResult += ` --------------------------------------------------------\n`;
+            });
             
-            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob);
-            const a = document.createElement("a"); a.href = url; a.download = `서재_백업데이터_${key}.txt`; a.click(); URL.revokeObjectURL(url);
-        } else if (format === 'pdf') {
-            const printWindow = window.open("", "_blank");
-            if (!printWindow) return showSystemAlert("브라우저 팝업 차단을 해제해주세요.");
-            let htmlContent = `<html><head><title>수평선 너머의 서재 백업 리포트</title><style>body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; } h1 { border-bottom: 2px solid #0f172a; padding-bottom: 12px; font-size: 22px; } h2 { color: #0284c7; margin-top: 32px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; } .item { margin-bottom: 24px; page-break-inside: avoid; } .meta { font-size: 12px; color: #64748b; margin-bottom: 6px; } .content { background: #f8fafc; padding: 14px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #e2e8f0; }</style></head><body><h1>수평선 너머의 서재 스냅샷 백업 [시점: ${key}]</h1><h2>[바다의 기록 - 글 목록]</h2>`;
-            Object.keys(posts).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(posts[k].title)}</strong><div class="meta">작성자: ${posts[k].author || '기록자'} ㅣ 일시: ${posts[k].date}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; });
+            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" }); 
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); 
+            a.href = url; 
+            a.download = `수평선너머_백업_${key}.txt`; 
+            a.click(); 
+            URL.revokeObjectURL(url);
+        } 
+        // =====================================
+        // 🖨️ 2. PDF 포맷 (about:blank 방지 및 서재 테마 적용)
+        // =====================================
+        else if (format === 'pdf') {
+            // about:blank를 없애기 위해 현재 창 뒤에 투명한 iframe을 생성하여 그 안에서 인쇄를 호출합니다.
+            let printFrame = document.getElementById('pdf-print-frame');
+            if (!printFrame) {
+                printFrame = document.createElement('iframe');
+                printFrame.id = 'pdf-print-frame';
+                printFrame.style.cssText = 'position:absolute; width:0; height:0; border:none; top:-1000px; left:-1000px;';
+                document.body.appendChild(printFrame);
+            }
             
-            htmlContent += `<h2>[수평선 너머 - 비밀 기록 목록]</h2>`;
-            Object.keys(horizons).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(horizons[k].title)}</strong><div class="meta">작성자: ${horizons[k].author || '기록자'} ㅣ 일시: ${horizons[k].date}</div><div class="content">${escapeHtml(horizons[k].content)}</div></div>`; });
+            const doc = printFrame.contentWindow.document;
             
-            htmlContent += `<h2>[띄워진 편지 목록]</h2>`;
-            Object.keys(letters).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(letters[k].title)}</strong><div class="meta">일시: ${letters[k].date} ㅣ 처리 상태: ${letters[k].read ? '수거됨' : '미수거'}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; });
-            htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
-            printWindow.document.write(htmlContent); printWindow.document.close();
+            // 서재의 밤바다 테마(다크 네이비 배경, 감성적인 폰트와 여백)를 PDF에 강제 적용합니다.
+            let htmlContent = `
+            <html>
+            <head>
+                <title>수평선 너머의 서재 - 백업 리포트</title>
+                <style>
+                    @page { margin: 15mm; size: A4; }
+                    body { 
+                        font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
+                        background-color: #061121; /* 밤바다 배경 */
+                        color: #e2e8f0; 
+                        padding: 10px 20px; 
+                        line-height: 1.7; 
+                        -webkit-print-color-adjust: exact; /* 배경색 인쇄 강제 허용 */
+                        print-color-adjust: exact;
+                    }
+                    .header-box {
+                        text-align: center;
+                        border-bottom: 2px solid #00b4d8;
+                        padding-bottom: 20px;
+                        margin-bottom: 30px;
+                    }
+                    h1 { color: #fff; font-size: 24px; margin: 0 0 10px 0; letter-spacing: 2px; }
+                    .timestamp { color: #90e0ef; font-size: 13px; }
+                    
+                    h2 { 
+                        color: #f7a37f; 
+                        font-size: 18px; 
+                        margin-top: 40px; 
+                        border-left: 4px solid #f7a37f; 
+                        padding-left: 10px;
+                        page-break-after: avoid;
+                    }
+                    .item { 
+                        background: rgba(255, 255, 255, 0.05); 
+                        border: 1px solid rgba(144, 224, 239, 0.2); 
+                        border-radius: 8px; 
+                        padding: 20px; 
+                        margin-bottom: 20px; 
+                        page-break-inside: avoid; /* 글이 페이지 중간에 잘리는 현상 방지 */
+                    }
+                    .item-title { 
+                        font-size: 16px; 
+                        font-weight: bold; 
+                        color: #fff; 
+                        margin-bottom: 8px;
+                    }
+                    .meta { 
+                        font-size: 12px; 
+                        color: #94a3b8; 
+                        margin-bottom: 12px; 
+                        border-bottom: 1px dashed rgba(255, 255, 255, 0.1); 
+                        padding-bottom: 8px;
+                    }
+                    .content { 
+                        white-space: pre-wrap; 
+                        font-size: 14px; 
+                        color: #cbd5e1;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header-box">
+                    <h1>🌊 수평선 너머의 서재 백업 기록</h1>
+                    <div class="timestamp">스냅샷 기준 시점 : ${key}</div>
+                </div>
+                
+                <h2>[1. 바다의 기록]</h2>`;
+            
+            Object.keys(posts).forEach(k => { 
+                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(posts[k].title)}</div><div class="meta">작성자: ${posts[k].author || '기록자'} &nbsp;|&nbsp; 작성일: ${posts[k].date}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; 
+            });
+            
+            htmlContent += `<h2>[2. 수평선 너머 (비밀 기록)]</h2>`;
+            Object.keys(horizons).forEach(k => { 
+                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(horizons[k].title)}</div><div class="meta">작성자: ${horizons[k].author || '기록자'} &nbsp;|&nbsp; 작성일: ${horizons[k].date}</div><div class="content">${escapeHtml(horizons[k].content)}</div></div>`; 
+            });
+            
+            htmlContent += `<h2>[3. 띄워진 편지]</h2>`;
+            Object.keys(letters).forEach(k => { 
+                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(letters[k].title)}</div><div class="meta">상태: ${letters[k].read ? '수거됨' : '미수거'} &nbsp;|&nbsp; 작성일: ${letters[k].date}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; 
+            });
+            
+            htmlContent += `
+                <script>
+                    window.onload = function() { 
+                        // 화면이 완벽하게 그려질 때까지 0.5초 대기 후 인쇄를 실행합니다.
+                        setTimeout(function() {
+                            window.print(); 
+                        }, 500);
+                    }
+                </script>
+            </body>
+            </html>`;
+            
+            doc.open();
+            doc.write(htmlContent);
+            doc.close();
         }
     }).catch(err => showSystemAlert("다운로드 파일 추출 실패"));
 }
