@@ -6,8 +6,8 @@ const NOTIFICATION_CONFIG = {
     postBody: "새로운 기록이 수평선 너머, 바다에 새겨졌습니다.",
     letterTitle: "수평선 너머의 서재",
     letterBody: "새로운 편지가 수평선 너머, 바다 위로 띄워졌습니다.",
-    icon: "글_하은.png",                           
-    badge: "글_하은.png",                        
+    icon: "글_하은.png",                               
+    badge: "글_하은.png",                                
     vibrate: [200, 100, 200]                 
 };
 
@@ -30,7 +30,7 @@ let isAsmrPlaying = false;
 window.manualTimeOverride = localStorage.getItem('env_time_override') || 'auto';
 window.manualWeatherOverride = localStorage.getItem('env_weather_override') || 'auto';
 
-let currentDisplayMode = localStorage.getItem('env_display_mode') || 'list'; // 💡 기존 'list'에서 업그레이드
+let currentDisplayMode = localStorage.getItem('env_display_mode') || 'list';
 let isRestMode = false; 
 let backupTriggerQueued = false;
 
@@ -117,8 +117,6 @@ function togglePlayPause() {
 }
 window.togglePlayPause = togglePlayPause;
 
-
-
 function injectRandomMemoryButton() {
     if (document.getElementById('random-memory-btn')) return;
     const btn = document.createElement('div');
@@ -170,7 +168,6 @@ function requestNotificationPermission() {
                     messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg', serviceWorkerRegistration: registration })
                     .then((currentToken) => {
                         if (currentToken) {
-                            // 🚨 [구조 개편] 로그인 상태(나의 정체)에 따라 토큰 저장 경로를 분기합니다.
                             const cleanToken = currentToken.replace(/[.#$\[\]]/g, '_');
                             let tokenPath = 'fcmTokens/visitors/' + cleanToken;
                             
@@ -178,7 +175,6 @@ function requestNotificationPermission() {
                                 tokenPath = 'fcmTokens/admins/' + loggedInUser + '/' + cleanToken;
                             }
 
-                            // 중복 등록 방지를 위해 정체별로 캐싱 체크
                             const cacheKey = `last_token_path_${loggedInUser || 'visitor'}`;
                             if (localStorage.getItem(cacheKey) === tokenPath) return;
                             
@@ -200,7 +196,6 @@ function requestNotificationPermission() {
 function sendNotification(title, body) {
     if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-    // 1. 단기 쿨다운 방어막 (이전 코드와 동일)
     const now = Date.now();
     const lastNotiTime = localStorage.getItem('last_noti_time') || 0;
     const lastNotiBody = localStorage.getItem('last_noti_body') || '';
@@ -210,22 +205,18 @@ function sendNotification(title, body) {
     localStorage.setItem('last_noti_time', now.toString());
     localStorage.setItem('last_noti_body', body);
 
-    // 2. 알림 세팅
     const notificationOptions = {
         body: body,
         icon: NOTIFICATION_CONFIG.icon,
         badge: NOTIFICATION_CONFIG.badge,
         vibrate: NOTIFICATION_CONFIG.vibrate,
-        tag: 'library-notification' // 🚨 핵심: 기기(OS) 레벨에서 중복 알림을 하나로 묶어주는 고유 이름표
+        tag: 'library-notification' 
     };
 
-    // 3. 브라우저 기본 알림 대신, 웹앱 서비스 워커(Service Worker)를 통해 전송
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(function(registration) {
-            // 설치된 웹앱의 권한으로 알림을 띄워 브라우저 중복 간섭을 완벽히 차단합니다.
             registration.showNotification(title, notificationOptions);
         }).catch(function() {
-            // 만약 서비스 워커 연결이 지연될 경우를 대비한 안전 장치
             new Notification(title, notificationOptions);
         });
     } else {
@@ -249,23 +240,18 @@ function hideLoadingScreen() {
 if (document.readyState === 'complete' || document.readyState === 'interactive') { hideLoadingScreen(); } 
 else { document.addEventListener('DOMContentLoaded', hideLoadingScreen); }
 
-
-
-// 💡 셀렉트 박스에서 모드를 선택할 때마다 작동하는 변경 함수
 window.setDisplayMode = function(mode) {
     currentDisplayMode = mode;
-    currentPage = 1; // 모드가 바뀌면 1페이지부터 다시 정렬
-    
-    // 💾 보기 모드 설정 브라우저에 영구 저장
+    currentPage = 1; 
     localStorage.setItem('env_display_mode', mode);
     
-    // 무한 스크롤 관찰자 초기화
     if (window.infiniteObserver) {
         window.infiniteObserver.disconnect();
         window.infiniteObserver = null;
     }
     renderUI();
 };
+
 const secureConfig = {
     apiKey: "AIzaSyC7nqQqEJcFp_jdy4wVG33WYXIj5xWJuV0",
     authDomain: "star-bock.firebaseapp.com",
@@ -301,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         syncWeatherAndWidget(); 
         setInterval(syncWeatherAndWidget, 30 * 60000); 
         listenPosts();
+        listenHorizons(); // 🚨 추가된 수평선 실시간 감지
         listenLetters();
         initMusicPlayerEngine(); 
         
@@ -363,11 +350,10 @@ document.addEventListener('keydown', function(e) {
 
 function decodeData(str) { return decodeURIComponent(escape(atob(str))); }
 
-// 🛠️ [긴급 수리 완료] 원인 문법 결함 파편 제거 및 완전무결한 오리지널 해시 토큰 원복 복구 완료
 const secureAdmin = { id: decodeData("7JWE7Iuc"), pw: atob("YXNoaSMyNjA0MTY=") };
 
 let isAdmin = false; let loggedInUser = ''; let currentView = 'posts'; let currentPage = 1; const postsPerPage = 6;
-let allPosts = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
+let allPosts = []; let allHorizons = []; let allLetters = []; let editTargetKey = null; let searchKeyword = ''; let searchAuthor = 'all';
 let isSubmitting = false; let isInternalSyncAction = false; 
 
 function showSystemAlert(message, callback) {
@@ -472,11 +458,9 @@ function toggleRestMode() {
 }
 window.toggleRestMode = toggleRestMode;
 
-// 💡 [추가] Firebase 인증 상태 실시간 감지 리스너 (기존 DOMContentLoaded 밖이나 안에 배치)
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         isAdmin = true;
-        // 이메일로 접속자 식별 후 기존 변수(loggedInUser) 동기화
         if (user.email === 'alyagsosiji@gmail.com') loggedInUser = '아시';
         else if (user.email === 'haeunchan0114@naver.com') loggedInUser = '하은';
         
@@ -484,7 +468,7 @@ firebase.auth().onAuthStateChanged((user) => {
         localStorage.setItem('loggedInUser', loggedInUser);
         
         requestNotificationPermission();
-        updateUI(); // 기존의 화려한 CSS 트리거 및 권한 뷰 전환 기능 정상 작동
+        updateUI(); 
     } else {
         isAdmin = false;
         loggedInUser = '';
@@ -494,7 +478,6 @@ firebase.auth().onAuthStateChanged((user) => {
     }
 });
 
-// 💡 [수정] 로그인 함수 완전 교체
 function login() {
     const idElem = document.getElementById('admin-id'); 
     const pwElem = document.getElementById('admin-pw');
@@ -503,7 +486,6 @@ function login() {
     const inputId = idElem.value.trim(); 
     const inputPw = pwElem.value;
     
-    // UI에서 한글 이름 입력 시 뒤에서 이메일로 매핑
     let targetEmail = "";
     if (inputId === "아시") targetEmail = "alyagsosiji@gmail.com";
     else if (inputId === "하은") targetEmail = "haeunchan0114@naver.com";
@@ -512,7 +494,6 @@ function login() {
         return;
     }
 
-    // Firebase Auth 백엔드 로그인 요청
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
             closeModal(); 
@@ -526,7 +507,6 @@ function login() {
 }
 window.login = login;
 
-// 💡 [수정] 로그아웃 함수 완전 교체
 function logout() { 
     firebase.auth().signOut().then(() => {
         cancelEdit(); 
@@ -543,6 +523,7 @@ function updateUI() {
     const tabContainer = document.getElementById('view-tab-container'); 
     const currentUserBtn = document.getElementById('current-user-btn'); 
     const backupTrigger = document.getElementById('mini-backup-trigger');
+    const tabHorizons = document.getElementById('tab-horizons');
 
     if (isAdmin) {
         document.body.classList.add('admin-logged-in'); 
@@ -551,6 +532,7 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'none'; 
         if (adminMenu) adminMenu.style.display = 'flex'; 
         if (tabContainer) tabContainer.style.display = 'flex'; 
+        if (tabHorizons) tabHorizons.style.display = 'inline-block'; // 관리자 전용 수평선 너머 탭 활성화
         if (currentUserBtn) currentUserBtn.innerText = `기록자 ${loggedInUser}님`; 
         if (backupTrigger) backupTrigger.style.display = 'flex'; 
         switchView(currentView);
@@ -561,8 +543,12 @@ function updateUI() {
         if (loginBtn) loginBtn.style.display = 'inline-block'; 
         if (adminMenu) adminMenu.style.display = 'none';
         if (tabContainer) tabContainer.style.display = 'none'; 
+        if (tabHorizons) tabHorizons.style.display = 'none'; // 비로그인 시 수평선 너머 탭 강제 은닉
         if (backupTrigger) backupTrigger.style.display = 'none'; 
-        switchView('posts'); 
+        
+        // 만약 비로그인 상태인데 수평선 너머 탭을 보고 있었다면 메인으로 사출
+        if (currentView === 'horizons') switchView('posts');
+        else switchView('posts'); 
     }
 
     const letterSubmitBtn = document.getElementById('submit-letter-btn');
@@ -576,14 +562,37 @@ function updateUI() {
     }
 }
 
+// 🚨 뷰 스위칭: 'horizons' 로직 완벽 통합
 function switchView(view) {
-    if (!isAdmin && view === 'letters') { currentView = 'posts'; return; }
+    if (!isAdmin && (view === 'letters' || view === 'horizons')) { currentView = 'posts'; return; }
     currentView = view; currentPage = 1;
-    const tabPosts = document.getElementById('tab-posts'); const tabLetters = document.getElementById('tab-letters');
+    
+    const tabPosts = document.getElementById('tab-posts'); 
+    const tabHorizons = document.getElementById('tab-horizons'); 
+    const tabLetters = document.getElementById('tab-letters');
+    
     const mainTitle = document.getElementById('section-main-title');
-    if (tabPosts) tabPosts.classList.remove('active'); if (tabLetters) tabLetters.classList.remove('active');
-    if(view === 'posts') { if (tabPosts) tabPosts.classList.add('active'); if (mainTitle) mainTitle.innerText = "바다의 기록"; } 
-    else { if (tabLetters) tabLetters.classList.add('active'); if (mainTitle) mainTitle.innerText = "띄워진 편지"; }
+    const writeTitle = document.getElementById('write-title');
+    const submitPostBtn = document.getElementById('submit-post-btn');
+
+    if (tabPosts) tabPosts.classList.remove('active'); 
+    if (tabHorizons) tabHorizons.classList.remove('active'); 
+    if (tabLetters) tabLetters.classList.remove('active');
+
+    if (view === 'posts') { 
+        if (tabPosts) tabPosts.classList.add('active'); 
+        if (mainTitle) mainTitle.innerText = "바다의 기록"; 
+        if (writeTitle && !editTargetKey) writeTitle.innerText = "새로운 기록 남기기";
+        if (submitPostBtn && !editTargetKey) submitPostBtn.innerText = "기록하기";
+    } else if (view === 'horizons') { 
+        if (tabHorizons) tabHorizons.classList.add('active'); 
+        if (mainTitle) mainTitle.innerText = "수평선 너머"; 
+        if (writeTitle && !editTargetKey) writeTitle.innerText = "수평선 너머에 비밀 기록하기";
+        if (submitPostBtn && !editTargetKey) submitPostBtn.innerText = "비밀 기록하기";
+    } else { 
+        if (tabLetters) tabLetters.classList.add('active'); 
+        if (mainTitle) mainTitle.innerText = "띄워진 편지"; 
+    }
     renderUI();
 }
 window.switchView = switchView;
@@ -609,13 +618,17 @@ function parseCustomDate(dateStr) {
 // ==========================================
 // 🌊 2. 글(Post) 실시간 감지 및 알림 타겟팅
 // ==========================================
-let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
+let rawPostsSnapshot = null; let rawHorizonsSnapshot = null; let rawLettersSnapshot = null; 
+let isInitialPostLoad = true; let knownPostIds = new Set();
+let isInitialHorizonLoad = true; let knownHorizonIds = new Set();
+let isInitialLetterLoad = true; let knownLetterIds = new Set();
+
 function listenPosts() {
     if (!database) return;
     database.ref('posts').off();
     database.ref('posts').on('value', (snapshot) => {
         rawPostsSnapshot = snapshot.val(); allPosts = []; let currentIds = new Set(); 
-        let hasNewPost = false; let newPostAuthor = ''; // 💡 새로 추가된 글의 작성자 추적
+        let hasNewPost = false; let newPostAuthor = ''; 
         
         if (rawPostsSnapshot) {
             Object.keys(rawPostsSnapshot).forEach((key) => {
@@ -633,7 +646,6 @@ function listenPosts() {
             });
         }
         
-        // 🚨 핵심: 내가 쓴 글이면 알림 무시, 남이 쓴 글일 때만 알림 발생!
         if (hasNewPost && isAdmin && newPostAuthor !== loggedInUser) {
             sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
         }
@@ -643,13 +655,46 @@ function listenPosts() {
     });
 }
 
-let knownLetterIds = new Set(); let isInitialLetterLoad = true;
+// 🚨 [추가] 수평선 너머 (비밀 기록) 실시간 감지 리스너
+function listenHorizons() {
+    if (!database) return;
+    database.ref('horizons').off();
+    database.ref('horizons').on('value', (snapshot) => {
+        rawHorizonsSnapshot = snapshot.val(); allHorizons = []; let currentIds = new Set(); 
+        let hasNewHorizon = false; let newHorizonAuthor = ''; 
+        
+        if (rawHorizonsSnapshot) {
+            Object.keys(rawHorizonsSnapshot).forEach((key) => {
+                allHorizons.push({ id: key, ...rawHorizonsSnapshot[key] }); currentIds.add(key);
+                if (!isInitialHorizonLoad && !knownHorizonIds.has(key)) {
+                    hasNewHorizon = true;
+                    newHorizonAuthor = rawHorizonsSnapshot[key].author || '기록자';
+                }
+            });
+            allHorizons.sort((a, b) => {
+                const timeA = parseCustomDate(a.date) || 0;
+                const timeB = parseCustomDate(b.date) || 0;
+                if (timeB !== timeA) return timeB - timeA;
+                return b.id.localeCompare(a.id);
+            });
+        }
+        
+        // 비밀 기록 알림 (다른 관리자가 비밀 글을 썼을 때 수신)
+        if (hasNewHorizon && isAdmin && newHorizonAuthor !== loggedInUser) {
+            sendNotification("비밀 기록", "수평선 너머에 누군가 은밀한 기록을 남겼습니다.");
+        }
+        
+        knownHorizonIds = currentIds; isInitialHorizonLoad = false;
+        if(currentView === 'horizons') renderUI();
+    });
+}
+
 function listenLetters() {
     if (!database) return;
     database.ref('letters').off();
     database.ref('letters').on('value', (snapshot) => {
         rawLettersSnapshot = snapshot.val(); allLetters = []; let currentIds = new Set(); 
-        let hasNewLetter = false; let newLetterAuthor = ''; // 💡 새로 추가된 편지의 작성자 추적
+        let hasNewLetter = false; let newLetterAuthor = ''; 
         
         if (rawLettersSnapshot) {
             Object.keys(rawLettersSnapshot).forEach((key) => {
@@ -667,7 +712,6 @@ function listenLetters() {
             });
         }
         
-        // 🚨 핵심: 내가 쓴 편지면 알림 무시, 남(다른 관리자나 방문자)이 쓴 편지만 알림 발생!
         if (hasNewLetter && isAdmin && newLetterAuthor !== loggedInUser) {
             sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
         }
@@ -677,14 +721,20 @@ function listenLetters() {
     });
 }
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
+
+// 🚨 백업 엔진에 horizons (비밀 기록) 완벽 통합
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return Promise.reject(new Error("Database connection lost"));
     const now = new Date(); const timestamp = now.getTime();
     const dateString = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-    const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0; const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
-    const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, lCount: lCount };
-    const backupPayload = { posts: rawPostsSnapshot || {}, letters: rawLettersSnapshot || {} };
+    const pCount = rawPostsSnapshot ? Object.keys(rawPostsSnapshot).length : 0; 
+    const hCount = rawHorizonsSnapshot ? Object.keys(rawHorizonsSnapshot).length : 0;
+    const lCount = rawLettersSnapshot ? Object.keys(rawLettersSnapshot).length : 0;
+    
+    const backupMeta = { timestamp: timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount: pCount, hCount: hCount, lCount: lCount };
+    const backupPayload = { posts: rawPostsSnapshot || {}, horizons: rawHorizonsSnapshot || {}, letters: rawLettersSnapshot || {} };
     const newBackupKey = database.ref().push().key;
+    
     return Promise.all([ database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload) ])
     .then(() => { cleanExpiredBackupsTimeline(); loadBackupTimelineList(); });
 }
@@ -750,7 +800,11 @@ function loadBackupTimelineList() {
         if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding: 20px 0; text-align:center;">복구 지점이 없습니다.</p>`; return; }
 
         keys.forEach((key) => {
-            const item = backups[key]; const pCount = item.pCount || 0; const lCount = item.lCount || 0; const badgeClass = item.type === "자동" ? "auto" : "manual";
+            const item = backups[key]; 
+            const pCount = item.pCount || 0; 
+            const hCount = item.hCount || 0; // 비밀기록
+            const lCount = item.lCount || 0; 
+            const badgeClass = item.type === "자동" ? "auto" : "manual";
             const element = document.createElement('div'); element.className = 'backup-item';
             
             element.innerHTML = `
@@ -758,7 +812,7 @@ function loadBackupTimelineList() {
                     <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="margin-right:12px; accent-color:#f7a37f; width:16px; height:16px; cursor:pointer; flex-shrink:0;">
                     <div class="backup-meta" style="flex-grow: 1; padding-right: 8px;">
                         <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
-                        <div class="backup-counts">글 ${pCount}개 ㅣ 편지 ${lCount}개</div>
+                        <div class="backup-counts">글 ${pCount}개 ㅣ 비밀 ${hCount}개 ㅣ 편지 ${lCount}개</div>
                     </div>
                     <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
                         <button onclick="window.downloadBackupFile('${key}', 'txt')" style="font-size:0.75rem; border:1px solid rgba(144,224,239,0.35); color:#90e0ef; padding: 5px 9px; border-radius:6px; background:rgba(144,224,239,0.04); cursor:pointer; font-weight:500; transition:all 0.2s;">TXT</button>
@@ -781,13 +835,20 @@ function downloadBackupFile(key, format) {
     database.ref(`backupData/${key}`).once('value').then((snapshot) => {
         const data = snapshot.val();
         if (!data) return showSystemAlert("백업 파일이 유실되었습니다.");
-        const posts = data.posts || {}; const letters = data.letters || {};
+        
+        // 🚨 비밀 기록 (horizons) 추가
+        const posts = data.posts || {}; const horizons = data.horizons || {}; const letters = data.letters || {};
         
         if (format === 'txt') {
             let textResult = `=========================================\n  수평선 너머의 서재 백업 기록 파일 (${key})\n=========================================\n\n[1. 바다의 기록 (글)]\n`;
             Object.keys(posts).forEach(k => { textResult += `▶ 제목: ${posts[k].title}\n▶ 기록자: ${posts[k].author || '기록자'}\n▶ 날짜: ${posts[k].date}\n▶ 내용:\n${posts[k].content}\n-----------------------------------------\n`; });
-            textResult += `\n[2. 띄워진 편지]\n`;
+            
+            textResult += `\n[2. 수평선 너머 (비밀 기록)]\n`;
+            Object.keys(horizons).forEach(k => { textResult += `▶ 제목: ${horizons[k].title}\n▶ 기록자: ${horizons[k].author || '기록자'}\n▶ 날짜: ${horizons[k].date}\n▶ 내용:\n${horizons[k].content}\n-----------------------------------------\n`; });
+            
+            textResult += `\n[3. 띄워진 편지]\n`;
             Object.keys(letters).forEach(k => { textResult += `▶ 제목: ${letters[k].title}\n▶ 날짜: ${letters[k].date}\n▶ 상태: ${letters[k].read ? '수거됨' : '미수거'}\n▶ 내용:\n${letters[k].content}\n-----------------------------------------\n`; });
+            
             const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" }); const url = URL.createObjectURL(blob);
             const a = document.createElement("a"); a.href = url; a.download = `서재_백업데이터_${key}.txt`; a.click(); URL.revokeObjectURL(url);
         } else if (format === 'pdf') {
@@ -795,6 +856,10 @@ function downloadBackupFile(key, format) {
             if (!printWindow) return showSystemAlert("브라우저 팝업 차단을 해제해주세요.");
             let htmlContent = `<html><head><title>수평선 너머의 서재 백업 리포트</title><style>body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; } h1 { border-bottom: 2px solid #0f172a; padding-bottom: 12px; font-size: 22px; } h2 { color: #0284c7; margin-top: 32px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; font-size: 16px; } .item { margin-bottom: 24px; page-break-inside: avoid; } .meta { font-size: 12px; color: #64748b; margin-bottom: 6px; } .content { background: #f8fafc; padding: 14px; border-radius: 6px; white-space: pre-wrap; font-size: 14px; border: 1px solid #e2e8f0; }</style></head><body><h1>수평선 너머의 서재 스냅샷 백업 [시점: ${key}]</h1><h2>[바다의 기록 - 글 목록]</h2>`;
             Object.keys(posts).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(posts[k].title)}</strong><div class="meta">작성자: ${posts[k].author || '기록자'} ㅣ 일시: ${posts[k].date}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; });
+            
+            htmlContent += `<h2>[수평선 너머 - 비밀 기록 목록]</h2>`;
+            Object.keys(horizons).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(horizons[k].title)}</strong><div class="meta">작성자: ${horizons[k].author || '기록자'} ㅣ 일시: ${horizons[k].date}</div><div class="content">${escapeHtml(horizons[k].content)}</div></div>`; });
+            
             htmlContent += `<h2>[띄워진 편지 목록]</h2>`;
             Object.keys(letters).forEach(k => { htmlContent += `<div class="item"><strong>${escapeHtml(letters[k].title)}</strong><div class="meta">일시: ${letters[k].date} ㅣ 처리 상태: ${letters[k].read ? '수거됨' : '미수거'}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; });
             htmlContent += `<script>window.onload = function() { window.print(); window.close(); }</script></body></html>`;
@@ -812,14 +877,20 @@ window.restoreFromTargetBackupPoint = restoreFromTargetBackupPoint;
 
 function executeRestore(targetBackup) {
     if (!targetBackup) return; isInternalSyncAction = true;
-    database.ref('posts').off(); database.ref('letters').off();
-    Promise.all([ database.ref('posts').set(targetBackup.posts || null), database.ref('letters').set(targetBackup.letters || null) ]).then(() => {
-        listenPosts(); listenLetters(); showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
-    }).catch(() => { listenPosts(); listenLetters(); });
+    database.ref('posts').off(); database.ref('horizons').off(); database.ref('letters').off();
+    
+    // 🚨 비밀 기록 (horizons) 복구 추가
+    Promise.all([ 
+        database.ref('posts').set(targetBackup.posts || null), 
+        database.ref('horizons').set(targetBackup.horizons || null), 
+        database.ref('letters').set(targetBackup.letters || null) 
+    ]).then(() => {
+        listenPosts(); listenHorizons(); listenLetters(); 
+        showSystemAlert('수평선 너머 바다가 완전 복원되었습니다.', function() { isInternalSyncAction = false; closeBackupModal(); });
+    }).catch(() => { listenPosts(); listenHorizons(); listenLetters(); });
 }
 
 function scrollToPosts() { const postsSection = document.getElementById('posts-section'); if (postsSection) { const yOffset = postsSection.getBoundingClientRect().top + window.scrollY - 40; window.scrollTo({ top: yOffset, behavior: 'smooth' }); } }
-
 
 function renderUI(isAppend = false) {
     const container = document.getElementById('posts-container'); 
@@ -828,10 +899,8 @@ function renderUI(isAppend = false) {
     const authorStatsContainer = document.getElementById('author-stats'); 
     const authorFilterContainer = document.getElementById('author-filter-container');
 
-    
     if (!container || !paginationContainer) return; 
 
-    // 무한 스크롤 작동 중이 아닐 때만 화면을 비우고 새로 그림
     if (!isAppend) {
         container.innerHTML = ''; 
         paginationContainer.innerHTML = '';
@@ -843,11 +912,15 @@ function renderUI(isAppend = false) {
         }
 
         if (subtitleElem) {
-            let subtitleText = currentView === 'posts' 
-                ? `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>` 
-                : `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
+            let subtitleText = '';
+            if (currentView === 'posts') {
+                subtitleText = `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(144,224,239,0.6); background:linear-gradient(120deg, #fff, #b9efff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color: #90e0ef; font-size: 0.85rem; display: inline-block; margin-top: 9px;">총 기록된 글 : ${allPosts.length}개</span>`;
+            } else if (currentView === 'horizons') {
+                subtitleText = `<span style="color:#ffffff; font-size:1.02rem; font-weight:500; letter-spacing:0.5px; text-shadow:0 0 10px rgba(216, 180, 255, 0.6); background:linear-gradient(120deg, #fff, #e4c1ff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; display:inline-block;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color: #c9a0ff; font-size: 0.85rem; display: inline-block; margin-top: 9px;">은밀한 기록 : ${allHorizons.length}개</span>`;
+            } else {
+                subtitleText = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color: #ffd4ba; font-size: 0.85rem; display: inline-block; margin-top: 9px;">띄워진 편지 : ${allLetters.length}개</span>`;
+            }
             
-            // 💡 드롭다운 UI: 브라우저 강제 정렬 무시를 방어하기 위해 좌/우 양쪽에 동일한 화살표를 배치하여 대칭을 맞춤
             let selectHtml = `
             <div style="margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; gap:15px;">
                 <div style="display:flex; justify-content:center; width:100%;">
@@ -887,7 +960,6 @@ function renderUI(isAppend = false) {
                 </div>
             `;
 
-            // 💡 [배경틀 제거 완료] 위치와 양끝 정렬은 그대로 유지하되, 투명 배경 처리로 단추만 심플하게 노출
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
                 <div id="letter-batch-controls" style="
@@ -895,13 +967,13 @@ function renderUI(isAppend = false) {
                     align-items: center !important;
                     justify-content: space-between !important;
                     width: 100% !important;
-                    max-width: 450px !important; /* 기존 자석 정렬 범위 유지 */
+                    max-width: 450px !important;
                     height: 36px !important;
-                    background: transparent !important; /* 🚨 기존 유리알 배경 완벽 삭제 */
-                    border: none !important;             /* 🚨 기존 테두리 완벽 삭제 */
+                    background: transparent !important;
+                    border: none !important;             
                     box-shadow: none !important;
                     padding: 0 !important;
-                    margin: 25px auto 10px auto !important; /* 시원한 상하 여백 고정 */
+                    margin: 25px auto 10px auto !important;
                     box-sizing: border-box !important;
                     user-select: none !important;
                 ">
@@ -960,17 +1032,26 @@ function renderUI(isAppend = false) {
             subtitleElem.innerHTML = subtitleText + selectHtml;
         }
 
-        if (currentView === 'posts') {
+        // 필터 및 통계는 '기록된 바다'와 '수평선 너머' 두 곳 모두에서 동일하게 작동
+        if (currentView === 'posts' || currentView === 'horizons') {
             if (authorStatsContainer) authorStatsContainer.style.display = 'flex'; if (authorFilterContainer) authorFilterContainer.style.display = 'block';
-            let ashiCount = 0; let haeunCount = 0; allPosts.forEach(post => { if ((post.author || "").includes("하은")) haeunCount++; else ashiCount++; });
+            let targetArrayCount = currentView === 'posts' ? allPosts : allHorizons;
+            let ashiCount = 0; let haeunCount = 0; 
+            targetArrayCount.forEach(item => { if ((item.author || "").includes("하은")) haeunCount++; else ashiCount++; });
             if (authorStatsContainer) authorStatsContainer.innerHTML = `<span class="stat-badge">아시 : ${ashiCount}개</span><span class="stat-badge">하은 : ${haeunCount}개</span>`;
         } else {
             if (authorStatsContainer) authorStatsContainer.style.display = 'none'; if (authorFilterContainer) authorFilterContainer.style.display = 'none';
         }
     }
 
-    let targetArray = (currentView === 'posts') ? allPosts : allLetters;
-    if (currentView === 'posts' && searchAuthor !== 'all') { targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); }
+    let targetArray;
+    if (currentView === 'posts') targetArray = allPosts;
+    else if (currentView === 'horizons') targetArray = allHorizons;
+    else targetArray = allLetters;
+
+    if ((currentView === 'posts' || currentView === 'horizons') && searchAuthor !== 'all') { 
+        targetArray = targetArray.filter(item => { const author = item.author || "기록자"; return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은"); }); 
+    }
     if (searchKeyword) targetArray = targetArray.filter(item => String(item.title).toLowerCase().includes(searchKeyword.toLowerCase()));
 
     if (targetArray.length === 0) { 
@@ -981,7 +1062,6 @@ function renderUI(isAppend = false) {
     const totalPages = Math.ceil(targetArray.length / postsPerPage);
     let currentItems = [];
 
-    // 무한 스크롤일 때 배열 보존 분기 처리
     if (currentDisplayMode === 'infinite') {
         if (isAppend) {
             currentItems = targetArray.slice((currentPage - 1) * postsPerPage, currentPage * postsPerPage);
@@ -1001,7 +1081,7 @@ function renderUI(isAppend = false) {
         
         let mgmtButtonsHtml = '';
         if (isAdmin) {
-            mgmtButtonsHtml = currentView === 'posts' 
+            mgmtButtonsHtml = (currentView === 'posts' || currentView === 'horizons')
                 ? `<div class="card-mgmt-btns"><button class="mgmt-btn" onclick="event.stopPropagation(); window.prepareEdit('${item.id}')">수정</button><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deletePost('${item.id}')">소멸</button></div>`
                 : `<div class="card-mgmt-btns"><button class="mgmt-btn danger-btn" onclick="event.stopPropagation(); window.deleteLetter('${item.id}')">소멸</button></div>`;
         }
@@ -1011,19 +1091,17 @@ function renderUI(isAppend = false) {
             readBadgeHtml = `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 5px; border-radius:4px; margin-left:8px; font-weight:bold; vertical-align:middle; display:inline-block;">수거됨</span>`; 
         }
 
-        const displayDate = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
+        const displayDate = (currentView === 'posts' || currentView === 'horizons') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         
         let selectLetterCbHtml = '';
         if (isAdmin && currentView === 'letters') {
             selectLetterCbHtml = `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:12px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle; flex-shrink:0;">`;
         }
 
-        // 🟢 편지 모드 및 리스트 모드: 기존 원본 구조 100% 동일 (건드리지 않음)
         let footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
         let contentHtml = `<div class="post-content-area">${item.content}</div>`;
 
-        // 🚨 오직 글(posts) + 갤러리/스크롤 모드일 때만 적용 (5줄 제한 & 2줄 정렬)
-        if (currentView === 'posts' && (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite')) {
+        if ((currentView === 'posts' || currentView === 'horizons') && (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite')) {
             contentHtml = `<div class="post-content-area grid-text-clamp">${item.content}</div>`;
 
             let datePart = displayDate;
@@ -1035,7 +1113,6 @@ function renderUI(isAppend = false) {
             }
 
             if (isAdmin) {
-                // 관리자 로그인 시 2줄 레이아웃 (우측 상단에 원본 스타일의 더보기 버튼 배치)
                 footerHtml = `
                     <div class="admin-grid-footer" onclick="event.stopPropagation();">
                         <div class="grid-date">${datePart}</div>
@@ -1045,7 +1122,6 @@ function renderUI(isAppend = false) {
                     </div>
                 `;
             } else {
-                // ✨ [수정] 일반 방문자용 하단 레이아웃: 중복되던 추가 <button> 제거 (원본 구조 100% 복구)
                 footerHtml = `
                     <div class="post-footer">
                         <span class="date">${displayDate}</span>
@@ -1058,14 +1134,11 @@ function renderUI(isAppend = false) {
         cardFragment.appendChild(card);
     });
     
-    // 깜빡임 없이 리스트 맨 뒤에 이어붙이기
     container.appendChild(cardFragment);
 
-    // 💡 하단 페이지네이션 및 무한 스크롤 교차 관찰자(Observer) 동작 로직
     if (currentDisplayMode === 'infinite') {
         if (!isAppend) {
             paginationContainer.innerHTML = '';
-            // 페이지가 남았다면 스크롤 감지 센서(Sentinel) 이식
             if (currentPage < totalPages) {
                 const sentinel = document.createElement('div');
                 sentinel.id = 'infinite-sentinel';
@@ -1074,7 +1147,6 @@ function renderUI(isAppend = false) {
 
                 if (window.infiniteObserver) window.infiniteObserver.disconnect();
                 window.infiniteObserver = new IntersectionObserver((entries) => {
-                    // 유저가 밑바닥 센서 근처(150px)에 도달하면 다음 페이지 조용히 로드
                     if (entries[0].isIntersecting) {
                         if (currentPage < Math.ceil(targetArray.length / postsPerPage)) {
                             currentPage++;
@@ -1085,7 +1157,6 @@ function renderUI(isAppend = false) {
                 window.infiniteObserver.observe(sentinel);
             }
         } else {
-            // 끝까지 스크롤하여 더 이상 불러올 게 없으면 관찰자 제거
             if (currentPage >= totalPages && window.infiniteObserver) {
                 window.infiniteObserver.disconnect();
                 const sentinel = document.getElementById('infinite-sentinel');
@@ -1093,7 +1164,6 @@ function renderUI(isAppend = false) {
             }
         }
     } else {
-        // 기존 리스트, 갤러리 모드의 버튼식 페이지네이션 생성
         if (!isAppend && totalPages > 1) {
             const pageFragment = document.createDocumentFragment();
             const maxPageButtons = 5; const currentGroup = Math.ceil(currentPage / maxPageButtons);
@@ -1109,23 +1179,26 @@ function renderUI(isAppend = false) {
 }
 
 function openDetailModal(key) {
-    if (!isAdmin && currentView === 'letters') return;
-    const item = ((currentView === 'posts') ? allPosts : allLetters).find(p => p.id === key); if (!item) return;
+    if (!isAdmin && (currentView === 'letters' || currentView === 'horizons')) return;
+    
+    let targetArray;
+    if (currentView === 'posts') targetArray = allPosts;
+    else if (currentView === 'horizons') targetArray = allHorizons;
+    else targetArray = allLetters;
+
+    const item = targetArray.find(p => p.id === key); if (!item) return;
 
     if (currentView === 'letters' && isAdmin && !item.read) database.ref('letters/' + key).update({ read: true });
 
-    // 💡 1. 제목: 모든 야광/하이라이트 효과를 완전히 제거하고 원본 텍스트만 깔끔하게 출력
     if (document.getElementById('detail-title')) {
         document.getElementById('detail-title').innerHTML = escapeHtml(item.title);
     }
     
-    // 💡 2. 날짜 정보
     if (document.getElementById('detail-date')) {
-        const displayInfo = (currentView === 'posts') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
+        const displayInfo = (currentView === 'posts' || currentView === 'horizons') ? `${item.author || "기록자"} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
         document.getElementById('detail-date').innerText = displayInfo;
     }
     
-    // 💡 3. 본문(내용): 본문 역시 검색어 강조 효과를 완전히 빼고 원본 그대로 출력
     if (document.getElementById('detail-text')) {
         document.getElementById('detail-text').innerHTML = escapeHtml(item.content);
     } 
@@ -1144,33 +1217,35 @@ function triggerBottleAnimation(callback) {
     setTimeout(() => { bottle.remove(); if(callback) callback(); }, 2500);
 }
 
+// 🚨 글 및 비밀 기록 저장 로직
 function savePost() {
     if (!isAdmin || !database || isSubmitting) return;
     const title = document.getElementById('post-title')?.value.trim(); const content = document.getElementById('post-content')?.value.trim();
     if (!title || !content) { showSystemAlert('내용을 모두 입력해주세요.'); return; }
     if (!navigator.onLine) { showSystemAlert('인터넷이 끊겨 글을 기록할 수 없습니다.'); return; }
+    
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; 
     const postData = { title: title, content: content, date: date, author: loggedInUser };
+    
+    // 현재 보고 있는 탭에 따라 데이터베이스 저장 경로 변경 (수평선 너머일 경우 horizons)
+    const targetNode = currentView === 'horizons' ? 'horizons' : 'posts';
 
     if (editTargetKey) { 
-        database.ref('posts/' + editTargetKey).update(postData).then(() => { 
+        database.ref(targetNode + '/' + editTargetKey).update(postData).then(() => { 
             showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit(); 
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
         }).finally(() => { isSubmitting = false; }); 
     } else { 
-        database.ref('posts').push(postData).then(() => { 
+        database.ref(targetNode).push(postData).then(() => { 
             document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; clearDraftCacheStorage('post'); currentPage = 1; 
-            showSystemAlert('성공적으로 새겨졌습니다.'); 
+            showSystemAlert(currentView === 'horizons' ? '수평선 너머에 은밀히 새겨졌습니다.' : '성공적으로 새겨졌습니다.'); 
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
         }).finally(() => { isSubmitting = false; }); 
     }
 }
 window.savePost = savePost;
 
-// ==========================================
-// 📝 1. 편지 저장 로직 업그레이드 (작성자 식별 꼬리표 추가)
-// ==========================================
 function saveLetter() {
     if (!database || isSubmitting || isRestMode) return;
     const title = document.getElementById('letter-title')?.value.trim(); const content = document.getElementById('letter-content')?.value.trim();
@@ -1181,7 +1256,6 @@ function saveLetter() {
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; 
     
-    // 🚨 핵심: 편지에도 '작성자' 정보를 기록합니다. (관리자면 이름, 아니면 '방문자')
     const letterData = { title: title, content: content, date: date, author: isAdmin ? loggedInUser : '방문자', read: false };
 
     triggerBottleAnimation(() => {
@@ -1196,21 +1270,20 @@ function saveLetter() {
 window.saveLetter = saveLetter;
 
 function prepareEdit(key) {
-    const post = allPosts.find(p => p.id === key); if (!post) return; editTargetKey = key;
-    if (document.getElementById('write-title')) document.getElementById('write-title').innerText = "기록 수정하기";
+    let targetArray = currentView === 'horizons' ? allHorizons : allPosts;
+    const post = targetArray.find(p => p.id === key); if (!post) return; editTargetKey = key;
+    
+    if (document.getElementById('write-title')) document.getElementById('write-title').innerText = currentView === 'horizons' ? "비밀 기록 수정하기" : "기록 수정하기";
     if (document.getElementById('post-title')) document.getElementById('post-title').value = post.title;
     if (document.getElementById('post-content')) document.getElementById('post-content').value = post.content;
     if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "수정하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "inline-block";
     
-    // 💡 모바일 브라우저의 스크롤 무시 현상을 완벽히 타파하는 정밀 좌표 추적 스크롤
     const writeSection = document.getElementById('write-section');
     if (writeSection) {
-        // 상단에 딱 붙지 않도록 60px의 여유 공간을 두고 부드럽게 끌어올립니다.
         const yOffset = writeSection.getBoundingClientRect().top + window.scrollY - 60; 
         window.scrollTo({ top: yOffset, behavior: 'smooth' });
     } else {
-        // 혹시라도 구역을 못 찾으면 무조건 맨 꼭대기로 강제 사출합니다.
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
@@ -1218,10 +1291,10 @@ window.prepareEdit = prepareEdit;
 
 function cancelEdit() {
     editTargetKey = null;
-    if (document.getElementById('write-title')) document.getElementById('write-title').innerText = "새로운 기록 남기기";
+    if (document.getElementById('write-title')) document.getElementById('write-title').innerText = currentView === 'horizons' ? "수평선 너머에 비밀 기록하기" : "새로운 기록 남기기";
     if (document.getElementById('post-title')) document.getElementById('post-title').value = '';
     if (document.getElementById('post-content')) document.getElementById('post-content').value = '';
-    if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = "기록하기";
+    if (document.getElementById('submit-post-btn')) document.getElementById('submit-post-btn').innerText = currentView === 'horizons' ? "비밀 기록하기" : "기록하기";
     if (document.getElementById('cancel-edit-btn')) document.getElementById('cancel-edit-btn').style.display = "none";
     clearDraftCacheStorage('post'); 
 }
@@ -1229,10 +1302,12 @@ window.cancelEdit = cancelEdit;
 
 function deletePost(key) {
     if (!isAdmin || !database) return;
-    showSystemConfirm('이 기록을 완전히 소멸시키겠습니까?', function() {
+    showSystemConfirm(currentView === 'horizons' ? '이 비밀 기록을 완전히 소멸시키겠습니까?' : '이 기록을 완전히 소멸시키겠습니까?', function() {
         if(editTargetKey === key) cancelEdit();
-        database.ref('posts/' + key).remove().then(() => { 
-            const totalPagesAfterDelete = Math.ceil((allPosts.length - 1) / postsPerPage); 
+        const targetNode = currentView === 'horizons' ? 'horizons' : 'posts';
+        database.ref(targetNode + '/' + key).remove().then(() => { 
+            let targetArrayCount = currentView === 'horizons' ? allHorizons : allPosts;
+            const totalPagesAfterDelete = Math.ceil((targetArrayCount.length - 1) / postsPerPage); 
             if (currentPage > totalPagesAfterDelete && currentPage > 1) currentPage = totalPagesAfterDelete; 
             renderUI(); 
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
@@ -1256,7 +1331,7 @@ window.deleteLetter = deleteLetter;
 
 function clearDatabase() {
     if (!isAdmin || !database) return;
-    showSystemConfirm('🚨 모든 기록들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); backupTriggerQueued = true; }); }); }, 150); });
+    showSystemConfirm('🚨 모든 기록과 편지들이 사라집니다. 초기화할까요?', function() { setTimeout(function() { showSystemConfirm('정말 소멸시킬까요?', function() { Promise.all([database.ref('posts').remove(), database.ref('horizons').remove(), database.ref('letters').remove()]).then(() => { cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.'); backupTriggerQueued = true; }); }); }, 150); });
 }
 window.clearDatabase = clearDatabase;
 
@@ -1290,23 +1365,19 @@ function applyTimeBasedThemeEngine() {
     else if (mode === 'evening') { bgStyle = "linear-gradient(135deg, #0b0f19 0%, #4a192c 50%, #f7a37f 100%)"; themeText = "🌇 저녁의 바다"; }
     else { bgStyle = "linear-gradient(135deg, #02050d 0%, #09132b 60%, #1e1b4b 100%)"; themeText = "🌌 밤의 바다"; }
 
-    // 💡 1. 꼬였던 브라우저 배경 초기화: html은 까맣게, body는 투명하게 열어둠
     document.documentElement.style.setProperty('background-color', '#02050d', 'important');
     document.body.style.setProperty('background-color', 'transparent', 'important');
     document.body.style.setProperty('background-image', 'none', 'important');
 
-    // 💡 2. 어떤 상황에서도 스크롤에 튕기지 않는 절대적인 배경 액자 설치
     let oceanBg = document.getElementById('ocean-bg-layer');
     if (!oceanBg) {
         oceanBg = document.createElement('div');
         oceanBg.id = 'ocean-bg-layer';
-        // 🚨 [핵심 타격] 너비와 높이를 120%로 늘리고, 왼쪽(-10%)과 위(-10%)로 완전히 끌어당겨서 틈새를 멸망시킴
         oceanBg.style.cssText = "position:fixed; top:-10vh; left:-10vw; width:120vw; height:120vh; z-index:-999; pointer-events:none; transition:background 1.5s ease-in-out;";
         document.body.insertBefore(oceanBg, document.body.firstChild);
     }
     oceanBg.style.background = bgStyle;
 
-    // 💡 3. 테마 텍스트 업데이트
     let tElem = document.getElementById('theme-widget'); 
     if (!tElem && document.body) { 
         tElem = document.createElement('div'); 
@@ -1316,9 +1387,6 @@ function applyTimeBasedThemeEngine() {
     if (tElem) tElem.innerText = themeText;
 }
 
-
-// 💡 1. 캐시 경쟁 차단: 이제 여기서 몰래 네트워크 통신(fetch)을 시도하지 않습니다.
-// 기존에 저장된 캐시(v4)만 빠르게 읽어서 화면 멈춤만 방지합니다.
 function fetchWeatherWidget() {
     const cacheKey = 'weather_cache_payload_v4';
     const cacheTimeKey = 'weather_cache_timestamp_v4';
@@ -1340,7 +1408,6 @@ function fetchWeatherWidget() {
     }
 }
 
-// 💡 2. 렌더링 함수: 소수점을 예쁜 정수로 반올림 처리합니다.
 function renderWeatherHTML(data) {
     const code = data.current_weather.weathercode;
     let icon = '☁️';
@@ -1358,27 +1425,24 @@ function renderWeatherHTML(data) {
     wElem.innerHTML = `${icon} ${Math.round(data.current_weather.temperature)}°C`;
 }
 
-// 💡 3. 유일한 메인 통신 함수: 여기서만 정확하게 한 번 위치를 파악하고 통신합니다.
 function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
     
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
     
-    // GPS 거부 시 기본값 (부산)
     const defaultLat = 35.1796; const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
         .then(res => res.json())
         .then(data => {
-            // 💡 통신에 성공한 진짜 날씨 데이터를 캐시(v4)에 덮어씌웁니다.
             localStorage.setItem('weather_cache_payload_v4', JSON.stringify(data));
             localStorage.setItem('weather_cache_timestamp_v4', String(Date.now()));
 
             if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') return; 
             
-            renderWeatherHTML(data); // 💡 화면 반영
+            renderWeatherHTML(data); 
             
             const code = data.current_weather.weathercode; 
             let weatherType = 'clear';
@@ -1476,7 +1540,6 @@ window.applyEnvironmentSettings = function() {
     window.manualTimeOverride = document.getElementById('time-select').value;
     window.manualWeatherOverride = document.getElementById('weather-select').value;
     
-    // 💾 시간대 및 날씨 설정 브라우저에 영구 저장
     localStorage.setItem('env_time_override', window.manualTimeOverride);
     localStorage.setItem('env_weather_override', window.manualWeatherOverride);
     
@@ -1486,27 +1549,16 @@ window.applyEnvironmentSettings = function() {
     syncWeatherAndWidget(); 
     document.getElementById('env-modal').style.display = 'none';
 };
-// ==========================================
-// 💧 수면 위 마우스 파문 효과 (버튼/모달 무시 강제 터치 반응)
-// ==========================================
+
 document.addEventListener('pointerdown', function(e) {
     const ripple = document.createElement('div');
     ripple.className = 'water-ripple';
-    
-    // 화면 위치 정확도 보정
     ripple.style.left = e.clientX + 'px';
     ripple.style.top = e.clientY + 'px';
-    
     document.body.appendChild(ripple);
-    
-    setTimeout(() => {
-        ripple.remove();
-    }, 800);
-}, true); // 캡처링 유지
+    setTimeout(() => { ripple.remove(); }, 800);
+}, true);
 
-// ==========================================
-// 📬 [신규 기능] 편지 일괄 다중 선택 및 원자적 소멸 엔진
-// ==========================================
 window.toggleAllLetters = function(source) {
     const checkboxes = document.querySelectorAll('.letter-checkbox');
     checkboxes.forEach(cb => cb.checked = source.checked);
@@ -1523,23 +1575,18 @@ window.deleteSelectedLetters = function() {
     }
     
     showSystemConfirm(`선택하신 ${keysToDelete.length}개의 편지를 바다에서 완전히 소멸시키겠습니까?`, function() {
-        // Firebase 원자적 다중 경로 업데이트(Multi-path update) 처리 객체 생성
         const batchUpdates = {};
         keysToDelete.forEach(key => {
-            batchUpdates['letters/' + key] = null; // 해당 노드를 데이터베이스에서 완전히 날림
+            batchUpdates['letters/' + key] = null; 
         });
         
         database.ref().update(batchUpdates)
         .then(() => {
             showSystemAlert('선택하신 편지 조각들이 완벽히 소멸되었습니다.');
-            
-            // 삭제 후 현재 페이지 번호가 최대 페이지수를 넘지 않도록 자동 보정
             const totalPagesAfterDelete = Math.ceil((allLetters.length - keysToDelete.length) / postsPerPage);
             if (currentPage > totalPagesAfterDelete && currentPage > 1) {
                 currentPage = totalPagesAfterDelete;
             }
-            
-            // 데이터가 유실되지 않도록 변경 사항을 클라우드 백업 엔진에 즉시 동기화
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
         })
         .catch(err => {
@@ -1547,18 +1594,14 @@ window.deleteSelectedLetters = function() {
         });
     });
 };
-// ====================================================
-// 🔒 백업창, 지침서창, 글 상세보기창 화면 밖(배경) 클릭 시 닫힘 방지 패치
-// ====================================================
+
 document.addEventListener('click', function(event) {
     const backupModal = document.getElementById('backup-modal');
     const libraryModal = document.getElementById('library-modal');
-    const detailModal = document.getElementById('detail-modal'); // 💡 글 상세보기 모달 추가
+    const detailModal = document.getElementById('detail-modal'); 
     
-    // 클릭한 대상이 모달창들의 바깥 배경(디밍 레이어) 자체일 경우,
-    // 기존에 심겨 있던 외부 클릭 닫기 이벤트가 발동하기 전에 최상위에서 가로채서 파괴합니다.
     if (event.target === backupModal || event.target === libraryModal || event.target === detailModal) {
         event.stopPropagation();
         event.stopImmediatePropagation();
     }
-}, true); // 💡 캡처링(true) 모드를 적용하여 기존 닫기 기능보다 무조건 먼저 실행되도록 방어막을 칩니다.
+}, true);
