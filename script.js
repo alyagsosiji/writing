@@ -1829,3 +1829,12 @@ document.addEventListener('click', function(event) {
         event.stopImmediatePropagation();
     }
 }, true);
+
+// 카카오페이 후원 팝업창 제어 함수 (오직 X 버튼으로만 닫힘)
+function openDonationModal() {
+    document.getElementById('donation-modal').style.display = 'flex';
+}
+
+function closeDonationModal() {
+    document.getElementById('donation-modal').style.display = 'none';
+}
