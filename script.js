@@ -898,14 +898,13 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (글 박스 잘림 완벽 방지 및 서재 테마)
+        // 🖨️ 2. PDF 포맷 (브라우저 버그 제압: 글 박스 잘림 완벽 방어)
         // =====================================
         else if (format === 'pdf') {
             let printFrame = document.getElementById('pdf-print-frame');
             if (!printFrame) {
                 printFrame = document.createElement('iframe');
                 printFrame.id = 'pdf-print-frame';
-                // 화면 밖 영역에 생성하여 새 창(about:blank) 방지
                 printFrame.style.cssText = 'position:absolute; width:0; height:0; border:none; top:-1000px; left:-1000px;';
                 document.body.appendChild(printFrame);
             }
@@ -917,7 +916,6 @@ function downloadBackupFile(key, format) {
             <head>
                 <title>수평선 너머의 서재 - 백업 리포트</title>
                 <style>
-                    /* 브라우저 기본 머리글(날짜/제목) 완전 제거 */
                     @page { margin: 0; size: A4; }
                     body { 
                         padding: 20mm 15mm; 
@@ -978,7 +976,7 @@ function downloadBackupFile(key, format) {
                         break-after: avoid;
                     }
                     
-                    /* 🚨 [핵심 해결] 글 박스가 페이지 중간에 걸쳐서 반토막 나는 현상 완벽 차단 */
+                    /* 🚨 [최종 해결] 브라우저가 절대 쪼개지 못하도록 속성을 table로 강제 변경 */
                     .item-card { 
                         background: #fdfbf7; 
                         border: 1px solid #e1dbd6; 
@@ -987,12 +985,15 @@ function downloadBackupFile(key, format) {
                         margin-bottom: 22px; 
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
                         
-                        /* 크롬/엣지 인쇄 엔진에서 박스를 하나의 덩어리로 인식하게 강제하는 마법의 속성들 */
-                        page-break-inside: avoid !important; 
-                        break-inside: avoid !important;
-                        display: inline-block; 
+                        /* inline-block 대신 table을 쓰면 강력한 한 덩어리의 벽돌로 인식됩니다. */
+                        display: table !important; 
                         width: 100%;
                         box-sizing: border-box;
+                        
+                        /* 크롬, 사파리, 엣지의 모든 절단 엔진을 무력화시키는 3단 콤보 */
+                        page-break-inside: avoid !important; 
+                        break-inside: avoid !important;
+                        -webkit-column-break-inside: avoid !important;
                     }
                     
                     .item-title { 
