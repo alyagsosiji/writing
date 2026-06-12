@@ -598,17 +598,25 @@ function parseCustomDate(dateStr) {
 }
 
 let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
+// ==========================================
+// 🌊 2. 글(Post) 실시간 감지 및 알림 타겟팅
+// ==========================================
+let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
 function listenPosts() {
     if (!database) return;
     database.ref('posts').off();
     database.ref('posts').on('value', (snapshot) => {
-        rawPostsSnapshot = snapshot.val(); allPosts = []; let currentIds = new Set(); let hasNewPost = false;
+        rawPostsSnapshot = snapshot.val(); allPosts = []; let currentIds = new Set(); 
+        let hasNewPost = false; let newPostAuthor = ''; // 💡 새로 추가된 글의 작성자 추적
+        
         if (rawPostsSnapshot) {
             Object.keys(rawPostsSnapshot).forEach((key) => {
                 allPosts.push({ id: key, ...rawPostsSnapshot[key] }); currentIds.add(key);
-                if (!isInitialPostLoad && !knownPostIds.has(key)) hasNewPost = true;
+                if (!isInitialPostLoad && !knownPostIds.has(key)) {
+                    hasNewPost = true;
+                    newPostAuthor = rawPostsSnapshot[key].author || '기록자';
+                }
             });
-            // 시간차 역순 안전 예외 방어 정렬
             allPosts.sort((a, b) => {
                 const timeA = parseCustomDate(a.date) || 0;
                 const timeB = parseCustomDate(b.date) || 0;
@@ -616,7 +624,12 @@ function listenPosts() {
                 return b.id.localeCompare(a.id);
             });
         }
-        if (hasNewPost && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
+        
+        // 🚨 핵심: 내가 쓴 글이면 알림 무시, 남이 쓴 글일 때만 알림 발생!
+        if (hasNewPost && isAdmin && newPostAuthor !== loggedInUser) {
+            sendNotification(NOTIFICATION_CONFIG.postTitle, NOTIFICATION_CONFIG.postBody);
+        }
+        
         knownPostIds = currentIds; isInitialPostLoad = false;
         if(currentView === 'posts') renderUI();
     });
@@ -627,11 +640,16 @@ function listenLetters() {
     if (!database) return;
     database.ref('letters').off();
     database.ref('letters').on('value', (snapshot) => {
-        rawLettersSnapshot = snapshot.val(); allLetters = []; let currentIds = new Set(); let hasNewLetter = false;
+        rawLettersSnapshot = snapshot.val(); allLetters = []; let currentIds = new Set(); 
+        let hasNewLetter = false; let newLetterAuthor = ''; // 💡 새로 추가된 편지의 작성자 추적
+        
         if (rawLettersSnapshot) {
             Object.keys(rawLettersSnapshot).forEach((key) => {
                 allLetters.push({ id: key, ...rawLettersSnapshot[key] }); currentIds.add(key);
-                if (!isInitialLetterLoad && !knownLetterIds.has(key)) hasNewLetter = true;
+                if (!isInitialLetterLoad && !knownLetterIds.has(key)) {
+                    hasNewLetter = true;
+                    newLetterAuthor = rawLettersSnapshot[key].author || '방문자';
+                }
             });
             allLetters.sort((a, b) => {
                 const timeA = parseCustomDate(a.date) || 0;
@@ -640,12 +658,16 @@ function listenLetters() {
                 return b.id.localeCompare(a.id);
             });
         }
-        if (hasNewLetter && isAdmin && !isSubmitting) sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
+        
+        // 🚨 핵심: 내가 쓴 편지면 알림 무시, 남(다른 관리자나 방문자)이 쓴 편지만 알림 발생!
+        if (hasNewLetter && isAdmin && newLetterAuthor !== loggedInUser) {
+            sendNotification(NOTIFICATION_CONFIG.letterTitle, NOTIFICATION_CONFIG.letterBody);
+        }
+        
         knownLetterIds = currentIds; isInitialLetterLoad = false;
         if(currentView === 'letters') renderUI();
     });
 }
-
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 function executeCloudBackupEngine(isAutomatic = true) {
     if (!database) return Promise.reject(new Error("Database connection lost"));
@@ -1138,6 +1160,9 @@ function savePost() {
 }
 window.savePost = savePost;
 
+// ==========================================
+// 📝 1. 편지 저장 로직 업그레이드 (작성자 식별 꼬리표 추가)
+// ==========================================
 function saveLetter() {
     if (!database || isSubmitting || isRestMode) return;
     const title = document.getElementById('letter-title')?.value.trim(); const content = document.getElementById('letter-content')?.value.trim();
@@ -1147,7 +1172,9 @@ function saveLetter() {
 
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; 
-    const letterData = { title: title, content: content, date: date };
+    
+    // 🚨 핵심: 편지에도 '작성자' 정보를 기록합니다. (관리자면 이름, 아니면 '방문자')
+    const letterData = { title: title, content: content, date: date, author: isAdmin ? loggedInUser : '방문자', read: false };
 
     triggerBottleAnimation(() => {
         database.ref('letters').push(letterData).then(() => {
