@@ -468,6 +468,12 @@ firebase.auth().onAuthStateChanged((user) => {
         localStorage.setItem('loggedInUser', loggedInUser);
         
         requestNotificationPermission();
+        
+        // 🚨 [핵심 수정] 로그인(관리자) 확인 즉시 끊어졌던 데이터 연결선 재가동!
+        listenPosts();
+        listenHorizons();
+        listenLetters();
+        
         updateUI(); 
     } else {
         isAdmin = false;
@@ -477,7 +483,6 @@ firebase.auth().onAuthStateChanged((user) => {
         updateUI();
     }
 });
-
 function login() {
     const idElem = document.getElementById('admin-id'); 
     const pwElem = document.getElementById('admin-pw');
@@ -1263,7 +1268,11 @@ function saveLetter() {
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
-            setTimeout(() => window.executeCloudBackupEngine(true), 800);
+            
+            // 🚨 [핵심 수정] 일반 방문자가 편지를 쓸 때는 권한이 없으므로 자동 백업 생략
+            if (isAdmin) {
+                setTimeout(() => window.executeCloudBackupEngine(true), 800);
+            }
         }).finally(() => { isSubmitting = false; });
     });
 }
