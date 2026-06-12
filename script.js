@@ -898,107 +898,166 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (about:blank 방지 및 서재 테마 적용)
+        // 🖨️ 2. PDF 포맷 (저작권 줄바꿈 차단 및 프리미엄 서재 테마)
         // =====================================
         else if (format === 'pdf') {
-            // about:blank를 없애기 위해 현재 창 뒤에 투명한 iframe을 생성하여 그 안에서 인쇄를 호출합니다.
             let printFrame = document.getElementById('pdf-print-frame');
             if (!printFrame) {
                 printFrame = document.createElement('iframe');
                 printFrame.id = 'pdf-print-frame';
+                // 화면 밖 영역에 생성하여 새 창(about:blank) 방지
                 printFrame.style.cssText = 'position:absolute; width:0; height:0; border:none; top:-1000px; left:-1000px;';
                 document.body.appendChild(printFrame);
             }
             
             const doc = printFrame.contentWindow.document;
             
-            // 서재의 밤바다 테마(다크 네이비 배경, 감성적인 폰트와 여백)를 PDF에 강제 적용합니다.
             let htmlContent = `
             <html>
             <head>
                 <title>수평선 너머의 서재 - 백업 리포트</title>
                 <style>
-                    @page { margin: 15mm; size: A4; }
+                    @page { margin: 20mm 15mm; size: A4; }
                     body { 
-                        font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; 
-                        background-color: #061121; /* 밤바다 배경 */
-                        color: #e2e8f0; 
-                        padding: 10px 20px; 
-                        line-height: 1.7; 
-                        -webkit-print-color-adjust: exact; /* 배경색 인쇄 강제 허용 */
-                        print-color-adjust: exact;
+                        font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif; /* 격조 있는 문학 바탕체 계열 지정 */
+                        background-color: #ffffff; 
+                        color: #2d3748; 
+                        padding: 0; 
+                        line-height: 1.9; 
+                        margin: 0;
                     }
-                    .header-box {
+                    /* 🚨 [해결] 브라우저 인쇄 환경에서 찌그러짐을 방지하는 정밀 테이블 구조 */
+                    .header-container {
+                        display: table;
+                        width: 100%;
+                        border-bottom: 2px solid #1d3557; /* 짙은 심해색 */
+                        padding-bottom: 8px;
+                        margin-bottom: 5px;
+                    }
+                    .header-row { display: table-row; }
+                    .header-left { display: table-cell; width: 15%; }
+                    .header-center { 
+                        display: table-cell; 
+                        width: 70%; 
+                        text-align: center; 
+                        font-size: 21px; 
+                        font-weight: bold; 
+                        color: #1d3557; 
+                        letter-spacing: 2px;
+                    }
+                    .header-right { 
+                        display: table-cell; 
+                        width: 15%; 
+                        text-align: right; 
+                        font-size: 11px; 
+                        color: #5a6a85; 
+                        font-family: sans-serif;
+                        white-space: nowrap; /* 🚨 [해결] 저작권 글씨 엔터(줄바꿈) 절대 불가 설정 */
+                        vertical-align: bottom;
+                        padding-bottom: 4px;
+                    }
+                    .timestamp-box { 
+                        text-align: center; 
+                        color: #457b9d; 
+                        font-size: 11.5px; 
+                        margin-bottom: 25px;
+                        font-family: sans-serif;
+                    }
+                    /* 🌊 서재 분위기를 깊고 낭만적으로 만들어줄 문학 모토 영역 */
+                    .library-motto {
                         text-align: center;
-                        border-bottom: 2px solid #00b4d8;
-                        padding-bottom: 20px;
-                        margin-bottom: 30px;
+                        font-size: 13px;
+                        color: #718096;
+                        font-style: italic;
+                        margin-bottom: 45px;
+                        letter-spacing: 0.5px;
                     }
-                    h1 { color: #fff; font-size: 24px; margin: 0 0 10px 0; letter-spacing: 2px; }
-                    .timestamp { color: #90e0ef; font-size: 13px; }
                     
                     h2 { 
-                        color: #f7a37f; 
-                        font-size: 18px; 
+                        color: #1d3557; 
+                        font-size: 16px; 
+                        font-weight: bold;
                         margin-top: 40px; 
-                        border-left: 4px solid #f7a37f; 
-                        padding-left: 10px;
-                        page-break-after: avoid;
+                        margin-bottom: 18px;
+                        border-left: 3px solid #457b9d; 
+                        padding-left: 12px;
+                        page-break-after: avoid; /* 제목이 페이지 맨 밑에 혼자 남는 현상 차단 */
                     }
-                    .item { 
-                        background: rgba(255, 255, 255, 0.05); 
-                        border: 1px solid rgba(144, 224, 239, 0.2); 
-                        border-radius: 8px; 
-                        padding: 20px; 
-                        margin-bottom: 20px; 
-                        page-break-inside: avoid; /* 글이 페이지 중간에 잘리는 현상 방지 */
+                    .item-card { 
+                        background: #fdfbf7; /* ✨ 고품격 프리미엄 도서 지면 느낌의 크림 아이보리 틴트 */
+                        border: 1px solid #e1dbd6; 
+                        border-radius: 6px; 
+                        padding: 24px; 
+                        margin-bottom: 22px; 
+                        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
+                        page-break-inside: avoid; /* 글 내용이 다음 페이지로 넘어갈 때 쪼개짐 방지 */
                     }
                     .item-title { 
                         font-size: 16px; 
                         font-weight: bold; 
-                        color: #fff; 
+                        color: #0f172a; 
                         margin-bottom: 8px;
                     }
-                    .meta { 
-                        font-size: 12px; 
-                        color: #94a3b8; 
-                        margin-bottom: 12px; 
-                        border-bottom: 1px dashed rgba(255, 255, 255, 0.1); 
-                        padding-bottom: 8px;
+                    .meta-line { 
+                        font-size: 11.5px; 
+                        color: #718096; 
+                        margin-bottom: 16px; 
+                        border-bottom: 1px dashed #e2e8f0; 
+                        padding-bottom: 10px;
+                        font-family: sans-serif;
                     }
-                    .content { 
+                    .author-tag {
+                        color: #457b9d;
+                        font-weight: bold;
+                    }
+                    .status-tag {
+                        background: #edf2f7;
+                        color: #4a5568;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        font-size: 10px;
+                        font-weight: bold;
+                    }
+                    .content-text { 
                         white-space: pre-wrap; 
                         font-size: 14px; 
-                        color: #cbd5e1;
+                        color: #2d3748; 
+                        word-break: break-all;
+                        text-align: justify; /* 소설책처럼 양끝 정렬 처리 */
                     }
                 </style>
             </head>
             <body>
-                <div class="header-box">
-                    <h1>🌊 수평선 너머의 서재 백업 기록</h1>
-                    <div class="timestamp">스냅샷 기준 시점 : ${key}</div>
+                <div class="header-container">
+                    <div class="header-row">
+                        <div class="header-left"></div>
+                        <div class="header-center">🌊 수평선 너머의 서재</div>
+                        <div class="header-right">© 2026. atritime. & haeun.</div>
+                    </div>
                 </div>
+                <div class="timestamp-box">스냅샷 보존 시점 : ${key}</div>
+                <div class="library-motto">"노을지는 수평선 너머의 바다, 그곳에 온전히 새겨진 기록들"</div>
                 
-                <h2>[1. 바다의 기록]</h2>`;
+                <h2>[1. 바다의 기록 — Public Archive]</h2>`;
             
             Object.keys(posts).forEach(k => { 
-                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(posts[k].title)}</div><div class="meta">작성자: ${posts[k].author || '기록자'} &nbsp;|&nbsp; 작성일: ${posts[k].date}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; 
+                htmlContent += `<div class="item-card"><div class="item-title">${escapeHtml(posts[k].title)}</div><div class="meta-line">기록자: <span class="author-tag">${posts[k].author || '기록자'}</span> &nbsp;|&nbsp; 새긴일시: ${posts[k].date}</div><div class="content-text">${escapeHtml(posts[k].content)}</div></div>`; 
             });
             
-            htmlContent += `<h2>[2. 수평선 너머 (비밀 기록)]</h2>`;
+            htmlContent += `<h2>[2. 수평선 너머 — Private Secret Archive]</h2>`;
             Object.keys(horizons).forEach(k => { 
-                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(horizons[k].title)}</div><div class="meta">작성자: ${horizons[k].author || '기록자'} &nbsp;|&nbsp; 작성일: ${horizons[k].date}</div><div class="content">${escapeHtml(horizons[k].content)}</div></div>`; 
+                htmlContent += `<div class="item-card"><div class="item-title">${escapeHtml(horizons[k].title)}</div><div class="meta-line">기록자: <span class="author-tag">${horizons[k].author || '기록자'}</span> &nbsp;|&nbsp; 새긴일시: ${horizons[k].date}</div><div class="content-text">${escapeHtml(horizons[k].content)}</div></div>`; 
             });
             
-            htmlContent += `<h2>[3. 띄워진 편지]</h2>`;
+            htmlContent += `<h2>[3. 띄워진 편지 — Received Letters]</h2>`;
             Object.keys(letters).forEach(k => { 
-                htmlContent += `<div class="item"><div class="item-title">${escapeHtml(letters[k].title)}</div><div class="meta">상태: ${letters[k].read ? '수거됨' : '미수거'} &nbsp;|&nbsp; 작성일: ${letters[k].date}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; 
+                const statusBadge = letters[k].read ? `<span class="status-tag">수거됨</span>` : `<span class="status-tag" style="background:#fff5f5; color:#c53030;">미수거</span>`;
+                htmlContent += `<div class="item-card"><div class="item-title">${escapeHtml(letters[k].title)}</div><div class="meta-line">상태: ${statusBadge} &nbsp;|&nbsp; 띄운일시: ${letters[k].date}</div><div class="content-text">${escapeHtml(letters[k].content)}</div></div>`; 
             });
             
             htmlContent += `
                 <script>
                     window.onload = function() { 
-                        // 화면이 완벽하게 그려질 때까지 0.5초 대기 후 인쇄를 실행합니다.
                         setTimeout(function() {
                             window.print(); 
                         }, 500);
