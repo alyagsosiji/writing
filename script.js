@@ -898,7 +898,7 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (저작권 줄바꿈 차단 및 프리미엄 서재 테마)
+        // 🖨️ 2. PDF 포맷 (저작권 줄바꿈 차단 및 완벽한 중앙 정렬)
         // =====================================
         else if (format === 'pdf') {
             let printFrame = document.getElementById('pdf-print-frame');
@@ -919,40 +919,42 @@ function downloadBackupFile(key, format) {
                 <style>
                     @page { margin: 20mm 15mm; size: A4; }
                     body { 
-                        font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif; /* 격조 있는 문학 바탕체 계열 지정 */
+                        font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif;
                         background-color: #ffffff; 
                         color: #2d3748; 
                         padding: 0; 
                         line-height: 1.9; 
                         margin: 0;
                     }
-                    /* 🚨 [해결] 브라우저 인쇄 환경에서 찌그러짐을 방지하는 정밀 테이블 구조 */
+                    /* 🚨 [해결] table-layout: fixed를 통해 글자 길이에 상관없이 완벽한 1:2:1 대칭 비율 강제 고정 */
                     .header-container {
                         display: table;
                         width: 100%;
-                        border-bottom: 2px solid #1d3557; /* 짙은 심해색 */
+                        table-layout: fixed; 
+                        border-bottom: 2px solid #1d3557; 
                         padding-bottom: 8px;
                         margin-bottom: 5px;
                     }
                     .header-row { display: table-row; }
-                    .header-left { display: table-cell; width: 15%; }
+                    .header-left { display: table-cell; width: 25%; }
                     .header-center { 
                         display: table-cell; 
-                        width: 70%; 
+                        width: 50%; 
                         text-align: center; 
-                        font-size: 21px; 
+                        font-size: 20px; 
                         font-weight: bold; 
                         color: #1d3557; 
-                        letter-spacing: 2px;
+                        letter-spacing: 1px;
+                        white-space: nowrap; /* 제목 자체도 줄바꿈되지 않도록 보호 */
                     }
                     .header-right { 
                         display: table-cell; 
-                        width: 15%; 
+                        width: 25%; 
                         text-align: right; 
                         font-size: 11px; 
                         color: #5a6a85; 
                         font-family: sans-serif;
-                        white-space: nowrap; /* 🚨 [해결] 저작권 글씨 엔터(줄바꿈) 절대 불가 설정 */
+                        white-space: nowrap; 
                         vertical-align: bottom;
                         padding-bottom: 4px;
                     }
@@ -963,7 +965,6 @@ function downloadBackupFile(key, format) {
                         margin-bottom: 25px;
                         font-family: sans-serif;
                     }
-                    /* 🌊 서재 분위기를 깊고 낭만적으로 만들어줄 문학 모토 영역 */
                     .library-motto {
                         text-align: center;
                         font-size: 13px;
@@ -981,16 +982,16 @@ function downloadBackupFile(key, format) {
                         margin-bottom: 18px;
                         border-left: 3px solid #457b9d; 
                         padding-left: 12px;
-                        page-break-after: avoid; /* 제목이 페이지 맨 밑에 혼자 남는 현상 차단 */
+                        page-break-after: avoid; 
                     }
                     .item-card { 
-                        background: #fdfbf7; /* ✨ 고품격 프리미엄 도서 지면 느낌의 크림 아이보리 틴트 */
+                        background: #fdfbf7; 
                         border: 1px solid #e1dbd6; 
                         border-radius: 6px; 
                         padding: 24px; 
                         margin-bottom: 22px; 
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
-                        page-break-inside: avoid; /* 글 내용이 다음 페이지로 넘어갈 때 쪼개짐 방지 */
+                        page-break-inside: avoid; 
                     }
                     .item-title { 
                         font-size: 16px; 
@@ -1023,7 +1024,7 @@ function downloadBackupFile(key, format) {
                         font-size: 14px; 
                         color: #2d3748; 
                         word-break: break-all;
-                        text-align: justify; /* 소설책처럼 양끝 정렬 처리 */
+                        text-align: justify; 
                     }
                 </style>
             </head>
@@ -1031,7 +1032,7 @@ function downloadBackupFile(key, format) {
                 <div class="header-container">
                     <div class="header-row">
                         <div class="header-left"></div>
-                        <div class="header-center">🌊 수평선 너머의 서재</div>
+                        <div class="header-center">🌊 수평선 너머의 서재 - 백업 리포트</div>
                         <div class="header-right">© 2026. atritime. & haeun.</div>
                     </div>
                 </div>
