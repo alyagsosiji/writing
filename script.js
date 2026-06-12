@@ -898,7 +898,7 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (저작권 줄바꿈 차단 및 완벽한 중앙 정렬)
+        // 🖨️ 2. PDF 포맷 (브라우저 기본 머리글 제거 및 저작권 우측 상단 독립 배치)
         // =====================================
         else if (format === 'pdf') {
             let printFrame = document.getElementById('pdf-print-frame');
@@ -917,51 +917,46 @@ function downloadBackupFile(key, format) {
             <head>
                 <title>수평선 너머의 서재 - 백업 리포트</title>
                 <style>
-                    @page { margin: 20mm 15mm; size: A4; }
+                    /* 🚨 [해결] margin: 0;으로 설정하여 브라우저가 강제로 찍어내는 날짜, 제목 등의 작은 머리글을 완전히 삭제합니다. */
+                    @page { margin: 0; size: A4; }
                     body { 
+                        /* 🚨 종이의 진짜 여백은 브라우저 머리글을 피해서 body의 padding으로 안전하게 밀어넣습니다. */
+                        padding: 20mm 15mm; 
                         font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif;
                         background-color: #ffffff; 
                         color: #2d3748; 
-                        padding: 0; 
                         line-height: 1.9; 
                         margin: 0;
                     }
-                    /* 🚨 [해결] table-layout: fixed를 통해 글자 길이에 상관없이 완벽한 1:2:1 대칭 비율 강제 고정 */
+                    
+                    /* 🚨 [해결] 저작권을 제목에서 완전히 떼어내어 맨 우측 상단으로 이동시켰습니다. */
+                    .top-right-copyright {
+                        text-align: right;
+                        font-size: 11px;
+                        color: #718096;
+                        font-family: sans-serif;
+                        margin-bottom: 12px;
+                    }
+
+                    /* 메인 타이틀 영역 (이제 복잡한 테이블 없이 완벽하게 중앙에만 뜹니다) */
                     .header-container {
-                        display: table;
-                        width: 100%;
-                        table-layout: fixed; 
+                        text-align: center;
                         border-bottom: 2px solid #1d3557; 
-                        padding-bottom: 8px;
+                        padding-bottom: 15px;
                         margin-bottom: 5px;
                     }
-                    .header-row { display: table-row; }
-                    .header-left { display: table-cell; width: 25%; }
-                    .header-center { 
-                        display: table-cell; 
-                        width: 50%; 
-                        text-align: center; 
-                        font-size: 20px; 
+                    .header-title { 
+                        font-size: 23px; 
                         font-weight: bold; 
                         color: #1d3557; 
                         letter-spacing: 1px;
-                        white-space: nowrap; /* 제목 자체도 줄바꿈되지 않도록 보호 */
                     }
-                    .header-right { 
-                        display: table-cell; 
-                        width: 25%; 
-                        text-align: right; 
-                        font-size: 11px; 
-                        color: #5a6a85; 
-                        font-family: sans-serif;
-                        white-space: nowrap; 
-                        vertical-align: bottom;
-                        padding-bottom: 4px;
-                    }
+                    
                     .timestamp-box { 
                         text-align: center; 
                         color: #457b9d; 
                         font-size: 11.5px; 
+                        margin-top: 10px;
                         margin-bottom: 25px;
                         font-family: sans-serif;
                     }
@@ -1029,13 +1024,12 @@ function downloadBackupFile(key, format) {
                 </style>
             </head>
             <body>
+                <div class="top-right-copyright">© 2026. atritime. & haeun.</div>
+                
                 <div class="header-container">
-                    <div class="header-row">
-                        <div class="header-left"></div>
-                        <div class="header-center">🌊 수평선 너머의 서재 - 백업 리포트</div>
-                        <div class="header-right">© 2026. atritime. & haeun.</div>
-                    </div>
+                    <div class="header-title">🌊 수평선 너머의 서재 - 백업 리포트</div>
                 </div>
+                
                 <div class="timestamp-box">스냅샷 보존 시점 : ${key}</div>
                 <div class="library-motto">"노을지는 수평선 너머의 바다, 그곳에 온전히 새겨진 기록들"</div>
                 
