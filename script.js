@@ -170,12 +170,21 @@ function requestNotificationPermission() {
                     messaging.getToken({ vapidKey: 'BP8mVTuhszB5HkdHqMC3Lo-flElm8Jj06TGct_qEdzhn30bmgxfYKlG8z0n2DE0BD6L_upJVfliSX9Ua0vCg5Pg', serviceWorkerRegistration: registration })
                     .then((currentToken) => {
                         if (currentToken) {
-                            const lastToken = localStorage.getItem('last_registered_fcm_token');
-                            if (lastToken === currentToken) return;
+                            // 🚨 [구조 개편] 로그인 상태(나의 정체)에 따라 토큰 저장 경로를 분기합니다.
+                            const cleanToken = currentToken.replace(/[.#$\[\]]/g, '_');
+                            let tokenPath = 'fcmTokens/visitors/' + cleanToken;
                             
-                            database.ref('fcmTokens/' + currentToken.replace(/[.#$\[\]]/g, '_')).set(currentToken)
+                            if (isAdmin && (loggedInUser === '아시' || loggedInUser === '하은')) {
+                                tokenPath = 'fcmTokens/admins/' + loggedInUser + '/' + cleanToken;
+                            }
+
+                            // 중복 등록 방지를 위해 정체별로 캐싱 체크
+                            const cacheKey = `last_token_path_${loggedInUser || 'visitor'}`;
+                            if (localStorage.getItem(cacheKey) === tokenPath) return;
+                            
+                            database.ref(tokenPath).set(currentToken)
                             .then(() => {
-                                localStorage.setItem('last_registered_fcm_token', currentToken);
+                                localStorage.setItem(cacheKey, tokenPath);
                             });
                         }
                     });
