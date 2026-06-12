@@ -9,4 +9,4 @@
     - 편지 내용은 글 소재로 참고가 될 순 있어도, 무단 도용 등의 행위는 하지 않습니다.
   - BGM은 KUSE. 명의로 SUNO 에서 PRO 라이센스 (SONO 정책) 으로 사용되었습니다.
   - ASMR은 무료 배포(저작권 프리) 음원을 사용하였습니다.
-* atritime (alyagsosiji 와 동일인물)
+* atritime (alyagsosiji, KUSE. 와 동일인물)
