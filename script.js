@@ -597,7 +597,6 @@ function parseCustomDate(dateStr) {
     return new Date(year, month, day, hours, minutes, seconds).getTime();
 }
 
-let rawPostsSnapshot = null; let rawLettersSnapshot = null; let isInitialPostLoad = true; let knownPostIds = new Set();
 // ==========================================
 // 🌊 2. 글(Post) 실시간 감지 및 알림 타겟팅
 // ==========================================
