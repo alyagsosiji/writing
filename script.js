@@ -15,8 +15,8 @@ const NOTIFICATION_CONFIG = {
 // 🎵 0-B. 음악 및 소리 엔진 설정
 // ==========================================
 const MY_MUSIC_LIST = [
-    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" },
-    { title: "Night Sky City 2026 - Plum", src: "Night_Sky_City_2026_Plum.mp3" }
+    { title: "Ethereal Horizon - KUSE.", src: "Ethereal Horizon.mp3" },
+    { title: "Ethereal Horizon - KUSE.", src: "Ethereal Horizon.mp3" }
 ];
 
 let currentTrackIndex = 0;
