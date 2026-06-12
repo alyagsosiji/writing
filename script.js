@@ -898,7 +898,7 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (브라우저 기본 머리글 제거 및 저작권 우측 상단 독립 배치)
+        // 🖨️ 2. PDF 포맷 (글 박스 잘림 완벽 방지 및 서재 테마)
         // =====================================
         else if (format === 'pdf') {
             let printFrame = document.getElementById('pdf-print-frame');
@@ -917,10 +917,9 @@ function downloadBackupFile(key, format) {
             <head>
                 <title>수평선 너머의 서재 - 백업 리포트</title>
                 <style>
-                    /* 🚨 [해결] margin: 0;으로 설정하여 브라우저가 강제로 찍어내는 날짜, 제목 등의 작은 머리글을 완전히 삭제합니다. */
+                    /* 브라우저 기본 머리글(날짜/제목) 완전 제거 */
                     @page { margin: 0; size: A4; }
                     body { 
-                        /* 🚨 종이의 진짜 여백은 브라우저 머리글을 피해서 body의 padding으로 안전하게 밀어넣습니다. */
                         padding: 20mm 15mm; 
                         font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif;
                         background-color: #ffffff; 
@@ -929,7 +928,6 @@ function downloadBackupFile(key, format) {
                         margin: 0;
                     }
                     
-                    /* 🚨 [해결] 저작권을 제목에서 완전히 떼어내어 맨 우측 상단으로 이동시켰습니다. */
                     .top-right-copyright {
                         text-align: right;
                         font-size: 11px;
@@ -938,7 +936,6 @@ function downloadBackupFile(key, format) {
                         margin-bottom: 12px;
                     }
 
-                    /* 메인 타이틀 영역 (이제 복잡한 테이블 없이 완벽하게 중앙에만 뜹니다) */
                     .header-container {
                         text-align: center;
                         border-bottom: 2px solid #1d3557; 
@@ -978,7 +975,10 @@ function downloadBackupFile(key, format) {
                         border-left: 3px solid #457b9d; 
                         padding-left: 12px;
                         page-break-after: avoid; 
+                        break-after: avoid;
                     }
+                    
+                    /* 🚨 [핵심 해결] 글 박스가 페이지 중간에 걸쳐서 반토막 나는 현상 완벽 차단 */
                     .item-card { 
                         background: #fdfbf7; 
                         border: 1px solid #e1dbd6; 
@@ -986,8 +986,15 @@ function downloadBackupFile(key, format) {
                         padding: 24px; 
                         margin-bottom: 22px; 
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
-                        page-break-inside: avoid; 
+                        
+                        /* 크롬/엣지 인쇄 엔진에서 박스를 하나의 덩어리로 인식하게 강제하는 마법의 속성들 */
+                        page-break-inside: avoid !important; 
+                        break-inside: avoid !important;
+                        display: inline-block; 
+                        width: 100%;
+                        box-sizing: border-box;
                     }
+                    
                     .item-title { 
                         font-size: 16px; 
                         font-weight: bold; 
