@@ -898,7 +898,7 @@ function downloadBackupFile(key, format) {
             URL.revokeObjectURL(url);
         } 
         // =====================================
-        // 🖨️ 2. PDF 포맷 (브라우저 버그 제압: 글 박스 잘림 완벽 방어)
+        // 🖨️ 2. PDF 포맷 (가짜 테이블 여백 기법으로 2페이지 상단 잘림 완벽 해결)
         // =====================================
         else if (format === 'pdf') {
             let printFrame = document.getElementById('pdf-print-frame');
@@ -916,16 +916,23 @@ function downloadBackupFile(key, format) {
             <head>
                 <title>수평선 너머의 서재 - 백업 리포트</title>
                 <style>
+                    /* 브라우저 기본 머리글(날짜/제목) 완전 제거 */
                     @page { margin: 0; size: A4; }
                     body { 
-                        padding: 20mm 15mm; 
                         font-family: 'KoPub Batang', 'Nanum Myeongjo', 'Times New Roman', serif;
                         background-color: #ffffff; 
                         color: #2d3748; 
                         line-height: 1.9; 
                         margin: 0;
+                        padding: 0; /* padding은 컨텐츠 래퍼로 이동합니다 */
                     }
                     
+                    /* 🚨 [핵심 해결] 모든 페이지 상/하단에 안전한 빈 공간을 강제로 만들어주는 투명 테이블 세팅 */
+                    .page-container { width: 100%; border-collapse: collapse; border: none; }
+                    .page-header-space { height: 18mm; } /* 2페이지부터 맨 위에 생길 안전 여백 */
+                    .page-footer-space { height: 18mm; } /* 맨 아래 안전 여백 */
+                    .content-padding { padding: 0 15mm; } /* 좌우 여백 */
+
                     .top-right-copyright {
                         text-align: right;
                         font-size: 11px;
@@ -976,7 +983,7 @@ function downloadBackupFile(key, format) {
                         break-after: avoid;
                     }
                     
-                    /* 🚨 [최종 해결] 브라우저가 절대 쪼개지 못하도록 속성을 table로 강제 변경 */
+                    /* 글 박스 디자인 */
                     .item-card { 
                         background: #fdfbf7; 
                         border: 1px solid #e1dbd6; 
@@ -985,15 +992,10 @@ function downloadBackupFile(key, format) {
                         margin-bottom: 22px; 
                         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.01);
                         
-                        /* inline-block 대신 table을 쓰면 강력한 한 덩어리의 벽돌로 인식됩니다. */
-                        display: table !important; 
-                        width: 100%;
-                        box-sizing: border-box;
-                        
-                        /* 크롬, 사파리, 엣지의 모든 절단 엔진을 무력화시키는 3단 콤보 */
+                        /* 이제 2페이지 맨 위에도 18mm 여백이 생기므로 안심하고 avoid를 쓸 수 있습니다. */
                         page-break-inside: avoid !important; 
                         break-inside: avoid !important;
-                        -webkit-column-break-inside: avoid !important;
+                        display: block; 
                     }
                     
                     .item-title { 
@@ -1032,16 +1034,21 @@ function downloadBackupFile(key, format) {
                 </style>
             </head>
             <body>
-                <div class="top-right-copyright">© 2026. atritime. & haeun.</div>
-                
-                <div class="header-container">
-                    <div class="header-title">🌊 수평선 너머의 서재 - 백업 리포트</div>
-                </div>
-                
-                <div class="timestamp-box">스냅샷 보존 시점 : ${key}</div>
-                <div class="library-motto">"노을지는 수평선 너머의 바다, 그곳에 온전히 새겨진 기록들"</div>
-                
-                <h2>[1. 바다의 기록 — Public Archive]</h2>`;
+                <table class="page-container">
+                    <thead><tr><td><div class="page-header-space"></div></td></tr></thead>
+                    <tbody><tr><td>
+                        <div class="content-padding">
+                        
+                            <div class="top-right-copyright">© 2026. atritime. & haeun.</div>
+                            
+                            <div class="header-container">
+                                <div class="header-title">🌊 수평선 너머의 서재 - 백업 리포트</div>
+                            </div>
+                            
+                            <div class="timestamp-box">스냅샷 보존 시점 : ${key}</div>
+                            <div class="library-motto">"노을지는 수평선 너머의 바다, 그곳에 온전히 새겨진 기록들"</div>
+                            
+                            <h2>[1. 바다의 기록 — Public Archive]</h2>`;
             
             Object.keys(posts).forEach(k => { 
                 htmlContent += `<div class="item-card"><div class="item-title">${escapeHtml(posts[k].title)}</div><div class="meta-line">기록자: <span class="author-tag">${posts[k].author || '기록자'}</span> &nbsp;|&nbsp; 새긴일시: ${posts[k].date}</div><div class="content-text">${escapeHtml(posts[k].content)}</div></div>`; 
@@ -1059,6 +1066,11 @@ function downloadBackupFile(key, format) {
             });
             
             htmlContent += `
+                        </div>
+                    </td></tr></tbody>
+                    <tfoot><tr><td><div class="page-footer-space"></div></td></tr></tfoot>
+                </table>
+                
                 <script>
                     window.onload = function() { 
                         setTimeout(function() {
