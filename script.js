@@ -1981,3 +1981,32 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+// ==========================================
+// 🛡️ 캐시 무시! JS로 팝업/위젯 강제 서열 정리 
+// ==========================================
+const enforceZIndexStyle = document.createElement('style');
+enforceZIndexStyle.innerHTML = `
+    /* 떠다니는 위젯들은 모두 10층으로 강등 */
+    #weather-widget, 
+    #theme-widget, 
+    #time-gear-btn, 
+    #random-memory-btn, 
+    #mini-audio-trigger, 
+    #mini-backup-trigger {
+        z-index: 900 !important; 
+    }
+
+    /* 모든 팝업창은 99만 층으로 무조건 최상단 끌어올림 */
+    #system-modal, 
+    #login-modal, 
+    #backup-modal, 
+    #library-modal, 
+    #detail-modal, 
+    #pin-modal, 
+    #sound-modal, 
+    #env-modal, 
+    #donation-modal {
+        z-index: 999999 !important; 
+    }
+`;
+document.head.appendChild(enforceZIndexStyle);
