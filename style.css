@@ -1701,9 +1701,9 @@ html body .modal-content .env-select-box option {
     left: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: rgba(4, 9, 20, 0.9);
+    background: #02050d;
     backdrop-filter: blur(8px);
-    z-index: 9999999 !important;
+    z-index: 9999999999 !important;
     display: flex;
     justify-content: center;
     align-items: center;
