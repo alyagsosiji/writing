@@ -458,46 +458,90 @@ function toggleRestMode() {
 }
 window.toggleRestMode = toggleRestMode;
 
+// ==========================================
+// 🔐 2차 인증 (PIN 키패드) 변수 및 암호화 설정
+// ==========================================
+let currentPin = '';
+let pendingUser = null; 
+// 🚨 암호화한 해시값입니다. (코드에 원본 숫자가 노출되지 않습니다)
+const ENCRYPTED_PIN_HASH = '2e472251dc3d6c1f1ec4239bb403e4b78c9dce1c02888f4b0f92b793740e6919';
+
+// 1. 기존 onAuthStateChanged를 교체합니다.
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        isAdmin = true;
-        if (user.email === 'alyagsosiji@gmail.com') loggedInUser = '아시';
-        else if (user.email === 'haeunchan0114@naver.com') loggedInUser = '하은';
-        
-        localStorage.setItem('isAdminLoggedIn', 'true'); 
-        localStorage.setItem('loggedInUser', loggedInUser);
-        
-        requestNotificationPermission();
-        
-        // 🚨 [핵심 수정] 로그인(관리자) 확인 즉시 끊어졌던 데이터 연결선 재가동!
-        listenPosts();
-        listenHorizons();
-        listenLetters();
-        
-        updateUI(); 
+        // 이미 이번 접속에서 PIN 인증을 통과했다면 곧바로 진입
+        if (sessionStorage.getItem('pinAuthenticated') === 'true') {
+            finalizeLogin(user);
+        } else {
+            // 이메일 로그인은 맞지만, 아직 PIN을 안 쳤다면 팝업창 띄우기
+            pendingUser = user;
+            currentPin = '';
+            document.getElementById('pin-display').innerText = '';
+            document.getElementById('pin-modal').style.display = 'flex';
+        }
     } else {
+        // 로그아웃 상태
         isAdmin = false;
         loggedInUser = '';
         localStorage.removeItem('isAdminLoggedIn'); 
         localStorage.removeItem('loggedInUser');
+        sessionStorage.removeItem('pinAuthenticated'); // 로그아웃 시 인증 기록 초기화
         updateUI();
     }
 });
-function login() {
-    const idElem = document.getElementById('admin-id'); 
-    const pwElem = document.getElementById('admin-pw');
-    if (!idElem || !pwElem) return;
+
+// 2. 2차 인증 성공 시 최종 진입 함수
+function finalizeLogin(user) {
+    sessionStorage.setItem('pinAuthenticated', 'true'); // 브라우저를 닫기 전까지 인증 유지
+    isAdmin = true;
+    if (user.email === 'alyagsosiji@gmail.com') loggedInUser = '아시';
+    else if (user.email === 'haeunchan0114@naver.com') loggedInUser = '하은';
     
-    const inputId = idElem.value.trim(); 
-    const inputPw = pwElem.value;
+    localStorage.setItem('isAdminLoggedIn', 'true'); 
+    localStorage.setItem('loggedInUser', loggedInUser);
     
-    let targetEmail = "";
-    if (inputId === "아시") targetEmail = "alyagsosiji@gmail.com";
-    else if (inputId === "하은") targetEmail = "haeunchan0114@naver.com";
-    else {
-        showSystemAlert('올바른 접근이 아닙니다.');
-        return;
+    requestNotificationPermission();
+    listenPosts();
+    listenHorizons();
+    listenLetters();
+    updateUI(); 
+}
+
+// 3. 키패드 작동 함수들
+function inputPin(num) {
+    if (currentPin.length < 6) currentPin += num;
+    document.getElementById('pin-display').innerText = '●'.repeat(currentPin.length);
+}
+
+function clearPin() {
+    currentPin = '';
+    document.getElementById('pin-display').innerText = '';
+}
+
+async function submitPin() {
+    // 사용자가 입력한 숫자를 SHA-256으로 암호화하여 대조
+    const encoder = new TextEncoder();
+    const data = encoder.encode(currentPin);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    if (hashHex === ENCRYPTED_PIN_HASH) {
+        // ✅ 비밀번호 일치: 서재 입장
+        document.getElementById('pin-modal').style.display = 'none';
+        finalizeLogin(pendingUser);
+    } else {
+        // ❌ 비밀번호 불일치: 접근 차단 및 강제 로그아웃
+        if (typeof showSystemAlert === 'function') {
+            showSystemAlert('올바른 접근이 아닙니다.');
+        } else {
+            alert('올바른 접근이 아닙니다.');
+        }
+        firebase.auth().signOut();
+        document.getElementById('pin-modal').style.display = 'none';
+        clearPin();
     }
+}
 
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
