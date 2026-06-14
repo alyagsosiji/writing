@@ -1767,7 +1767,7 @@ html body .modal-content .env-select-box option {
 #random-memory-btn,
 #mini-audio-trigger,
 #mini-backup-trigger {
-    z-index: 999999 !important; 
+    z-index: 900 !important; 
 }
 
 /* 2. 로그인창, 안내창 등 중요한 팝업창들은 화면의 절대적인 최상단 층으로 끌어올립니다. */
