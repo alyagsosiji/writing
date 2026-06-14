@@ -460,7 +460,6 @@ window.toggleRestMode = toggleRestMode;
 
 let currentPin = '';
 let pendingUser = null; 
-// 🚨 암호화한 해시값입니다. (코드에 원본 숫자가 노출되지 않습니다)
 const ENCRYPTED_PIN_HASH = '2e472251dc3d6c1f1ec4239bb403e4b78c9dce1c02888f4b0f92b793740e6919';
 
 // 1. 기존 onAuthStateChanged를 교체합니다.
