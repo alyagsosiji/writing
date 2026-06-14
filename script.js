@@ -460,7 +460,8 @@ window.toggleRestMode = toggleRestMode;
 
 let currentPin = '';
 let pendingUser = null; 
-const ENCRYPTED_PIN_HASH = '2e472251dc3d6c1f1ec4239bb403e4b78c9dce1c02888f4b0f92b793740e6919';
+const ENCRYPTED_PIN_HASH = 'MjYwNDE2';
+
 
 // 1. 기존 onAuthStateChanged를 교체합니다.
 firebase.auth().onAuthStateChanged((user) => {
@@ -521,15 +522,13 @@ function clearPin() {
     document.getElementById('pin-display').innerText = '';
 }
 
-async function submitPin() {
-    // 사용자가 입력한 숫자를 SHA-256으로 암호화하여 대조
-    const encoder = new TextEncoder();
-    const data = encoder.encode(currentPin);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+const ENCRYPTED_PIN_HASH = 'MjYwNDE2';
 
-    if (hashHex === ENCRYPTED_PIN_HASH) {
+async function submitPin() {
+    // 사용자가 키패드로 입력한 번호를 똑같이 암호화(인코딩)하여 대조합니다.
+    const encodedInput = btoa(currentPin);
+
+    if (encodedInput === ENCRYPTED_PIN_HASH) {
         // ✅ 비밀번호 일치: 서재 입장
         document.getElementById('pin-modal').style.display = 'none';
         finalizeLogin(pendingUser);
