@@ -548,25 +548,23 @@ async function submitPin() {
 }
 
 // ==========================================
-// 🚨 4. 누락되었던 login() 함수 뼈대 및 변수 복구
+// 🔐 4. 아이디(닉네임) -> 이메일 자동 매핑 로그인 함수
 // ==========================================
 function login() {
-    // 1. HTML에서 아이디와 비밀번호 입력창 요소를 찾습니다. 
-    // (※ index.html의 아이디/비밀번호 input 태그 id가 'login-id', 'login-pw'가 맞는지 꼭 확인해주세요!)
+    // 1. 화면의 로그인 ID, PW 입력 태그 요소를 가져옵니다.
     const idElem = document.getElementById('login-id');
     const pwElem = document.getElementById('login-pw');
     
     if (!idElem || !pwElem) {
-        console.error("로그인 입력창 요소를 찾을 수 없습니다.");
+        console.error("로그인 입력창 요소를 찾을 수 없습니다. HTML의 id를 확인해주세요.");
         return;
     }
     
-    // 2. 입력된 값을 가져옵니다.
-    const targetEmail = idElem.value.trim();
+    // 2. 사용자가 입력한 아이디(닉네임)와 비밀번호를 읽어옵니다.
+    const inputId = idElem.value.trim();
     const inputPw = pwElem.value.trim();
     
-    // 3. 빈칸 제출 방지
-    if (!targetEmail || !inputPw) {
+    if (!inputId || !inputPw) {
         if (typeof showSystemAlert === 'function') {
             showSystemAlert('아이디와 비밀번호를 모두 입력해주세요.');
         } else {
@@ -575,14 +573,25 @@ function login() {
         return;
     }
     
-    // 4. 파이어베이스 인증 시도
+    // 3. ✨ [재검토 핵심] 입력한 아이디에 대응되는 실제 파이어베이스 인증용 이메일 매핑
+    let targetEmail = inputId; // 기본적으로는 입력한 값을 쓰되,
+    
+    if (inputId === '아시') {
+        targetEmail = 'alyagsosiji@gmail.com';
+    } else if (inputId === '하은') {
+        targetEmail = 'haeunchan0114@naver.com';
+    }
+    
+    // 4. 매핑된 이메일과 비밀번호로 파이어베이스에 문을 두드립니다.
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
-            // 이메일/비번 1차 통과 시 모달창(기존 로그인창)만 닫아주고 초기화
+            // 이메일/비번 1차 통과 시 로그인 모달창만 단정하게 닫고 초기화
             if (typeof closeModal === 'function') closeModal(); 
             idElem.value = ''; 
             pwElem.value = '';
-            // 🚨 환영 인사는 여기서 띄우지 않습니다. (2차 PIN 인증 통과 후 finalizeLogin에서 띄움)
+            
+            // 🚨 최종 환영 인사는 PIN(2차 인증)까지 완벽히 맞췄을 때 
+            // 위의 finalizeLogin() 함수 안에서 멋지게 등장합니다!
         })
         .catch((error) => {
             console.error("인증 에러:", error);
