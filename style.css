@@ -1756,3 +1756,28 @@ html body .modal-content .env-select-box option {
 .btn-clear { color: #f7a37f; font-weight: bold; }
 .btn-submit { background: #457b9d; border: none; font-weight: bold; font-size: 14px; }
 .btn-submit:hover { background: #1d3557; }
+/* ==========================================
+   🛡️ 위젯 & 플로팅 아이콘 눈치 챙기기 (모달창 침범 방지)
+   ========================================== */
+
+/* 1. 평소에 둥둥 떠다니는 위젯들을 모달창(안내창)보다 한참 아래 층으로 강등시킵니다. */
+#weather-widget,
+#theme-widget,
+#time-gear-btn,
+#random-memory-btn,
+#mini-audio-trigger,
+#mini-backup-trigger {
+    z-index: 999999 !important; 
+}
+
+/* 2. 로그인창, 안내창 등 중요한 팝업창들은 화면의 절대적인 최상단 층으로 끌어올립니다. */
+#system-modal,
+#login-modal,
+#backup-modal,
+#library-modal,
+#detail-modal,
+#sound-modal,
+#env-modal,
+#donation-modal {
+    z-index: 999999999 !important; 
+}
