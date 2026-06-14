@@ -2,7 +2,7 @@
   "name": "수평선 너머의 서재",
   "short_name": "수평선 너머의 서재",
   "description": "노을지는 수평선 너머의 바다, 그 곳에 있는 서재에 새겨진 기록들",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#02050d",
   "theme_color": "#00b4d8",
