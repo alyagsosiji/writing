@@ -548,19 +548,41 @@ async function submitPin() {
 }
 
 // ==========================================
-// 🚨 4. 누락되었던 login() 함수 껍데기 복구
+// 🚨 4. 누락되었던 login() 함수 뼈대 및 변수 복구
 // ==========================================
 function login() {
-    // 주의: 본인의 코드에 맞게 이메일/비밀번호 값을 가져오는 변수명이 맞는지 확인하세요.
-    // 보통 const targetEmail = idElem.value; const inputPw = pwElem.value; 같은 코드가 위에 있어야 합니다.
+    // 1. HTML에서 아이디와 비밀번호 입력창 요소를 찾습니다. 
+    // (※ index.html의 아이디/비밀번호 input 태그 id가 'login-id', 'login-pw'가 맞는지 꼭 확인해주세요!)
+    const idElem = document.getElementById('login-id');
+    const pwElem = document.getElementById('login-pw');
     
+    if (!idElem || !pwElem) {
+        console.error("로그인 입력창 요소를 찾을 수 없습니다.");
+        return;
+    }
+    
+    // 2. 입력된 값을 가져옵니다.
+    const targetEmail = idElem.value.trim();
+    const inputPw = pwElem.value.trim();
+    
+    // 3. 빈칸 제출 방지
+    if (!targetEmail || !inputPw) {
+        if (typeof showSystemAlert === 'function') {
+            showSystemAlert('아이디와 비밀번호를 모두 입력해주세요.');
+        } else {
+            alert('아이디와 비밀번호를 모두 입력해주세요.');
+        }
+        return;
+    }
+    
+    // 4. 파이어베이스 인증 시도
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
-            // 이메일/비번 1차 통과 시 모달창(기존 로그인창)만 닫아주고 초기화합니다.
+            // 이메일/비번 1차 통과 시 모달창(기존 로그인창)만 닫아주고 초기화
             if (typeof closeModal === 'function') closeModal(); 
-            if (typeof idElem !== 'undefined') idElem.value = ''; 
-            if (typeof pwElem !== 'undefined') pwElem.value = '';
-            // 환영 인사는 finalizeLogin 함수로 이동했으므로 여기서는 띄우지 않습니다!
+            idElem.value = ''; 
+            pwElem.value = '';
+            // 🚨 환영 인사는 여기서 띄우지 않습니다. (2차 PIN 인증 통과 후 finalizeLogin에서 띄움)
         })
         .catch((error) => {
             console.error("인증 에러:", error);
