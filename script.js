@@ -458,9 +458,6 @@ function toggleRestMode() {
 }
 window.toggleRestMode = toggleRestMode;
 
-// ==========================================
-// 🔐 2차 인증 (PIN 키패드) 변수 및 암호화 설정
-// ==========================================
 let currentPin = '';
 let pendingUser = null; 
 // 🚨 암호화한 해시값입니다. (코드에 원본 숫자가 노출되지 않습니다)
@@ -499,6 +496,13 @@ function finalizeLogin(user) {
     
     localStorage.setItem('isAdminLoggedIn', 'true'); 
     localStorage.setItem('loggedInUser', loggedInUser);
+    
+    // 🚨 PIN 코드까지 통과하여 최종 입장할 때 비로소 환영 인사를 띄웁니다.
+    if (typeof showSystemAlert === 'function') {
+        showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`);
+    } else {
+        alert(`환영합니다, 수평선 너머 바다의 기록자, ${loggedInUser}님.`);
+    }
     
     requestNotificationPermission();
     listenPosts();
@@ -543,17 +547,31 @@ async function submitPin() {
     }
 }
 
+// ==========================================
+// 🚨 4. 누락되었던 login() 함수 껍데기 복구
+// ==========================================
+function login() {
+    // 주의: 본인의 코드에 맞게 이메일/비밀번호 값을 가져오는 변수명이 맞는지 확인하세요.
+    // 보통 const targetEmail = idElem.value; const inputPw = pwElem.value; 같은 코드가 위에 있어야 합니다.
+    
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
-            closeModal(); 
-            idElem.value = ''; pwElem.value = '';
-            showSystemAlert(`환영합니다, 수평선 너머 바다의 기록자, ${inputId}님.`);
+            // 이메일/비번 1차 통과 시 모달창(기존 로그인창)만 닫아주고 초기화합니다.
+            if (typeof closeModal === 'function') closeModal(); 
+            if (typeof idElem !== 'undefined') idElem.value = ''; 
+            if (typeof pwElem !== 'undefined') pwElem.value = '';
+            // 환영 인사는 finalizeLogin 함수로 이동했으므로 여기서는 띄우지 않습니다!
         })
         .catch((error) => {
             console.error("인증 에러:", error);
-            showSystemAlert('서재의 열쇠가 맞지 않습니다.');
+            if (typeof showSystemAlert === 'function') {
+                showSystemAlert('서재의 열쇠가 맞지 않습니다.');
+            } else {
+                alert('서재의 열쇠가 맞지 않습니다.');
+            }
         });
 }
+
 window.login = login;
 
 function logout() { 
