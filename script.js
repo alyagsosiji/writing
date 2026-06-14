@@ -1919,12 +1919,23 @@ window.deleteSelectedLetters = function() {
     });
 };
 
+// ==========================================
+// 🛡️ 모달창 바깥 배경 클릭 시 닫힘 강제 방어
+// ==========================================
 document.addEventListener('click', function(event) {
     const backupModal = document.getElementById('backup-modal');
     const libraryModal = document.getElementById('library-modal');
     const detailModal = document.getElementById('detail-modal'); 
+    const pinModal = document.getElementById('pin-modal');     // 🚨 키패드 창 추가!
+    const loginModal = document.getElementById('login-modal'); // 🚨 로그인 창 추가!
     
-    if (event.target === backupModal || event.target === libraryModal || event.target === detailModal) {
+    // 클릭한 곳이 모달창들의 바깥 배경(어두운 부분)일 경우, 
+    // 창이 닫히는 동작(이벤트)을 그 자리에서 즉시 차단합니다.
+    if (event.target === backupModal || 
+        event.target === libraryModal || 
+        event.target === detailModal || 
+        event.target === pinModal || 
+        event.target === loginModal) {
         event.stopPropagation();
         event.stopImmediatePropagation();
     }
