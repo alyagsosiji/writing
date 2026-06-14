@@ -1604,16 +1604,22 @@ html body .modal-content .env-select-box option {
     text-shadow: 0 0 8px rgba(247, 163, 127, 0.4);
 }
 
-/* 후원 팝업창 (모달) 배경 */
+/* 후원 팝업창 (모달) 전체 어두운 배경 */
 .donation-modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(4, 9, 20, 0.85); /* 깊은 밤바다 색상 */
+    position: fixed !important; /* 🚨 [핵심] 푸터 등 다른 요소에 밀리지 않고 무조건 화면 최상단에 고정 */
+    top: 0 !important; 
+    left: 0 !important; 
+    width: 100vw !important; /* 화면 가로 전체 */
+    height: 100vh !important; /* 화면 세로 전체 */
+    background: rgba(4, 9, 20, 0.85); 
     backdrop-filter: blur(5px);
-    z-index: 9999;
+    z-index: 999999 !important; /* 🚨 화면의 모든 요소보다 가장 위에 뜨도록 z축 강제 상승 */
+    
+    /* 팝업 내용물 정중앙 배치 */
     display: flex;
     justify-content: center;
     align-items: center;
+    
     animation: fadeInModal 0.4s ease-out;
 }
 
