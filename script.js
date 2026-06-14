@@ -1838,3 +1838,35 @@ function openDonationModal() {
 function closeDonationModal() {
     document.getElementById('donation-modal').style.display = 'none';
 }
+// ==========================================
+// 🛡️ 서재 기록 보호 (스크린샷 단축키 및 우클릭 방어)
+// ==========================================
+
+// 1. 우클릭 차단
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
+// 2. 캡처 단축키 차단 (PrintScreen, Mac Cmd+Shift+3/4/5 등)
+document.addEventListener('keydown', function(e) {
+    // 윈도우 PrintScreen 또는 Mac 캡처 단축키 감지
+    if (e.key === 'PrintScreen' || 
+       (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5' || e.key === 's' || e.key === 'S')) ||
+       (e.ctrlKey && e.key === 'p') || // 인쇄 단축키 차단
+       (e.ctrlKey && e.key === 's')) { // 저장 단축키 차단
+        
+        e.preventDefault(); // 기본 캡처/인쇄 동작 막기
+        
+        // 캡처 시도 시 클립보드를 강제로 비워버림
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(''); 
+        }
+        
+        // 서재의 시스템 알림창 띄우기 (경고)
+        if (typeof showSystemAlert === 'function') {
+            showSystemAlert("서재의 기록은 눈과 마음으로만 담아주세요.");
+        } else {
+            alert("서재의 기록은 눈과 마음으로만 담아주세요.");
+        }
+    }
+});
