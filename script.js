@@ -458,12 +458,16 @@ function toggleRestMode() {
 }
 window.toggleRestMode = toggleRestMode;
 
+// ==========================================
+// 🔐 2차 인증 및 로그인 상태 제어
+// ==========================================
 let currentPin = '';
 let pendingUser = null; 
+
+// ✅ 암호화된 해시값은 반드시 딱 한 번만 선언해야 합니다!
 const ENCRYPTED_PIN_HASH = 'MjYwNDE2';
 
-
-// 1. 기존 onAuthStateChanged를 교체합니다.
+// 1. 기존 onAuthStateChanged
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
         // 이미 이번 접속에서 PIN 인증을 통과했다면 곧바로 진입
@@ -522,7 +526,7 @@ function clearPin() {
     document.getElementById('pin-display').innerText = '';
 }
 
-const ENCRYPTED_PIN_HASH = 'MjYwNDE2';
+// 🚨 기존에 여기에 있던 중복된 const ENCRYPTED_PIN_HASH 선언을 삭제했습니다.
 
 async function submitPin() {
     // 사용자가 키패드로 입력한 번호를 똑같이 암호화(인코딩)하여 대조합니다.
