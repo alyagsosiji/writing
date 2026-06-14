@@ -1982,31 +1982,23 @@ document.addEventListener('keydown', function(e) {
     }
 });
 // ==========================================
-// 🛡️ 캐시 무시! JS로 팝업/위젯 강제 서열 정리 
+// 🚀 지독한 Z-index 갇힘 현상 원천 차단 (DOM 물리적 이동)
 // ==========================================
-const enforceZIndexStyle = document.createElement('style');
-enforceZIndexStyle.innerHTML = `
-    /* 떠다니는 위젯들은 모두 10층으로 강등 */
-    #weather-widget, 
-    #theme-widget, 
-    #time-gear-btn, 
-    #random-memory-btn, 
-    #mini-audio-trigger, 
-    #mini-backup-trigger {
-        z-index: 900 !important; 
-    }
-
-    /* 모든 팝업창은 99만 층으로 무조건 최상단 끌어올림 */
-    #system-modal, 
-    #login-modal, 
-    #backup-modal, 
-    #library-modal, 
-    #detail-modal, 
-    #pin-modal, 
-    #sound-modal, 
-    #env-modal, 
-    #donation-modal {
-        z-index: 999999 !important; 
-    }
-`;
-document.head.appendChild(enforceZIndexStyle);
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. 화면에 띄워지는 모든 팝업/안내창들의 ID 목록
+    const targetModals = [
+        'system-modal', 'login-modal', 'backup-modal', 
+        'library-modal', 'detail-modal', 'pin-modal'
+    ];
+    
+    targetModals.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+            // 2. 🚨 갇혀있던 모달창을 HTML의 가장 바깥쪽 부모(body)로 물리적 강제 이사!
+            document.body.appendChild(modal);
+            
+            // 3. 바깥으로 꺼낸 뒤 최상단 층수 999만을 쐐기로 박아넣음
+            modal.style.setProperty('z-index', '9999999999999', 'important');
+        }
+    });
+});
