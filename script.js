@@ -550,48 +550,55 @@ async function submitPin() {
 // ==========================================
 // 🔐 4. 아이디(닉네임) -> 이메일 자동 매핑 로그인 함수
 // ==========================================
+// ==========================================
+// 🔐 4. 자동 추적 기능이 탑재된 완벽한 로그인 함수
+// ==========================================
 function login() {
-    // 1. 화면의 로그인 ID, PW 입력 태그 요소를 가져옵니다.
-    const idElem = document.getElementById('login-id');
-    const pwElem = document.getElementById('login-pw');
-    
-    if (!idElem || !pwElem) {
-        console.error("로그인 입력창 요소를 찾을 수 없습니다. HTML의 id를 확인해주세요.");
+    // 1. HTML의 태그(id) 이름을 몰라도, 로그인 모달창 자체를 알아서 찾아냅니다.
+    const modal = document.getElementById('login-modal');
+    if (!modal) {
+        console.error("로그인 모달창을 찾을 수 없습니다.");
         return;
     }
     
-    // 2. 사용자가 입력한 아이디(닉네임)와 비밀번호를 읽어옵니다.
+    // 2. 모달창 안에 있는 입력칸(텍스트, 비밀번호)을 자동으로 쏙 뽑아옵니다.
+    const idElem = modal.querySelector('input[type="text"], input[type="email"]') || modal.querySelectorAll('input')[0];
+    const pwElem = modal.querySelector('input[type="password"]') || modal.querySelectorAll('input')[1];
+    
+    if (!idElem || !pwElem) {
+        console.error("아이디와 비밀번호 입력칸을 찾을 수 없습니다.");
+        return;
+    }
+    
     const inputId = idElem.value.trim();
     const inputPw = pwElem.value.trim();
     
+    // 3. 빈칸 방지
     if (!inputId || !inputPw) {
         if (typeof showSystemAlert === 'function') {
-            showSystemAlert('아이디와 비밀번호를 모두 입력해주세요.');
+            showSystemAlert('서재의 열쇠를 모두 입력해주세요.');
         } else {
-            alert('아이디와 비밀번호를 모두 입력해주세요.');
+            alert('서재의 열쇠를 모두 입력해주세요.');
         }
         return;
     }
     
-    // 3. ✨ [재검토 핵심] 입력한 아이디에 대응되는 실제 파이어베이스 인증용 이메일 매핑
-    let targetEmail = inputId; // 기본적으로는 입력한 값을 쓰되,
-    
+    // 4. 기록자님의 원래 로직 복구: 닉네임을 파이어베이스 이메일로 마법처럼 자동 변환
+    let targetEmail = inputId; // 기본적으로는 입력값을 쓰되,
     if (inputId === '아시') {
         targetEmail = 'alyagsosiji@gmail.com';
     } else if (inputId === '하은') {
         targetEmail = 'haeunchan0114@naver.com';
     }
     
-    // 4. 매핑된 이메일과 비밀번호로 파이어베이스에 문을 두드립니다.
+    // 5. 파이어베이스 인증의 문을 두드립니다.
     firebase.auth().signInWithEmailAndPassword(targetEmail, inputPw)
         .then(() => {
-            // 이메일/비번 1차 통과 시 로그인 모달창만 단정하게 닫고 초기화
+            // 1차 통과 시 껍데기 모달창만 닫아주고 입력칸 초기화
             if (typeof closeModal === 'function') closeModal(); 
             idElem.value = ''; 
             pwElem.value = '';
-            
-            // 🚨 최종 환영 인사는 PIN(2차 인증)까지 완벽히 맞췄을 때 
-            // 위의 finalizeLogin() 함수 안에서 멋지게 등장합니다!
+            // 🚨 최종 환영 인사는 이후 2차 PIN 인증까지 통과하면 finalizeLogin()에서 등장합니다.
         })
         .catch((error) => {
             console.error("인증 에러:", error);
