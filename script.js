@@ -2002,3 +2002,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// ==========================================
+// ✨ 하단 고정 아이콘들 호버(Hover) 액션 완벽 통일
+// ==========================================
+const unifyHoverStyle = document.createElement('style');
+unifyHoverStyle.innerHTML = `
+    /* 1. 모든 아이콘의 기본 상태: 마우스가 닿을 때 부드럽게 반응하도록 트랜지션(전환) 장착 */
+    #time-gear-btn, 
+    #random-memory-btn, 
+    #mini-audio-trigger, 
+    #mini-backup-trigger {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        cursor: pointer !important;
+        opacity: 0.85 !important; /* 평소엔 아주 살짝 투명하게 */
+    }
+
+    /* 2. 지침서 기준 호버 효과: 마우스를 올리면 1.15배 커지며 살짝 위로 떠오르고, 영롱한 빛이 남 */
+    #time-gear-btn:hover, 
+    #random-memory-btn:hover, 
+    #mini-audio-trigger:hover, 
+    #mini-backup-trigger:hover {
+        transform: scale(1.15) translateY(-4px) !important;
+        filter: drop-shadow(0 0 10px rgba(144, 224, 239, 0.7)) !important;
+        opacity: 1 !important; /* 마우스를 올리면 100% 선명해짐 */
+    }
+    
+    /* 3. 클릭할 때는 살짝 눌리는 쫀득한 느낌 추가 (선택 사항) */
+    #time-gear-btn:active, 
+    #random-memory-btn:active, 
+    #mini-audio-trigger:active, 
+    #mini-backup-trigger:active {
+        transform: scale(0.95) translateY(0) !important;
+    }
+`;
+document.head.appendChild(unifyHoverStyle);
