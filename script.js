@@ -1758,7 +1758,12 @@ function syncWeatherAndWidget() {
     const defaultLat = 35.1796; const defaultLon = 129.0756;
     
     function fetchWeatherData(lat, lon) {
-        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto`)
+        // 🚨 [핵심 해결 1] 주소 맨 끝에 현재 시간을 밀리초 단위로 달아서, 브라우저가 매번 '완전히 새로운 요청'으로 착각하게 만듭니다.
+        const timeStamp = new Date().getTime();
+        const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto&_=${timeStamp}`;
+
+        // 🚨 [핵심 해결 2] fetch 옵션에 { cache: 'no-store' }를 달아 인터넷 캐시를 원천 차단합니다.
+        fetch(apiUrl, { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
             localStorage.setItem('weather_cache_payload_v4', JSON.stringify(data));
@@ -1780,6 +1785,16 @@ function syncWeatherAndWidget() {
             applyManualWeatherEffect('clear');
         });
     }
+    
+    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
+    
+    // 🚨 [핵심 해결 3] GPS 옵션 대폭 강화: 과거 위치(캐시) 무시, 최고 정확도 요구, 응답 대기시간 연장
+    navigator.geolocation.getCurrentPosition(
+        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude), 
+        (error) => fetchWeatherData(defaultLat, defaultLon), 
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+    );
+}
     
     if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
     navigator.geolocation.getCurrentPosition(
