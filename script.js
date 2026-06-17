@@ -2003,36 +2003,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 // ==========================================
-// ✨ 하단 고정 아이콘들 호버(Hover) 액션 완벽 통일
+// ✨ 하단 고정 아이콘 호버: 은은한 움직임 + 원본의 영롱한 빛 복구
 // ==========================================
 const unifyHoverStyle = document.createElement('style');
 unifyHoverStyle.innerHTML = `
-    /* 1. 모든 아이콘의 기본 상태: 마우스가 닿을 때 부드럽게 반응하도록 트랜지션(전환) 장착 */
+    /* 1. 기본 상태: 아주 부드럽고 차분한 전환 속도 */
     #time-gear-btn, 
     #random-memory-btn, 
     #mini-audio-trigger, 
     #mini-backup-trigger {
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        transition: all 0.25s ease-out !important;
         cursor: pointer !important;
-        opacity: 0.85 !important; /* 평소엔 아주 살짝 투명하게 */
+        opacity: 0.9 !important; 
     }
 
-    /* 2. 지침서 기준 호버 효과: 마우스를 올리면 1.15배 커지며 살짝 위로 떠오르고, 영롱한 빛이 남 */
+    /* 2. 호버 상태: 살짝만 커지고(1.1배), 지침서 원본 느낌의 푸른빛 그림자(Glow) 강하게 발산 */
     #time-gear-btn:hover, 
     #random-memory-btn:hover, 
     #mini-audio-trigger:hover, 
     #mini-backup-trigger:hover {
-        transform: scale(1.15) translateY(-4px) !important;
-        filter: drop-shadow(0 0 10px rgba(144, 224, 239, 0.7)) !important;
-        opacity: 1 !important; /* 마우스를 올리면 100% 선명해짐 */
+        transform: scale(1.1) translateY(-2px) !important; 
+        filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important; /* 원본의 빛나는 효과 복구! */
+        opacity: 1 !important; 
     }
     
-    /* 3. 클릭할 때는 살짝 눌리는 쫀득한 느낌 추가 (선택 사항) */
+    /* 3. 클릭할 때: 아주 미세하게 눌리는 느낌 */
     #time-gear-btn:active, 
     #random-memory-btn:active, 
     #mini-audio-trigger:active, 
     #mini-backup-trigger:active {
-        transform: scale(0.95) translateY(0) !important;
+        transform: scale(0.98) translateY(0) !important;
+        filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important; /* 누를 땐 빛이 살짝 줄어듦 */
     }
 `;
 document.head.appendChild(unifyHoverStyle);
