@@ -2037,27 +2037,43 @@ unifyHoverStyle.innerHTML = `
     }
 `;
 document.head.appendChild(unifyHoverStyle);
+
 // ==========================================
-// 🛡️ 호버 시 0.1초 텍스트 깨짐(Blur) 및 떨림 완벽 방어
+// 🛡️ 호버 시 0.1초 텍스트 깨짐 및 깜빡임(Flicker) 완벽 방어 (최종 진화형)
 // ==========================================
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.innerHTML = `
-    /* 글 목록(카드), 서재 환경 설정창, 각종 버튼 등 
-       움직임이 발생하는 요소들의 픽셀을 강제로 고정시킵니다. */
+    /* 움직임이 발생하는 모든 카드와 모달, 버튼들 */
     .post-card, 
-    .post-card *, 
     #env-modal,
-    #env-modal *,
     select,
     .page-btn,
-    .mgmt-btn {
-        /* 1. 폰트 테두리를 가장 부드럽고 선명한 상태로 강제 고정 */
+    .mgmt-btn,
+    #time-gear-btn, 
+    #random-memory-btn, 
+    #mini-audio-trigger, 
+    #mini-backup-trigger {
+        /* 1. 폰트 선명도 강제 고정 */
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
         
-        /* 2. 하드웨어(GPU) 가속 전환 시 발생하는 0.1초의 딜레이/번짐 현상 원천 차단 */
+        /* 2. 번짐 방지 (뒷면 렌더링 차단) */
         -webkit-backface-visibility: hidden !important;
         backface-visibility: hidden !important;
+
+        /* 3. 🚨 [핵심 해결] 3D 가속(GPU) 강제 할당: 마우스 올리기 전부터 미리 그래픽 카드를 대기시킵니다. (깜빡임 원천 차단) */
+        transform: translateZ(0); 
+        -webkit-transform: translateZ(0);
+        
+        /* 4. 브라우저에게 "이 요소는 곧 크기나 투명도가 변할 거야"라고 미리 예고장 날리기 */
+        will-change: transform, opacity, filter;
+    }
+
+    /* 카드 내부의 글자(텍스트)들까지 깜빡이지 않도록 꽉 잡아줍니다. */
+    .post-card * {
+        -webkit-backface-visibility: hidden !important;
+        backface-visibility: hidden !important;
+        transform: translateZ(0);
     }
 `;
 document.head.appendChild(antiBlurStyle);
