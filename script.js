@@ -2077,3 +2077,31 @@ antiBlurStyle.innerHTML = `
     }
 `;
 document.head.appendChild(antiBlurStyle);
+// ==========================================
+// 🚀 성능 최적화: 저사양 기기 렌더링(GPU) 효율 극대화
+// ==========================================
+const hardwareAccelerationStyle = document.createElement('style');
+hardwareAccelerationStyle.innerHTML = `
+    /* 1. 화면 밖의 카드들은 브라우저가 계산을 생략하도록 지시 (스크롤 렉 대폭 감소) */
+    .post-card {
+        content-visibility: auto; /* 화면에 보일 때만 렌더링 (최신 브라우저 최적화) */
+        contain: content; /* 이 카드 안에서 일어나는 변화가 바깥 화면에 영향을 주지 않도록 격리 */
+    }
+
+    /* 2. 넓은 영역을 차지하는 배경 레이어들을 GPU 전용으로 넘겨 CPU 부담을 줄임 */
+    #ocean-bg-layer,
+    .weather-overlay,
+    body::before {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: background, transform;
+        pointer-events: none; /* 배경이 마우스 이벤트를 계산하지 않도록 차단 */
+    }
+
+    /* 3. 모달창 팝업 시 뒷배경(블러 등)의 렌더링 성능 최적화 */
+    .modal {
+        will-change: opacity;
+        transform: translateZ(0);
+    }
+`;
+document.head.appendChild(hardwareAccelerationStyle);
