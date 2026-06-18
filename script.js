@@ -2150,74 +2150,69 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 🫧 심해에서 수면으로: 관리자 모드 감응형 스크롤 탑 버튼
+// 🫧 심해에서 수면으로: 로딩 타이밍 완벽 방어 버전
 // ==========================================
-const topBtnStyle = document.createElement('style');
-topBtnStyle.innerHTML = `
-    #ocean-top-btn {
-        position: fixed;
-        left: 30px;   /* 🚨 화면 왼쪽 고정 (환경설정과 대칭) */
-        bottom: 80px; /* 기본(방문자) 모드: 소라게(🐚) 바로 위쪽 높이 */
-        font-size: 26px; /* 환경설정 ⚙️ 아이콘과 동일한 크기 */
-        z-index: 99999; !important;
-        cursor: pointer;
+function initOceanTopButton() {
+    // 혹시 이미 버튼이 있으면 중복 생성 방지
+    if (document.getElementById('ocean-top-btn')) return;
+
+    const topBtnStyle = document.createElement('style');
+    topBtnStyle.innerHTML = `
+        #ocean-top-btn {
+            position: fixed;
+            left: 30px;
+            bottom: 80px; /* 비로그인 시 높이 */
+            font-size: 26px;
+            z-index: 999999 !important; /* 모달창보다도 무조건 위로! */
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px) translateZ(0); 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out;
+            will-change: transform, opacity, filter, bottom;
+            -webkit-backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
         
-        /* 1. 기본 숨김 상태 */
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(20px) translateZ(0); 
+        /* 관리자 로그인 시 스윽 올라감 */
+        body.admin-logged-in #ocean-top-btn { bottom: 140px !important; }
         
-        /* 2. 🚨 [핵심] bottom 값에 애니메이션을 걸어 관리자 로그인/로그아웃 시 스윽~ 오르락내리락 합니다 */
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out;
-        will-change: transform, opacity, filter, bottom;
-        -webkit-backface-visibility: hidden;
-        -webkit-font-smoothing: antialiased;
-    }
-    
-    /* 3. 🚨 기록자(관리자) 로그인 시: 소라게와 백업 아이콘 사이로 이동 */
-    body.admin-logged-in #ocean-top-btn {
-        bottom: 140px; /* 백업 아이콘 아래, 소라게 위로 스윽 올라감 (높이는 필요시 조절하세요) */
-    }
-    
-    /* 4. 스크롤을 400px 이상 내려서 화면에 나타날 때 */
-    #ocean-top-btn.show {
-        opacity: 0.9;
-        pointer-events: auto;
-        transform: translateY(0) translateZ(0);
-    }
-    
-    /* 5. 마우스 호버 효과 (영롱한 푸른빛과 1.1배 크기) */
-    #ocean-top-btn.show:hover {
-        transform: scale(1.1) translateY(-2px) translateZ(0) !important;
-        filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
-        opacity: 1 !important;
-    }
-    
-    /* 6. 클릭 효과 (미세하게 눌러지는 질감) */
-    #ocean-top-btn.show:active {
-        transform: scale(0.98) translateY(0) translateZ(0) !important;
-        filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
-    }
-`;
-document.head.appendChild(topBtnStyle);
+        /* 보일 때의 상태 */
+        #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; transform: translateY(0) translateZ(0); }
+        
+        /* 호버 및 클릭 효과 */
+        #ocean-top-btn.show:hover { transform: scale(1.1) translateY(-2px) translateZ(0) !important; filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important; opacity: 1 !important; }
+        #ocean-top-btn.show:active { transform: scale(0.98) translateY(0) translateZ(0) !important; filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important; }
+    `;
+    document.head.appendChild(topBtnStyle);
 
-// 버튼 요소 생성 및 주입
-const topBtn = document.createElement('div');
-topBtn.id = 'ocean-top-btn';
-topBtn.innerHTML = '🌊'; // 물방울 모양 아이콘
-topBtn.title = "수면 위로 올라가기";
-document.body.appendChild(topBtn);
+    // 버튼 요소 생성 및 주입
+    const topBtn = document.createElement('div');
+    topBtn.id = 'ocean-top-btn';
+    topBtn.innerHTML = '🌊'; 
+    topBtn.title = "수면 위로 올라가기";
+    document.body.appendChild(topBtn);
 
-// 스크롤 감지 엔진 (성능 최적화 passive 옵션 적용)
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 100) {
-        topBtn.classList.add('show');
-    } else {
-        topBtn.classList.remove('show');
-    }
-}, { passive: true });
+    // 스크롤 감지 (화면을 50px만 내려도 바로 뜨게 설정)
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 200) { 
+            topBtn.classList.add('show');
+        } else {
+            topBtn.classList.remove('show');
+        }
+    }, { passive: true });
 
-// 클릭 시 수면(맨 위)으로 부드럽게 스크롤
-topBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+    // 클릭 시 맨 위로
+    topBtn.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    console.log("🫧 수면 위로 가기 버튼 장전 완료!");
+}
+
+// 🚨 핵심 해결책: 문서가 이미 로드되었는지 확인하고, 상황에 맞게 즉시 실행!
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initOceanTopButton(); // 이미 로딩이 끝났다면 즉시 실행
+} else {
+    document.addEventListener('DOMContentLoaded', initOceanTopButton); // 아직 로딩 중이면 기다렸다가 실행
+}
