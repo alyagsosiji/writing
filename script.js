@@ -2139,153 +2139,56 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🫧 심해에서 수면으로: 모바일 대응 + 로그인 시 소라게 위로 상승 완벽 복구
+// 🚀 성능 최적화: 프레임 드랍 방지 통합 스크립트
 // ==========================================
 (function() {
-    function initOceanTopButtonFinal() {
-        // 1. 흐려짐 방지
-        if (!document.getElementById('fix-blur-style-safe')) {
-            const styleFix = document.createElement('style');
-            styleFix.id = 'fix-blur-style-safe';
-            styleFix.innerHTML = `
-                #env-modal, #env-modal *, select, option, input, textarea {
-                    transform: none !important;
-                    will-change: auto !important;
-                    -webkit-backface-visibility: visible !important;
-                    backface-visibility: visible !important;
-                    filter: none !important;
-                }
-            `;
-            document.head.appendChild(styleFix);
+    // 1. 기존에 설치한 무거운 요소들 전부 제거 (메모리 정리)
+    const oldBtn = document.getElementById('ocean-top-btn');
+    if (oldBtn) oldBtn.remove();
+    const oldStyle = document.getElementById('ocean-top-btn-style');
+    if (oldStyle) oldStyle.remove();
+    const oldFix = document.getElementById('ocean-safe-menu-style');
+    if (oldFix) oldFix.remove();
+
+    // 2. 가벼운 스타일 주입 (CSS 클래스 기반 제어)
+    const style = document.createElement('style');
+    style.id = 'ocean-optimized-style';
+    style.innerHTML = `
+        /* 스크롤 버튼 애니메이션 최적화 */
+        #ocean-top-btn {
+            position: fixed; left: 30px; bottom: 104px;
+            z-index: 9999; cursor: pointer;
+            opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none;
         }
+        body.admin-logged-in #ocean-top-btn { bottom: 157px; }
+        #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
+        
+        /* 메뉴 3개 흔들림 방지 (CSS만 사용, JS 연산 제거) */
+        .ocean-safe-menu { transition: none !important; }
+        .ocean-safe-menu:hover { transform: none !important; }
+    `;
+    document.head.appendChild(style);
 
-        // 2. 찌꺼기 완벽 청소
-        const oldBtn = document.getElementById('ocean-top-btn');
-        if (oldBtn) oldBtn.remove();
-        const oldStyle = document.getElementById('ocean-top-btn-style');
-        if (oldStyle) oldStyle.remove();
+    // 3. 버튼 생성
+    const topBtn = document.createElement('div');
+    topBtn.id = 'ocean-top-btn';
+    topBtn.innerHTML = '🫧';
+    document.body.appendChild(topBtn);
 
-        // 3. 순수 CSS 애니메이션 엔진 (로그인 감응형 높이 포함)
-        const btnStyle = document.createElement('style');
-        btnStyle.id = 'ocean-top-btn-style';
-        btnStyle.innerHTML = `
-            #ocean-top-btn {
-                position: fixed !important;
-                z-index: 99999 !important;
-                cursor: pointer !important;
-                opacity: 0 !important; 
-                pointer-events: none !important;
-                display: flex !important; 
-                align-items: center !important; 
-                justify-content: center !important;
-                
-                /* 🚨 기본 상태(방문자 모드): 소라게 🐚 바로 위 높이 고정 */
-                bottom: 104px !important; 
-                
-                /* 부드러운 승강기 애니메이션 (위치와 높이 전환을 부드럽게) */
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out !important;
-                transform: translateY(20px) translateZ(0) !important;
-                -webkit-font-smoothing: antialiased !important;
-                -webkit-tap-highlight-color: transparent !important;
-            }
-            
-            /* 🚨 [핵심 복구] 기록자(관리자) 로그인 시: 소라게와 백업 사이로 스윽 상승 */
-            body.admin-logged-in #ocean-top-btn {
-                bottom: 157px !important; 
-            }
-
-            #ocean-top-btn.show {
-                opacity: 0.9 !important;
-                pointer-events: auto !important;
-                transform: translateY(0) translateZ(0) !important;
-            }
-
-            /* PC 환경에서만 작동하는 호버 효과 (모바일 굳힘 방지) */
-            @media (hover: hover) and (pointer: fine) {
-                #ocean-top-btn.show:hover {
-                    transform: scale(1.1) translateY(-2px) translateZ(0) !important;
-                    filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
-                    opacity: 1 !important;
-                }
-            }
-            
-            /* 터치/클릭 시 반응 */
-            #ocean-top-btn.show:active {
-                transform: scale(0.95) translateY(0) translateZ(0) !important;
-                filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
-            }
-        `;
-        document.head.appendChild(btnStyle);
-
-        // 4. 버튼 생성
-        const topBtn = document.createElement('div');
-        topBtn.id = 'ocean-top-btn';
-        topBtn.innerHTML = '🌊'; 
-        topBtn.title = "수면 위로 올라가기";
-        document.body.appendChild(topBtn);
-
-        // 5. 환경설정 디자인 복제 엔진
-        function syncStylesWithGear() {
-            const gearBtn = document.getElementById('time-gear-btn');
-            if (gearBtn) {
-                const gearStyle = window.getComputedStyle(gearBtn);
-                
-                topBtn.style.setProperty('background', gearStyle.background, 'important');
-                topBtn.style.setProperty('border', gearStyle.border, 'important');
-                topBtn.style.setProperty('border-radius', gearStyle.borderRadius, 'important');
-                topBtn.style.setProperty('width', gearStyle.width, 'important');
-                topBtn.style.setProperty('height', gearStyle.height, 'important');
-                topBtn.style.setProperty('font-size', gearStyle.fontSize, 'important');
-                topBtn.style.setProperty('box-shadow', gearStyle.boxShadow, 'important');
-                topBtn.style.setProperty('backdrop-filter', gearStyle.backdropFilter, 'important');
-                
-                const rightOffset = gearStyle.right;
-                if (rightOffset && rightOffset !== 'auto' && rightOffset !== '0px') {
-                    topBtn.style.setProperty('left', rightOffset, 'important');
-                } else {
-                    topBtn.style.setProperty('left', '20px', 'important'); 
-                }
-            }
-            // 🚨 [버그 수정] 자바스크립트가 bottom을 80px로 찍어 누르던 코드를 완전히 삭제했습니다!
-        }
-
-        // 스크롤 센서 설치
-        const sentinel = document.createElement('div');
-        sentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 1px; height: 1px; background: transparent; z-index: -1; pointer-events: none;';
-        if (document.body.firstChild) {
-            document.body.insertBefore(sentinel, document.body.firstChild);
-        } else {
-            document.body.appendChild(sentinel);
-        }
-
-        if (window.IntersectionObserver) {
-            const observer = new IntersectionObserver((entries) => {
-                if (!entries[0].isIntersecting) {
-                    topBtn.classList.add('show');
-                } else {
-                    topBtn.classList.remove('show');
-                }
+    // 4. 이벤트 최적화 (scroll 대신 requestAnimationFrame 사용)
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                topBtn.classList.toggle('show', window.scrollY > 100);
+                ticking = false;
             });
-            observer.observe(sentinel);
+            ticking = true;
         }
+    }, { passive: true });
 
-        // 클릭 시 스크롤
-        topBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.body.scrollTo) document.body.scrollTo({ top: 0, behavior: 'smooth' });
-            if (document.documentElement.scrollTo) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-
-        syncStylesWithGear();
-        window.addEventListener('resize', syncStylesWithGear);
-    }
-
-    if (document.readyState === 'complete') {
-        setTimeout(initOceanTopButtonFinal, 150);
-    } else {
-        window.addEventListener('load', () => setTimeout(initOceanTopButtonFinal, 150));
-    }
+    topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 })();
 // ==========================================
 // 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
@@ -2334,41 +2237,6 @@ document.head.appendChild(fixBlurStyle);
             }
         `;
         document.head.appendChild(scrollStyle);
-    }
-})();
-// ==========================================
-// ⚓ 3개 메뉴 전용: 초경량 흔들림/가라앉음 방지 (프레임 드랍 해결)
-// ==========================================
-(function() {
-    const targetMenus = ['바다의 기록', '수평선 너머', '띄워진 편지'];
-    
-    // 무거운 div, span은 제외하고 링크(a)와 버튼(button)만 가볍게 탐색합니다.
-    const menuElements = document.querySelectorAll('a, button');
-
-    menuElements.forEach(el => {
-        if (targetMenus.includes(el.textContent.trim())) {
-            el.classList.add('ocean-safe-menu');
-        }
-    });
-
-    if (!document.getElementById('ocean-safe-menu-style')) {
-        const style = document.createElement('style');
-        style.id = 'ocean-safe-menu-style';
-        // GPU를 괴롭히지 않고, 오직 '레이아웃 밀림' 현상만 CSS로 제어합니다.
-        style.innerHTML = `
-            .ocean-safe-menu {
-                /* 호버 시 테두리나 굵기가 변해도 주변을 밀어내지 않도록 설정 */
-                box-sizing: border-box !important;
-                transform-origin: center center !important;
-            }
-            .ocean-safe-menu:hover {
-                /* 불필요하게 밑으로 내려가는 위치 이동(Y축)만 무력화 */
-                transform: translateY(0) scale(1) !important;
-                margin-bottom: 0 !important;
-                padding-bottom: 0 !important;
-            }
-        `;
-        document.head.appendChild(style);
     }
 })();
 // ==========================================
