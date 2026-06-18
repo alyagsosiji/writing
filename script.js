@@ -2166,21 +2166,6 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🛠️ 1. 환경설정 창 등 글자 흐려짐(Blur) 완벽 해결
-// ==========================================
-const fixBlurStyle = document.createElement('style');
-fixBlurStyle.innerHTML = `
-    #env-modal, #env-modal *, select, option, input, textarea {
-        transform: none !important;
-        will-change: auto !important;
-        -webkit-backface-visibility: visible !important;
-        backface-visibility: visible !important;
-        filter: none !important;
-    }
-`;
-document.head.appendChild(fixBlurStyle);
-
-// ==========================================
 // 🫧 2. 심해에서 수면으로: 원형 배경 + 완벽 대칭 스크롤 버튼
 // ==========================================
 function initOceanTopButtonFinal() {
