@@ -2204,7 +2204,7 @@ document.head.appendChild(topBtnStyle);
 // 버튼 요소 생성 및 주입
 const topBtn = document.createElement('div');
 topBtn.id = 'ocean-top-btn';
-topBtn.innerHTML = '🫧'; // 물방울 모양 아이콘
+topBtn.innerHTML = '🌊'; // 물방울 모양 아이콘
 topBtn.title = "수면 위로 올라가기";
 document.body.appendChild(topBtn);
 
