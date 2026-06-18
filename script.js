@@ -2138,7 +2138,52 @@ fixBlurStyle.innerHTML = `
 `;
 document.head.appendChild(fixBlurStyle);
 
+// ==========================================
+// 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
+// ==========================================
+(function() {
+    const oldBtn = document.getElementById('ocean-top-btn');
+    if (oldBtn) oldBtn.remove();
+    const oldStyle = document.getElementById('ocean-optimized-style');
+    if (oldStyle) oldStyle.remove();
 
+    const style = document.createElement('style');
+    style.id = 'ocean-optimized-style';
+    style.innerHTML = `
+        #ocean-top-btn {
+            position: fixed; left: 30px; bottom: 104px;
+            z-index: 999; cursor: pointer;
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            opacity: 0;
+            /* 🚨 [핵심] 렌더링 끊김 방지: 미리 GPU에 레이어를 올립니다 */
+            will-change: opacity, transform;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        body.admin-logged-in #ocean-top-btn { bottom: 157px; }
+        #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
+        .ocean-safe-menu:hover { transform: none !important; }
+    `;
+    document.head.appendChild(style);
+
+    const btn = document.createElement('div');
+    btn.id = 'ocean-top-btn';
+    btn.innerHTML = '🌊';
+    document.body.appendChild(btn);
+
+    // 스크롤 성능 최적화
+    window.addEventListener('scroll', () => {
+        const isShow = window.scrollY > 100;
+        if (isShow !== btn.classList.contains('show')) {
+            btn.classList.toggle('show', isShow);
+        }
+    }, { passive: true });
+
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+})();
 // ==========================================
 // 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
 // ==========================================
@@ -2216,93 +2261,3 @@ hardwareAccelerationStyle.innerHTML = `
     }
 `;
 document.head.appendChild(hardwareAccelerationStyle);
-// ==========================================
-// 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
-// ==========================================
-(function() {
-    const oldBtn = document.getElementById('ocean-top-btn');
-    if (oldBtn) oldBtn.remove();
-    const oldStyle = document.getElementById('ocean-optimized-style');
-    if (oldStyle) oldStyle.remove();
-
-    const style = document.createElement('style');
-    style.id = 'ocean-optimized-style';
-    style.innerHTML = `
-        #ocean-top-btn {
-            position: fixed; left: 30px; bottom: 104px;
-            z-index: 999; cursor: pointer;
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2);
-            border-radius: 50%;
-            opacity: 0;
-            /* 🚨 [핵심] 렌더링 끊김 방지: 미리 GPU에 레이어를 올립니다 */
-            will-change: opacity, transform;
-            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-        }
-        body.admin-logged-in #ocean-top-btn { bottom: 157px; }
-        #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
-        .ocean-safe-menu:hover { transform: none !important; }
-    `;
-    document.head.appendChild(style);
-
-    const btn = document.createElement('div');
-    btn.id = 'ocean-top-btn';
-    btn.innerHTML = '🌊';
-    document.body.appendChild(btn);
-
-    // 스크롤 성능 최적화
-    window.addEventListener('scroll', () => {
-        const isShow = window.scrollY > 100;
-        if (isShow !== btn.classList.contains('show')) {
-            btn.classList.toggle('show', isShow);
-        }
-    }, { passive: true });
-
-    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-})();
-// ====================================================
-// 🚀 최후의 성능 엔진: 리스트 렌더링 부하 제어
-// ====================================================
-(function() {
-    // 1. 기존에 설치한 무거운 루프들 강제 정지
-    const oldFix = document.getElementById('ocean-infinite-scroll-fix');
-    if (oldFix) oldFix.remove();
-
-    // 2. 성능 최적화 핵심 설정
-    const style = document.createElement('style');
-    style.id = 'ocean-infinite-scroll-fix';
-    style.innerHTML = `
-        /* 🚨 핵심: 리스트 컨테이너의 레이아웃 재계산 범위를 강제로 잠급니다 */
-        .posts-grid, .posts-grid-view, #posts-container {
-            contain: strict !important; 
-            content-visibility: auto !important; /* 화면에 보이는 것만 렌더링 */
-            contain-intrinsic-size: 0 500px !important; /* 스크롤바 높이 유지 */
-        }
-        
-        /* 카드 렌더링 최적화 */
-        .post-card {
-            contain: layout style !important;
-            transform: translateZ(0) !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // 3. 스크롤 모드 버벅임 방어: 스크롤 이벤트 빈도수 강제 제한 (Throttling)
-    let lastKnownScrollPosition = 0;
-    let ticking = false;
-
-    window.addEventListener('scroll', () => {
-        lastKnownScrollPosition = window.scrollY;
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                // 상단 버튼 표시
-                const btn = document.getElementById('ocean-top-btn');
-                if (btn) btn.classList.toggle('show', lastKnownScrollPosition > 200);
-                ticking = false;
-            });
-            ticking = true;
-        }
-    }, { passive: true });
-})();
