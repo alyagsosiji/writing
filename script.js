@@ -2113,3 +2113,106 @@ hardwareAccelerationStyle.innerHTML = `
     }
 `;
 document.head.appendChild(hardwareAccelerationStyle);
+// ==========================================
+// 🐚 숨겨진 감성: 개발자 도구를 열어본 이를 위한 이스터에그
+// ==========================================
+setTimeout(() => {
+    console.clear(); // 브라우저 기본 경고들을 살짝 지워주고
+    console.log(
+        "%c🌊 수평선 너머의 서재 뒷면 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자 아시 올림", 
+        "color: #90e0ef; font-size: 18px; font-weight: bold; font-family: sans-serif; text-shadow: 0 0 10px rgba(144,224,239,0.5);",
+        "color: #cbd5e1; font-size: 13px; line-height: 1.8; font-family: sans-serif;"
+    );
+}, 2000);
+
+// ==========================================
+// 🪄 보이지 않는 편의성: ESC 키로 모든 열린 창 부드럽게 닫기
+// ==========================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        // 기존에 만들어두신 닫기 함수들을 호출합니다.
+        if (typeof closeModal === 'function') closeModal();
+        if (typeof closeDetailModal === 'function') closeDetailModal();
+        if (typeof closeBackupModal === 'function') closeBackupModal();
+        if (typeof closeDonationModal === 'function') closeDonationModal();
+        if (typeof closeLibraryModal === 'function') closeLibraryModal();
+        
+        // ID로 직접 제어되는 창들도 숨겨줍니다.
+        const extraModals = ['env-modal', 'sound-modal', 'system-modal', 'pin-modal'];
+        extraModals.forEach(id => {
+            const m = document.getElementById(id);
+            if (m && m.style.display !== 'none') m.style.display = 'none';
+        });
+        
+        // ESC를 누르면 스크롤 잠금도 확실히 풀어줍니다.
+        document.body.classList.remove('no-scroll');
+    }
+});
+
+// ==========================================
+// 🫧 심해에서 수면으로: 왼쪽 아래 고정 스크롤 탑 버튼
+// ==========================================
+const topBtnStyle = document.createElement('style');
+topBtnStyle.innerHTML = `
+    #ocean-top-btn {
+        position: fixed;
+        bottom: 30px; /* 아래쪽 여백 */
+        left: 30px;   /* 🚨 화면 왼쪽으로 고정 */
+        font-size: 26px; /* 환경설정 ⚙️ 아이콘과 동일한 크기 세팅 */
+        z-index: 9999;
+        cursor: pointer;
+        
+        /* 1. 기본 숨김 상태 */
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(20px) translateZ(0); 
+        
+        /* 2. 텍스트 깜빡임 방지 및 부드러운 전환 (안티 블러) */
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, opacity, filter;
+        -webkit-backface-visibility: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
+    
+    /* 3. 스크롤을 400px 이상 내려서 화면에 나타날 때 */
+    #ocean-top-btn.show {
+        opacity: 0.9;
+        pointer-events: auto;
+        transform: translateY(0) translateZ(0);
+    }
+    
+    /* 4. 마우스 호버 효과 (기존 ⚙️ 버튼과 완벽히 동일한 영롱한 푸른빛과 1.1배 크기) */
+    #ocean-top-btn.show:hover {
+        transform: scale(1.1) translateY(-2px) translateZ(0) !important;
+        filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
+        opacity: 1 !important;
+    }
+    
+    /* 5. 클릭 효과 (미세하게 눌러지는 질감) */
+    #ocean-top-btn.show:active {
+        transform: scale(0.98) translateY(0) translateZ(0) !important;
+        filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
+    }
+`;
+document.head.appendChild(topBtnStyle);
+
+// 버튼 요소 생성 및 주입
+const topBtn = document.createElement('div');
+topBtn.id = 'ocean-top-btn';
+topBtn.innerHTML = '🌊'; 
+topBtn.title = "수면 위로 올라가기";
+document.body.appendChild(topBtn);
+
+// 스크롤 감지 엔진 (성능 최적화 passive 옵션 적용)
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+        topBtn.classList.add('show');
+    } else {
+        topBtn.classList.remove('show');
+    }
+}, { passive: true });
+
+// 클릭 시 수면(맨 위)으로 부드럽게 스크롤
+topBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
