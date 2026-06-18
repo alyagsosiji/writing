@@ -2159,7 +2159,7 @@ topBtnStyle.innerHTML = `
         left: 30px;   /* 🚨 화면 왼쪽 고정 (환경설정과 대칭) */
         bottom: 80px; /* 기본(방문자) 모드: 소라게(🐚) 바로 위쪽 높이 */
         font-size: 26px; /* 환경설정 ⚙️ 아이콘과 동일한 크기 */
-        z-index: 9999;
+        z-index: 99999; !important;
         cursor: pointer;
         
         /* 1. 기본 숨김 상태 */
