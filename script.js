@@ -2314,3 +2314,52 @@ document.head.appendChild(fixBlurStyle);
         window.addEventListener('load', () => setTimeout(initOceanTopButtonFinal, 150));
     }
 })();
+// ==========================================
+// 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
+// ==========================================
+(function() {
+    // 이미 스크롤바 스타일이 적용되어 있다면 중복 생성 방지
+    if (!document.getElementById('custom-scrollbar-style')) {
+        const scrollStyle = document.createElement('style');
+        scrollStyle.id = 'custom-scrollbar-style';
+        
+        // 🚨 어떤 배경에서든 잘 보이고 분위기를 살리는 디자인
+        scrollStyle.innerHTML = `
+            /* 크롬(Chrome), 엣지(Edge), 사파리(Safari) 브라우저 지원 */
+            
+            /* 1. 스크롤바 전체 길 (트랙) */
+            ::-webkit-scrollbar {
+                width: 14px !important; /* 마우스로 잡기 편한 넉넉한 두께 */
+                background: transparent !important;
+            }
+            
+            /* 2. 스크롤바가 지나다니는 배경 */
+            ::-webkit-scrollbar-track {
+                background: rgba(3, 10, 23, 0.1) !important; /* 아주 옅은 심해색으로 길만 살짝 표시 */
+                border-radius: 10px !important;
+            }
+            
+            /* 3. 🚨 움직이는 스크롤바 (손잡이) */
+            ::-webkit-scrollbar-thumb {
+                background: rgba(144, 224, 239, 0.4) !important; /* 서재의 네온 빛과 맞춘 반투명 물빛 */
+                border-radius: 10px !important; /* 둥글고 부드러운 마감 */
+                
+                /* 벽에 딱 붙지 않고 살짝 떨어져 보이게 하는 마법의 CSS */
+                border: 4px solid transparent !important; 
+                background-clip: padding-box !important;
+            }
+            
+            /* 4. 마우스를 올렸을 때 (호버) */
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(144, 224, 239, 0.8) !important; /* 마우스를 올리면 확 선명해짐 */
+            }
+
+            /* 파이어폭스(Firefox) 브라우저 호환성 지원 */
+            * {
+                scrollbar-width: thin !important;
+                scrollbar-color: rgba(144, 224, 239, 0.6) transparent !important;
+            }
+        `;
+        document.head.appendChild(scrollStyle);
+    }
+})();
