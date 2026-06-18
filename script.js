@@ -2150,69 +2150,83 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 🫧 심해에서 수면으로: 로딩 타이밍 완벽 방어 버전
+// 🫧 심해에서 수면으로: 외부 간섭 100% 차단 (인라인 직접 제어 버전)
 // ==========================================
 function initOceanTopButton() {
-    // 혹시 이미 버튼이 있으면 중복 생성 방지
-    if (document.getElementById('ocean-top-btn')) return;
+    // 기존 찌꺼기 버튼이 있다면 완벽히 삭제
+    const oldBtn = document.getElementById('ocean-top-btn');
+    if (oldBtn) oldBtn.remove();
 
-    const topBtnStyle = document.createElement('style');
-    topBtnStyle.innerHTML = `
-        #ocean-top-btn {
-            position: fixed;
-            left: 30px;
-            bottom: 80px; /* 비로그인 시 높이 */
-            font-size: 26px;
-            z-index: 999999 !important; /* 모달창보다도 무조건 위로! */
-            cursor: pointer;
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px) translateZ(0); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out;
-            will-change: transform, opacity, filter, bottom;
-            -webkit-backface-visibility: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        /* 관리자 로그인 시 스윽 올라감 */
-        body.admin-logged-in #ocean-top-btn { bottom: 140px !important; }
-        
-        /* 보일 때의 상태 */
-        #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; transform: translateY(0) translateZ(0); }
-        
-        /* 호버 및 클릭 효과 */
-        #ocean-top-btn.show:hover { transform: scale(1.1) translateY(-2px) translateZ(0) !important; filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important; opacity: 1 !important; }
-        #ocean-top-btn.show:active { transform: scale(0.98) translateY(0) translateZ(0) !important; filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important; }
-    `;
-    document.head.appendChild(topBtnStyle);
-
-    // 버튼 요소 생성 및 주입
     const topBtn = document.createElement('div');
     topBtn.id = 'ocean-top-btn';
     topBtn.innerHTML = '🌊'; 
     topBtn.title = "수면 위로 올라가기";
-    document.body.appendChild(topBtn);
 
-    // 스크롤 감지 (화면을 50px만 내려도 바로 뜨게 설정)
+    // 🚨 CSS 클래스를 버리고, 요소에 직접 스타일을 콘크리트처럼 발라버립니다. (외부 간섭 절대 불가)
+    topBtn.style.cssText = `
+        position: fixed !important;
+        left: 30px !important;
+        bottom: 80px !important;
+        font-size: 26px !important;
+        z-index: 999999 !important; /* 브라우저가 허용하는 층수 최댓값 */
+        cursor: pointer !important;
+        opacity: 0 !important; /* 초기 상태 */
+        pointer-events: none !important;
+        transition: all 0.4s ease !important;
+        -webkit-backface-visibility: hidden !important;
+        transform: translateY(20px) !important;
+    `;
+    
+    // body가 아닌 html 문서 최상단(documentElement)에 꽂아서 body의 렌더링 간섭을 회피합니다.
+    document.documentElement.appendChild(topBtn);
+
+    // 스크롤 및 위치 제어도 자바스크립트로 직접 강제 명령
     window.addEventListener('scroll', () => {
+        // 관리자 모드인지 실시간 체크
+        const isAdmin = document.body.classList.contains('admin-logged-in');
+        const targetBottom = isAdmin ? '140px' : '80px';
+        
         if (window.scrollY > 200) { 
-            topBtn.classList.add('show');
+            topBtn.style.setProperty('opacity', '0.9', 'important');
+            topBtn.style.setProperty('pointer-events', 'auto', 'important');
+            topBtn.style.setProperty('bottom', targetBottom, 'important');
+            topBtn.style.setProperty('transform', 'translateY(0)', 'important');
         } else {
-            topBtn.classList.remove('show');
+            topBtn.style.setProperty('opacity', '0', 'important');
+            topBtn.style.setProperty('pointer-events', 'none', 'important');
+            topBtn.style.setProperty('bottom', targetBottom, 'important');
+            topBtn.style.setProperty('transform', 'translateY(20px)', 'important');
         }
     }, { passive: true });
 
-    // 클릭 시 맨 위로
+    // 마우스 호버(올림/내림) 효과마저도 JS로 통제
+    topBtn.onmouseenter = () => {
+        if(topBtn.style.opacity !== '0') {
+            topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important');
+            topBtn.style.setProperty('filter', 'drop-shadow(0 0 8px rgba(144, 224, 239, 0.8))', 'important');
+            topBtn.style.setProperty('opacity', '1', 'important');
+        }
+    };
+    topBtn.onmouseleave = () => {
+        if(topBtn.style.opacity !== '0') {
+            topBtn.style.setProperty('transform', 'scale(1) translateY(0)', 'important');
+            topBtn.style.setProperty('filter', 'none', 'important');
+            topBtn.style.setProperty('opacity', '0.9', 'important');
+        }
+    };
+    
+    // 클릭 시 미세하게 눌리는 효과와 스크롤 이동
+    topBtn.onmousedown = () => { topBtn.style.setProperty('transform', 'scale(0.95)', 'important'); };
+    topBtn.onmouseup = () => { topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important'); };
+
     topBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
-    
-    console.log("🫧 수면 위로 가기 버튼 장전 완료!");
 }
 
-// 🚨 핵심 해결책: 문서가 이미 로드되었는지 확인하고, 상황에 맞게 즉시 실행!
+// 스크립트 실행 타이밍 완벽 보장
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initOceanTopButton(); // 이미 로딩이 끝났다면 즉시 실행
+    initOceanTopButton();
 } else {
-    document.addEventListener('DOMContentLoaded', initOceanTopButton); // 아직 로딩 중이면 기다렸다가 실행
+    document.addEventListener('DOMContentLoaded', initOceanTopButton);
 }
