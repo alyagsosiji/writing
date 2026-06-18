@@ -2261,3 +2261,27 @@ hardwareAccelerationStyle.innerHTML = `
     }
 `;
 document.head.appendChild(hardwareAccelerationStyle);
+// ==========================================
+// 🚀 무한 스크롤(infinite) 모드 전용 렌더링 최적화
+// ==========================================
+(function() {
+    const style = document.createElement('style');
+    style.id = 'ocean-infinite-scroll-fix';
+    
+    // 무한 스크롤 리스트가 포함된 영역을 타겟팅합니다.
+    // 보통 이 리스트들은 .posts-grid, .post-list 등의 클래스를 갖습니다.
+    style.innerHTML = `
+        /* 무한 스크롤이 작동하는 영역의 레이아웃 계산 부하 방지 */
+        .posts-grid, .posts-grid-view, .infinite-scroll-list {
+            contain: layout style !important;
+            will-change: transform !important;
+        }
+
+        /* 스크롤 시 글자나 카드가 튀는 현상을 막기 위한 가속 설정 */
+        .post-card {
+            transform: translateZ(0) !important;
+            backface-visibility: hidden !important;
+        }
+    `;
+    document.head.appendChild(style);
+})();
