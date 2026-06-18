@@ -2337,32 +2337,35 @@ document.head.appendChild(fixBlurStyle);
     }
 })();
 // ==========================================
-// ⚓ 3개 메뉴 전용: 호버 시 Y축(위아래) 가라앉음 강제 차단
+// ⚓ 3개 메뉴 전용: 초경량 흔들림/가라앉음 방지 (프레임 드랍 해결)
 // ==========================================
 (function() {
     const targetMenus = ['바다의 기록', '수평선 너머', '띄워진 편지'];
     
-    // 서재 안의 텍스트가 들어갈 만한 요소들을 모두 찾습니다.
-    const allElements = document.querySelectorAll('a, button, div, span, li');
+    // 무거운 div, span은 제외하고 링크(a)와 버튼(button)만 가볍게 탐색합니다.
+    const menuElements = document.querySelectorAll('a, button');
 
-    allElements.forEach(el => {
-        // 정확히 저 3개의 텍스트를 가진 메뉴만 찾아냅니다.
+    menuElements.forEach(el => {
         if (targetMenus.includes(el.textContent.trim())) {
-            // 찾아낸 메뉴에만 '가라앉음 방지용' 클래스를 달아줍니다.
-            el.classList.add('ocean-fixed-menu');
+            el.classList.add('ocean-safe-menu');
         }
     });
 
-    // 해당 클래스에만 적용되는 철벽 방어 CSS 주입
-    if (!document.getElementById('ocean-fixed-menu-style')) {
+    if (!document.getElementById('ocean-safe-menu-style')) {
         const style = document.createElement('style');
-        style.id = 'ocean-fixed-menu-style';
+        style.id = 'ocean-safe-menu-style';
+        // GPU를 괴롭히지 않고, 오직 '레이아웃 밀림' 현상만 CSS로 제어합니다.
         style.innerHTML = `
-            /* 오직 저 3개 메뉴에 마우스를 올렸을 때만 작동! 다른 곳은 건드리지 않음 */
-            .ocean-fixed-menu:hover {
-                /* 밑으로 가라앉는 이동 효과를 완전히 0으로 무력화합니다 */
-                transform: translateY(0) !important;
-                margin-top: 0 !important; 
+            .ocean-safe-menu {
+                /* 호버 시 테두리나 굵기가 변해도 주변을 밀어내지 않도록 설정 */
+                box-sizing: border-box !important;
+                transform-origin: center center !important;
+            }
+            .ocean-safe-menu:hover {
+                /* 불필요하게 밑으로 내려가는 위치 이동(Y축)만 무력화 */
+                transform: translateY(0) scale(1) !important;
+                margin-bottom: 0 !important;
+                padding-bottom: 0 !important;
             }
         `;
         document.head.appendChild(style);
