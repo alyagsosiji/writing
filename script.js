@@ -2315,49 +2315,49 @@ document.head.appendChild(fixBlurStyle);
     }
 })();
 // ==========================================
-// 🌊 서재 맞춤형 가시성 극대화 스크롤바 (심해와 진주)
+// 🌊 서재 맞춤형: 전역(모달 포함) 가독성 극대화 스크롤바
 // ==========================================
 (function() {
-    // 혹시 기존 스크롤바 코드가 남아있다면 싹 청소
+    // 기존 스크롤바 코드가 있다면 깔끔하게 지우고 다시 씁니다.
     const oldScrollStyle = document.getElementById('custom-scrollbar-style');
     if (oldScrollStyle) oldScrollStyle.remove();
 
     const scrollStyle = document.createElement('style');
     scrollStyle.id = 'custom-scrollbar-style';
     
+    // 🚨 핵심: `*::` 선택자를 사용하여 웹페이지 안의 '모든 스크롤 가능한 요소'에 강제 적용합니다.
     scrollStyle.innerHTML = `
-        /* 1. 스크롤바 전체 너비 (잡기 편하도록 16px로 아주 살짝 키웠습니다) */
-        ::-webkit-scrollbar {
-            width: 16px !important; 
+        /* 1. 모든 스크롤바의 너비 설정 (너무 두껍지 않고 세련된 12px) */
+        *::-webkit-scrollbar {
+            width: 12px !important;  
+            height: 12px !important; /* 가로 스크롤 대비 */
             background: transparent !important;
         }
         
-        /* 🚨 2. 스크롤이 다니는 길 (배경색과 섞이지 않도록 짙은 반투명 심해색을 깔아줍니다) */
-        ::-webkit-scrollbar-track {
-            background: rgba(3, 10, 23, 0.3) !important; 
+        /* 2. 스크롤바 길(트랙): 모달창 내부에서도 자연스럽게 깔리는 은은한 심해색 */
+        *::-webkit-scrollbar-track {
+            background: rgba(3, 10, 23, 0.15) !important; 
             border-radius: 10px !important;
-            /* 길도 벽에서 살짝 떨어지게 여백 주기 */
-            border: 4px solid transparent !important;
+        }
+        
+        /* 3. 스크롤 손잡이: 가독성을 꽉 잡은 '네온 물빛' (눈에 확실히 띄면서도 분위기 유지) */
+        *::-webkit-scrollbar-thumb {
+            background: rgba(144, 224, 239, 0.75) !important; 
+            border-radius: 10px !important;
+            /* 🚨 손잡이를 살짝 얇게 깎아 여백을 주어 훨씬 고급스럽게 만듭니다. */
+            border: 3px solid transparent !important; 
             background-clip: padding-box !important;
         }
         
-        /* 🚨 3. 움직이는 손잡이 (어떤 배경에서든 100% 눈에 띄는 맑은 진주빛 화이트) */
-        ::-webkit-scrollbar-thumb {
-            background: rgba(240, 248, 255, 0.6) !important; /* 맑은 얼음빛 반투명 */
-            border-radius: 10px !important;
-            border: 4px solid transparent !important; 
-            background-clip: padding-box !important;
-        }
-        
-        /* 4. 마우스를 올리거나 스크롤을 잡았을 때 (더 밝게 빛남) */
-        ::-webkit-scrollbar-thumb:hover {
+        /* 4. 마우스를 올렸을 때: 확 밝아지는 화이트 진주빛 */
+        *::-webkit-scrollbar-thumb:hover {
             background: rgba(240, 248, 255, 0.95) !important; 
         }
 
-        /* 파이어폭스(Firefox) 브라우저 호환 지원 */
+        /* 5. 파이어폭스(Firefox) 브라우저 전역 호환성 지원 */
         * {
             scrollbar-width: thin !important;
-            scrollbar-color: rgba(240, 248, 255, 0.6) rgba(3, 10, 23, 0.3) !important;
+            scrollbar-color: rgba(144, 224, 239, 0.75) rgba(3, 10, 23, 0.15) !important;
         }
     `;
     document.head.appendChild(scrollStyle);
