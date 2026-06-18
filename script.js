@@ -2270,7 +2270,7 @@ document.head.appendChild(fixBlurStyle);
         }
 
         // 기본 높이는 소라게 위로 수동 세팅
-        topBtn.style.setProperty('bottom', '95px', 'important');
+        topBtn.style.setProperty('bottom', '105px', 'important');
 
         document.body.appendChild(topBtn);
 
