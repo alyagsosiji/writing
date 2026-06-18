@@ -1796,13 +1796,6 @@ function syncWeatherAndWidget() {
     );
 }
     
-    if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
-    navigator.geolocation.getCurrentPosition(
-        (position) => fetchWeatherData(position.coords.latitude, position.coords.longitude), 
-        (error) => fetchWeatherData(defaultLat, defaultLon), 
-        { timeout: 5000 }
-    );
-}
 
 function applyManualWeatherEffect(type) {
     let overlay = document.getElementById('weather-overlay-layer');
