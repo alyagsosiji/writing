@@ -2270,7 +2270,7 @@ document.head.appendChild(fixBlurStyle);
                     topBtn.style.setProperty('left', '20px', 'important'); 
                 }
             }
-            topBtn.style.setProperty('bottom', '105px', 'important');
+            topBtn.style.setProperty('bottom', '104px', 'important');
         }
 
         // 스크롤 센서 설정
