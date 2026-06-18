@@ -2210,7 +2210,7 @@ document.body.appendChild(topBtn);
 
 // 스크롤 감지 엔진 (성능 최적화 passive 옵션 적용)
 window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
+    if (window.scrollY > 100) {
         topBtn.classList.add('show');
     } else {
         topBtn.classList.remove('show');
