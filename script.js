@@ -2150,56 +2150,81 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 🫧 심해에서 수면으로: 외부 간섭 100% 차단 (인라인 직접 제어 버전)
+// 🛠️ 1. 환경설정 창 등 글자 흐려짐(Blur) 완벽 해결
 // ==========================================
-function initOceanTopButton() {
-    // 기존 찌꺼기 버튼이 있다면 완벽히 삭제
-    const oldBtn = document.getElementById('ocean-top-btn');
-    if (oldBtn) oldBtn.remove();
+const fixBlurStyle = document.createElement('style');
+fixBlurStyle.innerHTML = `
+    /* 환경설정 창, 텍스트, 선택 박스 등에서는 GPU 가속을 강제로 꺼서 폰트를 다시 선명하게 만듭니다. */
+    #env-modal, #env-modal *, select, option, input, textarea {
+        transform: none !important;
+        will-change: auto !important;
+        -webkit-backface-visibility: visible !important;
+        backface-visibility: visible !important;
+        filter: none !important;
+    }
+`;
+document.head.appendChild(fixBlurStyle);
 
+// ==========================================
+// 🫧 2. 심해에서 수면으로: 센서(Observer) 기반 절대 방어 스크롤 버튼
+// ==========================================
+function initOceanTopButtonFinal() {
+    // 혹시 남은 찌꺼기 버튼이 있다면 삭제
+    if (document.getElementById('ocean-top-btn')) document.getElementById('ocean-top-btn').remove();
+
+    // 물방울 버튼 생성
     const topBtn = document.createElement('div');
     topBtn.id = 'ocean-top-btn';
     topBtn.innerHTML = '🌊'; 
     topBtn.title = "수면 위로 올라가기";
 
-    // 🚨 CSS 클래스를 버리고, 요소에 직접 스타일을 콘크리트처럼 발라버립니다. (외부 간섭 절대 불가)
+    // CSS 파일의 간섭을 100% 차단하기 위해 인라인 스타일로 콘크리트를 칩니다.
     topBtn.style.cssText = `
         position: fixed !important;
         left: 30px !important;
-        bottom: 80px !important;
+        bottom: 80px !important; /* 기본 높이 */
         font-size: 26px !important;
-        z-index: 999999 !important; /* 브라우저가 허용하는 층수 최댓값 */
+        z-index: 99999 !important; /* 최상위 층수 */
         cursor: pointer !important;
-        opacity: 0 !important; /* 초기 상태 */
+        opacity: 0 !important; 
         pointer-events: none !important;
-        transition: all 0.4s ease !important;
-        -webkit-backface-visibility: hidden !important;
+        transition: opacity 0.4s ease, transform 0.4s ease, bottom 0.5s ease-in-out !important;
+        margin: 0 !important; padding: 0 !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        width: 40px !important; height: 40px !important;
+        background: transparent !important; border: none !important;
         transform: translateY(20px) !important;
     `;
-    
-    // body가 아닌 html 문서 최상단(documentElement)에 꽂아서 body의 렌더링 간섭을 회피합니다.
-    document.documentElement.appendChild(topBtn);
+    document.body.appendChild(topBtn);
 
-    // 스크롤 및 위치 제어도 자바스크립트로 직접 강제 명령
-    window.addEventListener('scroll', () => {
-        // 관리자 모드인지 실시간 체크
+    // 🚨 [핵심] 화면 맨 꼭대기에 투명한 '감시 카메라(Sentinel)'를 하나 심습니다.
+    const sentinel = document.createElement('div');
+    sentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 1px; height: 1px; background: transparent; z-index: -1;';
+    document.body.prepend(sentinel);
+
+    // 카메라가 화면에서 사라지면(스크롤을 내리면) 버튼을 띄우는 옵저버(감시자) 설정
+    const observer = new IntersectionObserver((entries) => {
+        // 관리자 모드인지 확인하여 높이 계산
         const isAdmin = document.body.classList.contains('admin-logged-in');
         const targetBottom = isAdmin ? '140px' : '80px';
         
-        if (window.scrollY > 200) { 
+        if (!entries[0].isIntersecting) {
+            // 화면 맨 위가 안 보인다 = 스크롤을 내렸다! (버튼 띄움)
             topBtn.style.setProperty('opacity', '0.9', 'important');
             topBtn.style.setProperty('pointer-events', 'auto', 'important');
             topBtn.style.setProperty('bottom', targetBottom, 'important');
             topBtn.style.setProperty('transform', 'translateY(0)', 'important');
         } else {
+            // 화면 맨 위다 = 스크롤을 올렸다! (버튼 숨김)
             topBtn.style.setProperty('opacity', '0', 'important');
             topBtn.style.setProperty('pointer-events', 'none', 'important');
             topBtn.style.setProperty('bottom', targetBottom, 'important');
             topBtn.style.setProperty('transform', 'translateY(20px)', 'important');
         }
-    }, { passive: true });
+    });
+    observer.observe(sentinel); // 감시 시작
 
-    // 마우스 호버(올림/내림) 효과마저도 JS로 통제
+    // 마우스 호버 효과
     topBtn.onmouseenter = () => {
         if(topBtn.style.opacity !== '0') {
             topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important');
@@ -2214,19 +2239,18 @@ function initOceanTopButton() {
             topBtn.style.setProperty('opacity', '0.9', 'important');
         }
     };
-    
-    // 클릭 시 미세하게 눌리는 효과와 스크롤 이동
-    topBtn.onmousedown = () => { topBtn.style.setProperty('transform', 'scale(0.95)', 'important'); };
-    topBtn.onmouseup = () => { topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important'); };
 
+    // 클릭 시 모든 스크롤 가능 영역을 싹 다 위로 끌어올립니다.
     topBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.body.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// 스크립트 실행 타이밍 완벽 보장
+// 스크립트 실행 타이밍
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    initOceanTopButton();
+    initOceanTopButtonFinal();
 } else {
-    document.addEventListener('DOMContentLoaded', initOceanTopButton);
+    document.addEventListener('DOMContentLoaded', initOceanTopButtonFinal);
 }
