@@ -2139,19 +2139,17 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// ⚡ 초경량 엔진: 모든 무거운 효과 제거 (버벅거림 제로)
+// 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
 // ==========================================
 (function() {
-    // 1. 기존 잔여물 제거
-    const old = document.getElementById('ocean-top-btn');
-    if (old) old.remove();
-    const style = document.getElementById('ocean-optimized-style');
-    if (style) style.remove();
+    const oldBtn = document.getElementById('ocean-top-btn');
+    if (oldBtn) oldBtn.remove();
+    const oldStyle = document.getElementById('ocean-optimized-style');
+    if (oldStyle) oldStyle.remove();
 
-    // 2. 가장 가벼운 스타일 (블러/그림자 없이 단순화)
-    const newStyle = document.createElement('style');
-    newStyle.id = 'ocean-optimized-style';
-    newStyle.innerHTML = `
+    const style = document.createElement('style');
+    style.id = 'ocean-optimized-style';
+    style.innerHTML = `
         #ocean-top-btn {
             position: fixed; left: 30px; bottom: 104px;
             z-index: 999; cursor: pointer;
@@ -2159,26 +2157,29 @@ document.head.appendChild(fixBlurStyle);
             display: flex; align-items: center; justify-content: center;
             background: rgba(0,0,0,0.2);
             border-radius: 50%;
-            opacity: 0; transition: opacity 0.2s;
+            opacity: 0;
+            /* 🚨 [핵심] 렌더링 끊김 방지: 미리 GPU에 레이어를 올립니다 */
+            will-change: opacity, transform;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
         }
         body.admin-logged-in #ocean-top-btn { bottom: 157px; }
         #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
-        
-        /* 메뉴 3개 가라앉음 방지 (CSS로만 처리) */
         .ocean-safe-menu:hover { transform: none !important; }
     `;
-    document.head.appendChild(newStyle);
+    document.head.appendChild(style);
 
-    // 3. 버튼 생성
     const btn = document.createElement('div');
     btn.id = 'ocean-top-btn';
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
-    // 4. 스크롤 감지 (가장 가벼운 방식)
+    // 스크롤 성능 최적화
     window.addEventListener('scroll', () => {
-        btn.classList.toggle('show', window.scrollY > 100);
+        const isShow = window.scrollY > 100;
+        if (isShow !== btn.classList.contains('show')) {
+            btn.classList.toggle('show', isShow);
+        }
     }, { passive: true });
 
     btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
