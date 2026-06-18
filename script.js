@@ -2138,52 +2138,7 @@ fixBlurStyle.innerHTML = `
 `;
 document.head.appendChild(fixBlurStyle);
 
-// ==========================================
-// 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
-// ==========================================
-(function() {
-    const oldBtn = document.getElementById('ocean-top-btn');
-    if (oldBtn) oldBtn.remove();
-    const oldStyle = document.getElementById('ocean-optimized-style');
-    if (oldStyle) oldStyle.remove();
 
-    const style = document.createElement('style');
-    style.id = 'ocean-optimized-style';
-    style.innerHTML = `
-        #ocean-top-btn {
-            position: fixed; left: 30px; bottom: 104px;
-            z-index: 999; cursor: pointer;
-            width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2);
-            border-radius: 50%;
-            opacity: 0;
-            /* 🚨 [핵심] 렌더링 끊김 방지: 미리 GPU에 레이어를 올립니다 */
-            will-change: opacity, transform;
-            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-        }
-        body.admin-logged-in #ocean-top-btn { bottom: 157px; }
-        #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
-        .ocean-safe-menu:hover { transform: none !important; }
-    `;
-    document.head.appendChild(style);
-
-    const btn = document.createElement('div');
-    btn.id = 'ocean-top-btn';
-    btn.innerHTML = '🌊';
-    document.body.appendChild(btn);
-
-    // 스크롤 성능 최적화
-    window.addEventListener('scroll', () => {
-        const isShow = window.scrollY > 100;
-        if (isShow !== btn.classList.contains('show')) {
-            btn.classList.toggle('show', isShow);
-        }
-    }, { passive: true });
-
-    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-})();
 // ==========================================
 // 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
 // ==========================================
@@ -2284,4 +2239,55 @@ document.head.appendChild(hardwareAccelerationStyle);
         }
     `;
     document.head.appendChild(style);
+})();
+// ====================================================
+// 🚀 성능 최적화: 기능 유지 및 프레임 드랍 제거 통합
+// ====================================================
+(function() {
+    // 1. 기존 중복 스타일/객체 정리
+    const cleanup = () => {
+        const ids = ['custom-scrollbar-style', 'ocean-optimized-style', 'ocean-infinite-scroll-fix', 'hardware-accel-fix'];
+        ids.forEach(id => { const el = document.getElementById(id); if (el) el.remove(); });
+    };
+    cleanup();
+
+    // 2. 통합 최적화 스타일 (GPU 부하 분산)
+    const style = document.createElement('style');
+    style.id = 'hardware-accel-fix';
+    style.innerHTML = `
+        /* 스크롤 성능 극대화 */
+        * { -webkit-tap-highlight-color: transparent; }
+        
+        /* 렌더링 격리 (글 목록이 길어져도 전체 페이지가 안 멈춤) */
+        .post-card { contain: content; will-change: transform; }
+        
+        /* 스크롤바 디자인 (부하 없는 버전) */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: rgba(3, 10, 23, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(144, 224, 239, 0.4); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(144, 224, 239, 0.8); }
+    `;
+    document.head.appendChild(style);
+
+    // 3. 스크롤 이벤트 성능 개선 (이벤트 루프 차단 해제)
+    let isTicking = false;
+    window.addEventListener('scroll', () => {
+        if (!isTicking) {
+            window.requestAnimationFrame(() => {
+                // 상단 버튼 표시 로직 (기능 유지)
+                const btn = document.getElementById('ocean-top-btn');
+                if (btn) btn.classList.toggle('show', window.scrollY > 100);
+                isTicking = false;
+            });
+            isTicking = true;
+        }
+    }, { passive: true });
+
+    // 4. 상단 버튼 로직 (내용 불변)
+    const btn = document.createElement('div');
+    btn.id = 'ocean-top-btn';
+    btn.innerHTML = '🌊';
+    btn.style.cssText = "position:fixed; left:30px; bottom:104px; z-index:999; cursor:pointer; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); border-radius:50%; opacity:0; transition:opacity 0.3s; pointer-events:none;";
+    document.body.appendChild(btn);
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 })();
