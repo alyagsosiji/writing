@@ -2166,10 +2166,25 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🫧 2. 심해에서 수면으로: 센서(Observer) 기반 절대 방어 스크롤 버튼
+// 🛠️ 1. 환경설정 창 등 글자 흐려짐(Blur) 완벽 해결
+// ==========================================
+const fixBlurStyle = document.createElement('style');
+fixBlurStyle.innerHTML = `
+    #env-modal, #env-modal *, select, option, input, textarea {
+        transform: none !important;
+        will-change: auto !important;
+        -webkit-backface-visibility: visible !important;
+        backface-visibility: visible !important;
+        filter: none !important;
+    }
+`;
+document.head.appendChild(fixBlurStyle);
+
+// ==========================================
+// 🫧 2. 심해에서 수면으로: 원형 배경 + 완벽 대칭 스크롤 버튼
 // ==========================================
 function initOceanTopButtonFinal() {
-    // 혹시 남은 찌꺼기 버튼이 있다면 삭제
+    // 남은 찌꺼기 버튼 삭제
     if (document.getElementById('ocean-top-btn')) document.getElementById('ocean-top-btn').remove();
 
     // 물방울 버튼 생성
@@ -2178,69 +2193,84 @@ function initOceanTopButtonFinal() {
     topBtn.innerHTML = '🌊'; 
     topBtn.title = "수면 위로 올라가기";
 
-    // CSS 파일의 간섭을 100% 차단하기 위해 인라인 스타일로 콘크리트를 칩니다.
+    // 🚨 환경설정 버튼과 동일한 '동그란 유리 질감 배경'과 '대칭 위치' 적용
     topBtn.style.cssText = `
         position: fixed !important;
-        left: 30px !important;
-        bottom: 80px !important; /* 기본 높이 */
-        font-size: 26px !important;
-        z-index: 99999 !important; /* 최상위 층수 */
+        left: 30px !important;       /* 우측 버튼들과 완벽한 좌우 대칭 */
+        bottom: 80px !important;     /* 소라게(🐚) 버튼 바로 위 높이 */
+        width: 44px !important;      /* 동그란 배경의 너비 */
+        height: 44px !important;     /* 동그란 배경의 높이 */
+        font-size: 22px !important;  /* 이모지 크기 */
+        z-index: 2147483647 !important;
         cursor: pointer !important;
         opacity: 0 !important; 
         pointer-events: none !important;
-        transition: opacity 0.4s ease, transform 0.4s ease, bottom 0.5s ease-in-out !important;
-        margin: 0 !important; padding: 0 !important;
-        display: flex !important; align-items: center !important; justify-content: center !important;
-        width: 40px !important; height: 40px !important;
-        background: transparent !important; border: none !important;
+        
+        /* 🚨 둥근 배경 디자인 (유리 질감 + 테두리) */
+        background: rgba(3, 10, 23, 0.4) !important;
+        border: 1px solid rgba(144, 224, 239, 0.25) !important;
+        border-radius: 50% !important; /* 완벽한 원형 */
+        backdrop-filter: blur(4px) !important; /* 배경 흐림 효과 */
+        -webkit-backdrop-filter: blur(4px) !important;
+        
+        display: flex !important; 
+        align-items: center !important; 
+        justify-content: center !important;
+        
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out !important;
         transform: translateY(20px) !important;
+        margin: 0 !important; padding: 0 !important;
     `;
     document.body.appendChild(topBtn);
 
-    // 🚨 [핵심] 화면 맨 꼭대기에 투명한 '감시 카메라(Sentinel)'를 하나 심습니다.
+    // 센서용 투명 카메라
     const sentinel = document.createElement('div');
     sentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 1px; height: 1px; background: transparent; z-index: -1;';
     document.body.prepend(sentinel);
 
-    // 카메라가 화면에서 사라지면(스크롤을 내리면) 버튼을 띄우는 옵저버(감시자) 설정
+    // 스크롤 감지 및 관리자 모드 높이 조절
     const observer = new IntersectionObserver((entries) => {
-        // 관리자 모드인지 확인하여 높이 계산
         const isAdmin = document.body.classList.contains('admin-logged-in');
-        const targetBottom = isAdmin ? '140px' : '80px';
+        const targetBottom = isAdmin ? '140px' : '80px'; // 관리자일 때 백업과 소라게 사이로 이동
         
         if (!entries[0].isIntersecting) {
-            // 화면 맨 위가 안 보인다 = 스크롤을 내렸다! (버튼 띄움)
             topBtn.style.setProperty('opacity', '0.9', 'important');
             topBtn.style.setProperty('pointer-events', 'auto', 'important');
             topBtn.style.setProperty('bottom', targetBottom, 'important');
             topBtn.style.setProperty('transform', 'translateY(0)', 'important');
         } else {
-            // 화면 맨 위다 = 스크롤을 올렸다! (버튼 숨김)
             topBtn.style.setProperty('opacity', '0', 'important');
             topBtn.style.setProperty('pointer-events', 'none', 'important');
             topBtn.style.setProperty('bottom', targetBottom, 'important');
             topBtn.style.setProperty('transform', 'translateY(20px)', 'important');
         }
     });
-    observer.observe(sentinel); // 감시 시작
+    observer.observe(sentinel);
 
-    // 마우스 호버 효과
+    // 🚨 마우스 호버 시 배경색도 영롱하게 변하도록 세팅
     topBtn.onmouseenter = () => {
         if(topBtn.style.opacity !== '0') {
             topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important');
-            topBtn.style.setProperty('filter', 'drop-shadow(0 0 8px rgba(144, 224, 239, 0.8))', 'important');
+            topBtn.style.setProperty('background', 'rgba(144, 224, 239, 0.15)', 'important');
+            topBtn.style.setProperty('border-color', '#90e0ef', 'important');
+            topBtn.style.setProperty('box-shadow', '0 0 12px rgba(144, 224, 239, 0.5)', 'important');
             topBtn.style.setProperty('opacity', '1', 'important');
         }
     };
     topBtn.onmouseleave = () => {
         if(topBtn.style.opacity !== '0') {
             topBtn.style.setProperty('transform', 'scale(1) translateY(0)', 'important');
-            topBtn.style.setProperty('filter', 'none', 'important');
+            topBtn.style.setProperty('background', 'rgba(3, 10, 23, 0.4)', 'important');
+            topBtn.style.setProperty('border-color', 'rgba(144, 224, 239, 0.25)', 'important');
+            topBtn.style.setProperty('box-shadow', 'none', 'important');
             topBtn.style.setProperty('opacity', '0.9', 'important');
         }
     };
 
-    // 클릭 시 모든 스크롤 가능 영역을 싹 다 위로 끌어올립니다.
+    // 클릭 시 스크롤 최상단 이동
+    topBtn.onmousedown = () => { topBtn.style.setProperty('transform', 'scale(0.95)', 'important'); };
+    topBtn.onmouseup = () => { topBtn.style.setProperty('transform', 'scale(1.1) translateY(-2px)', 'important'); };
+
     topBtn.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         document.body.scrollTo({ top: 0, behavior: 'smooth' });
