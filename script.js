@@ -2364,35 +2364,25 @@ document.head.appendChild(fixBlurStyle);
     }
 })();
 // ==========================================
-// ⚓ 서재 메뉴(텍스트) 호버 시 가라앉음/덜컹거림 완벽 방지
+// ⚓ 딱 3개의 메뉴만 타겟팅: 호버 시 덜컹거림/가라앉음 방지
 // ==========================================
 (function() {
-    if (document.getElementById('fix-text-shift-style')) return;
+    // 찾고자 하는 정확한 메뉴 이름 3가지
+    const targetMenus = ['바다의 기록', '수평선 너머', '띄워진 편지'];
     
-    const fixShiftStyle = document.createElement('style');
-    fixShiftStyle.id = 'fix-text-shift-style';
-    
-    // 🚨 텍스트가 미세하게 내려가거나 변형되는 3가지 원인을 모두 차단합니다.
-    fixShiftStyle.innerHTML = `
-        /* 1. 호버 시 테두리나 밑줄이 생기면서 픽셀을 밑으로 밀어내는 현상 차단 */
-        a, button, .menu, .tab, .menu-item, [class*="btn"], [class*="tab"] {
-            /* 테두리가 생겨도 바깥으로 밀어내지 않고 안쪽으로 흡수하게 만듭니다 */
-            box-sizing: border-box !important; 
-            
-            /* 2. 크기 변화(Scale)나 이동 시 글자가 뿌옇게 변하거나 소수점 픽셀로 가라앉는 버그 차단 */
-            -webkit-backface-visibility: hidden !important;
-            backface-visibility: hidden !important;
-            transform: translateZ(0) !important;
-            
-            /* 텍스트의 선명도를 강제로 유지시켜 폰트가 뭉개지는 것을 막습니다 */
-            -webkit-font-smoothing: antialiased !important;
-            -moz-osx-font-smoothing: grayscale !important;
-        }
+    // 서재 안의 모든 클릭 가능한 요소들을 훑어봅니다
+    const allElements = document.querySelectorAll('a, button, div, span, li');
 
-        /* 3. 혹시 부모 요소의 높이가 변해서 내려가는 것을 막기 위한 안전장치 */
-        nav, header, .menu-container {
-            align-items: center !important;
+    allElements.forEach(el => {
+        // 요소의 텍스트가 저 3개 중 하나와 정확히 일치할 때만 작동! (다른 곳은 절대 건드리지 않음)
+        const text = el.textContent.trim();
+        if (targetMenus.includes(text)) {
+            // 미세한 픽셀 오차와 렌더링 흔들림을 잡아주는 콘크리트 스타일 적용
+            el.style.setProperty('transform', 'translateZ(0)', 'important');
+            el.style.setProperty('-webkit-backface-visibility', 'hidden', 'important');
+            el.style.setProperty('backface-visibility', 'hidden', 'important');
+            el.style.setProperty('-webkit-font-smoothing', 'antialiased', 'important');
+            el.style.setProperty('box-sizing', 'border-box', 'important');
         }
-    `;
-    document.head.appendChild(fixShiftStyle);
+    });
 })();
