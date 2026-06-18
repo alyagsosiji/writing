@@ -2364,25 +2364,34 @@ document.head.appendChild(fixBlurStyle);
     }
 })();
 // ==========================================
-// ⚓ 딱 3개의 메뉴만 타겟팅: 호버 시 덜컹거림/가라앉음 방지
+// ⚓ 3개 메뉴 전용: 호버 시 Y축(위아래) 가라앉음 강제 차단
 // ==========================================
 (function() {
-    // 찾고자 하는 정확한 메뉴 이름 3가지
     const targetMenus = ['바다의 기록', '수평선 너머', '띄워진 편지'];
     
-    // 서재 안의 모든 클릭 가능한 요소들을 훑어봅니다
+    // 서재 안의 텍스트가 들어갈 만한 요소들을 모두 찾습니다.
     const allElements = document.querySelectorAll('a, button, div, span, li');
 
     allElements.forEach(el => {
-        // 요소의 텍스트가 저 3개 중 하나와 정확히 일치할 때만 작동! (다른 곳은 절대 건드리지 않음)
-        const text = el.textContent.trim();
-        if (targetMenus.includes(text)) {
-            // 미세한 픽셀 오차와 렌더링 흔들림을 잡아주는 콘크리트 스타일 적용
-            el.style.setProperty('transform', 'translateZ(0)', 'important');
-            el.style.setProperty('-webkit-backface-visibility', 'hidden', 'important');
-            el.style.setProperty('backface-visibility', 'hidden', 'important');
-            el.style.setProperty('-webkit-font-smoothing', 'antialiased', 'important');
-            el.style.setProperty('box-sizing', 'border-box', 'important');
+        // 정확히 저 3개의 텍스트를 가진 메뉴만 찾아냅니다.
+        if (targetMenus.includes(el.textContent.trim())) {
+            // 찾아낸 메뉴에만 '가라앉음 방지용' 클래스를 달아줍니다.
+            el.classList.add('ocean-fixed-menu');
         }
     });
+
+    // 해당 클래스에만 적용되는 철벽 방어 CSS 주입
+    if (!document.getElementById('ocean-fixed-menu-style')) {
+        const style = document.createElement('style');
+        style.id = 'ocean-fixed-menu-style';
+        style.innerHTML = `
+            /* 오직 저 3개 메뉴에 마우스를 올렸을 때만 작동! 다른 곳은 건드리지 않음 */
+            .ocean-fixed-menu:hover {
+                /* 밑으로 가라앉는 이동 효과를 완전히 0으로 무력화합니다 */
+                transform: translateY(0) !important;
+                margin-top: 0 !important; 
+            }
+        `;
+        document.head.appendChild(style);
+    }
 })();
