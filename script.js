@@ -2085,41 +2085,14 @@ antiBlurStyle.innerHTML = `
     }
 `;
 document.head.appendChild(antiBlurStyle);
-// ==========================================
-// 🚀 성능 최적화: 저사양 기기 렌더링(GPU) 효율 극대화
-// ==========================================
-const hardwareAccelerationStyle = document.createElement('style');
-hardwareAccelerationStyle.innerHTML = `
-    /* 1. 화면 밖의 카드들은 브라우저가 계산을 생략하도록 지시 (스크롤 렉 대폭 감소) */
-    .post-card {
-        content-visibility: auto; /* 화면에 보일 때만 렌더링 (최신 브라우저 최적화) */
-        contain: content; /* 이 카드 안에서 일어나는 변화가 바깥 화면에 영향을 주지 않도록 격리 */
-    }
 
-    /* 2. 넓은 영역을 차지하는 배경 레이어들을 GPU 전용으로 넘겨 CPU 부담을 줄임 */
-    #ocean-bg-layer,
-    .weather-overlay,
-    body::before {
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-        will-change: background, transform;
-        pointer-events: none; /* 배경이 마우스 이벤트를 계산하지 않도록 차단 */
-    }
-
-    /* 3. 모달창 팝업 시 뒷배경(블러 등)의 렌더링 성능 최적화 */
-    .modal {
-        will-change: opacity;
-        transform: translateZ(0);
-    }
-`;
-document.head.appendChild(hardwareAccelerationStyle);
 // ==========================================
 // 🐚 숨겨진 감성: 개발자 도구를 열어본 이를 위한 이스터에그
 // ==========================================
 setTimeout(() => {
     console.clear(); // 브라우저 기본 경고들을 살짝 지워주고
     console.log(
-        "%c🌊 수평선 너머의 서재 뒷면 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자 아시 올림", 
+        "%c🌊 수평선 너머의 서재 뒷면에 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자 아시 올림", 
         "color: #90e0ef; font-size: 18px; font-weight: bold; font-family: sans-serif; text-shadow: 0 0 10px rgba(144,224,239,0.5);",
         "color: #cbd5e1; font-size: 13px; line-height: 1.8; font-family: sans-serif;"
     );
@@ -2395,3 +2368,31 @@ document.head.appendChild(fixBlurStyle);
         document.head.appendChild(style);
     }
 })();
+// ==========================================
+// 🚀 성능 최적화: 저사양 기기 렌더링(GPU) 효율 극대화
+// ==========================================
+const hardwareAccelerationStyle = document.createElement('style');
+hardwareAccelerationStyle.innerHTML = `
+    /* 1. 화면 밖의 카드들은 브라우저가 계산을 생략하도록 지시 (스크롤 렉 대폭 감소) */
+    .post-card {
+        content-visibility: auto; /* 화면에 보일 때만 렌더링 (최신 브라우저 최적화) */
+        contain: content; /* 이 카드 안에서 일어나는 변화가 바깥 화면에 영향을 주지 않도록 격리 */
+    }
+
+    /* 2. 넓은 영역을 차지하는 배경 레이어들을 GPU 전용으로 넘겨 CPU 부담을 줄임 */
+    #ocean-bg-layer,
+    .weather-overlay,
+    body::before {
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        will-change: background, transform;
+        pointer-events: none; /* 배경이 마우스 이벤트를 계산하지 않도록 차단 */
+    }
+
+    /* 3. 모달창 팝업 시 뒷배경(블러 등)의 렌더링 성능 최적화 */
+    .modal {
+        will-change: opacity;
+        transform: translateZ(0);
+    }
+`;
+document.head.appendChild(hardwareAccelerationStyle);
