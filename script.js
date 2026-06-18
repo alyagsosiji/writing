@@ -2173,7 +2173,7 @@ document.head.appendChild(fixBlurStyle);
     // 3. 버튼 생성
     const topBtn = document.createElement('div');
     topBtn.id = 'ocean-top-btn';
-    topBtn.innerHTML = '🫧';
+    topBtn.innerHTML = '🌊';
     document.body.appendChild(topBtn);
 
     // 4. 이벤트 최적화 (scroll 대신 requestAnimationFrame 사용)
