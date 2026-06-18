@@ -2150,15 +2150,15 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==========================================
-// 🫧 심해에서 수면으로: 왼쪽 아래 고정 스크롤 탑 버튼
+// 🫧 심해에서 수면으로: 관리자 모드 감응형 스크롤 탑 버튼
 // ==========================================
 const topBtnStyle = document.createElement('style');
 topBtnStyle.innerHTML = `
     #ocean-top-btn {
         position: fixed;
-        bottom: 30px; /* 아래쪽 여백 */
-        left: 30px;   /* 🚨 화면 왼쪽으로 고정 */
-        font-size: 26px; /* 환경설정 ⚙️ 아이콘과 동일한 크기 세팅 */
+        left: 30px;   /* 🚨 화면 왼쪽 고정 (환경설정과 대칭) */
+        bottom: 80px; /* 기본(방문자) 모드: 소라게(🐚) 바로 위쪽 높이 */
+        font-size: 26px; /* 환경설정 ⚙️ 아이콘과 동일한 크기 */
         z-index: 9999;
         cursor: pointer;
         
@@ -2167,28 +2167,33 @@ topBtnStyle.innerHTML = `
         pointer-events: none;
         transform: translateY(20px) translateZ(0); 
         
-        /* 2. 텍스트 깜빡임 방지 및 부드러운 전환 (안티 블러) */
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: transform, opacity, filter;
+        /* 2. 🚨 [핵심] bottom 값에 애니메이션을 걸어 관리자 로그인/로그아웃 시 스윽~ 오르락내리락 합니다 */
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out;
+        will-change: transform, opacity, filter, bottom;
         -webkit-backface-visibility: hidden;
         -webkit-font-smoothing: antialiased;
     }
     
-    /* 3. 스크롤을 400px 이상 내려서 화면에 나타날 때 */
+    /* 3. 🚨 기록자(관리자) 로그인 시: 소라게와 백업 아이콘 사이로 이동 */
+    body.admin-logged-in #ocean-top-btn {
+        bottom: 140px; /* 백업 아이콘 아래, 소라게 위로 스윽 올라감 (높이는 필요시 조절하세요) */
+    }
+    
+    /* 4. 스크롤을 400px 이상 내려서 화면에 나타날 때 */
     #ocean-top-btn.show {
         opacity: 0.9;
         pointer-events: auto;
         transform: translateY(0) translateZ(0);
     }
     
-    /* 4. 마우스 호버 효과 (기존 ⚙️ 버튼과 완벽히 동일한 영롱한 푸른빛과 1.1배 크기) */
+    /* 5. 마우스 호버 효과 (영롱한 푸른빛과 1.1배 크기) */
     #ocean-top-btn.show:hover {
         transform: scale(1.1) translateY(-2px) translateZ(0) !important;
         filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
         opacity: 1 !important;
     }
     
-    /* 5. 클릭 효과 (미세하게 눌러지는 질감) */
+    /* 6. 클릭 효과 (미세하게 눌러지는 질감) */
     #ocean-top-btn.show:active {
         transform: scale(0.98) translateY(0) translateZ(0) !important;
         filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
@@ -2199,7 +2204,7 @@ document.head.appendChild(topBtnStyle);
 // 버튼 요소 생성 및 주입
 const topBtn = document.createElement('div');
 topBtn.id = 'ocean-top-btn';
-topBtn.innerHTML = '🌊'; 
+topBtn.innerHTML = '🫧'; // 물방울 모양 아이콘
 topBtn.title = "수면 위로 올라가기";
 document.body.appendChild(topBtn);
 
