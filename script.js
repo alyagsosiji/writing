@@ -2139,56 +2139,49 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🚀 성능 최적화: 프레임 드랍 방지 통합 스크립트
+// ⚡ 초경량 엔진: 모든 무거운 효과 제거 (버벅거림 제로)
 // ==========================================
 (function() {
-    // 1. 기존에 설치한 무거운 요소들 전부 제거 (메모리 정리)
-    const oldBtn = document.getElementById('ocean-top-btn');
-    if (oldBtn) oldBtn.remove();
-    const oldStyle = document.getElementById('ocean-top-btn-style');
-    if (oldStyle) oldStyle.remove();
-    const oldFix = document.getElementById('ocean-safe-menu-style');
-    if (oldFix) oldFix.remove();
+    // 1. 기존 잔여물 제거
+    const old = document.getElementById('ocean-top-btn');
+    if (old) old.remove();
+    const style = document.getElementById('ocean-optimized-style');
+    if (style) style.remove();
 
-    // 2. 가벼운 스타일 주입 (CSS 클래스 기반 제어)
-    const style = document.createElement('style');
-    style.id = 'ocean-optimized-style';
-    style.innerHTML = `
-        /* 스크롤 버튼 애니메이션 최적화 */
+    // 2. 가장 가벼운 스타일 (블러/그림자 없이 단순화)
+    const newStyle = document.createElement('style');
+    newStyle.id = 'ocean-optimized-style';
+    newStyle.innerHTML = `
         #ocean-top-btn {
             position: fixed; left: 30px; bottom: 104px;
-            z-index: 9999; cursor: pointer;
-            opacity: 0; transition: opacity 0.3s ease;
+            z-index: 999; cursor: pointer;
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            opacity: 0; transition: opacity 0.2s;
             pointer-events: none;
         }
         body.admin-logged-in #ocean-top-btn { bottom: 157px; }
         #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
         
-        /* 메뉴 3개 흔들림 방지 (CSS만 사용, JS 연산 제거) */
-        .ocean-safe-menu { transition: none !important; }
+        /* 메뉴 3개 가라앉음 방지 (CSS로만 처리) */
         .ocean-safe-menu:hover { transform: none !important; }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(newStyle);
 
     // 3. 버튼 생성
-    const topBtn = document.createElement('div');
-    topBtn.id = 'ocean-top-btn';
-    topBtn.innerHTML = '🌊';
-    document.body.appendChild(topBtn);
+    const btn = document.createElement('div');
+    btn.id = 'ocean-top-btn';
+    btn.innerHTML = '🌊';
+    document.body.appendChild(btn);
 
-    // 4. 이벤트 최적화 (scroll 대신 requestAnimationFrame 사용)
-    let ticking = false;
+    // 4. 스크롤 감지 (가장 가벼운 방식)
     window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                topBtn.classList.toggle('show', window.scrollY > 100);
-                ticking = false;
-            });
-            ticking = true;
-        }
+        btn.classList.toggle('show', window.scrollY > 100);
     }, { passive: true });
 
-    topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 })();
 // ==========================================
 // 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
