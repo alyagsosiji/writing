@@ -2166,11 +2166,11 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🫧 심해에서 수면으로: 호버 버그 완벽 해결 & 원본 대칭 스타일
+// 🫧 심해에서 수면으로: 환경설정 100% 복제 & 호버 버그 원천 차단
 // ==========================================
 (function() {
     function initOceanTopButtonFinal() {
-        // 1. 흐려짐 방지 스타일 (중복 생성 방어)
+        // 1. 흐려짐 방지 스타일
         if (!document.getElementById('fix-blur-style-safe')) {
             const styleFix = document.createElement('style');
             styleFix.id = 'fix-blur-style-safe';
@@ -2186,56 +2186,42 @@ document.head.appendChild(fixBlurStyle);
             document.head.appendChild(styleFix);
         }
 
-        // 2. 예전 버튼 및 스타일 찌꺼기 완벽 청소
+        // 2. 찌꺼기 완벽 청소
         const oldBtn = document.getElementById('ocean-top-btn');
         if (oldBtn) oldBtn.remove();
         const oldStyle = document.getElementById('ocean-top-btn-style');
         if (oldStyle) oldStyle.remove();
 
-        // 3. 🚨 [핵심 해결] JS 간섭을 없애고 순수 CSS로 호버와 위치를 통제합니다.
+        // 3. 순수 호버 애니메이션용 CSS (억지 배경 삭제, CSS 호버로 굳힘 방지)
         const btnStyle = document.createElement('style');
         btnStyle.id = 'ocean-top-btn-style';
         btnStyle.innerHTML = `
             #ocean-top-btn {
                 position: fixed !important;
-                left: 28px !important;       /* 환경설정 버튼과 좌우 완벽 대칭 */
-                bottom: 95px !important;     /* 소라게 버튼 바로 위 기본 높이 */
-                font-size: 24px !important;  /* ⚙️, 🐚 아이콘과 똑같은 기본 크기 */
-                z-index: 99999 !important;
+                z-index: 2147483647 !important;
                 cursor: pointer !important;
-                
-                /* 초기 숨김 상태 */
                 opacity: 0 !important; 
                 pointer-events: none !important;
-                transform: translateY(20px) translateZ(0) !important;
-                
-                /* 억지 배경/테두리 전부 제거! (원본 아이콘들처럼 깔끔하게) */
-                background: transparent !important;
-                border: none !important;
-                margin: 0 !important; 
-                padding: 0 !important;
                 display: flex !important; 
                 align-items: center !important; 
                 justify-content: center !important;
-                
-                /* 부드러운 승강기 애니메이션 */
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out !important;
+                transform: translateY(20px) translateZ(0) !important;
                 -webkit-font-smoothing: antialiased !important;
             }
-
-            /* 관리자 로그인 시 소라게와 백업 사이로 스윽 상승 */
+            
+            /* 관리자 로그인 시 소라게 위로 스윽 상승 */
             body.admin-logged-in #ocean-top-btn {
-                bottom: 140px !important;
+                bottom: 140px !important; 
             }
 
-            /* 센서 감지 시 .show 클래스가 붙어 화면에 등장 */
             #ocean-top-btn.show {
                 opacity: 0.9 !important;
                 pointer-events: auto !important;
                 transform: translateY(0) translateZ(0) !important;
             }
 
-            /* 🚨 [호버 버그 해결] JS 이벤트를 끄고 원본 서재의 unifyHoverStyle과 똑같은 CSS 적용 */
+            /* 기존 버튼들과 완벽히 똑같은 호버 효과 */
             #ocean-top-btn.show:hover {
                 transform: scale(1.1) translateY(-2px) translateZ(0) !important;
                 filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
@@ -2249,14 +2235,46 @@ document.head.appendChild(fixBlurStyle);
         `;
         document.head.appendChild(btnStyle);
 
-        // 4. 깔끔한 물방울 버튼 생성
+        // 4. 버튼 생성
         const topBtn = document.createElement('div');
         topBtn.id = 'ocean-top-btn';
         topBtn.innerHTML = '🌊'; 
         topBtn.title = "수면 위로 올라가기";
+
+        // 🚨 5. [핵심] 환경설정 버튼(⚙️)의 디자인을 실시간으로 스캔해서 훔쳐옵니다!
+        const gearBtn = document.getElementById('time-gear-btn');
+        if (gearBtn) {
+            const gearStyle = window.getComputedStyle(gearBtn);
+            
+            // 배경, 크기, 테두리, 폰트 크기까지 100% 동일하게 복사
+            topBtn.style.setProperty('background', gearStyle.background, 'important');
+            topBtn.style.setProperty('border', gearStyle.border, 'important');
+            topBtn.style.setProperty('border-radius', gearStyle.borderRadius, 'important');
+            topBtn.style.setProperty('width', gearStyle.width, 'important');
+            topBtn.style.setProperty('height', gearStyle.height, 'important');
+            topBtn.style.setProperty('font-size', gearStyle.fontSize, 'important');
+            topBtn.style.setProperty('box-shadow', gearStyle.boxShadow, 'important');
+            topBtn.style.setProperty('backdrop-filter', gearStyle.backdropFilter, 'important');
+            
+            // 환경설정 버튼의 '우측 여백(right)'을 읽어서 '좌측 여백(left)'으로 똑같이 세팅 (완벽 대칭)
+            const rightOffset = gearStyle.right;
+            if (rightOffset && rightOffset !== 'auto') {
+                topBtn.style.setProperty('left', rightOffset, 'important');
+            } else {
+                topBtn.style.setProperty('left', '20px', 'important'); // 안전빵 기본값
+            }
+        } else {
+            // 환경설정 버튼을 못 찾을 경우의 예외 처리
+            topBtn.style.setProperty('left', '20px', 'important');
+            topBtn.style.setProperty('font-size', '24px', 'important');
+        }
+
+        // 기본 높이는 소라게 위로 수동 세팅
+        topBtn.style.setProperty('bottom', '95px', 'important');
+
         document.body.appendChild(topBtn);
 
-        // 5. 스크롤 감지 센서 설치
+        // 6. 스크롤 센서 옵저버
         const sentinel = document.createElement('div');
         sentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 1px; height: 1px; background: transparent; z-index: -1; pointer-events: none;';
         if (document.body.firstChild) {
@@ -2265,7 +2283,6 @@ document.head.appendChild(fixBlurStyle);
             document.body.appendChild(sentinel);
         }
 
-        // 6. 옵저버(감시자) 가동: CSS 클래스만 뗐다 붙여서 에러 원천 차단
         if (window.IntersectionObserver) {
             const observer = new IntersectionObserver((entries) => {
                 if (!entries[0].isIntersecting) {
@@ -2277,7 +2294,7 @@ document.head.appendChild(fixBlurStyle);
             observer.observe(sentinel);
         }
 
-        // 7. 클릭 시 맨 위로 부드럽게 이동
+        // 7. 클릭 시 부드럽게 스크롤
         topBtn.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (document.body.scrollTo) document.body.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2285,10 +2302,11 @@ document.head.appendChild(fixBlurStyle);
         });
     }
 
-    // 문서 로딩 확인 후 실행
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initOceanTopButtonFinal();
+    // 🚨 CSS가 완전히 입혀질 때까지 기다리기 위해 window.onload(load) 이벤트를 사용합니다.
+    if (document.readyState === 'complete') {
+        // 환경설정 버튼이 렌더링될 시간을 0.1초만 아주 잠깐 기다렸다가 복사합니다.
+        setTimeout(initOceanTopButtonFinal, 100);
     } else {
-        document.addEventListener('DOMContentLoaded', initOceanTopButtonFinal);
+        window.addEventListener('load', () => setTimeout(initOceanTopButtonFinal, 100));
     }
 })();
