@@ -2166,11 +2166,11 @@ fixBlurStyle.innerHTML = `
 document.head.appendChild(fixBlurStyle);
 
 // ==========================================
-// 🫧 심해에서 수면으로: 환경설정 100% 복제 & 호버 버그 원천 차단
+// 🫧 심해에서 수면으로: 모바일 완벽 대응 & 실시간 동기화 버전
 // ==========================================
 (function() {
     function initOceanTopButtonFinal() {
-        // 1. 흐려짐 방지 스타일
+        // 1. 흐려짐 방지
         if (!document.getElementById('fix-blur-style-safe')) {
             const styleFix = document.createElement('style');
             styleFix.id = 'fix-blur-style-safe';
@@ -2186,19 +2186,19 @@ document.head.appendChild(fixBlurStyle);
             document.head.appendChild(styleFix);
         }
 
-        // 2. 찌꺼기 완벽 청소
+        // 2. 찌꺼기 청소
         const oldBtn = document.getElementById('ocean-top-btn');
         if (oldBtn) oldBtn.remove();
         const oldStyle = document.getElementById('ocean-top-btn-style');
         if (oldStyle) oldStyle.remove();
 
-        // 3. 순수 호버 애니메이션용 CSS (억지 배경 삭제, CSS 호버로 굳힘 방지)
+        // 3. 🚨 [모바일 핵심 최적화] 터치 깜빡임 방지 및 모바일 전용 호버 처리
         const btnStyle = document.createElement('style');
         btnStyle.id = 'ocean-top-btn-style';
         btnStyle.innerHTML = `
             #ocean-top-btn {
                 position: fixed !important;
-                z-index: 2147483647 !important;
+                z-index: 999999 !important;
                 cursor: pointer !important;
                 opacity: 0 !important; 
                 pointer-events: none !important;
@@ -2208,9 +2208,11 @@ document.head.appendChild(fixBlurStyle);
                 transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.5s ease-in-out !important;
                 transform: translateY(20px) translateZ(0) !important;
                 -webkit-font-smoothing: antialiased !important;
+                
+                /* 모바일 터치 시 생기는 못생긴 파란색/회색 하이라이트 박스 원천 차단 */
+                -webkit-tap-highlight-color: transparent !important;
             }
             
-            /* 관리자 로그인 시 소라게 위로 스윽 상승 */
             body.admin-logged-in #ocean-top-btn {
                 bottom: 140px !important; 
             }
@@ -2221,15 +2223,18 @@ document.head.appendChild(fixBlurStyle);
                 transform: translateY(0) translateZ(0) !important;
             }
 
-            /* 기존 버튼들과 완벽히 똑같은 호버 효과 */
-            #ocean-top-btn.show:hover {
-                transform: scale(1.1) translateY(-2px) translateZ(0) !important;
-                filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
-                opacity: 1 !important;
+            /* 🚨 [핵심] 진짜 '마우스'가 있는 기기(PC)에서만 호버 효과 작동 (모바일 호버 굳힘 방지) */
+            @media (hover: hover) and (pointer: fine) {
+                #ocean-top-btn.show:hover {
+                    transform: scale(1.1) translateY(-2px) translateZ(0) !important;
+                    filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
+                    opacity: 1 !important;
+                }
             }
             
+            /* 모바일 터치(클릭) 시 직관적으로 눌리는 애니메이션 */
             #ocean-top-btn.show:active {
-                transform: scale(0.98) translateY(0) translateZ(0) !important;
+                transform: scale(0.95) translateY(0) translateZ(0) !important;
                 filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
             }
         `;
@@ -2240,41 +2245,35 @@ document.head.appendChild(fixBlurStyle);
         topBtn.id = 'ocean-top-btn';
         topBtn.innerHTML = '🌊'; 
         topBtn.title = "수면 위로 올라가기";
-
-        // 🚨 5. [핵심] 환경설정 버튼(⚙️)의 디자인을 실시간으로 스캔해서 훔쳐옵니다!
-        const gearBtn = document.getElementById('time-gear-btn');
-        if (gearBtn) {
-            const gearStyle = window.getComputedStyle(gearBtn);
-            
-            // 배경, 크기, 테두리, 폰트 크기까지 100% 동일하게 복사
-            topBtn.style.setProperty('background', gearStyle.background, 'important');
-            topBtn.style.setProperty('border', gearStyle.border, 'important');
-            topBtn.style.setProperty('border-radius', gearStyle.borderRadius, 'important');
-            topBtn.style.setProperty('width', gearStyle.width, 'important');
-            topBtn.style.setProperty('height', gearStyle.height, 'important');
-            topBtn.style.setProperty('font-size', gearStyle.fontSize, 'important');
-            topBtn.style.setProperty('box-shadow', gearStyle.boxShadow, 'important');
-            topBtn.style.setProperty('backdrop-filter', gearStyle.backdropFilter, 'important');
-            
-            // 환경설정 버튼의 '우측 여백(right)'을 읽어서 '좌측 여백(left)'으로 똑같이 세팅 (완벽 대칭)
-            const rightOffset = gearStyle.right;
-            if (rightOffset && rightOffset !== 'auto') {
-                topBtn.style.setProperty('left', rightOffset, 'important');
-            } else {
-                topBtn.style.setProperty('left', '20px', 'important'); // 안전빵 기본값
-            }
-        } else {
-            // 환경설정 버튼을 못 찾을 경우의 예외 처리
-            topBtn.style.setProperty('left', '20px', 'important');
-            topBtn.style.setProperty('font-size', '24px', 'important');
-        }
-
-        // 기본 높이는 소라게 위로 수동 세팅
-        topBtn.style.setProperty('bottom', '105px', 'important');
-
         document.body.appendChild(topBtn);
 
-        // 6. 스크롤 센서 옵저버
+        // 5. 🚨 [모바일 반응형 동기화] 화면 크기가 바뀔 때마다 환경설정(⚙️) 디자인을 실시간으로 스캔!
+        function syncStylesWithGear() {
+            const gearBtn = document.getElementById('time-gear-btn');
+            if (gearBtn) {
+                const gearStyle = window.getComputedStyle(gearBtn);
+                
+                topBtn.style.setProperty('background', gearStyle.background, 'important');
+                topBtn.style.setProperty('border', gearStyle.border, 'important');
+                topBtn.style.setProperty('border-radius', gearStyle.borderRadius, 'important');
+                topBtn.style.setProperty('width', gearStyle.width, 'important');
+                topBtn.style.setProperty('height', gearStyle.height, 'important');
+                topBtn.style.setProperty('font-size', gearStyle.fontSize, 'important');
+                topBtn.style.setProperty('box-shadow', gearStyle.boxShadow, 'important');
+                topBtn.style.setProperty('backdrop-filter', gearStyle.backdropFilter, 'important');
+                
+                const rightOffset = gearStyle.right;
+                // 모바일 환경 등에서 right 값이 비정상적일 때를 대비한 안전 장치
+                if (rightOffset && rightOffset !== 'auto' && rightOffset !== '0px') {
+                    topBtn.style.setProperty('left', rightOffset, 'important');
+                } else {
+                    topBtn.style.setProperty('left', '20px', 'important'); 
+                }
+            }
+            topBtn.style.setProperty('bottom', '105px', 'important');
+        }
+
+        // 스크롤 센서 설정
         const sentinel = document.createElement('div');
         sentinel.style.cssText = 'position: absolute; top: 0; left: 0; width: 1px; height: 1px; background: transparent; z-index: -1; pointer-events: none;';
         if (document.body.firstChild) {
@@ -2294,19 +2293,23 @@ document.head.appendChild(fixBlurStyle);
             observer.observe(sentinel);
         }
 
-        // 7. 클릭 시 부드럽게 스크롤
-        topBtn.addEventListener('click', () => {
+        // 6. 클릭 및 터치 시 최상단 이동
+        topBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // 모바일 터치 이벤트 꼬임 방어
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (document.body.scrollTo) document.body.scrollTo({ top: 0, behavior: 'smooth' });
             if (document.documentElement.scrollTo) document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
         });
+
+        // 🚨 최초 1회 디자인 스캔 후, 화면 회전(리사이징) 시마다 다시 스캔!
+        syncStylesWithGear();
+        window.addEventListener('resize', syncStylesWithGear);
     }
 
-    // 🚨 CSS가 완전히 입혀질 때까지 기다리기 위해 window.onload(load) 이벤트를 사용합니다.
+    // 완전히 로딩된 후 안정적으로 실행
     if (document.readyState === 'complete') {
-        // 환경설정 버튼이 렌더링될 시간을 0.1초만 아주 잠깐 기다렸다가 복사합니다.
-        setTimeout(initOceanTopButtonFinal, 100);
+        setTimeout(initOceanTopButtonFinal, 150);
     } else {
-        window.addEventListener('load', () => setTimeout(initOceanTopButtonFinal, 100));
+        window.addEventListener('load', () => setTimeout(initOceanTopButtonFinal, 150));
     }
 })();
