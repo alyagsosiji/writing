@@ -2218,7 +2218,7 @@ document.head.appendChild(fixBlurStyle);
             
             /* 🚨 [핵심 복구] 기록자(관리자) 로그인 시: 소라게와 백업 사이로 스윽 상승 */
             body.admin-logged-in #ocean-top-btn {
-                bottom: 140px !important; 
+                bottom: 155px !important; 
             }
 
             #ocean-top-btn.show {
