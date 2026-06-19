@@ -2312,3 +2312,34 @@ hardwareAccelerationStyle.innerHTML = `
     }
 `;
 document.head.appendChild(hardwareAccelerationStyle);
+
+// ==========================================
+// 🚀 극한의 스크롤 최적화: 스크롤 중 마우스 연산(Hover) 일시 중단
+// ==========================================
+(function() {
+    const scrollOptStyle = document.createElement('style');
+    scrollOptStyle.innerHTML = `
+        /* 스크롤 중일 때 모든 요소의 마우스 인식과 호버 연산을 강제로 꺼버립니다 */
+        .is-scrolling * {
+            pointer-events: none !important;
+        }
+    `;
+    document.head.appendChild(scrollOptStyle);
+
+    let scrollTimeout;
+    // passive: true 옵션으로 브라우저에게 "스크롤을 방해하지 않겠다"고 선언하여 성능을 극대화합니다.
+    window.addEventListener('scroll', function() {
+        // 스크롤이 시작되면 연산을 차단하는 클래스 추가
+        if (!document.body.classList.contains('is-scrolling')) {
+            document.body.classList.add('is-scrolling');
+        }
+        
+        // 이전 타이머 초기화
+        clearTimeout(scrollTimeout);
+        
+        // 스크롤이 완전히 멈추고 0.15초(150ms)가 지나면 다시 마우스 인식을 부드럽게 켭니다.
+        scrollTimeout = setTimeout(function() {
+            document.body.classList.remove('is-scrolling');
+        }, 100);
+    }, { passive: true }); 
+})();
