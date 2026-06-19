@@ -2077,45 +2077,6 @@ unifyHoverStyle.innerHTML = `
 `;
 document.head.appendChild(unifyHoverStyle);
 
-// ==========================================
-// 🛡️ 호버 시 0.1초 텍스트 깨짐 및 깜빡임(Flicker) 완벽 방어 (최종 진화형)
-// ==========================================
-const antiBlurStyle = document.createElement('style');
-antiBlurStyle.innerHTML = `
-    /* 🚨 스케일 애니메이션 시 글자가 비트맵(이미지)으로 뭉개지는 현상 원천 차단 */
-    .post-card, 
-    .modal-content,
-    .modal,
-    #env-modal,
-    .page-btn,
-    .mgmt-btn,
-    #time-gear-btn, 
-    #random-memory-btn, 
-    #mini-audio-trigger, 
-    #mini-backup-trigger,
-    #ocean-top-btn {
-        /* 1. 폰트 안티앨리어싱 강제 고정 (애니메이션 도중 렌더링 방식 변경 방지) */
-        -webkit-font-smoothing: antialiased !important;
-        -moz-osx-font-smoothing: grayscale !important;
-        
-        /* 2. 3D 변환 시 뒷면 렌더링 차단 (크기가 커질 때 픽셀 뭉개짐 방지) */
-        -webkit-backface-visibility: hidden !important;
-        backface-visibility: hidden !important;
-        
-        /* 3. 브라우저가 애니메이션 중에도 텍스트를 선명하게 유지하도록 강제 지시 */
-        transform-style: preserve-3d !important;
-        -webkit-transform-style: preserve-3d !important;
-    }
-
-    /* 🚨 핵심: 호버되는 요소 '내부'의 모든 자식(제목, 내용, 버튼 등)까지 보호막 적용 */
-    .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
-        -webkit-font-smoothing: antialiased !important;
-        -moz-osx-font-smoothing: grayscale !important;
-        -webkit-backface-visibility: hidden !important;
-        backface-visibility: hidden !important;
-    }
-`;
-document.head.appendChild(antiBlurStyle);
 
 // ==========================================
 // 🐚 숨겨진 감성: 개발자 도구를 열어본 이를 위한 이스터에그
@@ -2168,7 +2129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     style.id = 'ocean-optimized-style';
     style.innerHTML = `
         #ocean-top-btn {
-            position: fixed; left: 20px; bottom: 104px;
+            position: fixed; left: 25px; bottom: 104px;
             z-index: 999; 
             width: 42px; height: 42px; /* ⚙️ 톱니바퀴 버튼과 완벽히 동일한 크기 */
             display: flex; align-items: center; justify-content: center;
@@ -2280,6 +2241,64 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(scrollStyle);
     }
 })();
+// ==========================================
+// 🛡️ 호버 시 0.1초 텍스트 깨짐 및 깜빡임(Flicker) 완벽 방어 (최종 진화형)
+// ==========================================
+const antiBlurStyle = document.createElement('style');
+antiBlurStyle.innerHTML = `
+    /* 🚨 1. 브라우저의 2D 렌더링 버그(흐려짐)를 우회하기 위한 3D 그래픽 엔진 강제 호출 */
+    .post-card, 
+    .modal-content,
+    .modal,
+    #env-modal,
+    .page-btn,
+    .mgmt-btn,
+    #time-gear-btn, 
+    #random-memory-btn, 
+    #mini-audio-trigger, 
+    #mini-backup-trigger,
+    #ocean-top-btn {
+        /* 글씨체를 가장 선명한 서브픽셀 방식으로 고정 */
+        -webkit-font-smoothing: subpixel-antialiased !important;
+        -moz-osx-font-smoothing: auto !important;
+        
+        /* 픽셀 뭉개짐을 방지하는 마법의 1px 원근법 및 3D 기준점 설정 */
+        transform: perspective(1px) translateZ(0);
+        -webkit-transform: perspective(1px) translateZ(0);
+        
+        /* 뒷면 렌더링 차단 (깜빡임 원천 제거) */
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        
+        /* 테두리가 떨리는 현상(Jitter) 방어 */
+        outline: 1px solid transparent !important;
+    }
+
+    /* 🚨 2. 내부 글자들도 흔들리지 않도록 안티앨리어싱 강력 보호 */
+    .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
+        -webkit-font-smoothing: subpixel-antialiased !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+    }
+
+    /* 🚨 3. 호버(Hover) 시 브라우저가 강제로 3D 스케일을 사용하도록 덮어쓰기 (가장 핵심!) */
+    #ocean-top-btn.show:hover,
+    #time-gear-btn:hover, 
+    #random-memory-btn:hover, 
+    #mini-audio-trigger:hover, 
+    #mini-backup-trigger:hover {
+        /* scale(1.1) 대신 scale3d(1.1, 1.1, 1.1)을 사용하여 캡처링 방지 */
+        transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
+        -webkit-transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
+    }
+    
+    .post-card:hover {
+        /* 글 목록(카드)이 호버될 때도 3D 애니메이션으로 강제 변환 */
+        transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
+        -webkit-transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
+    }
+`;
+document.head.appendChild(antiBlurStyle);
 // ==========================================
 // 🚀 성능 최적화: 저사양 기기 렌더링(GPU) 효율 극대화
 // ==========================================
