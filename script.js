@@ -264,8 +264,19 @@ const secureConfig = {
 };
 
 let database = null;
-try { if (typeof firebase !== 'undefined') { firebase.initializeApp(secureConfig); database = firebase.database(); } } 
-catch (error) { console.error("Firebase 초기화 에러:", error); }
+// 🚨 [보안 3] Firebase App Check 활성화 (해킹 툴 직접 접근 차단)
+try {
+    if (typeof firebase !== 'undefined' && firebase.appCheck) {
+        const appCheck = firebase.appCheck();
+        // 참고: 실제로 동작하려면 Google Cloud Console에서 reCAPTCHA v3 키를 발급받아 아래에 넣어야 합니다.
+        appCheck.activate(
+            '6LeF0yctAAAAAD-CVI-X1HI3qIi9n_ySlFces9ag', 
+            true // 토큰 자동 갱신
+        );
+    }
+} catch (e) {
+    console.error("App Check 초기화 실패:", e);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     try {
