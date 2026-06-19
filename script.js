@@ -2082,28 +2082,37 @@ document.head.appendChild(unifyHoverStyle);
 // ==========================================
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.innerHTML = `
-    /* 🚨 [핵심 해결] .post-card 제외: 카드가 늘어날 때마다 GPU 메모리가 터지던 주범(will-change) 할당 해제 */
+    /* 🚨 스케일 애니메이션 시 글자가 비트맵(이미지)으로 뭉개지는 현상 원천 차단 */
+    .post-card, 
+    .modal-content,
+    .modal,
     #env-modal,
-    select,
     .page-btn,
     .mgmt-btn,
     #time-gear-btn, 
     #random-memory-btn, 
     #mini-audio-trigger, 
-    #mini-backup-trigger {
+    #mini-backup-trigger,
+    #ocean-top-btn {
+        /* 1. 폰트 안티앨리어싱 강제 고정 (애니메이션 도중 렌더링 방식 변경 방지) */
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        
+        /* 2. 3D 변환 시 뒷면 렌더링 차단 (크기가 커질 때 픽셀 뭉개짐 방지) */
+        -webkit-backface-visibility: hidden !important;
+        backface-visibility: hidden !important;
+        
+        /* 3. 브라우저가 애니메이션 중에도 텍스트를 선명하게 유지하도록 강제 지시 */
+        transform-style: preserve-3d !important;
+        -webkit-transform-style: preserve-3d !important;
+    }
+
+    /* 🚨 핵심: 호버되는 요소 '내부'의 모든 자식(제목, 내용, 버튼 등)까지 보호막 적용 */
+    .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
         -webkit-backface-visibility: hidden !important;
         backface-visibility: hidden !important;
-        transform: translateZ(0); 
-        -webkit-transform: translateZ(0);
-        will-change: transform, opacity, filter;
-    }
-
-    /* 카드 글자는 선명하게 유지하되, 무리한 3D 가속은 제외 */
-    .post-card {
-        -webkit-font-smoothing: antialiased !important;
-        -moz-osx-font-smoothing: grayscale !important;
     }
 `;
 document.head.appendChild(antiBlurStyle);
@@ -2114,7 +2123,7 @@ document.head.appendChild(antiBlurStyle);
 setTimeout(() => {
     console.clear(); // 브라우저 기본 경고들을 살짝 지워주고
     console.log(
-        "%c🌊 수평선 너머의 서재 뒷면에 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자 아시 올림", 
+        "%c🌊 수평선 너머의 서재 그 뒷면에 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자이자 마리존 사이트의 주인 아시 올림", 
         "color: #90e0ef; font-size: 18px; font-weight: bold; font-family: sans-serif; text-shadow: 0 0 10px rgba(144,224,239,0.5);",
         "color: #cbd5e1; font-size: 13px; line-height: 1.8; font-family: sans-serif;"
     );
@@ -2144,21 +2153,7 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// ==========================================
-// 🛠️ 1. 환경설정 창 등 글자 흐려짐(Blur) 완벽 해결
-// ==========================================
-const fixBlurStyle = document.createElement('style');
-fixBlurStyle.innerHTML = `
-    /* 환경설정 창, 텍스트, 선택 박스 등에서는 GPU 가속을 강제로 꺼서 폰트를 다시 선명하게 만듭니다. */
-    #env-modal, #env-modal *, select, option, input, textarea {
-        transform: none !important;
-        will-change: auto !important;
-        -webkit-backface-visibility: visible !important;
-        backface-visibility: visible !important;
-        filter: none !important;
-    }
-`;
-document.head.appendChild(fixBlurStyle);
+
 
 // ==========================================
 // 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
@@ -2173,36 +2168,35 @@ document.addEventListener('DOMContentLoaded', function() {
     style.id = 'ocean-optimized-style';
     style.innerHTML = `
         #ocean-top-btn {
-            position: fixed; left: 30px; bottom: 104px;
+            position: fixed; left: 20px; bottom: 104px;
             z-index: 999; 
-            width: 44px; height: 44px; /* 환경설정 버튼 크기에 완벽히 맞춤 */
+            width: 42px; height: 42px; /* ⚙️ 톱니바퀴 버튼과 완벽히 동일한 크기 */
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
             opacity: 0;
             pointer-events: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             
-            /* 🚨 [스타일 변경] 환경설정, 랜덤 글 버튼과 완전히 동일한 글래스모피즘(유리) 디자인 적용 */
-            background: rgba(255, 255, 255, 0.04) !important;
-            border: 1px solid rgba(0, 180, 216, 0.25) !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            /* 🚨 톱니바퀴 버튼과 똑같은 다크 네이비/블랙 톤 적용 */
+            background: rgba(10, 15, 25, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             color: #fff;
             
-            transition: opacity 0.3s ease, transform 0.25s ease-out, filter 0.25s ease-out, border-color 0.2s ease !important;
+            transition: opacity 0.3s ease, transform 0.25s ease-out, filter 0.25s ease-out !important;
             cursor: pointer !important;
         }
         body.admin-logged-in #ocean-top-btn { bottom: 157px; }
         #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; }
         
-        /* 🚨 [호버 효과 추가] 하단 아이콘들처럼 마우스를 올리면 영롱한 푸른빛 글로우 효과 발산 */
+        /* 톱니바퀴 버튼과 동일한 호버 효과 (살짝 커지며 은은한 푸른빛 발산) */
         #ocean-top-btn.show:hover {
             transform: scale(1.1) translateY(-2px) !important; 
             filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
             opacity: 1 !important; 
-            border-color: #00b4d8 !important;
-            background: rgba(3, 10, 23, 0.85) !important;
+            background: rgba(15, 20, 30, 0.95) !important;
         }
         #ocean-top-btn.show:active {
             transform: scale(0.98) translateY(0) !important;
@@ -2216,7 +2210,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
-    // 🚨 [최적화] 스크롤 이벤트가 화면 프레임을 깎아먹지 않도록 requestAnimationFrame 도입 (스크롤 렉 최종 차단)
+    // 스크롤 최적화 (프레임 드랍 방지)
     let ticking = false;
     window.addEventListener('scroll', () => {
         if (!ticking) {
