@@ -264,18 +264,20 @@ const secureConfig = {
 };
 
 let database = null;
-// 🚨 [보안 3] Firebase App Check 활성화 (해킹 툴 직접 접근 차단)
-try {
-    if (typeof firebase !== 'undefined' && firebase.appCheck) {
-        const appCheck = firebase.appCheck();
-        // 참고: 실제로 동작하려면 Google Cloud Console에서 reCAPTCHA v3 키를 발급받아 아래에 넣어야 합니다.
-        appCheck.activate(
-            '6LeF0yctAAAAAD-CVI-X1HI3qIi9n_ySlFces9ag', 
-            true // 토큰 자동 갱신
-        );
-    }
-} catch (e) {
-    console.error("App Check 초기화 실패:", e);
+try { 
+    if (typeof firebase !== 'undefined') { 
+        // 1. 파이어베이스 기본 초기화가 먼저 무조건 실행되어야 합니다!
+        firebase.initializeApp(secureConfig); 
+        database = firebase.database(); 
+        
+        // 2. 초기화가 끝난 직후에 앱 체크(App Check) 방어막을 켭니다.
+        if (firebase.appCheck) {
+            const appCheck = firebase.appCheck();
+            appCheck.activate('6LeF0yctAAAAAD-CVI-X1HI3qIi9n_ySlFces9ag', true);
+        }
+    } 
+} catch (error) { 
+    console.error("Firebase 초기화 에러:", error); 
 }
 
 document.addEventListener('DOMContentLoaded', function() {
