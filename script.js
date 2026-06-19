@@ -2129,7 +2129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     style.id = 'ocean-optimized-style';
     style.innerHTML = `
         #ocean-top-btn {
-            position: fixed; left: 25px; bottom: 104px;
+            position: fixed; left: 30px; bottom: 104px;
             z-index: 999; 
             width: 42px; height: 42px; /* ⚙️ 톱니바퀴 버튼과 완벽히 동일한 크기 */
             display: flex; align-items: center; justify-content: center;
