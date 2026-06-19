@@ -1568,10 +1568,26 @@ window.savePost = savePost;
 
 function saveLetter() {
     if (!database || isSubmitting || isRestMode) return;
-    const title = document.getElementById('letter-title')?.value.trim(); const content = document.getElementById('letter-content')?.value.trim();
+
+    // 🚨 [보안 1] 편지 도배 매크로 방어 (일반 방문자 한정 30초 쿨타임)
+    const nowTime = Date.now();
+    const lastSubmitTime = localStorage.getItem('last_letter_submit_time') || 0;
+    if (!isAdmin && nowTime - lastSubmitTime < 30000) {
+        showSystemAlert('띄워진 편지가 수평선에 닿을 때까지 잠시 기다려주세요. (30초 후 다시 띄울 수 있습니다.)');
+        return;
+    }
+
+    const title = document.getElementById('letter-title')?.value.trim(); 
+    const content = document.getElementById('letter-content')?.value.trim();
     if (!title || !content) { showSystemAlert('제목과 내용을 모두 채워주세요.'); return; }
     if (!navigator.onLine) { showSystemAlert('인터넷이 끊겨 편지를 띄울 수 없습니다.'); return; }
     if (document.getElementById('agree-terms') && !document.getElementById('agree-terms').checked) { showSystemAlert('안내 및 약관에 동의해주세요.'); return; }
+
+    // 🚨 [보안 2] 비정상적인 데이터 폭탄(Payload) 방어
+    if (title.length > 100 || content.length > 5000) {
+        showSystemAlert('편지의 내용이 너무 깁니다. 마음을 조금만 줄여서 적어주세요. 제목 100자 이하, 본문 5000자 이하여야 합니다.');
+        return;
+    }
 
     const now = new Date(); const date = `${now.getFullYear()}. ${now.getMonth() + 1}. ${now.getDate()}. ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
     isSubmitting = true; 
@@ -1580,11 +1596,13 @@ function saveLetter() {
 
     triggerBottleAnimation(() => {
         database.ref('letters').push(letterData).then(() => {
+            // 🚨 [보안 1-2] 편지가 성공적으로 띄워지면 현재 시간을 로컬 스토리지에 기록
+            if (!isAdmin) localStorage.setItem('last_letter_submit_time', Date.now().toString());
+
             document.getElementById('letter-title').value = ''; document.getElementById('letter-content').value = '';
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
             
-            // 🚨 [핵심 수정] 일반 방문자가 편지를 쓸 때는 권한이 없으므로 자동 백업 생략
             if (isAdmin) {
                 setTimeout(() => window.executeCloudBackupEngine(true), 800);
             }
@@ -2051,8 +2069,7 @@ document.head.appendChild(unifyHoverStyle);
 // ==========================================
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.innerHTML = `
-    /* 움직임이 발생하는 모든 카드와 모달, 버튼들 */
-    .post-card, 
+    /* 🚨 [핵심 해결] .post-card 제외: 카드가 늘어날 때마다 GPU 메모리가 터지던 주범(will-change) 할당 해제 */
     #env-modal,
     select,
     .page-btn,
@@ -2061,27 +2078,19 @@ antiBlurStyle.innerHTML = `
     #random-memory-btn, 
     #mini-audio-trigger, 
     #mini-backup-trigger {
-        /* 1. 폰트 선명도 강제 고정 */
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
-        
-        /* 2. 번짐 방지 (뒷면 렌더링 차단) */
         -webkit-backface-visibility: hidden !important;
         backface-visibility: hidden !important;
-
-        /* 3. 🚨 [핵심 해결] 3D 가속(GPU) 강제 할당: 마우스 올리기 전부터 미리 그래픽 카드를 대기시킵니다. (깜빡임 원천 차단) */
         transform: translateZ(0); 
         -webkit-transform: translateZ(0);
-        
-        /* 4. 브라우저에게 "이 요소는 곧 크기나 투명도가 변할 거야"라고 미리 예고장 날리기 */
         will-change: transform, opacity, filter;
     }
 
-    /* 카드 내부의 글자(텍스트)들까지 깜빡이지 않도록 꽉 잡아줍니다. */
-    .post-card * {
-        -webkit-backface-visibility: hidden !important;
-        backface-visibility: hidden !important;
-        /* 🚨 [수정됨] GPU 메모리 폭발을 일으키던 transform 속성을 제거하여 스크롤 렉 완벽 해결 */
+    /* 카드 글자는 선명하게 유지하되, 무리한 3D 가속은 제외 */
+    .post-card {
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
     }
 `;
 document.head.appendChild(antiBlurStyle);
@@ -2152,20 +2161,40 @@ document.addEventListener('DOMContentLoaded', function() {
     style.innerHTML = `
         #ocean-top-btn {
             position: fixed; left: 30px; bottom: 104px;
-            z-index: 999; cursor: pointer;
-            width: 40px; height: 40px;
+            z-index: 999; 
+            width: 44px; height: 44px; /* 환경설정 버튼 크기에 완벽히 맞춤 */
             display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.2);
             border-radius: 50%;
             opacity: 0;
-            /* 🚨 [핵심] 렌더링 끊김 방지: 미리 GPU에 레이어를 올립니다 */
-            will-change: opacity, transform;
-            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
+            font-size: 1.2rem;
+            
+            /* 🚨 [스타일 변경] 환경설정, 랜덤 글 버튼과 완전히 동일한 글래스모피즘(유리) 디자인 적용 */
+            background: rgba(255, 255, 255, 0.04) !important;
+            border: 1px solid rgba(0, 180, 216, 0.25) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #fff;
+            
+            transition: opacity 0.3s ease, transform 0.25s ease-out, filter 0.25s ease-out, border-color 0.2s ease !important;
+            cursor: pointer !important;
         }
         body.admin-logged-in #ocean-top-btn { bottom: 157px; }
-        #ocean-top-btn.show { opacity: 1; pointer-events: auto; }
-        .ocean-safe-menu:hover { transform: none !important; }
+        #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; }
+        
+        /* 🚨 [호버 효과 추가] 하단 아이콘들처럼 마우스를 올리면 영롱한 푸른빛 글로우 효과 발산 */
+        #ocean-top-btn.show:hover {
+            transform: scale(1.1) translateY(-2px) !important; 
+            filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
+            opacity: 1 !important; 
+            border-color: #00b4d8 !important;
+            background: rgba(3, 10, 23, 0.85) !important;
+        }
+        #ocean-top-btn.show:active {
+            transform: scale(0.98) translateY(0) !important;
+            filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
+        }
     `;
     document.head.appendChild(style);
 
@@ -2174,18 +2203,25 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
-    // 🚨 [수정됨] HTML이 전부 준비된 후 버튼을 생성하게 만들고, 내부 숨겨진 스크롤까지 모두 감지(캡처링)하도록 호환성 강화
+    // 🚨 [최적화] 스크롤 이벤트가 화면 프레임을 깎아먹지 않도록 requestAnimationFrame 도입 (스크롤 렉 최종 차단)
+    let ticking = false;
     window.addEventListener('scroll', () => {
-        const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        const isShow = scrollPos > 100;
-        if (isShow !== btn.classList.contains('show')) {
-            btn.classList.toggle('show', isShow);
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                const isShow = scrollPos > 100;
+                if (isShow !== btn.classList.contains('show')) {
+                    btn.classList.toggle('show', isShow);
+                }
+                ticking = false;
+            });
+            ticking = true;
         }
     }, true); 
 
     btn.onclick = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' }); // 안전장치 추가
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
     };
 });
 // ==========================================
@@ -2242,24 +2278,21 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==========================================
 const hardwareAccelerationStyle = document.createElement('style');
 hardwareAccelerationStyle.innerHTML = `
-    /* 1. 화면 밖의 카드들은 브라우저가 계산을 생략하도록 지시 (스크롤 렉 대폭 감소) */
+    /* 🚨 [핵심 해결] content-visibility 제거: 무한 스크롤 시 높이 재계산으로 인한 레이아웃 뒤틀림과 스크롤 버벅임 완벽 제거 */
     .post-card {
-        content-visibility: auto; /* 화면에 보일 때만 렌더링 (최신 브라우저 최적화) */
-        contain-intrinsic-size: 300px; /* 🚨 [수정됨] 브라우저가 카드 높이를 헤매지 않도록 기본 크기를 잡아주어 스크롤 끊김 방지 */
-        contain: content; /* 이 카드 안에서 일어나는 변화가 바깥 화면에 영향을 주지 않도록 격리 */
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
     }
 
-    /* 2. 넓은 영역을 차지하는 배경 레이어들을 GPU 전용으로 넘겨 CPU 부담을 줄임 */
     #ocean-bg-layer,
     .weather-overlay,
     body::before {
         transform: translateZ(0);
         -webkit-transform: translateZ(0);
         will-change: background, transform;
-        pointer-events: none; /* 배경이 마우스 이벤트를 계산하지 않도록 차단 */
+        pointer-events: none;
     }
 
-    /* 3. 모달창 팝업 시 뒷배경(블러 등)의 렌더링 성능 최적화 */
     .modal {
         will-change: opacity;
         transform: translateZ(0);
