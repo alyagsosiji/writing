@@ -2081,7 +2081,7 @@ antiBlurStyle.innerHTML = `
     .post-card * {
         -webkit-backface-visibility: hidden !important;
         backface-visibility: hidden !important;
-        transform: translateZ(0);
+        /* 🚨 [수정됨] GPU 메모리 폭발을 일으키던 transform 속성을 제거하여 스크롤 렉 완벽 해결 */
     }
 `;
 document.head.appendChild(antiBlurStyle);
@@ -2141,7 +2141,7 @@ document.head.appendChild(fixBlurStyle);
 // ==========================================
 // 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
 // ==========================================
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     const oldBtn = document.getElementById('ocean-top-btn');
     if (oldBtn) oldBtn.remove();
     const oldStyle = document.getElementById('ocean-optimized-style');
@@ -2174,16 +2174,20 @@ document.head.appendChild(fixBlurStyle);
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
-    // 스크롤 성능 최적화
+    // 🚨 [수정됨] HTML이 전부 준비된 후 버튼을 생성하게 만들고, 내부 숨겨진 스크롤까지 모두 감지(캡처링)하도록 호환성 강화
     window.addEventListener('scroll', () => {
-        const isShow = window.scrollY > 100;
+        const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const isShow = scrollPos > 100;
         if (isShow !== btn.classList.contains('show')) {
             btn.classList.toggle('show', isShow);
         }
-    }, { passive: true });
+    }, true); 
 
-    btn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-})();
+    btn.onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' }); // 안전장치 추가
+    };
+});
 // ==========================================
 // 🌊 서재 분위기에 녹아드는 투명한 물빛 스크롤바
 // ==========================================
@@ -2241,6 +2245,7 @@ hardwareAccelerationStyle.innerHTML = `
     /* 1. 화면 밖의 카드들은 브라우저가 계산을 생략하도록 지시 (스크롤 렉 대폭 감소) */
     .post-card {
         content-visibility: auto; /* 화면에 보일 때만 렌더링 (최신 브라우저 최적화) */
+        contain-intrinsic-size: 300px; /* 🚨 [수정됨] 브라우저가 카드 높이를 헤매지 않도록 기본 크기를 잡아주어 스크롤 끊김 방지 */
         contain: content; /* 이 카드 안에서 일어나는 변화가 바깥 화면에 영향을 주지 않도록 격리 */
     }
 
