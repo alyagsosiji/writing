@@ -58,9 +58,9 @@ function openSoundModal() {
         modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:99999;';
         modal.innerHTML = `
             <div style="background:#0f172a; padding:25px; border-radius:12px; border:1px solid #38bdf8; width:320px; text-align:center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-                <h3 style="color:#fff; margin-bottom:20px; font-size:1.1rem;">바다의 소리 설정</h3>
+                <h3 style="color:#fff; margin-bottom:20px; font-size:1.1rem;">서재의 소리 설정</h3>
                 <div style="margin-bottom:20px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
-                    <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🎵 배경 음악 (BGM)</p>
+                    <p style="color:#cbd5e1; font-size:0.85rem; margin-bottom:10px;">🎵 수평선 배경 음악 (BGM)</p>
                     <button id="btn-music-toggle" onclick="window.togglePlayPause()" style="padding:8px 16px; border-radius:6px; background:#0284c7; color:#fff; border:none; cursor:pointer; font-weight:bold;">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
                 </div>
                 <div style="margin-bottom:25px; background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
