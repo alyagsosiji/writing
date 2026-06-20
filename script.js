@@ -2128,7 +2128,7 @@ document.addEventListener('DOMContentLoaded', function() {
     style.innerHTML = `
         #ocean-top-btn {
             position: fixed; left: 30px; bottom: 104px;
-            z-index: 999; 
+            z-index: 999999 !important; /* 🚨 [데스크탑 해결] 다른 배경 레이어에 가려지지 않도록 최상위 층수 부여 */
             width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
@@ -2154,28 +2154,28 @@ document.addEventListener('DOMContentLoaded', function() {
             background: rgba(15, 20, 30, 0.95) !important;
         }
 
-        /* 🚨 [모바일 최적화] 모바일 화면에서 위로가기(좌)와 환경설정(우) 버튼의 위치, 크기, 높이를 완벽한 대칭 구도로 강제 정렬 */
+        /* 🚨 [모바일 최적화 및 대칭 해결] 맨 아래(20px)로 쏠려 기기 바에 가려지던 현상을 기존 서재 플로팅 아이콘 높이(104px/157px)와 일치시켜 대칭 복구 */
         @media (max-width: 768px) {
             #ocean-top-btn {
                 left: 20px !important;
-                bottom: 20px !important;
+                bottom: 104px !important; 
                 width: 44px !important;
                 height: 44px !important;
             }
             #time-gear-btn {
                 position: fixed !important;
                 right: 20px !important;
-                bottom: 20px !important;
+                bottom: 104px !important; 
                 width: 44px !important;
                 height: 44px !important;
-                z-index: 999 !important;
+                z-index: 999999 !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
             }
-            /* 관리자 로그인 상태여도 모바일에서는 하단 바를 고려해 하단 고정 대칭 유지 */
-            body.admin-logged-in #ocean-top-btn { bottom: 20px !important; left: 20px !important; }
-            body.admin-logged-in #time-gear-btn { bottom: 20px !important; right: 20px !important; }
+            /* 관리자 로그인 시 모바일에서도 완벽한 높이 대칭 유지 */
+            body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 20px !important; }
+            body.admin-logged-in #time-gear-btn { bottom: 157px !important; right: 20px !important; }
         }
     `;
     document.head.appendChild(style);
@@ -2185,11 +2185,19 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
+    // 🚨 [데스크탑 해결] 일반 스크롤과 특정 컨테이너 내부 스크롤을 동시에 실시간 추적하여 스크롤 증발 현상 차단
     let ticking = false;
-    window.addEventListener('scroll', () => {
+    window.addEventListener('scroll', (e) => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                // 1. 전체 화면 스크롤 측정
+                let scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                
+                // 2. 데스크탑 브라우저 특성상 내부 컨테이너가 스크롤될 경우 해당 높이까지 합산 감지
+                if (e.target && e.target.scrollTop) {
+                    scrollPos = Math.max(scrollPos, e.target.scrollTop);
+                }
+                
                 const isShow = scrollPos > 100;
                 if (isShow !== btn.classList.contains('show')) {
                     btn.classList.toggle('show', isShow);
@@ -2200,14 +2208,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, true); 
 
-    /* 🚨 [모바일 최적화] 모바일 환경에서 상단 스크롤이 먹통이 되는 문제를 해결하기 위해 3중 스크롤 타겟팅 및 터치 잠금 강제 해제 장치 마련 */
     btn.onclick = () => {
         const scrollConfig = { top: 0, behavior: 'smooth' };
         window.scrollTo(scrollConfig);
         document.documentElement.scrollTo(scrollConfig);
         document.body.scrollTo(scrollConfig);
         
-        // 부드러운 스크롤 규격이 어긋나는 일부 구형 모바일 브라우저 대응용 즉시 이동 백업
         setTimeout(() => {
             window.scrollTo(0, 0);
             document.documentElement.scrollTop = 0;
