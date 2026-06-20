@@ -2114,8 +2114,6 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-
-
 // ==========================================
 // 🚀 최종 완성: 0.1초의 끊김도 없는 부드러운 하드웨어 가속 버전
 // ==========================================
@@ -2131,37 +2129,53 @@ document.addEventListener('DOMContentLoaded', function() {
         #ocean-top-btn {
             position: fixed; left: 30px; bottom: 104px;
             z-index: 999; 
-            width: 42px; height: 42px; /* ⚙️ 톱니바퀴 버튼과 완벽히 동일한 크기 */
+            width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 50%;
             opacity: 0;
             pointer-events: none;
             font-size: 1.1rem;
-            
-            /* 🚨 톱니바퀴 버튼과 똑같은 다크 네이비/블랙 톤 적용 */
             background: rgba(10, 15, 25, 0.85) !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
             color: #fff;
-            
             transition: opacity 0.3s ease, transform 0.25s ease-out, filter 0.25s ease-out !important;
             cursor: pointer !important;
         }
         body.admin-logged-in #ocean-top-btn { bottom: 157px; }
         #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; }
         
-        /* 톱니바퀴 버튼과 동일한 호버 효과 (살짝 커지며 은은한 푸른빛 발산) */
         #ocean-top-btn.show:hover {
             transform: scale(1.1) translateY(-2px) !important; 
             filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
             opacity: 1 !important; 
             background: rgba(15, 20, 30, 0.95) !important;
         }
-        #ocean-top-btn.show:active {
-            transform: scale(0.98) translateY(0) !important;
-            filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important;
+
+        /* 🚨 [모바일 최적화] 모바일 화면에서 위로가기(좌)와 환경설정(우) 버튼의 위치, 크기, 높이를 완벽한 대칭 구도로 강제 정렬 */
+        @media (max-width: 768px) {
+            #ocean-top-btn {
+                left: 20px !important;
+                bottom: 20px !important;
+                width: 44px !important;
+                height: 44px !important;
+            }
+            #time-gear-btn {
+                position: fixed !important;
+                right: 20px !important;
+                bottom: 20px !important;
+                width: 44px !important;
+                height: 44px !important;
+                z-index: 999 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            /* 관리자 로그인 상태여도 모바일에서는 하단 바를 고려해 하단 고정 대칭 유지 */
+            body.admin-logged-in #ocean-top-btn { bottom: 20px !important; left: 20px !important; }
+            body.admin-logged-in #time-gear-btn { bottom: 20px !important; right: 20px !important; }
         }
     `;
     document.head.appendChild(style);
@@ -2171,7 +2185,6 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.innerHTML = '🌊';
     document.body.appendChild(btn);
 
-    // 스크롤 최적화 (프레임 드랍 방지)
     let ticking = false;
     window.addEventListener('scroll', () => {
         if (!ticking) {
@@ -2187,9 +2200,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, true); 
 
+    /* 🚨 [모바일 최적화] 모바일 환경에서 상단 스크롤이 먹통이 되는 문제를 해결하기 위해 3중 스크롤 타겟팅 및 터치 잠금 강제 해제 장치 마련 */
     btn.onclick = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+        const scrollConfig = { top: 0, behavior: 'smooth' };
+        window.scrollTo(scrollConfig);
+        document.documentElement.scrollTo(scrollConfig);
+        document.body.scrollTo(scrollConfig);
+        
+        // 부드러운 스크롤 규격이 어긋나는 일부 구형 모바일 브라우저 대응용 즉시 이동 백업
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }, 300);
     };
 });
 // ==========================================
@@ -2246,56 +2269,43 @@ document.addEventListener('DOMContentLoaded', function() {
 // ==========================================
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.innerHTML = `
-    /* 🚨 1. 브라우저의 2D 렌더링 버그(흐려짐)를 우회하기 위한 3D 그래픽 엔진 강제 호출 */
-    .post-card, 
-    .modal-content,
-    .modal,
-    #env-modal,
-    .page-btn,
-    .mgmt-btn,
-    #time-gear-btn, 
-    #random-memory-btn, 
-    #mini-audio-trigger, 
-    #mini-backup-trigger,
-    #ocean-top-btn {
-        /* 글씨체를 가장 선명한 서브픽셀 방식으로 고정 */
-        -webkit-font-smoothing: subpixel-antialiased !important;
-        -moz-osx-font-smoothing: auto !important;
-        
-        /* 픽셀 뭉개짐을 방지하는 마법의 1px 원근법 및 3D 기준점 설정 */
-        transform: perspective(1px) translateZ(0);
-        -webkit-transform: perspective(1px) translateZ(0);
-        
-        /* 뒷면 렌더링 차단 (깜빡임 원천 제거) */
-        backface-visibility: hidden !important;
-        -webkit-backface-visibility: hidden !important;
-        
-        /* 테두리가 떨리는 현상(Jitter) 방어 */
-        outline: 1px solid transparent !important;
+    /* 기본 안티앨리어싱 선명도 고정 */
+    .post-card, .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
+    #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
     }
 
-    /* 🚨 2. 내부 글자들도 흔들리지 않도록 안티앨리어싱 강력 보호 */
-    .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
-        -webkit-font-smoothing: subpixel-antialiased !important;
-        backface-visibility: hidden !important;
-        -webkit-backface-visibility: hidden !important;
+    /* 🚨 [모바일 최적화] 모바일 사각형 박스 및 글자 실종 버그를 일으키는 3D 원근 속성을 데스크톱(PC) 환경으로만 격리 */
+    @media (min-width: 769px) {
+        .post-card, .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
+        #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
+            transform: perspective(1px) translateZ(0);
+            -webkit-transform: perspective(1px) translateZ(0);
+            backface-visibility: hidden !important;
+            -webkit-backface-visibility: hidden !important;
+            transform-style: preserve-3d !important;
+            -webkit-transform-style: preserve-3d !important;
+        }
+        .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
+            -webkit-font-smoothing: subpixel-antialiased !important;
+            backface-visibility: hidden !important;
+            -webkit-backface-visibility: hidden !important;
+        }
+        #ocean-top-btn.show:hover, #time-gear-btn:hover, #random-memory-btn:hover, #mini-audio-trigger:hover, #mini-backup-trigger:hover {
+            transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
+            -webkit-transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
+        }
+        .post-card:hover {
+            transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
+            -webkit-transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
+        }
     }
 
-    /* 🚨 3. 호버(Hover) 시 브라우저가 강제로 3D 스케일을 사용하도록 덮어쓰기 (가장 핵심!) */
-    #ocean-top-btn.show:hover,
-    #time-gear-btn:hover, 
-    #random-memory-btn:hover, 
-    #mini-audio-trigger:hover, 
-    #mini-backup-trigger:hover {
-        /* scale(1.1) 대신 scale3d(1.1, 1.1, 1.1)을 사용하여 캡처링 방지 */
-        transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
-        -webkit-transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
-    }
-    
-    .post-card:hover {
-        /* 글 목록(카드)이 호버될 때도 3D 애니메이션으로 강제 변환 */
-        transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
-        -webkit-transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
+    /* 모바일 전용 터치 액티브 반응 효과 (글자 깨짐 없음) */
+    @media (max-width: 768px) {
+        .post-card:active { transform: scale(0.99) !important; }
+        #ocean-top-btn.show:active, #time-gear-btn:active, #random-memory-btn:active { transform: scale(0.95) !important; }
     }
 `;
 document.head.appendChild(antiBlurStyle);
@@ -2332,27 +2342,21 @@ document.head.appendChild(hardwareAccelerationStyle);
 (function() {
     const scrollOptStyle = document.createElement('style');
     scrollOptStyle.innerHTML = `
-        /* 스크롤 중일 때 모든 요소의 마우스 인식과 호버 연산을 강제로 꺼버립니다 */
-        .is-scrolling * {
+        /* 🚨 [모바일 최적화] 모바일 화면 절반을 채우던 사각형 네모 버그의 원인인 와일드카드(*)를 제거하고 카드요소만 안전하게 타겟팅 */
+        .is-scrolling .post-card {
             pointer-events: none !important;
         }
     `;
     document.head.appendChild(scrollOptStyle);
 
     let scrollTimeout;
-    // passive: true 옵션으로 브라우저에게 "스크롤을 방해하지 않겠다"고 선언하여 성능을 극대화합니다.
     window.addEventListener('scroll', function() {
-        // 스크롤이 시작되면 연산을 차단하는 클래스 추가
         if (!document.body.classList.contains('is-scrolling')) {
             document.body.classList.add('is-scrolling');
         }
-        
-        // 이전 타이머 초기화
         clearTimeout(scrollTimeout);
-        
-        // 스크롤이 완전히 멈추고 0.15초(150ms)가 지나면 다시 마우스 인식을 부드럽게 켭니다.
         scrollTimeout = setTimeout(function() {
             document.body.classList.remove('is-scrolling');
-        }, 100);
+        }, 100); // 모바일 스크롤 반응 속도를 위해 100ms로 조절
     }, { passive: true }); 
 })();
