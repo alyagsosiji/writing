@@ -188,7 +188,7 @@ body.admin-logged-in #random-memory-btn {
         border-radius: 30px !important; font-size: 20px !important; 
     }
     body.admin-logged-in #random-memory-btn { 
-        bottomed80px !important; left: 26px !important; 
+        bottome: 80px !important; left: 26px !important; 
         width: 36px !important; height: 36px !important; 
         border-radius: 50% !important; font-size: 16px !important; 
     }
