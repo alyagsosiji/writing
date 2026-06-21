@@ -2158,14 +2158,14 @@ document.addEventListener('DOMContentLoaded', function() {
         @media (max-width: 768px) {
             #ocean-top-btn {
                 left: 20px !important;
-                bottom: 104px !important; 
+                bottom: 90px !important; 
                 width: 44px !important;
                 height: 44px !important;
             }
             #time-gear-btn {
                 position: fixed !important;
                 right: 20px !important;
-                bottom: 104px !important; 
+                bottom: 80px !important; 
                 width: 44px !important;
                 height: 44px !important;
                 z-index: 999999 !important;
@@ -2175,7 +2175,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             /* 관리자 로그인 시 모바일에서도 완벽한 높이 대칭 유지 */
             body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 20px !important; }
-            body.admin-logged-in #time-gear-btn { bottom: 157px !important; right: 20px !important; }
         }
     `;
     document.head.appendChild(style);
