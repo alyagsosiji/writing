@@ -2162,17 +2162,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 width: 44px !important;
                 height: 44px !important;
             }
-            #time-gear-btn {
-                position: fixed !important;
-                right: 20px !important;
-                bottom: 80px !important; 
-                width: 44px !important;
-                height: 44px !important;
-                z-index: 999999 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-            }
+            
             /* 관리자 로그인 시 모바일에서도 완벽한 높이 대칭 유지 */
             body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 20px !important; }
         }
