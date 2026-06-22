@@ -2260,44 +2260,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })();
 // ==========================================
-// 🛡️ 호버 시 0.1초 텍스트 깨짐 및 깜빡임(Flicker) 완벽 방어 (최종 진화형)
+// 🛡️ 호버 시 0.1초 텍스트 깨짐 완벽 방어 (원본 느낌 100% 복구형)
 // ==========================================
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.innerHTML = `
-    /* 기본 안티앨리어싱 선명도 고정 */
-    .post-card, .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
+    /* 1. 버튼 및 모달류 (기존 글자 보호막 유지) */
+    .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
     #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
     }
 
-    /* 🚨 [모바일 최적화] 모바일 사각형 박스 및 글자 실종 버그를 일으키는 3D 원근 속성을 데스크톱(PC) 환경으로만 격리 */
     @media (min-width: 769px) {
-        .post-card, .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
+        .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
         #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
             transform: perspective(1px) translateZ(0);
             -webkit-transform: perspective(1px) translateZ(0);
             backface-visibility: hidden !important;
-            -webkit-backface-visibility: hidden !important;
-            transform-style: preserve-3d !important;
-            -webkit-transform-style: preserve-3d !important;
-        }
-        .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
-            -webkit-font-smoothing: subpixel-antialiased !important;
-            backface-visibility: hidden !important;
-            -webkit-backface-visibility: hidden !important;
         }
         #ocean-top-btn.show:hover, #time-gear-btn:hover, #random-memory-btn:hover, #mini-audio-trigger:hover, #mini-backup-trigger:hover {
             transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
             -webkit-transform: perspective(1px) scale3d(1.1, 1.1, 1.1) translateY(-2px) !important;
         }
-        .post-card:hover {
-            transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
-            -webkit-transform: perspective(1px) scale3d(1.02, 1.02, 1.02) translateZ(0) !important;
-        }
     }
 
-    /* 모바일 전용 터치 액티브 반응 효과 (글자 깨짐 없음) */
+    /* 🚨 2. [핵심] 글 목록(post-card) 원본 효과 복구 및 텍스트 선명도 고정 */
+    /* 억지로 넣었던 3D 그래픽 변환 코드를 모두 제거하여, 처음 서재를 만드셨을 때의 자연스러운 원본 호버 효과를 되살립니다. */
+    .post-card {
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+    }
+    
+    /* 🚨 마우스를 올리지 않았을 때, 이전 최적화에서 GPU 가속(translateZ) 때문에 글자가 이미지처럼 뭉개지던(Blur) 버그를 강제 해제합니다. */
+    .post-card:not(:hover) {
+        transform: none !important;
+        -webkit-transform: none !important;
+    }
+
+    /* 카드 내부 글자(제목, 날짜 등)가 호버 중에도 절대 흔들리지 않도록 안티앨리어싱 고정 */
+    .post-card * {
+        -webkit-font-smoothing: antialiased !important;
+        backface-visibility: hidden !important;
+    }
+
+    /* 모바일 터치 액티브 효과 */
     @media (max-width: 768px) {
         .post-card:active { transform: scale(0.99) !important; }
         #ocean-top-btn.show:active, #time-gear-btn:active, #random-memory-btn:active { transform: scale(0.95) !important; }
