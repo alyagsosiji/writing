@@ -2340,14 +2340,29 @@ hardwareAccelerationStyle.innerHTML = `
 document.head.appendChild(hardwareAccelerationStyle);
 
 // ==========================================
-// 🚀 극한의 스크롤 최적화: 스크롤 중 마우스 연산(Hover) 일시 중단
+// 🚀 극한의 스크롤 최적화: 렌더링 격리(Containment) + 스크롤 연산 차단
 // ==========================================
 (function() {
+    const oldStyle = document.getElementById('ultimate-scroll-opt');
+    if (oldStyle) oldStyle.remove();
+
     const scrollOptStyle = document.createElement('style');
+    scrollOptStyle.id = 'ultimate-scroll-opt';
     scrollOptStyle.innerHTML = `
-        /* 🚨 [모바일 최적화] 모바일 화면 절반을 채우던 사각형 네모 버그의 원인인 와일드카드(*)를 제거하고 카드요소만 안전하게 타겟팅 */
+        /* 🚨 1. 렌더링 격리(Containment): 카드 내부와 외부의 그래픽 연산을 완전히 분리! 
+           브라우저가 스크롤할 때마다 전체 페이지를 다시 그리지 않게 만들어 프레임을 방어합니다. */
+        .post-card {
+            contain: layout style; 
+        }
+
+        /* 🚨 2. 스크롤 중일 때 마우스 호버 연산을 완벽히 끕니다 */
         .is-scrolling .post-card {
             pointer-events: none !important;
+        }
+        
+        /* 🚨 3. 스크롤 중에는 브라우저를 괴롭히는 부드러운 전환(Transition) 효과를 잠시 꺼서 렌더링 속도에 100% 올인합니다 */
+        .is-scrolling * {
+            transition-duration: 0s !important;
         }
     `;
     document.head.appendChild(scrollOptStyle);
@@ -2360,6 +2375,6 @@ document.head.appendChild(hardwareAccelerationStyle);
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(function() {
             document.body.classList.remove('is-scrolling');
-        }, 100); // 모바일 스크롤 반응 속도를 위해 100ms로 조절
+        }, 100); 
     }, { passive: true }); 
 })();
