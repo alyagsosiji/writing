@@ -2155,13 +2155,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         /* 🚨 [모바일 최적화 및 대칭 해결] 맨 아래(20px)로 쏠려 기기 바에 가려지던 현상을 기존 서재 플로팅 아이콘 높이(104px/157px)와 일치시켜 대칭 복구 */
-        @media (max-width: 768px) {
-            #ocean-top-btn {
-                left: 20px !important;
-                bottom: 90px !important; 
-                width: 44px !important;
-                height: 44px !important;
-            }
+         @media (max-width: 768px) {
+    #ocean-top-btn { 
+        bottom: 30px !important; left: 20px !important; right: auto !important; 
+        width: 60px !important; height: 48px !important; padding: 0 !important; 
+        border-radius: 30px !important; font-size: 20px !important; 
+    }
+    body.admin-logged-in #ocean-top-btn { 
+        bottome: 90px !important; left: 26px !important; 
+        width: 36px !important; height: 36px !important; 
+        border-radius: 50% !important; font-size: 16px !important; 
+    }
+}
             
             /* 관리자 로그인 시 모바일에서도 완벽한 높이 대칭 유지 */
             body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 20px !important; }
