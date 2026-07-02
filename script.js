@@ -2169,7 +2169,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
             
             /* 관리자 로그인 시 모바일에서도 완벽한 높이 대칭 유지 */
-            body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 28px !important; }
+            body.admin-logged-in #ocean-top-btn { bottom: 157px !important; left: 30px !important; }
         }
     `;
     document.head.appendChild(style);
