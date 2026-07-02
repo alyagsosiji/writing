@@ -2162,7 +2162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         border-radius: 30px !important; font-size: 20px !important; 
     }
     body.admin-logged-in #ocean-top-btn { 
-        bottome: 70px !important; left: 28px !important; 
+        bottome: 50px !important; left: 28px !important; 
         width: 36px !important; height: 36px !important; 
         border-radius: 50% !important; font-size: 16px !important; 
     }
