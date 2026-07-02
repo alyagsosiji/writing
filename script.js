@@ -2127,7 +2127,8 @@ document.addEventListener('DOMContentLoaded', function() {
     style.id = 'ocean-optimized-style';
     style.innerHTML = `
         #ocean-top-btn {
-            position: fixed; left: 38px; bottom: 104px;
+            position: fixed; bottom: 104px;
+            left: 38px !important;
             z-index: 999999 !important; /* 🚨 [데스크탑 해결] 다른 배경 레이어에 가려지지 않도록 최상위 층수 부여 */
             width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
