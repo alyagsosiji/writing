@@ -2127,7 +2127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     style.id = 'ocean-optimized-style';
     style.innerHTML = `
         #ocean-top-btn {
-            position: fixed; left: 35px; bottom: 104px;
+            position: fixed; left: 38px; bottom: 104px;
             z-index: 999999 !important; /* 🚨 [데스크탑 해결] 다른 배경 레이어에 가려지지 않도록 최상위 층수 부여 */
             width: 42px; height: 42px;
             display: flex; align-items: center; justify-content: center;
@@ -2157,7 +2157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         /* 🚨 [모바일 최적화 및 대칭 해결] 맨 아래(20px)로 쏠려 기기 바에 가려지던 현상을 기존 서재 플로팅 아이콘 높이(104px/157px)와 일치시켜 대칭 복구 */
          @media (max-width: 768px) {
     #ocean-top-btn { 
-        bottom: 30px !important; left: 20px !important; right: auto !important; 
+        bottom: 30px !important; left: 28px !important; right: auto !important; 
         width: 60px !important; height: 48px !important; padding: 0 !important; 
         border-radius: 30px !important; font-size: 20px !important; 
     }
