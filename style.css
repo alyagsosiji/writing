@@ -1781,3 +1781,46 @@ html body .modal-content .env-select-box option {
 #donation-modal {
     z-index: 999999999 !important; 
 }
+/* ====================================================
+   🚀 [최종 박멸] 모든 버튼 및 이모지 호버 시 흐려짐(Blur) 완벽 방어
+==================================================== */
+/* 1. 크기가 변하는 모든 요소에 글자 렌더링 고정 및 상시 GPU 가속(will-change) 부여 */
+#time-gear-btn, 
+#random-memory-btn, 
+.mini-audio-player, 
+.mini-backup-manager, 
+.mini-library-btn,
+button,
+.tab-btn {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+    will-change: transform !important; /* 브라우저가 미리 렌더링을 준비하여 깜빡임/흐림 원천 차단 */
+}
+
+/* 2. 호버(Hover) 시 scale()만 쓰면 3D 렌더링이 풀리므로, 강제로 translateZ(0)을 덧붙여 가속 유지 */
+#time-gear-btn:hover {
+    transform: scale(1.1) translateZ(0) !important; 
+}
+#random-memory-btn:hover {
+    transform: scale(1.05) translateZ(0) !important; 
+}
+.mini-audio-player:hover, 
+.mini-backup-manager:hover {
+    transform: scale(1.03) translateZ(0) !important; 
+}
+.mini-library-btn:hover {
+    transform: translate3d(-50%, -8px, 0) scale(1.03) translateZ(0) !important; 
+}
+button:hover {
+    transform: translateY(-1.5px) translateZ(0) !important; 
+}
+
+/* 3. 모바일 환경 라이브러리 버튼 호버 픽스 */
+@media (max-width: 768px) {
+    .mini-library-btn:hover {
+        transform: translate3d(-50%, -2px, 0) scale(1.02) translateZ(0) !important; 
+    }
+}
