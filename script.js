@@ -2061,8 +2061,8 @@ unifyHoverStyle.innerHTML = `
     #random-memory-btn:hover, 
     #mini-audio-trigger:hover, 
     #mini-backup-trigger:hover {
-        transform: scale(1.1) translateY(-2px) !important; 
-        filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important; /* 원본의 빛나는 효과 복구! */
+        transform: scale(1.1) translateY(-2px) translateZ(0) !important; /* 🚨 translateZ(0) 추가 */
+        filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important; 
         opacity: 1 !important; 
     }
     
@@ -2071,8 +2071,8 @@ unifyHoverStyle.innerHTML = `
     #random-memory-btn:active, 
     #mini-audio-trigger:active, 
     #mini-backup-trigger:active {
-        transform: scale(0.98) translateY(0) !important;
-        filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important; /* 누를 땐 빛이 살짝 줄어듦 */
+        transform: scale(0.98) translateY(0) translateZ(0) !important; /* 🚨 translateZ(0) 추가 */
+        filter: drop-shadow(0 0 4px rgba(144, 224, 239, 0.5)) !important; 
     }
 `;
 document.head.appendChild(unifyHoverStyle);
@@ -2149,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         #ocean-top-btn.show { opacity: 0.9; pointer-events: auto; }
         
         #ocean-top-btn.show:hover {
-            transform: scale(1.1) translateY(-2px) !important; 
+            transform: scale(1.1) translateY(-2px) translateZ(0) !important; 
             filter: drop-shadow(0 0 8px rgba(144, 224, 239, 0.8)) !important;
             opacity: 1 !important; 
             background: rgba(15, 20, 30, 0.95) !important;
