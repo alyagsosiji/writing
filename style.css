@@ -1782,43 +1782,51 @@ html body .modal-content .env-select-box option {
     z-index: 999999999 !important; 
 }
 /* ====================================================
-   🚀 [최종 박멸] 크롬 비트맵 스케일링(흐림) 버그 강제 우회
+   🚀 [진짜 최종] 글자 버튼 깨짐 및 모달 버튼 기형화 완벽 박멸
 ==================================================== */
-/* 1. 오히려 화질을 깨뜨리던 will-change를 해제하고 글자 렌더링을 최적화합니다. */
-#time-gear-btn, 
-#random-memory-btn, 
-.mini-audio-player, 
-.mini-backup-manager, 
-.mini-library-btn,
-button,
-.tab-btn {
-    will-change: auto !important; /* 브라우저의 캡처본 캐싱 끄기 */
+/* 1. 글자가 포함된 모든 버튼의 렌더링 방식을 브라우저 기본(CPU 연산)으로 강제 초기화 */
+button, .tab-btn, .mgmt-btn, .page-btn, .update-buttons button, .modal-buttons button {
+    will-change: auto !important;
+    -webkit-transform: none !important;
+    transform: none !important;
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    position: relative !important; /* 물리적 이동을 위한 필수 속성 */
+    transition: background 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, top 0.25s ease-out !important;
+}
+
+/* 2. 호버 시 transform(GPU 가속)을 절대 쓰지 않고, 물리적 위치(top)를 옮겨 텍스트 선명도 100% 보존 */
+button:hover, 
+.tab-btn:hover, 
+.mgmt-btn:hover, 
+.page-btn:hover {
+    -webkit-transform: none !important;
+    transform: none !important;
+    top: -2px !important; /* transform 대신 물리적 높이를 조절합니다 */
+}
+
+/* 3. 모달 내부 버튼 레이아웃이 호버 시 틀어지거나 깨지는 현상 방어 */
+.modal-content button:hover,
+.update-toast button:hover,
+#system-modal button:hover {
+    -webkit-transform: none !important;
+    transform: none !important;
+    top: -2px !important;
+}
+
+/* 4. 마우스로 클릭할 때 자연스럽게 제자리로 눌리는 효과 적용 */
+button:active, 
+.tab-btn:active, 
+.mgmt-btn:active, 
+.page-btn:active {
+    top: 0px !important; 
+    -webkit-transform: none !important;
+    transform: none !important;
+}
+
+/* 5. 하단 둥근 아이콘 4총사는 텍스트가 없으므로 쨍한 애니메이션(GPU 가속) 유지 */
+#time-gear-btn, #random-memory-btn, .mini-audio-player, .mini-backup-manager {
+    -webkit-font-smoothing: antialiased !important;
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
-    -webkit-font-smoothing: antialiased !important;
-}
-
-/* 2. 호버 시 0.001도의 미세 회전을 주어, 브라우저가 이미지를 늘리지 않고 글자를 벡터로 쨍하게 다시 그리도록 강제합니다. */
-#time-gear-btn:hover {
-    transform: scale(1.1) translateY(-2px) rotate(0.001deg) !important; 
-}
-#random-memory-btn:hover {
-    transform: scale(1.05) rotate(0.001deg) !important; 
-}
-.mini-audio-player:hover, 
-.mini-backup-manager:hover {
-    transform: scale(1.03) rotate(0.001deg) !important; 
-}
-.mini-library-btn:hover {
-    transform: translate3d(-50%, -8px, 0) scale(1.03) rotate(0.001deg) !important; 
-}
-button:hover {
-    transform: translateY(-1.5px) rotate(0.001deg) !important; 
-}
-
-/* 모바일 호버 예외 처리 */
-@media (max-width: 768px) {
-    .mini-library-btn:hover {
-        transform: translate3d(-50%, -2px, 0) scale(1.02) rotate(0.001deg) !important; 
-    }
 }
