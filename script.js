@@ -2274,8 +2274,8 @@ if (oldAntiBlur) oldAntiBlur.remove();
 const antiBlurStyle = document.createElement('style');
 antiBlurStyle.id = 'anti-blur-style';
 antiBlurStyle.innerHTML = `
-    /* 🚨 1. 복잡한 3D 원근법과 강제 스케일링을 전부 버리고, 가장 안정적인 하드웨어 가속(translateZ)만 깔끔하게 적용합니다. */
-    .post-card, .modal-content, .modal, #env-modal, .page-btn, .mgmt-btn,
+    /* 🚨 1. 텍스트가 있는 글자 버튼과 모달창을 GPU 가속(transform) 간섭 대상에서 완전히 제외합니다. (아이콘과 카드만 유지) */
+    .post-card,
     #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
         -webkit-font-smoothing: antialiased !important;
         -moz-osx-font-smoothing: grayscale !important;
@@ -2285,14 +2285,13 @@ antiBlurStyle.innerHTML = `
         -webkit-transform: translateZ(0);
     }
 
-    /* 🚨 2. [버튼/모달 집중 보호] 개수가 적어 메모리 폭발 위험이 없는 요소들에만 렌더링 모드 전환을 미리 준비(will-change)시켜 스냅 현상을 없앱니다. */
-    .page-btn, .mgmt-btn, .modal-content, #env-modal,
+    /* 🚨 2. 글자가 없는 둥근 아이콘(플로팅 버튼)들만 렌더링 모드 전환(will-change)을 적용합니다. */
     #time-gear-btn, #random-memory-btn, #mini-audio-trigger, #mini-backup-trigger, #ocean-top-btn {
         will-change: transform;
     }
 
-    /* 🚨 3. 자식 요소들의 글자가 애니메이션 도중 뭉개지지 않도록 뒷면 숨김 처리 고정 */
-    .post-card *, .modal-content *, #env-modal *, #ocean-top-btn * {
+    /* 🚨 3. 자식 요소들 뒷면 숨김 처리 (모달 간섭 제거) */
+    .post-card *, #ocean-top-btn * {
         backface-visibility: hidden !important;
         -webkit-backface-visibility: hidden !important;
     }
