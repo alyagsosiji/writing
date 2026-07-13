@@ -1782,9 +1782,9 @@ html body .modal-content .env-select-box option {
     z-index: 999999999 !important; 
 }
 /* ====================================================
-   🚀 [최종 박멸] 모든 버튼 및 이모지 호버 시 흐려짐(Blur) 완벽 방어
+   🚀 [최종 박멸] 크롬 비트맵 스케일링(흐림) 버그 강제 우회
 ==================================================== */
-/* 1. 크기가 변하는 모든 요소에 글자 렌더링 고정 및 상시 GPU 가속(will-change) 부여 */
+/* 1. 오히려 화질을 깨뜨리던 will-change를 해제하고 글자 렌더링을 최적화합니다. */
 #time-gear-btn, 
 #random-memory-btn, 
 .mini-audio-player, 
@@ -1792,35 +1792,33 @@ html body .modal-content .env-select-box option {
 .mini-library-btn,
 button,
 .tab-btn {
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: optimizeLegibility !important;
+    will-change: auto !important; /* 브라우저의 캡처본 캐싱 끄기 */
     -webkit-backface-visibility: hidden !important;
     backface-visibility: hidden !important;
-    will-change: transform !important; /* 브라우저가 미리 렌더링을 준비하여 깜빡임/흐림 원천 차단 */
+    -webkit-font-smoothing: antialiased !important;
 }
 
-/* 2. 호버(Hover) 시 scale()만 쓰면 3D 렌더링이 풀리므로, 강제로 translateZ(0)을 덧붙여 가속 유지 */
+/* 2. 호버 시 0.001도의 미세 회전을 주어, 브라우저가 이미지를 늘리지 않고 글자를 벡터로 쨍하게 다시 그리도록 강제합니다. */
 #time-gear-btn:hover {
-    transform: scale(1.1) translateZ(0) !important; 
+    transform: scale(1.1) translateY(-2px) rotate(0.001deg) !important; 
 }
 #random-memory-btn:hover {
-    transform: scale(1.05) translateZ(0) !important; 
+    transform: scale(1.05) rotate(0.001deg) !important; 
 }
 .mini-audio-player:hover, 
 .mini-backup-manager:hover {
-    transform: scale(1.03) translateZ(0) !important; 
+    transform: scale(1.03) rotate(0.001deg) !important; 
 }
 .mini-library-btn:hover {
-    transform: translate3d(-50%, -8px, 0) scale(1.03) translateZ(0) !important; 
+    transform: translate3d(-50%, -8px, 0) scale(1.03) rotate(0.001deg) !important; 
 }
 button:hover {
-    transform: translateY(-1.5px) translateZ(0) !important; 
+    transform: translateY(-1.5px) rotate(0.001deg) !important; 
 }
 
-/* 3. 모바일 환경 라이브러리 버튼 호버 픽스 */
+/* 모바일 호버 예외 처리 */
 @media (max-width: 768px) {
     .mini-library-btn:hover {
-        transform: translate3d(-50%, -2px, 0) scale(1.02) translateZ(0) !important; 
+        transform: translate3d(-50%, -2px, 0) scale(1.02) rotate(0.001deg) !important; 
     }
 }
