@@ -799,7 +799,7 @@ function renderUI(isAppend = false) {
         if (subtitleElem) {
             let subtitleText = '';
             if (currentView === 'posts') {
-                subtitleText = `<span style="color:#fff; font-size:1.02rem; font-weight:500;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
+                subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #b9efff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(144, 224, 239, 0.6); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
             } else if (currentView === 'horizons') {
                 subtitleText = `<span style="color:#e9d5ff; font-size:1.02rem; font-weight:500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
             } else {
@@ -807,20 +807,23 @@ function renderUI(isAppend = false) {
             }
 
             let selectHtml = `
-            <div style="margin-top:18px; display:flex; flex-direction:column; align-items:center; width:100%; gap:14px;">
-                <select onchange="window.setDisplayMode(this.value)" style="height:38px; max-width:180px; background:rgba(255,255,255,0.05); border:1px solid rgba(0,180,216,0.28); color:#fff; padding:0 28px; border-radius:25px; font-size:0.85rem; cursor:pointer; text-align:center;">
-                    <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''} style="background:#030a16;">📄 리스트 모드</option>
-                    <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''} style="background:#030a16;">🔲 갤러리 모드</option>
-                    <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''} style="background:#030a16;">🌊 스크롤 모드</option>
-                </select>
+            <div style="margin-top: 18px; display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px;">
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <select onchange="window.setDisplayMode(this.value)">
+                        <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''}>📄 리스트 모드</option>
+                        <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''}>🔲 갤러리 모드</option>
+                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''}>🌊 스크롤 모드</option>
+                    </select>
+                </div>
             `;
             if (currentView === 'letters' && isAdmin) {
                 selectHtml += `
-                <div style="display:flex; align-items:center; justify-content:space-between; width:100%; max-width:450px; margin-top:10px;">
-                    <label style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; background:rgba(144,224,239,0.08); border:1px solid rgba(144,224,239,0.25); color:#90e0ef; font-size:0.78rem; font-weight:bold; cursor:pointer;">
-                        <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="accent-color:#00b4d8;"> 전체 선택
+                <div id="letter-batch-controls" style="display:flex; align-items:center; justify-content:space-between; width:100%; max-width:450px; padding:0; margin-top:10px; background:transparent; border:none;">
+                    <label for="letter-select-all" style="font-size:0.78rem; color:#90e0ef; font-weight:bold; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; user-select:none; margin:0; padding:0 16px; height:32px; border-radius:20px; background:linear-gradient(135deg, rgba(144,224,239,0.12), rgba(0,180,216,0.03)); border:1px solid rgba(144,224,239,0.3); box-sizing:border-box;">
+                        <input type="checkbox" id="letter-select-all" onclick="window.toggleAllLetters(this)" style="accent-color:#00b4d8; width:13px; height:13px; margin:0; cursor:pointer;">
+                        <span style="line-height:1;">전체 선택</span>
                     </label>
-                    <button type="button" onclick="window.deleteSelectedLetters()" class="danger-btn" style="padding:6px 16px; font-size:0.78rem;">선택 소멸</button>
+                    <button type="button" id="batch-delete-btn-custom" onclick="window.deleteSelectedLetters()" class="danger-btn" style="margin:0; padding:0 16px; height:32px; font-size:0.78rem; font-weight:bold; border-radius:20px; display:inline-flex; align-items:center; justify-content:center;">선택 소멸</button>
                 </div>`;
             }
             selectHtml += `</div>`;
@@ -880,7 +883,8 @@ function renderUI(isAppend = false) {
             ? `<span class="read-badge" style="font-size:0.7rem; background:rgba(247,163,127,0.15); color:#f7a37f; border:1px solid rgba(247,163,127,0.35); padding:2px 6px; border-radius:4px; margin-left:8px; font-weight:bold;">수거됨</span>`
             : '';
 
-        const displayDate = (currentView === 'posts' || currentView === 'horizons') ? `${escapeHtml(item.author || "기록자")} ㅣ ${formatTo24Hour(item.date)}` : formatTo24Hour(item.date);
+        const formattedFullDate = formatTo24Hour(item.date);
+        const displayDate = (currentView === 'posts' || currentView === 'horizons') ? `${escapeHtml(item.author || "기록자")} ㅣ ${formattedFullDate}` : formattedFullDate;
         const selectLetterCbHtml = (isAdmin && currentView === 'letters')
             ? `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:10px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle;">`
             : '';
@@ -890,8 +894,30 @@ function renderUI(isAppend = false) {
             ? `<button type="button" class="card-bookmark-btn ${isMarked ? 'bookmarked' : ''}" onclick="window.toggleBookmark('${item.id}', event)" title="책갈피">🔖</button>`
             : '';
 
-        const safeContentHtml = `<div class="post-content-area">${highlightSearchKeyword(item.content, searchKeyword)}</div>`;
-        const footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        let safeContentHtml = '';
+        let footerHtml = '';
+        if (currentDisplayMode === 'grid' || currentDisplayMode === 'infinite') {
+            safeContentHtml = `<div class="post-content-area grid-text-clamp">${highlightSearchKeyword(item.content, searchKeyword)}</div>`;
+            if (isAdmin) {
+                const timeMatch = formattedFullDate.match(/(\d{2}:\d{2}:\d{2})$/);
+                const timePart = timeMatch ? timeMatch[1] : '';
+                const datePart = timePart ? formattedFullDate.replace(timePart, '').trim() : formattedFullDate;
+                const authorPrefix = (currentView === 'posts' || currentView === 'horizons') ? `${escapeHtml(item.author || "기록자")} ㅣ ` : '';
+                footerHtml = `
+                    <div class="post-footer admin-grid-footer">
+                        <span class="grid-date">${authorPrefix}${datePart}</span>
+                        <span class="grid-more"><button type="button" onclick="event.stopPropagation(); window.openDetailModal('${item.id}')">더보기</button></span>
+                        <span class="grid-time">${timePart}</span>
+                        <span class="grid-actions">${mgmtButtonsHtml}</span>
+                    </div>
+                `;
+            } else {
+                footerHtml = `<div class="post-footer normal-grid-footer"><span class="date">${displayDate}</span></div>`;
+            }
+        } else {
+            safeContentHtml = `<div class="post-content-area">${highlightSearchKeyword(item.content, searchKeyword)}</div>`;
+            footerHtml = `<div class="post-footer"><span class="date">${displayDate}</span>${mgmtButtonsHtml}</div>`;
+        }
 
         card.innerHTML = `<div class="card-title-row"><h3>${selectLetterCbHtml}${highlightSearchKeyword(item.title, searchKeyword)}${readBadgeHtml}</h3>${bookmarkIconHtml}</div>${safeContentHtml}${footerHtml}`;
         cardFragment.appendChild(card);
@@ -1145,7 +1171,7 @@ window.clearDatabase = function() {
     });
 };
 
-// 💾 클라우드 백업 및 복원
+// 💾 클라우드 백업 및 복원 (30일 자동 만료 정리 + 들여쓰기 TXT + A4 표 양식 PDF 완비)
 const CONTEXT_RETENTION_PERIOD = 30 * 24 * 60 * 60 * 1000;
 
 window.openBackupModal = function() {
@@ -1170,6 +1196,7 @@ window.switchAdminTab = function(tab) {
     const delControls = document.getElementById('backup-delete-controls');
     const settingsContainer = document.getElementById('admin-settings-container');
     const timelineWrapper = document.querySelector('.backup-timeline-wrapper');
+    const subTitle = document.getElementById('backup-modal-subtitle');
 
     if (tab === 'backup') {
         if (btnBackup) { btnBackup.style.color = '#f7a37f'; btnBackup.style.borderBottom = '2px solid #f7a37f'; }
@@ -1178,6 +1205,8 @@ window.switchAdminTab = function(tab) {
         if (delControls) delControls.style.display = 'flex';
         if (settingsContainer) settingsContainer.style.display = 'none';
         if (timelineWrapper) timelineWrapper.style.display = 'block';
+        if (subTitle) subTitle.innerText = '최근 30일 이내의 복구 지점만 보존됩니다.';
+        cleanExpiredBackupsTimeline();
         loadBackupTimelineList();
     } else {
         if (btnSettings) { btnSettings.style.color = '#f7a37f'; btnSettings.style.borderBottom = '2px solid #f7a37f'; }
@@ -1186,6 +1215,7 @@ window.switchAdminTab = function(tab) {
         if (delControls) delControls.style.display = 'none';
         if (settingsContainer) settingsContainer.style.display = 'block';
         if (timelineWrapper) timelineWrapper.style.display = 'none';
+        if (subTitle) subTitle.innerText = '서재의 환경과 보안 시스템을 제어합니다.';
         renderAdminSettings();
     }
 };
@@ -1229,24 +1259,53 @@ window.executeCloudBackupEngine = function(isAutomatic = true) {
     const backupMeta = { timestamp, date: dateString, type: isAutomatic ? "자동" : "수동", pCount, hCount, lCount };
     const backupPayload = { posts: rawPostsSnapshot || {}, horizons: rawHorizonsSnapshot || {}, letters: rawLettersSnapshot || {} };
     const newBackupKey = database.ref().push().key;
-    return Promise.all([database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload)]).then(() => loadBackupTimelineList());
+    return Promise.all([database.ref(`backupMeta/${newBackupKey}`).set(backupMeta), database.ref(`backupData/${newBackupKey}`).set(backupPayload)]).then(() => {
+        cleanExpiredBackupsTimeline();
+        const modal = document.getElementById('backup-modal');
+        if (modal && modal.style.display === 'flex') loadBackupTimelineList();
+    });
 };
 
 window.triggerManualBackup = function() {
     if (!isAdmin || !database) return;
-    window.executeCloudBackupEngine(false).then(() => showSystemAlert("현재 바다 상태 스냅샷 수동 저장이 완료되었습니다."));
+    window.executeCloudBackupEngine(false)
+        .then(() => showSystemAlert("현재 바다 상태 스냅샷 수동 저장이 완료되었습니다."))
+        .catch(err => showSystemAlert("수동 백업 실패: " + err.message));
 };
+
+function cleanExpiredBackupsTimeline() {
+    if (!database) return;
+    const expirationThreshold = Date.now() - CONTEXT_RETENTION_PERIOD;
+    database.ref('backupMeta').once('value').then((snapshot) => {
+        const backups = snapshot.val();
+        if (!backups) return;
+        Object.keys(backups).forEach((key) => {
+            if (backups[key].timestamp < expirationThreshold) {
+                database.ref(`backupMeta/${key}`).remove();
+                database.ref(`backupData/${key}`).remove();
+            }
+        });
+    });
+}
 
 window.toggleAllBackups = function(source) { document.querySelectorAll('.backup-checkbox').forEach(cb => cb.checked = source.checked); };
 window.selectBackupsByPeriod = function(days) {
     const checkboxes = document.querySelectorAll('.backup-checkbox');
-    if (!days) { checkboxes.forEach(cb => cb.checked = false); return; }
+    const selectAllCb = document.getElementById('backup-select-all');
+    if (!days) {
+        checkboxes.forEach(cb => cb.checked = false);
+        if (selectAllCb) selectAllCb.checked = false;
+        return;
+    }
     const now = Date.now();
     const threshold = days === 'all' ? now + 999999999 : now - (parseInt(days, 10) * 24 * 60 * 60 * 1000);
+    let selectedCount = 0;
     checkboxes.forEach(cb => {
         const ts = parseInt(cb.getAttribute('data-timestamp'), 10);
-        cb.checked = days === 'all' ? true : ts < threshold;
+        if (days === 'all' || ts < threshold) { cb.checked = true; selectedCount++; }
+        else { cb.checked = false; }
     });
+    if (selectAllCb) selectAllCb.checked = (selectedCount === checkboxes.length && checkboxes.length > 0);
 };
 
 window.deleteSelectedBackups = function() {
@@ -1255,38 +1314,44 @@ window.deleteSelectedBackups = function() {
     if (keysToDelete.length === 0) return showSystemAlert('소멸시킬 백업 지점을 선택해주세요.');
     showSystemConfirm(`선택하신 ${keysToDelete.length}개의 백업 기록을 영구히 소멸시키겠습니까?`, function() {
         Promise.all(keysToDelete.map(k => Promise.all([database.ref(`backupMeta/${k}`).remove(), database.ref(`backupData/${k}`).remove()]))).then(() => {
-            showSystemAlert('선택한 백업이 완전 소멸되었습니다.'); loadBackupTimelineList();
+            if (document.getElementById('backup-select-all')) document.getElementById('backup-select-all').checked = false;
+            if (document.getElementById('backup-period-select')) document.getElementById('backup-period-select').value = "";
+            showSystemAlert('선택한 백업이 완전 소멸되었습니다.');
+            loadBackupTimelineList();
         });
     });
 };
 
 function loadBackupTimelineList() {
     const container = document.getElementById('backup-list-container');
+    const loadingMsg = document.getElementById('backup-loading-msg');
     if (!container || !database) return;
     container.innerHTML = '';
+    if (loadingMsg) loadingMsg.style.display = 'block';
     const expirationThreshold = Date.now() - CONTEXT_RETENTION_PERIOD;
     database.ref('backupMeta').once('value').then((snapshot) => {
-        if (document.getElementById('backup-loading-msg')) document.getElementById('backup-loading-msg').style.display = 'none';
+        if (loadingMsg) loadingMsg.style.display = 'none';
         const backups = snapshot.val();
-        if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding:20px 0; text-align:center;">복구 지점이 없습니다.</p>`; return; }
+        if (!backups) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding:20px 0; text-align:center;">생성된 복구 지점이 없습니다.</p>`; return; }
         const keys = Object.keys(backups).filter(k => backups[k].timestamp >= expirationThreshold).reverse();
+        if (keys.length === 0) { container.innerHTML = `<p style="color:#94a3b8; font-size:0.85rem; padding:20px 0; text-align:center;">최근 30일 이내의 복구 지점이 없습니다.</p>`; return; }
         keys.forEach((key) => {
             const item = backups[key];
             const badgeClass = item.type === "자동" ? "auto" : "manual";
             const el = document.createElement('div'); el.className = 'backup-item';
             el.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%; justify-content:space-between; gap:10px;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="accent-color:#f7a37f; width:16px; height:16px;">
-                        <div>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="accent-color:#f7a37f; width:16px; height:16px; cursor:pointer;">
+                        <div class="backup-info">
                             <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
-                            <div class="backup-counts">글 ${item.pCount || 0}개 ㅣ 비밀 ${item.hCount || 0}개 ㅣ 편지 ${item.lCount || 0}개</div>
+                            <div class="backup-counts">기록된 글 ${item.pCount || 0}개 ㅣ 비밀 기록 ${item.hCount || 0}개 ㅣ 띄워진 편지 ${item.lCount || 0}개</div>
                         </div>
                     </div>
-                    <div style="display:flex; gap:6px; align-items:center;">
-                        <button onclick="window.downloadBackupFile('${key}', 'txt')" style="font-size:0.75rem; padding:5px 9px; border-radius:6px;">TXT</button>
-                        <button onclick="window.downloadBackupFile('${key}', 'pdf')" style="font-size:0.75rem; padding:5px 9px; border-radius:6px; color:#ffd4ba;">PDF</button>
-                        <button onclick="window.restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; padding:5px 11px; border-radius:6px; background:#e76f51; color:#fff; border:none;">복구</button>
+                    <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
+                        <button class="mgmt-btn" onclick="window.downloadBackupFile('${key}', 'txt')" title="텍스트 문서로 저장" style="font-size:0.75rem; padding:5px 9px; border-radius:6px; background:rgba(255,255,255,0.06);">TXT</button>
+                        <button class="mgmt-btn" onclick="window.downloadBackupFile('${key}', 'pdf')" title="PDF 문서로 인쇄 및 저장" style="font-size:0.75rem; padding:5px 9px; border-radius:6px; background:rgba(247,163,127,0.12); color:#ffd4ba; border-color:rgba(247,163,127,0.3);">PDF</button>
+                        <button class="backup-restore-btn" onclick="window.restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; padding:5px 11px; border-radius:6px; background:#e76f51; color:#fff; border:none; cursor:pointer;">복구</button>
                     </div>
                 </div>
             `;
@@ -1297,38 +1362,165 @@ function loadBackupTimelineList() {
 
 window.downloadBackupFile = function(key, format) {
     if (!isAdmin || !database) return;
-    database.ref(`backupData/${key}`).once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (!data) return showSystemAlert("백업 파일이 유실되었습니다.");
-        const posts = data.posts || {}, horizons = data.horizons || {}, letters = data.letters || {};
+    Promise.all([
+        database.ref(`backupMeta/${key}`).once('value'),
+        database.ref(`backupData/${key}`).once('value')
+    ]).then(([metaSnap, dataSnap]) => {
+        const meta = metaSnap.val() || { date: "날짜 미상", type: "알수없음" };
+        const data = dataSnap.val();
+        if (!data) return showSystemAlert("백업 파일이 유실되었거나 존재하지 않습니다.");
+        const posts = data.posts || {};
+        const horizons = data.horizons || {};
+        const letters = data.letters || {};
+        const safeDateStr = (meta.date || key).replace(/[:.\s]/g, '_').replace(/__+/g, '_');
+
         if (format === 'txt') {
-            let textResult = `🌊 수평선 너머의 서재 백업 (${key})\n\n[1. 바다의 기록]\n`;
-            Object.keys(posts).forEach(k => { textResult += `\n◈ ${posts[k].title} (${posts[k].author || '기록자'} | ${posts[k].date})\n${posts[k].content}\n`; });
-            textResult += `\n[2. 수평선 너머]\n`;
-            Object.keys(horizons).forEach(k => { textResult += `\n◈ ${horizons[k].title} (${horizons[k].author || '기록자'} | ${horizons[k].date})\n${horizons[k].content}\n`; });
-            textResult += `\n[3. 띄워진 편지]\n`;
-            Object.keys(letters).forEach(k => { textResult += `\n◈ ${letters[k].title} (${letters[k].date})\n${letters[k].content}\n`; });
-            const blob = new Blob([textResult], { type: "text/plain;charset=utf-8" });
+            let txt = `======================================================\n`;
+            txt += `  🌊 수평선 너머의 서재 - 데이터베이스 백업 리포트\n`;
+            txt += `======================================================\n`;
+            txt += `• 백업 일시 : ${meta.date}\n`;
+            txt += `• 백업 유형 : ${meta.type} 스냅샷\n`;
+            txt += `• 통계 요약 : 기록 ${Object.keys(posts).length}편 / 비밀 ${Object.keys(horizons).length}편 / 편지 ${Object.keys(letters).length}통\n`;
+            txt += `======================================================\n\n\n`;
+
+            txt += `◈ [1] 바다의 기록 (총 ${Object.keys(posts).length}편)\n`;
+            txt += `------------------------------------------------------\n`;
+            if (Object.keys(posts).length === 0) txt += `기록된 글이 없습니다.\n\n`;
+            Object.keys(posts).forEach((k, idx) => {
+                const p = posts[k];
+                const indentedContent = (p.content || '').split('\n').map(line => `    ${line}`).join('\n');
+                txt += `\n[${idx + 1}] 제목 : ${p.title}\n`;
+                txt += `    작성자 : ${p.author || '기록자'}  |  작성일시 : ${p.date}\n`;
+                txt += `    --------------------------------------------------\n`;
+                txt += `${indentedContent}\n\n`;
+                txt += `======================================================\n`;
+            });
+
+            txt += `\n\n◈ [2] 수평선 너머 (비밀 공간 - 총 ${Object.keys(horizons).length}편)\n`;
+            txt += `------------------------------------------------------\n`;
+            if (Object.keys(horizons).length === 0) txt += `은밀한 기록이 없습니다.\n\n`;
+            Object.keys(horizons).forEach((k, idx) => {
+                const h = horizons[k];
+                const indentedContent = (h.content || '').split('\n').map(line => `    ${line}`).join('\n');
+                txt += `\n[${idx + 1}] 제목 : ${h.title}\n`;
+                txt += `    작성자 : ${h.author || '기록자'}  |  작성일시 : ${h.date}\n`;
+                txt += `    --------------------------------------------------\n`;
+                txt += `${indentedContent}\n\n`;
+                txt += `======================================================\n`;
+            });
+
+            txt += `\n\n◈ [3] 띄워진 편지 (방문객 수신함 - 총 ${Object.keys(letters).length}통)\n`;
+            txt += `------------------------------------------------------\n`;
+            if (Object.keys(letters).length === 0) txt += `수신된 편지가 없습니다.\n\n`;
+            Object.keys(letters).forEach((k, idx) => {
+                const l = letters[k];
+                const indentedContent = (l.content || '').split('\n').map(line => `    ${line}`).join('\n');
+                txt += `\n[${idx + 1}] 제목 : ${l.title}\n`;
+                txt += `    발신일시 : ${l.date}  |  상태 : ${l.read ? '수거됨(읽음)' : '미열람'}\n`;
+                txt += `    --------------------------------------------------\n`;
+                txt += `${indentedContent}\n\n`;
+                txt += `======================================================\n`;
+            });
+
+            const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a"); a.href = url; a.download = `수평선너머_백업_${key}.txt`; a.click(); URL.revokeObjectURL(url);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `수평선너머의서재_백업_${safeDateStr}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         } else if (format === 'pdf') {
-            let html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>수평선 너머의 서재 백업 (${escapeHtml(key)})</title><style>body{font-family:'Gowun Batang','Malgun Gothic',serif;padding:32px;color:#111827;line-height:1.8}h1{font-size:22px;border-bottom:2px solid #0284c7;padding-bottom:10px}h2{font-size:17px;margin-top:28px;color:#0369a1}.item{margin-bottom:20px;padding-bottom:14px;border-bottom:1px dashed #cbd5e1}.title{font-weight:bold;font-size:15px}.meta{font-size:12px;color:#64748b;margin-bottom:6px}.content{white-space:pre-wrap;font-size:13.5px}</style></head><body><h1>🌊 수평선 너머의 서재 백업</h1><h2>1. 기록된 바다 (${Object.keys(posts).length}편)</h2>`;
-            Object.keys(posts).forEach(k => { html += `<div class="item"><div class="title">${escapeHtml(posts[k].title)}</div><div class="meta">${escapeHtml(posts[k].author || '기록자')} | ${escapeHtml(posts[k].date)}</div><div class="content">${escapeHtml(posts[k].content)}</div></div>`; });
-            html += `<h2>2. 수평선 너머 (${Object.keys(horizons).length}편)</h2>`;
-            Object.keys(horizons).forEach(k => { html += `<div class="item"><div class="title">${escapeHtml(horizons[k].title)}</div><div class="meta">${escapeHtml(horizons[k].author || '기록자')} | ${escapeHtml(horizons[k].date)}</div><div class="content">${escapeHtml(horizons[k].content)}</div></div>`; });
-            html += `<h2>3. 띄워진 편지 (${Object.keys(letters).length}통)</h2>`;
-            Object.keys(letters).forEach(k => { html += `<div class="item"><div class="title">${escapeHtml(letters[k].title)}</div><div class="meta">${escapeHtml(letters[k].date)}</div><div class="content">${escapeHtml(letters[k].content)}</div></div>`; });
-            html += `</body></html>`;
-            const printIframe = document.createElement('iframe');
-            printIframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-            document.body.appendChild(printIframe);
-            const doc = printIframe.contentWindow.document;
+            const oldFrame = document.getElementById('pdf-print-frame');
+            if (oldFrame) oldFrame.remove();
+
+            const iframe = document.createElement('iframe');
+            iframe.id = 'pdf-print-frame';
+            iframe.style.cssText = 'position:fixed; right:0; bottom:0; width:0; height:0; border:0;';
+            document.body.appendChild(iframe);
+
+            let html = `
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <title>수평선 너머의 서재_백업_${escapeHtml(safeDateStr)}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap');
+                    @page { size: A4; margin: 0; }
+                    html, body {
+                        margin: 0 !important; padding: 0 !important;
+                        background-color: #ffffff; color: #1e293b;
+                        font-family: 'Noto Serif KR', 'Malgun Gothic', serif;
+                        line-height: 1.75; font-size: 10.5pt;
+                        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+                    }
+                    .layout-table { width: 100%; border-collapse: collapse; border: none; }
+                    .layout-table thead td { height: 22mm; padding: 0; border: none; }
+                    .layout-table tfoot td { height: 22mm; padding: 0; border: none; }
+                    .layout-table tbody td { padding: 0 20mm; border: none; vertical-align: top; }
+                    .doc-header { text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 18px; margin-bottom: 30px; }
+                    .doc-header h1 { margin: 0 0 8px 0; font-size: 20pt; color: #0f172a; letter-spacing: 1.5px; }
+                    .doc-header p { margin: 0 0 12px 0; font-size: 10pt; color: #64748b; }
+                    .meta-box { display: inline-block; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 18px; border-radius: 6px; font-size: 9.5pt; color: #334155; font-family: sans-serif; }
+                    .section-block { margin-bottom: 35px; }
+                    .page-break { page-break-before: always; break-before: page; }
+                    .section-title { font-size: 13.5pt; font-weight: 700; color: #0f172a; background: #f1f5f9; padding: 8px 14px; border-left: 4px solid #0284c7; margin-bottom: 18px; page-break-after: avoid; break-after: avoid; }
+                    .section-title.secret { border-left-color: #9333ea; background: #faf5ff; }
+                    .section-title.letter { border-left-color: #ea580c; background: #fff7ed; }
+                    .item-card { border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px 20px; margin-bottom: 16px; background: #ffffff; page-break-inside: avoid; break-inside: avoid; }
+                    .item-header { border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; page-break-after: avoid; break-after: avoid; }
+                    .item-title { font-size: 12pt; font-weight: 700; color: #0f172a; margin: 0; }
+                    .item-meta { font-size: 8.5pt; color: #64748b; font-family: sans-serif; white-space: nowrap; margin-left: 10px; }
+                    .item-content { white-space: pre-wrap; word-break: break-all; color: #1e293b; text-align: justify; font-size: 10pt; }
+                    .empty-msg { color: #94a3b8; font-style: italic; padding: 10px 0; }
+                </style>
+            </head>
+            <body>
+                <table class="layout-table">
+                    <thead><tr><td></td></tr></thead>
+                    <tfoot><tr><td></td></tr></tfoot>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="doc-header">
+                                    <h1>🌊 수평선 너머의 서재</h1>
+                                    <p>마리존(Marizon) 아카이브 데이터베이스 백업 리포트</p>
+                                    <div class="meta-box">
+                                        <strong>백업 일시 :</strong> ${escapeHtml(meta.date)} &nbsp;|&nbsp;
+                                        <strong>유형 :</strong> ${escapeHtml(meta.type)} 스냅샷 &nbsp;|&nbsp;
+                                        <strong>보존 데이터 :</strong> 글 ${Object.keys(posts).length}편 · 비밀 ${Object.keys(horizons).length}편 · 편지 ${Object.keys(letters).length}통
+                                    </div>
+                                </div>
+                                <div class="section-block">
+                                    <div class="section-title">1. 기록된 바다 (총 ${Object.keys(posts).length}편)</div>
+            `;
+            if (Object.keys(posts).length === 0) html += `<p class="empty-msg">기록된 글이 없습니다.</p>`;
+            Object.keys(posts).forEach((k, idx) => {
+                const p = posts[k];
+                html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(p.title)}</span><span class="item-meta">작성자: ${escapeHtml(p.author || '기록자')} | ${escapeHtml(p.date)}</span></div><div class="item-content">${escapeHtml(p.content)}</div></div>`;
+            });
+            html += `</div><div class="section-block page-break"><div class="section-title secret">2. 수평선 너머 - 비밀 기록 (총 ${Object.keys(horizons).length}편)</div>`;
+            if (Object.keys(horizons).length === 0) html += `<p class="empty-msg">은밀한 기록이 없습니다.</p>`;
+            Object.keys(horizons).forEach((k, idx) => {
+                const h = horizons[k];
+                html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(h.title)}</span><span class="item-meta">작성자: ${escapeHtml(h.author || '기록자')} | ${escapeHtml(h.date)}</span></div><div class="item-content">${escapeHtml(h.content)}</div></div>`;
+            });
+            html += `</div><div class="section-block page-break"><div class="section-title letter">3. 띄워진 편지 - 방문객 수신함 (총 ${Object.keys(letters).length}통)</div>`;
+            if (Object.keys(letters).length === 0) html += `<p class="empty-msg">수신된 편지가 없습니다.</p>`;
+            Object.keys(letters).forEach((k, idx) => {
+                const l = letters[k];
+                html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(l.title)}</span><span class="item-meta">발신일: ${escapeHtml(l.date)} | ${l.read ? '수거됨' : '미열람'}</span></div><div class="item-content">${escapeHtml(l.content)}</div></div>`;
+            });
+            html += `</div></td></tr></tbody></table></body></html>`;
+
+            const doc = iframe.contentWindow.document;
             doc.open(); doc.write(html); doc.close();
             setTimeout(() => {
-                printIframe.contentWindow.focus();
-                printIframe.contentWindow.print();
-                setTimeout(() => printIframe.remove(), 2000);
-            }, 250);
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }, 600);
         }
     });
 };
@@ -1338,7 +1530,7 @@ window.restoreFromTargetBackupPoint = function(key) {
     showSystemConfirm('선택하신 시점으로 바다 데이터를 덮어씌워 복구하시겠습니까?', function() {
         database.ref(`backupData/${key}`).once('value').then((snapshot) => {
             const targetBackup = snapshot.val();
-            if (!targetBackup) return;
+            if (!targetBackup) return showSystemAlert("복구할 원본 데이터가 유실되었습니다.");
             Promise.all([
                 database.ref('posts').set(targetBackup.posts || null),
                 database.ref('horizons').set(targetBackup.horizons || null),
@@ -1348,7 +1540,7 @@ window.restoreFromTargetBackupPoint = function(key) {
     });
 };
 
-// 🌅 시간대 배경 및 ⛅ 실시간 날씨 엔진
+// 🌅 시간대 배경 및 ⛅ 실시간 날씨 엔진 (15분 로컬 캐시 포함)
 function applyTimeBasedThemeEngine() {
     const hour = new Date().getHours();
     let mode = window.manualTimeOverride || 'auto';
@@ -1397,6 +1589,20 @@ function syncWeatherAndWidget() {
     let wElem = document.getElementById('weather-widget');
     if (!wElem && document.body) { wElem = document.createElement('div'); wElem.id = 'weather-widget'; document.body.appendChild(wElem); }
     if (window.manualWeatherOverride && window.manualWeatherOverride !== 'auto') { applyManualWeatherEffect(window.manualWeatherOverride); return; }
+
+    const CACHE_KEY = 'weather_cache_payload_v4';
+    const cachedRaw = localStorage.getItem(CACHE_KEY);
+    if (cachedRaw) {
+        try {
+            const cached = JSON.parse(cachedRaw);
+            if (Date.now() - cached.timestamp < 15 * 60 * 1000) {
+                if (wElem) wElem.innerHTML = cached.html;
+                applyManualWeatherEffect(cached.type);
+                return;
+            }
+        } catch (e) { localStorage.removeItem(CACHE_KEY); }
+    }
+
     const defaultLat = 35.1796, defaultLon = 129.0756;
     function fetchWeatherData(lat, lon) {
         fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=auto&_=${Date.now()}`, { cache: "no-store" })
@@ -1409,11 +1615,13 @@ function syncWeatherAndWidget() {
             else if (code > 0 && code <= 3) icon = '⛅';
             else if (code >= 51 && code <= 67) icon = '🌧️';
             else if (code >= 71 && code <= 77) icon = '❄️';
-            if (wElem) wElem.innerHTML = `${icon} ${Math.round(data.current_weather.temperature)}°C`;
+            const htmlResult = `${icon} ${Math.round(data.current_weather.temperature)}°C`;
+            if (wElem) wElem.innerHTML = htmlResult;
             let weatherType = 'clear';
             if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) weatherType = 'rain';
             else if ((code >= 71 && code <= 77) || code === 85 || code === 86) weatherType = 'snow';
             applyManualWeatherEffect(weatherType);
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), html: htmlResult, type: weatherType }));
         }).catch(() => { if (wElem) wElem.innerText = "☁️ 21°C"; applyManualWeatherEffect('clear'); });
     }
     if (!navigator.geolocation) { fetchWeatherData(defaultLat, defaultLon); return; }
@@ -1433,10 +1641,10 @@ window.openEnvironmentSettingsModal = function() {
         modal.onclick = () => { modal.style.display = 'none'; syncModalScrollLock(); };
         modal.innerHTML = `
             <div class="modal-content" onclick="event.stopPropagation()" style="max-width:350px;">
-                <h3 style="color:#fff; margin-bottom:20px;">⚙️ 서재 환경 조작</h3>
-                <div style="margin-bottom:16px; text-align:left;">
-                    <label style="color:#90e0ef; font-size:0.85rem; font-weight:bold; display:block; margin-bottom:8px;">🌅 시간대 배경</label>
-                    <select id="time-select" style="width:100%; padding:12px; border-radius:10px; background:#030a17; border:1px solid rgba(144,224,239,0.3); color:#fff;">
+                <h3 style="background:linear-gradient(135deg, #fff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; font-size:1.3rem;">⚙️ 서재 환경 조작</h3>
+                <div class="env-panel-area">
+                    <label class="env-label" style="color:#90e0ef;">🌅 시간대 배경</label>
+                    <select id="time-select" class="env-select-box">
                         <option value="auto">⏱️ 자동 (실시간 동기화)</option>
                         <option value="morning">🌅 아침 (물안개 청록)</option>
                         <option value="day">☀️ 낮 (스카이 블루)</option>
@@ -1444,17 +1652,17 @@ window.openEnvironmentSettingsModal = function() {
                         <option value="night">🌌 밤 (오로라 심해)</option>
                     </select>
                 </div>
-                <div style="margin-bottom:22px; text-align:left;">
-                    <label style="color:#f7a37f; font-size:0.85rem; font-weight:bold; display:block; margin-bottom:8px;">⛅ 날씨 효과</label>
-                    <select id="weather-select" style="width:100%; padding:12px; border-radius:10px; background:#030a17; border:1px solid rgba(247,163,127,0.3); color:#fff;">
+                <div class="env-panel-area" style="margin-bottom:25px;">
+                    <label class="env-label" style="color:#f7a37f;">⛅ 날씨 효과</label>
+                    <select id="weather-select" class="env-select-box">
                         <option value="auto">📍 자동 (현재 위치 기반)</option>
                         <option value="clear">☀️ 맑음 (평온한 바다)</option>
                         <option value="rain">🌧️ 비 (비 내리는 바다)</option>
                         <option value="snow">❄️ 눈 (눈 내리는 바다)</option>
                     </select>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="window.applyEnvironmentSettings()" style="flex:1; background:#0284c7; color:#fff;">설정 적용</button>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button onclick="window.applyEnvironmentSettings()" style="flex:1; background:linear-gradient(135deg, rgba(0,180,216,0.3), rgba(0,119,182,0.4)); border-color:#00b4d8; color:#fff; font-weight:bold;">설정 적용</button>
                     <button onclick="document.getElementById('env-modal').style.display='none'; window.syncModalScrollLock();" class="cancel-btn" style="flex:1;">닫기</button>
                 </div>
             </div>
@@ -1478,6 +1686,50 @@ window.applyEnvironmentSettings = function() {
     syncModalScrollLock();
 };
 
+// PWA 업데이트 토스트 및 서비스 워커 등록
+function showUpdateToast(worker) {
+    const toast = document.getElementById('update-toast');
+    const reloadBtn = document.getElementById('update-reload-btn');
+    const dismissBtn = document.getElementById('update-dismiss-btn');
+    if (toast && reloadBtn && dismissBtn) {
+        toast.classList.add('show');
+        reloadBtn.onclick = () => {
+            worker.postMessage({ action: 'skipWaiting' });
+            toast.classList.remove('show');
+        };
+        dismissBtn.onclick = () => {
+            toast.classList.remove('show');
+        };
+    }
+}
+
+if ('serviceWorker' in navigator) {
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+    });
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('firebase-messaging-sw.js').then((reg) => {
+            reg.update();
+            if (reg.waiting) { showUpdateToast(reg.waiting); return; }
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        showUpdateToast(newWorker);
+                    }
+                });
+            });
+        }).catch(err => console.log('서비스 워커 등록 실패:', err));
+    });
+}
+
+window.addEventListener('offline', () => showSystemAlert('수평선 너머와의 연결이 끊어졌습니다. 네트워크를 확인해 주세요.'));
+window.addEventListener('online', () => showSystemAlert('다시 수평선 너머로 연결되었습니다.'));
+
 // 초기화 및 이벤트 바인딩
 document.addEventListener('DOMContentLoaded', function() {
     applyTimeBasedThemeEngine();
@@ -1497,12 +1749,6 @@ document.addEventListener('DOMContentLoaded', function() {
             updateUI();
         });
     }
-
-    // PWA 업데이트 토스트 버튼 연결
-    const reloadBtn = document.getElementById('update-reload-btn');
-    const dismissBtn = document.getElementById('update-dismiss-btn');
-    if (reloadBtn) reloadBtn.onclick = () => window.location.reload();
-    if (dismissBtn) dismissBtn.onclick = () => document.getElementById('update-toast')?.classList.remove('show');
 
     // 🌊 맨 위로 가기 버튼 생성 및 스크롤 감지
     const topBtn = document.createElement('div');
@@ -1527,7 +1773,7 @@ document.addEventListener('DOMContentLoaded', function() {
         topBtn.classList.toggle('show', scrollPos > 120);
 
         if (headerElem) {
-            headerElem.classList.toggle('header-elevated', scrollPos > 45);
+            headerElem.classList.toggle('header-elevated', scrollPos > 110);
         }
 
         const themeWidget = document.getElementById('theme-widget');
