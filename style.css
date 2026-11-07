@@ -209,28 +209,51 @@ header {
     z-index: 600;
     text-align: center;
     margin-bottom: 42px;
-    border-radius: 18px;
+    border-radius: 20px;
     border: 1px solid transparent;
     transition:
-        opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-        background-color 0.4s ease,
-        border-color 0.4s ease,
-        box-shadow 0.4s ease,
-        padding 0.4s ease;
+        opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.35s ease,
+        border-color 0.35s ease,
+        box-shadow 0.35s ease,
+        padding 0.35s ease,
+        max-width 0.35s ease;
     will-change: opacity, transform;
 }
 header.header-elevated {
-    background: rgba(3, 10, 23, 0.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-color: rgba(144, 224, 239, 0.18);
-    padding: 16px 14px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+    background: rgba(3, 10, 23, 0.84);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(144, 224, 239, 0.22);
+    padding: 12px 20px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+header.header-elevated .main-title {
+    font-size: 1.45rem;
+    letter-spacing: 4px;
+    margin-bottom: 0;
+}
+header.header-elevated .subtitle {
+    display: none;
+}
+header.header-elevated .auth-box {
+    margin-top: 8px;
+}
+header.header-elevated .view-tab-container {
+    margin-top: 10px;
+    gap: 8px;
+}
+header.header-elevated .tab-btn {
+    padding: 6px 15px;
+    font-size: 0.8rem;
 }
 header.header-hidden {
     opacity: 0 !important;
-    transform: translate3d(0, -22px, 0) scale(0.985) !important;
+    transform: translate3d(0, -24px, 0) scale(0.98) !important;
     pointer-events: none !important;
 }
 header .main-title {
@@ -239,16 +262,17 @@ header .main-title {
     background: linear-gradient(135deg, #ffffff 15%, #90e0ef 50%, #f7a37f 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     text-shadow: 0 4px 15px rgba(0, 180, 216, 0.2);
+    transition: font-size 0.3s ease, margin-bottom 0.3s ease, letter-spacing 0.3s ease;
 }
 header .subtitle {
     font-size: 1rem; letter-spacing: 2px; font-weight: 500;
     background: linear-gradient(135deg, #ffb796 0%, #ffffff 50%, #90e0ef 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-.auth-box { margin-top: 25px; display: flex; justify-content: center; }
+.auth-box { margin-top: 25px; display: flex; justify-content: center; transition: margin-top 0.3s ease; }
 .auth-flex { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-.view-tab-container { display: flex; justify-content: center; gap: 12px; margin-top: 32px; flex-wrap: wrap; }
+.view-tab-container { display: flex; justify-content: center; gap: 12px; margin-top: 32px; flex-wrap: wrap; transition: margin-top 0.3s ease; }
 .tab-btn {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
     color: #e2e8f0; border-radius: 30px; padding: 10px 24px; font-size: 0.9rem; cursor: pointer; transition: all 0.25s ease;
@@ -281,7 +305,7 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     word-break: keep-all; line-height: 1.65;
 }
 
-/* 🔍 검색창, 기록자 필터, 책갈피 모아보기 */
+/* 🔍 검색창, 대칭형 화살표 셀렉트 박스, 기록자 필터, 책갈피 모아보기 */
 .search-wrapper {
     width: 100%; max-width: 800px; margin: 0 auto 38px auto;
     display: flex; flex-direction: column; align-items: center; gap: 14px;
@@ -303,19 +327,125 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
 .author-filter-container {
     width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;
 }
-#author-filter {
-    height: 42px; width: 200px; appearance: none; -webkit-appearance: none;
-    background-color: rgba(255, 255, 255, 0.04);
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 16px center; background-size: 14px;
-    border: 1px solid rgba(0, 180, 216, 0.2); color: #e2e8f0; padding: 0 36px 0 18px;
-    border-radius: 25px; font-size: 0.85rem; text-align: center; text-align-last: center; cursor: pointer;
+
+select, #author-filter {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-color: rgba(16, 25, 43, 0.7) !important;
+    background-image:
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"),
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat, no-repeat !important;
+    background-position: left 16px center, right 16px center !important;
+    background-size: 14px, 14px !important;
+    padding: 0 44px !important;
+    text-align: center !important;
+    text-align-last: center !important;
+    height: 44px !important;
+    width: auto !important;
+    min-width: 210px !important;
+    border: 1px solid rgba(0, 180, 216, 0.22) !important;
+    border-radius: 25px !important;
+    color: #e2e8f0 !important;
+    font-size: 0.85rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    outline: none !important;
 }
-#author-filter option { background: #030a16; color: #fff; }
+select:focus, #author-filter:focus {
+    border-color: #00b4d8 !important;
+    background-color: rgba(3, 10, 23, 0.85) !important;
+    background-image:
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2390e0ef' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"),
+        url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2390e0ef' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    box-shadow: 0 0 20px rgba(0, 180, 216, 0.3), inset 0 0 8px rgba(144, 224, 239, 0.2) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+}
+select option, #author-filter option {
+    background-color: #050d1a !important;
+    color: #e2e8f0 !important;
+    font-size: 0.9rem !important;
+}
+
+/* 기록자 관리창(백업 모달) 및 환경 설정 모달 내부 셀렉트 박스 전용 오버라이드 */
+html body .modal .backup-modal-content select {
+    min-width: unset !important;
+    width: auto !important;
+    height: 30px !important;
+    padding: 0 24px 0 8px !important;
+    font-size: 0.75rem !important;
+    border-radius: 8px !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7a37f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-position: right 6px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 12px !important;
+    text-align: left !important;
+    text-align-last: left !important;
+    transform: none !important;
+}
+
+.env-panel-area {
+    margin-bottom: 18px;
+    text-align: left;
+    background: rgba(3, 10, 23, 0.45);
+    padding: 15px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.env-label {
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+html body .modal .modal-content select.env-select-box {
+    width: 100% !important;
+    min-width: unset !important;
+    height: 42px !important;
+    padding: 0 35px 0 14px !important;
+    border-radius: 10px !important;
+    background-color: rgba(6, 15, 30, 0.9) !important;
+    color: #f1f5f9 !important;
+    font-size: 0.85rem !important;
+    outline: none !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    background-size: 14px !important;
+    text-align: left !important;
+    text-align-last: left !important;
+    transition: all 0.25s ease !important;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+    transform: none !important;
+}
+html body .modal .modal-content select#time-select.env-select-box {
+    border: 1px solid rgba(144, 224, 239, 0.35) !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2390e0ef' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+html body .modal .modal-content select#time-select.env-select-box:focus {
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+}
+html body .modal .modal-content select#weather-select.env-select-box {
+    border: 1px solid rgba(247, 163, 127, 0.35) !important;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7a37f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+}
+html body .modal .modal-content select#weather-select.env-select-box:focus {
+    border-color: #f7a37f !important;
+    box-shadow: 0 0 12px rgba(247, 163, 127, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.5) !important;
+}
 
 .bookmark-filter-btn {
-    height: 42px; padding: 0 18px; border-radius: 25px;
-    background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(0, 180, 216, 0.2);
+    height: 44px; padding: 0 20px; border-radius: 25px;
+    background: rgba(16, 25, 43, 0.7); border: 1px solid rgba(0, 180, 216, 0.22);
     color: #e2e8f0; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;
 }
 .bookmark-filter-btn.active {
@@ -343,7 +473,7 @@ button:hover { border-color: #00b4d8; color: #fff; box-shadow: 0 0 12px rgba(0, 
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 6px;
 }
 .char-counter { font-size: 0.8rem; color: #94a3b8; font-variant-numeric: tabular-nums; }
-.write-buttons { display: flex; gap: 10px; }
+.write-buttons { display: flex; gap: 10px; justify-content: flex-end; }
 
 input[type="text"], input[type="password"], textarea {
     width: 100%; background: rgba(3, 10, 23, 0.78); border: 1px solid rgba(255, 255, 255, 0.08);
@@ -352,6 +482,14 @@ input[type="text"], input[type="password"], textarea {
 }
 input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     border-color: #00b4d8; background: rgba(3, 10, 23, 0.92);
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.2);
+}
+
+input[type="checkbox"] {
+    vertical-align: middle !important;
+    position: relative !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
 }
 
 /* 📜 편지 안내 문구 (어절 단위 줄바꿈 + 번호 내어쓰기 적용) */
@@ -361,7 +499,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     border-radius: 12px; padding: 18px 20px; color: #cbd5e1; font-size: 0.84rem;
     line-height: 1.75; margin-bottom: 12px; word-break: keep-all;
 }
-.terms-heading { display: block; color: #90e0ef; font-size: 0.9rem; margin-bottom: 10px; }
+.terms-box strong, .terms-heading { display: block; color: #90e0ef; font-size: 0.9rem; margin-bottom: 10px; }
 .terms-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .terms-list li { display: flex; align-items: flex-start; gap: 8px; word-break: keep-all; }
 .terms-num { color: #90e0ef; font-weight: 600; flex-shrink: 0; }
@@ -371,7 +509,23 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 }
 .terms-label input[type="checkbox"] { cursor: pointer; width: 16px; height: 16px; accent-color: #00b4d8; flex-shrink: 0; }
 
-/* 🖼️ 글 카드 목록 및 그리드 (모바일 잘림 현상 완벽 해결) */
+/* 편지 일괄 선택 컨트롤 바 */
+#letter-batch-controls {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 42px !important;
+}
+#letter-batch-controls label, #letter-batch-controls button {
+    height: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* 🖼️ 글 카드 목록 및 그리드 (모바일 잘림 현상 완벽 해결 + 갤러리 2줄 푸터 지원) */
 .posts-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
@@ -419,7 +573,18 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     max-height: 8.6em; overflow: hidden; margin-bottom: 14px; flex-grow: 1;
     width: 100%; min-width: 0;
 }
-.posts-grid-view .post-content-area { max-height: 6.88em; }
+.posts-grid-view .post-content-area,
+.post-content-area.grid-text-clamp {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: pre-line !important;
+    line-height: 1.72 !important;
+    max-height: 6.88em !important;
+    margin-bottom: 16px !important;
+}
 
 .post-footer {
     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
@@ -442,42 +607,31 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 .card-mgmt-btns { display: flex; gap: 6px; flex-shrink: 0; margin-left: auto; }
 .mgmt-btn { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; }
 
-.admin-grid-footer {
-    display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; column-gap: 10px;
-    align-items: center; width: 100%; min-width: 0; padding-top: 12px; border-top: 1px dashed rgba(144, 224, 239, 0.28);
+/* 갤러리/스크롤 모드 관리자 2줄 푸터 */
+.post-footer.admin-grid-footer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    row-gap: 8px !important;
+    column-gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-top: 12px !important;
+    border-top: 1px dashed rgba(144, 224, 239, 0.28) !important;
 }
-.admin-grid-footer .grid-date { font-size: 0.82rem; color: #e2e8f0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-grid-footer .grid-date {
+    font-size: 0.8rem; color: #e2e8f0; text-align: left;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .admin-grid-footer .grid-more { text-align: right; }
 .admin-grid-footer .grid-more button {
     background: rgba(5, 12, 25, 0.95); color: #90e0ef; font-size: 0.7rem; font-weight: 600;
     padding: 2px 8px; border: 1px solid rgba(144, 224, 239, 0.3); border-radius: 6px;
 }
 .admin-grid-footer .grid-more button::after { content: ' 🌊'; }
-.admin-grid-footer .grid-time { font-size: 0.78rem; color: #94a3b8; text-align: left; }
+.admin-grid-footer .grid-time { font-size: 0.76rem; color: #94a3b8; text-align: left; }
 .admin-grid-footer .grid-actions { display: flex; justify-content: flex-end; gap: 6px; }
-
-@media (max-width: 768px) {
-    #app { padding: 56px 14px 30px 14px; width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box; }
-    header .main-title { font-size: 2.05rem; letter-spacing: 4px; word-break: keep-all; }
-    header .subtitle { font-size: 0.86rem; letter-spacing: 1px; word-break: keep-all; }
-    #write-section, #letter-section { padding: 20px 16px; border-radius: 14px; }
-    .posts-grid, .posts-grid-view {
-        grid-template-columns: minmax(0, 1fr) !important;
-        gap: 18px !important;
-        width: 100% !important;
-    }
-    .post-card {
-        padding: 20px 18px;
-        min-height: 210px;
-        border-radius: 14px;
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
-    }
-    .post-card h3 { font-size: 1.08rem; }
-    .post-content-area { font-size: 0.9rem; line-height: 1.68; }
-    .modal-content { padding: 22px 18px; }
-}
+.admin-grid-footer .grid-actions .card-mgmt-btns { margin-left: 0; }
 
 /* 📦 모달 & 상세 독서 뷰어 (글자 크기 조절 / 책갈피 / 이전·다음 글 이동 + 배경 스크롤 완전 차단) */
 .modal {
@@ -527,6 +681,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
     font-family: 'Gowun Batang', 'Noto Serif KR', serif;
     color: #e2e8f0; white-space: pre-wrap; max-height: 52vh; overflow-y: auto;
     padding-right: 8px; text-align: justify; word-break: break-word;
+    font-size: 1rem; line-height: 1.95;
     overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;
     scroll-behavior: smooth;
 }
@@ -546,7 +701,7 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 .detail-nav-btn.prev { text-align: left; }
 .detail-nav-btn.next { text-align: right; }
 
-/* 📖 서재 지침서 가독성 스타일 (내어쓰기 & keep-all & 스크롤 체이닝 방지) */
+/* 📖 서재 지침서 가독성 스타일 (내어쓰기 & keep-all & 스크롤 체이닝 방지 + 구버전 마크업 호환) */
 .guide-scroll-area {
     max-height: 55vh; overflow-y: auto; padding-right: 6px; margin: 14px 0;
     text-align: left; display: flex; flex-direction: column; gap: 14px; word-break: keep-all;
@@ -568,6 +723,9 @@ input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
 }
 .guide-bullet-list .bullet { color: #90e0ef; flex-shrink: 0; }
 .guide-desc .guide-bullet-list .bullet { color: #f7a37f; }
+#library-modal .modal-content p {
+    word-break: keep-all; line-height: 1.75; text-align: left;
+}
 
 .system-modal-box p {
     color: #e2e8f0; font-size: 0.94rem; line-height: 1.75; margin-bottom: 12px;
@@ -625,7 +783,7 @@ footer::after {
 .footer-donation-btn { font-family: 'Gowun Batang', serif; font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin-top: 14px; cursor: pointer; }
 .footer-donation-btn:hover { color: #f7a37f; }
 
-/* 날씨 오버레이 및 상단 위젯 (스크롤 방향 감지 인터랙션 포함) */
+/* 날씨 오버레이 및 상단 위젯 (스크롤 방향 감지 인터랙션 + 빈 박스 방지 포함) */
 #theme-widget, #weather-widget {
     position: fixed; top: 22px; z-index: 800; padding: 7px 15px;
     background: rgba(3, 10, 23, 0.65); border: 1px solid rgba(144, 224, 239, 0.25);
@@ -636,12 +794,46 @@ footer::after {
         transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: opacity, transform;
 }
+#theme-widget:empty::before { content: "🌅 시간 동기화 중..."; opacity: 0.65; }
+#weather-widget:empty::before { content: "☁️ 날씨 확인 중..."; opacity: 0.65; }
 #theme-widget.header-hidden, #weather-widget.header-hidden {
     opacity: 0 !important;
     transform: translate3d(0, -16px, 0) !important;
 }
 #theme-widget { left: 22px; }
 #weather-widget { right: 22px; }
+
+@media (max-width: 768px) {
+    #app { padding: 56px 14px 30px 14px; width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box; }
+    header .main-title { font-size: 2.05rem; letter-spacing: 4px; word-break: keep-all; }
+    header.header-elevated .main-title { font-size: 1.25rem; letter-spacing: 2px; }
+    header .subtitle { font-size: 0.86rem; letter-spacing: 1px; word-break: keep-all; }
+    #theme-widget, #weather-widget {
+        position: absolute !important;
+        top: 14px !important;
+        padding: 5px 11px !important;
+        font-size: 0.72rem !important;
+    }
+    #theme-widget { left: 14px !important; }
+    #weather-widget { right: 14px !important; }
+    #write-section, #letter-section { padding: 20px 16px; border-radius: 14px; }
+    .posts-grid, .posts-grid-view {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 18px !important;
+        width: 100% !important;
+    }
+    .post-card {
+        padding: 20px 18px;
+        min-height: 210px;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+    }
+    .post-card h3 { font-size: 1.08rem; }
+    .post-content-area { font-size: 0.9rem; line-height: 1.68; }
+    .modal-content { padding: 22px 18px; }
+}
 
 .weather-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 1.5s; }
 .weather-overlay::before, .weather-overlay::after { content: ""; position: absolute; pointer-events: none; background-repeat: repeat; opacity: 0; }
