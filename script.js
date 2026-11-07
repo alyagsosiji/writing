@@ -163,7 +163,7 @@ function syncModalScrollLock() {
             document.body.classList.remove('no-scroll');
             document.body.style.top = '';
             isBodyScrollLocked = false;
-            window.scrollTo(0, lockedScrollY);
+            window.scrollTo({ top: lockedScrollY, behavior: 'instant' });
         }
     }
 }
@@ -1516,10 +1516,42 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     document.body.appendChild(topBtn);
 
+    let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    const headerElem = document.querySelector('header');
+
     window.addEventListener('scroll', () => {
         if (isBodyScrollLocked) return;
-        const scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const scrollPos = Math.max(0, window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
+        const deltaY = scrollPos - lastScrollY;
+
         topBtn.classList.toggle('show', scrollPos > 120);
+
+        if (headerElem) {
+            headerElem.classList.toggle('header-elevated', scrollPos > 45);
+        }
+
+        const themeWidget = document.getElementById('theme-widget');
+        const weatherWidget = document.getElementById('weather-widget');
+
+        if (scrollPos <= 70) {
+            if (headerElem) headerElem.classList.remove('header-hidden');
+            if (themeWidget) themeWidget.classList.remove('header-hidden');
+            if (weatherWidget) weatherWidget.classList.remove('header-hidden');
+            lastScrollY = scrollPos;
+            return;
+        }
+
+        if (deltaY > 6) {
+            if (headerElem) headerElem.classList.add('header-hidden');
+            if (themeWidget) themeWidget.classList.add('header-hidden');
+            if (weatherWidget) weatherWidget.classList.add('header-hidden');
+            lastScrollY = scrollPos;
+        } else if (deltaY < -5) {
+            if (headerElem) headerElem.classList.remove('header-hidden');
+            if (themeWidget) themeWidget.classList.remove('header-hidden');
+            if (weatherWidget) weatherWidget.classList.remove('header-hidden');
+            lastScrollY = scrollPos;
+        }
     }, { passive: true });
 });
 
@@ -1566,7 +1598,7 @@ document.addEventListener('wheel', function(e) {
     }
 }, { passive: false });
 
-// 수면 파문 및 키보드 단축키 (ESC 닫기, 좌/우 방향키로 이전/다음 글 이동)
+// 수면 파문 효과
 document.addEventListener('pointerdown', function(e) {
     const ripple = document.createElement('div');
     ripple.className = 'water-ripple';
@@ -1576,7 +1608,53 @@ document.addEventListener('pointerdown', function(e) {
     setTimeout(() => ripple.remove(), 800);
 }, { passive: true });
 
+// ==========================================
+// 🛡️ 서재 기록 보안 시스템 (무단 복제 Ctrl+C/X/A, 우클릭, 드래그, 저장/인쇄/소스보기, 캡처 완벽 차단)
+// ==========================================
+function isEditableInput(target) {
+    if (!target || !target.tagName) return false;
+    const tag = target.tagName.toUpperCase();
+    return tag === 'INPUT' || tag === 'TEXTAREA';
+}
+
+// 1. 마우스 우클릭(컨텍스트 메뉴) 차단
+document.addEventListener('contextmenu', function(e) {
+    if (isEditableInput(e.target)) return;
+    e.preventDefault();
+});
+
+// 2. 마우스 드래그 및 텍스트 블록 선택 원천 차단
+document.addEventListener('dragstart', function(e) {
+    if (isEditableInput(e.target)) return;
+    e.preventDefault();
+});
+
+document.addEventListener('selectstart', function(e) {
+    if (isEditableInput(e.target)) return;
+    e.preventDefault();
+});
+
+// 3. 복사(Copy) 및 잘라내기(Cut) 이벤트 원천 차단 + 클립보드 보호 문구 덮어쓰기
+function blockClipboardCopy(e) {
+    if (isEditableInput(e.target)) return;
+    e.preventDefault();
+    if (e.clipboardData) {
+        e.clipboardData.setData('text/plain', '서재의 기록은 눈과 마음으로만 담아주세요.');
+    }
+    if (typeof showSystemAlert === 'function') {
+        showSystemAlert('서재의 기록은 눈과 마음으로만 담아주세요.');
+    }
+}
+document.addEventListener('copy', blockClipboardCopy);
+document.addEventListener('cut', blockClipboardCopy);
+
+// 4. 키보드 단축키 차단 (Ctrl+C, Ctrl+X, Ctrl+A, Ctrl+S, Ctrl+U, Ctrl+P, F12, 개발자도구, 캡처 키) & 모달 네비게이션
 document.addEventListener('keydown', function(e) {
+    const key = (e.key || '').toLowerCase();
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+    const inInput = isEditableInput(e.target);
+
+    // (A) ESC 닫기 및 독서 모달 좌/우 방향키 이동
     if (e.key === 'Escape') {
         closeModal(); closeDetailModal(); window.closeBackupModal(); window.closeDonationModal(); window.closeLibraryModal();
         ['env-modal', 'sound-modal', 'system-modal'].forEach(id => {
@@ -1584,10 +1662,71 @@ document.addEventListener('keydown', function(e) {
             if (m) m.style.display = 'none';
         });
         syncModalScrollLock();
-    } else if (currentDetailKey && document.getElementById('detail-modal')?.style.display === 'flex') {
+        return;
+    }
+    if (!inInput && currentDetailKey && document.getElementById('detail-modal')?.style.display === 'flex') {
         const list = getFilteredArray();
         const idx = list.findIndex(p => p.id === currentDetailKey);
-        if (e.key === 'ArrowLeft' && idx > 0) openDetailModal(list[idx - 1].id);
-        else if (e.key === 'ArrowRight' && idx !== -1 && idx < list.length - 1) openDetailModal(list[idx + 1].id);
+        if (e.key === 'ArrowLeft' && idx > 0) { openDetailModal(list[idx - 1].id); return; }
+        if (e.key === 'ArrowRight' && idx !== -1 && idx < list.length - 1) { openDetailModal(list[idx + 1].id); return; }
+    }
+
+    // (B) 복사(Ctrl+C), 잘라내기(Ctrl+X), 전체선택(Ctrl+A) 차단 (입력창 내부 제외)
+    if (!inInput && isCtrlOrCmd && (key === 'c' || key === 'x' || key === 'a')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText('서재의 기록은 눈과 마음으로만 담아주세요.').catch(() => {});
+        }
+        showSystemAlert('서재의 기록은 눈과 마음으로만 담아주세요.');
+        return;
+    }
+
+    // (C) 페이지 저장(Ctrl+S), 소스 보기(Ctrl+U), 인쇄(Ctrl+P) 차단
+    if (isCtrlOrCmd && (key === 's' || key === 'u' || key === 'p')) {
+        e.preventDefault();
+        e.stopPropagation();
+        showSystemAlert('서재의 기록은 눈과 마음으로만 담아주세요.');
+        return;
+    }
+
+    // (D) 개발자 도구 단축키(F12, Ctrl+Shift+I/J/C) 차단
+    if (
+        e.key === 'F12' ||
+        (isCtrlOrCmd && e.shiftKey && (key === 'i' || key === 'j' || key === 'c'))
+    ) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+    }
+
+    // (E) 화면 캡처 단축키(PrintScreen, Mac Cmd+Shift+3/4/5/S, Win+Shift+S) 차단
+    if (
+        e.key === 'PrintScreen' ||
+        (e.metaKey && e.shiftKey && (key === '3' || key === '4' || key === '5' || key === 's'))
+    ) {
+        e.preventDefault();
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText('').catch(() => {});
+        }
+        showSystemAlert('서재의 기록은 눈과 마음으로만 담아주세요.');
     }
 });
+
+document.addEventListener('keyup', function(e) {
+    if (e.key === 'PrintScreen') {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText('').catch(() => {});
+        }
+        showSystemAlert('서재의 기록은 눈과 마음으로만 담아주세요.');
+    }
+});
+
+// 5. 개발자 도구 콘솔 안내 이스터에그
+setTimeout(() => {
+    console.log(
+        "%c🌊 수평선 너머의 서재 그 뒷면에 닿으신 것을 환영합니다.\n\n%c굳게 닫힌 문을 열고 이곳(Console)까지 찾아오시다니, 바다를 탐험하는 항해사 같으시네요.\n이곳의 코드와 기록들은 눈과 마음으로만 봐주시고, 혹여나 코드를 원하신다면 [ https://github.com/alyagsosiji/writing ] 을 참고해주세요.\n\n- 서재의 기록자이자 마리존 사이트의 주인 아시 올림",
+        "color: #90e0ef; font-size: 16px; font-weight: bold; font-family: sans-serif; text-shadow: 0 0 10px rgba(144,224,239,0.5);",
+        "color: #cbd5e1; font-size: 13px; line-height: 1.8; font-family: sans-serif;"
+    );
+}, 1500);
