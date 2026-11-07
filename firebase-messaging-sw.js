@@ -1,5 +1,5 @@
 /* firebase-messaging-sw.js - PWA 렌더링 최적화 및 백그라운드 푸시 통합 */
-const CACHE_NAME = 'writing-final-v6.8';
+const CACHE_NAME = 'writing-final-v6.9';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
@@ -41,6 +41,18 @@ self.addEventListener('fetch', (event) => {
                 return response;
             }).catch(() => caches.match(event.request).then((res) => res || caches.match('index.html')))
         );
+    } else {
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                return cachedResponse || fetch(event.request).then((networkResponse) => {
+                    if (event.request.destination === 'image' && networkResponse.status === 200) {
+                        const clone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    }
+                    return networkResponse;
+                });
+            })
+        );
     }
 });
 
@@ -70,4 +82,26 @@ messaging.onBackgroundMessage((payload) => {
         vibrate: [200, 100, 200]
     };
     self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                if (client.url.includes(self.registration.scope) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow('./');
+            }
+        })
+    );
 });
