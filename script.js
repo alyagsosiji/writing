@@ -1772,10 +1772,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         topBtn.classList.toggle('show', scrollPos > 120);
 
-        if (headerElem) {
-            headerElem.classList.toggle('header-elevated', scrollPos > 110);
-        }
-
         const themeWidget = document.getElementById('theme-widget');
         const weatherWidget = document.getElementById('weather-widget');
 
