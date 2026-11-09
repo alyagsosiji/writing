@@ -799,7 +799,7 @@ function renderUI(isAppend = false) {
         if (subtitleElem) {
             let subtitleText = '';
             if (currentView === 'posts') {
-                subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #b9efff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 10px rgba(144, 224, 239, 0.6); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
+                subtitleText = `<span style="color: #e0f7ff; font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
             } else if (currentView === 'horizons') {
                 subtitleText = `<span style="color:#e9d5ff; font-size:1.02rem; font-weight:500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
             } else {
