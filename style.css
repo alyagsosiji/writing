@@ -516,6 +516,7 @@ input[type="checkbox"] {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); min-height: 250px;
     width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
+    transform: translateZ(0); backface-visibility: hidden;
 }
 .post-card:hover { transform: translate3d(0, -4px, 0); border-color: rgba(0, 180, 216, 0.32); box-shadow: 0 12px 30px rgba(0, 180, 216, 0.16); }
 
@@ -539,9 +540,10 @@ input[type="checkbox"] {
 .post-content-area {
     font-family: 'Gowun Batang', 'Apple SD Gothic Neo', sans-serif;
     color: #cbd5e1; line-height: 1.72; font-size: 0.94rem;
-    white-space: pre-wrap; text-align: justify; word-break: break-word; overflow-wrap: anywhere;
+    white-space: pre-wrap; text-align: left; word-break: break-word; overflow-wrap: anywhere;
     max-height: 8.6em; overflow: hidden; margin-bottom: 14px; flex-grow: 1;
     width: 100%; min-width: 0;
+    transform: translateZ(0); backface-visibility: hidden;
 }
 .posts-grid-view .post-content-area,
 .post-content-area.grid-text-clamp {
