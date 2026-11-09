@@ -1473,7 +1473,7 @@ window.downloadBackupFile = function(key, format) {
                     .item-header { border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline; page-break-after: avoid; break-after: avoid; }
                     .item-title { font-size: 12pt; font-weight: 700; color: #0f172a; margin: 0; }
                     .item-meta { font-size: 8.5pt; color: #64748b; font-family: sans-serif; white-space: nowrap; margin-left: 10px; }
-                    .item-content { white-space: pre-wrap; word-break: break-all; color: #1e293b; text-align: justify; font-size: 10pt; }
+                    .item-content { white-space: pre-wrap; word-break: break-all; color: #1e293b; text-align: left; font-size: 10pt; }
                     .empty-msg { color: #94a3b8; font-style: italic; padding: 10px 0; }
                 </style>
             </head>
