@@ -2,6 +2,14 @@
 
 * 패치 기록은 26.06.18 부터 기록되고 이전 패치 버전을 6으로 상정합니다.
 ---
+## 6.11d
+* 호버 시 글자 흐려짐/깨짐(서브픽셀 안티앨리어싱 전환 버그) 완벽 박멸 및 전체 UI 검증 완료.
+  - 크로미움(Chrome/Edge/Whale) 다크 배경에서 `:hover` 시 `transform: translateY()` 적용으로 인해 발생하던 GPU 비트맵 강제 승격 및 텍스트 흐려짐(두께 변화/자글거림) 현상을 100% CPU 벡터 렌더링(`position: relative; top` 트랜지션)으로 전면 교체
+  - 글 카드(`.post-card`), 모든 버튼(`button`, `.tab-btn`, `.danger-btn`, `.card-bookmark-btn`), 플로팅 버튼(`.mini-library-btn`, `.mini-audio-player`, `.mini-backup-manager`) 호버 시 글자 왜곡 0% 보장 및 기존의 부드러운 부유(Lift) + 심해 네온 글로우 감성 100% 유지
+  - 중앙 플로팅 버튼(`.mini-library-btn`) 및 토스트(`.update-toast`)의 `translateX(-50%)` 홀수 픽셀 서브픽셀 번짐까지 `left: 0; right: 0; margin: 0 auto;`로 원천 제거
+  - 커스텀 드롭다운 메뉴 및 섹션 안내 문구의 `filter: drop-shadow` / `backdrop-filter`에 의한 폰트 스무딩 간섭 제거 및 선명한 `text-shadow` 적용
+  - 서비스 워커 캐시 갱신 (writing-final-v6.11d)
+---
 ## 6.11c
 * 대칭형 글래스모피즘 커스텀 드롭다운 전면 도입 및 UI 완성도 극대화.
   - OS 기본 네이티브 셀렉트 박스를 밤바다 감성의 반투명 블러(Glassmorphism) 커스텀 드롭다운으로 전면 교체
