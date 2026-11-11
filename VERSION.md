@@ -2,6 +2,16 @@
 
 * 패치 기록은 26.06.18 부터 기록되고 이전 패치 버전을 6으로 상정합니다.
 ---
+## 6.11e
+* 전역 호버 인터랙션(떨림/깜빡임 해소 및 실키 60fps 애니메이션 복원) 완전 정상화.
+  - 글 카드(`.post-card`) 하단 경계면 진입 시 `top` 속성에 의해 발생하던 진동/깜빡임(Hover Cancellation Loop) 원천 해결
+  - 상시 GPU 컴포지터 레이어(`translate3d(0, 0, 0)` + `backface-visibility: hidden`) 고정으로 폰트 뭉개짐이나 두께 변화 없이 부드러운 60fps 부유(-4px) 애니메이션 달성
+  - 버튼류의 일괄 `top: -1px` 강제 적용을 해제하여 탭 버튼, 취소 버튼, 드롭다운 트리거의 오작동 및 스타일 왜곡 해소
+  - 활성 탭(`.tab-btn.active`) 호버 시 그라디언트 및 발광 효과 보존
+  - 카드 책갈피 버튼(`.card-bookmark-btn`)의 감성적인 확대(scale 1.18) 및 황금빛 글로우 효과 정상화
+  - 하단 플로팅 버튼(`.mini-audio-player`, `.mini-backup-manager`, `.mini-library-btn`, 소라게/기어/맨위로)의 부드러운 확대 및 리프트 모션 복원
+  - 서비스 워커 캐시 갱신 (writing-final-v6.11e)
+---
 ## 6.11d
 * 호버 시 글자 흐려짐/깨짐(서브픽셀 안티앨리어싱 전환 버그) 완벽 박멸 및 전체 UI 검증 완료.
   - 크로미움(Chrome/Edge/Whale) 다크 배경에서 `:hover` 시 `transform: translateY()` 적용으로 인해 발생하던 GPU 비트맵 강제 승격 및 텍스트 흐려짐(두께 변화/자글거림) 현상을 100% CPU 벡터 렌더링(`position: relative; top` 트랜지션)으로 전면 교체
