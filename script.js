@@ -1883,35 +1883,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let lastScrollY = window.scrollY || document.documentElement.scrollTop || 0;
     const headerElem = document.querySelector('header');
+    let isHeaderHovered = false;
+    if (headerElem) {
+        headerElem.addEventListener('mouseenter', () => { isHeaderHovered = true; }, { passive: true });
+        headerElem.addEventListener('mouseleave', () => { isHeaderHovered = false; }, { passive: true });
+    }
+    let isScrollTicking = false;
 
     window.addEventListener('scroll', () => {
         if (isBodyScrollLocked) return;
-        const scrollPos = Math.max(0, window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
-        const deltaY = scrollPos - lastScrollY;
+        if (!isScrollTicking) {
+            window.requestAnimationFrame(() => {
+                const scrollPos = Math.max(0, window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0);
+                const deltaY = scrollPos - lastScrollY;
 
-        topBtn.classList.toggle('show', scrollPos > 120);
+                // 맨 위로 가기 버튼: 120px 단일 경계선 깜빡임(Jitter) 방지를 위한 히스테리시스 적용 (160px 초과 시 표시, 90px 미만 시 숨김)
+                if (scrollPos > 160) {
+                    topBtn.classList.add('show');
+                } else if (scrollPos < 90) {
+                    topBtn.classList.remove('show');
+                }
 
-        const themeWidget = document.getElementById('theme-widget');
-        const weatherWidget = document.getElementById('weather-widget');
+                const themeWidget = document.getElementById('theme-widget');
+                const weatherWidget = document.getElementById('weather-widget');
 
-        if (scrollPos <= 70) {
-            if (headerElem) headerElem.classList.remove('header-hidden');
-            if (themeWidget) themeWidget.classList.remove('header-hidden');
-            if (weatherWidget) weatherWidget.classList.remove('header-hidden');
-            lastScrollY = scrollPos;
-            return;
-        }
+                // 사용자가 상단 헤더 영역(로그인/탭 버튼 등)을 호버하고 있거나 드롭다운이 열려있는 동안에는 헤더 숨김 방지
+                const isHovering = isHeaderHovered || (headerElem && headerElem.matches(':hover'));
+                const isDropdownOpen = document.querySelector('.custom-dropdown.open') !== null;
 
-        if (deltaY > 6) {
-            if (headerElem) headerElem.classList.add('header-hidden');
-            if (themeWidget) themeWidget.classList.add('header-hidden');
-            if (weatherWidget) weatherWidget.classList.add('header-hidden');
-            lastScrollY = scrollPos;
-        } else if (deltaY < -5) {
-            if (headerElem) headerElem.classList.remove('header-hidden');
-            if (themeWidget) themeWidget.classList.remove('header-hidden');
-            if (weatherWidget) weatherWidget.classList.remove('header-hidden');
-            lastScrollY = scrollPos;
+                if (scrollPos <= 140 || isHovering || isDropdownOpen) {
+                    if (headerElem) headerElem.classList.remove('header-hidden');
+                    if (themeWidget) themeWidget.classList.remove('header-hidden');
+                    if (weatherWidget) weatherWidget.classList.remove('header-hidden');
+                    lastScrollY = scrollPos;
+                    isScrollTicking = false;
+                    return;
+                }
+
+                // 미세 스크롤 떨림에 의한 헤더 깜빡임 차단 (충분한 스크롤 변화량 감지)
+                if (deltaY > 16) {
+                    if (headerElem) headerElem.classList.add('header-hidden');
+                    if (themeWidget) themeWidget.classList.add('header-hidden');
+                    if (weatherWidget) weatherWidget.classList.add('header-hidden');
+                    lastScrollY = scrollPos;
+                } else if (deltaY < -12) {
+                    if (headerElem) headerElem.classList.remove('header-hidden');
+                    if (themeWidget) themeWidget.classList.remove('header-hidden');
+                    if (weatherWidget) weatherWidget.classList.remove('header-hidden');
+                    lastScrollY = scrollPos;
+                }
+                isScrollTicking = false;
+            });
+            isScrollTicking = true;
         }
     }, { passive: true });
 });

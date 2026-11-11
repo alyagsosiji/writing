@@ -107,6 +107,9 @@ body {
     transform: none !important;
     will-change: auto !important;
 }
+.mini-audio-player *, .mini-backup-manager *, .mini-library-btn * {
+    pointer-events: none !important;
+}
 .mini-audio-player {
     bottom: 30px; right: 30px; border: 1px solid rgba(144, 224, 239, 0.25);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
@@ -171,10 +174,10 @@ body.admin-logged-in #random-memory-btn {
 }
 #ocean-top-btn {
     bottom: 102px; left: 38px; width: 42px; height: 42px; border-radius: 50%; font-size: 18px;
-    opacity: 0; pointer-events: none;
+    opacity: 0; pointer-events: none !important;
 }
 body.admin-logged-in #ocean-top-btn { bottom: 156px; left: 38px; }
-#ocean-top-btn.show { opacity: 0.95; pointer-events: auto; }
+#ocean-top-btn.show { opacity: 0.95; pointer-events: auto !important; }
 #random-memory-btn:hover, #time-gear-btn:hover, #ocean-top-btn.show:hover {
     transform: none !important;
     background: rgba(12, 28, 54, 0.96);
@@ -349,7 +352,8 @@ button:active {
 .search-container { width: 100%; max-width: 460px; display: flex; justify-content: center; }
 #search-input {
     width: 100%; height: 44px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(0, 180, 216, 0.2);
-    border-radius: 25px; padding: 0 20px; color: #fff; font-size: 0.9rem; text-align: center; transition: all 0.25s;
+    border-radius: 25px; padding: 0 20px; color: #fff; font-size: 0.9rem; text-align: center;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 #search-input:focus { border-color: #00b4d8; background: rgba(3, 10, 23, 0.88); box-shadow: 0 0 12px rgba(0, 180, 216, 0.25); }
 #search-input::placeholder { color: rgba(255, 255, 255, 0.78); }
@@ -389,6 +393,9 @@ button:active {
     box-shadow: none !important;
     transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease !important;
     transform: none !important;
+}
+.custom-dropdown-trigger * {
+    pointer-events: none !important;
 }
 .custom-dropdown-trigger:hover,
 .custom-dropdown.open .custom-dropdown-trigger {
@@ -435,24 +442,34 @@ button:active {
     flex-direction: column;
     gap: 4px;
     box-sizing: border-box;
-    animation: dropdownFadeIn 0.2s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+    animation: dropdownFadeIn 0.15s ease-out forwards;
+}
+.custom-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: transparent;
 }
 .custom-dropdown.open .custom-dropdown-menu {
     display: flex;
 }
 @keyframes dropdownFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 .custom-dropdown-item {
     padding: 10px 14px;
     border-radius: 11px;
+    border: 1px solid transparent;
     color: #cbd5e1;
     font-size: 0.86rem;
     font-weight: 500;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1086,6 +1103,7 @@ footer::after {
     opacity: 0 !important;
     top: 6px !important;
     transform: none !important;
+    pointer-events: none !important;
 }
 #theme-widget { left: 22px; }
 #weather-widget { right: 22px; }

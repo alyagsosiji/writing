@@ -1,5 +1,5 @@
 /* firebase-messaging-sw.js - PWA 렌더링 최적화 및 백그라운드 푸시 통합 */
-const CACHE_NAME = 'writing-final-v6.11g';
+const CACHE_NAME = 'writing-final-v6.11h';
 const ASSETS_TO_CACHE = [
     './',
     'index.html',
