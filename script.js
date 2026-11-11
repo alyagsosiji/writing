@@ -514,7 +514,7 @@ function highlightSearchKeyword(text, keyword) {
     const cleanKeyword = keyword.trim();
     const escapedKeyword = escapeHtml(cleanKeyword);
     const regex = new RegExp(escapedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return escaped.replace(regex, match => `<span style="background: rgba(0, 180, 216, 0.35); color: #fff; border-radius: 4px; padding: 1px 4px; font-weight: 600; text-shadow: 0 0 6px rgba(0, 180, 216, 0.5);">${match}</span>`);
+    return escaped.replace(regex, match => `<span style="background: rgba(0, 180, 216, 0.3); color: #ffffff; border-radius: 4px; padding: 1px 4px; font-weight: 600;">${match}</span>`);
 }
 
 function showSystemAlert(message, callback) {
@@ -836,11 +836,11 @@ function renderUI(isAppend = false) {
         if (subtitleElem) {
             let subtitleText = '';
             if (currentView === 'posts') {
-                subtitleText = `<span style="color: #e8f8ff; text-shadow: 0 0 12px rgba(144, 224, 239, 0.45); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
+                subtitleText = `<span style="color: #e2e8f0; font-size: 1.05rem; font-weight: 500; letter-spacing: -0.01em;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
             } else if (currentView === 'horizons') {
-                subtitleText = `<span style="color: #f3e8ff; text-shadow: 0 0 12px rgba(192, 132, 252, 0.45); font-size: 1.02rem; font-weight: 500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
+                subtitleText = `<span style="color: #e9d5ff; font-size: 1.02rem; font-weight: 500; letter-spacing: -0.01em;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
             } else {
-                subtitleText = `<span style="color: #ffedd5; text-shadow: 0 0 12px rgba(251, 146, 60, 0.4); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
+                subtitleText = `<span style="color: #fed7aa; font-size: 1.05rem; font-weight: 500; letter-spacing: -0.01em;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
             }
 
             const modeLabels = {
