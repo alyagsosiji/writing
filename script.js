@@ -442,6 +442,41 @@ window.setDisplayMode = function(mode) {
     renderUI();
 };
 
+window.toggleCustomDropdown = function(dropdownId, e) {
+    if (e) e.stopPropagation();
+    const target = document.getElementById(dropdownId);
+    if (!target) return;
+    const isOpen = target.classList.contains('open');
+    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+    if (!isOpen) target.classList.add('open');
+};
+
+window.selectDisplayModeOption = function(mode, e) {
+    if (e) e.stopPropagation();
+    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+    window.setDisplayMode(mode);
+};
+
+window.selectAuthorFilterOption = function(val, labelText, e) {
+    if (e) e.stopPropagation();
+    const selectElem = document.getElementById('author-filter');
+    if (selectElem) selectElem.value = val;
+    const labelElem = document.getElementById('author-filter-label');
+    if (labelElem) labelElem.innerText = labelText;
+    const dropdown = document.getElementById('author-filter-dropdown');
+    if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.querySelectorAll('.custom-dropdown-item').forEach(item => {
+            item.classList.toggle('selected', item.getAttribute('data-val') === val);
+        });
+    }
+    window.handleSearch();
+};
+
+document.addEventListener('click', function() {
+    document.querySelectorAll('.custom-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
 function formatTo24Hour(dateStr) {
     if (!dateStr) return '';
     let str = String(dateStr).trim().replace(/\b24(?=:\d{2})/g, '00');
@@ -808,14 +843,32 @@ function renderUI(isAppend = false) {
                 subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #fed7aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.4)); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
             }
 
+            const modeLabels = {
+                list: '📄 리스트 모드',
+                grid: '🔲 갤러리 모드',
+                infinite: '🌊 스크롤 모드'
+            };
+            const currentModeLabel = modeLabels[currentDisplayMode] || '📄 리스트 모드';
+
             let selectHtml = `
             <div style="margin-top: 18px; display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px;">
                 <div style="display: flex; justify-content: center; width: 100%;">
-                    <select onchange="window.setDisplayMode(this.value)">
-                        <option value="list" ${currentDisplayMode === 'list' ? 'selected' : ''}>📄 리스트 모드</option>
-                        <option value="grid" ${currentDisplayMode === 'grid' ? 'selected' : ''}>🔲 갤러리 모드</option>
-                        <option value="infinite" ${currentDisplayMode === 'infinite' ? 'selected' : ''}>🌊 스크롤 모드</option>
-                    </select>
+                    <div class="custom-dropdown" id="display-mode-dropdown">
+                        <button type="button" class="custom-dropdown-trigger" onclick="window.toggleCustomDropdown('display-mode-dropdown', event)">
+                            <span class="custom-dropdown-arrow">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                            <span class="custom-dropdown-label">${currentModeLabel}</span>
+                            <span class="custom-dropdown-arrow">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </button>
+                        <div class="custom-dropdown-menu">
+                            <div class="custom-dropdown-item ${currentDisplayMode === 'list' ? 'selected' : ''}" onclick="window.selectDisplayModeOption('list', event)">📄 리스트 모드</div>
+                            <div class="custom-dropdown-item ${currentDisplayMode === 'grid' ? 'selected' : ''}" onclick="window.selectDisplayModeOption('grid', event)">🔲 갤러리 모드</div>
+                            <div class="custom-dropdown-item ${currentDisplayMode === 'infinite' ? 'selected' : ''}" onclick="window.selectDisplayModeOption('infinite', event)">🌊 스크롤 모드</div>
+                        </div>
+                    </div>
                 </div>
             `;
             if (currentView === 'letters' && isAdmin) {
@@ -1642,26 +1695,61 @@ window.openEnvironmentSettingsModal = function() {
         modal = document.createElement('div'); modal.id = 'env-modal'; modal.className = 'modal';
         modal.onclick = () => { modal.style.display = 'none'; syncModalScrollLock(); };
         modal.innerHTML = `
-            <div class="modal-content" onclick="event.stopPropagation()" style="max-width:350px;">
+            <div class="modal-content" onclick="event.stopPropagation()" style="max-width:350px; overflow:visible;">
                 <h3 style="background:linear-gradient(135deg, #fff, #90e0ef); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:20px; font-size:1.3rem;">⚙️ 서재 환경 조작</h3>
-                <div class="env-panel-area">
+                <div class="env-panel-area" style="position:relative; z-index:20;">
                     <label class="env-label" style="color:#90e0ef;">🌅 시간대 배경</label>
-                    <select id="time-select" class="env-select-box">
+                    <select id="time-select" class="env-select-box" style="display:none !important;">
                         <option value="auto">⏱️ 자동 (실시간 동기화)</option>
                         <option value="morning">🌅 아침 (물안개 청록)</option>
                         <option value="day">☀️ 낮 (스카이 블루)</option>
                         <option value="evening">🌇 저녁 (코랄빛 노을)</option>
                         <option value="night">🌌 밤 (오로라 심해)</option>
                     </select>
+                    <div class="custom-dropdown env-custom-dropdown" id="time-select-dropdown" style="width:100%;">
+                        <button type="button" class="custom-dropdown-trigger env-dropdown-trigger time-theme-trigger" onclick="window.toggleCustomDropdown('time-select-dropdown', event)">
+                            <span class="custom-dropdown-arrow">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                            <span class="custom-dropdown-label" id="time-select-label">⏱️ 자동 (실시간 동기화)</span>
+                            <span class="custom-dropdown-arrow">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </button>
+                        <div class="custom-dropdown-menu">
+                            <div class="custom-dropdown-item selected" data-val="auto" onclick="window.selectEnvOption('time-select', 'auto', '⏱️ 자동 (실시간 동기화)', event)">⏱️ 자동 (실시간 동기화)</div>
+                            <div class="custom-dropdown-item" data-val="morning" onclick="window.selectEnvOption('time-select', 'morning', '🌅 아침 (물안개 청록)', event)">🌅 아침 (물안개 청록)</div>
+                            <div class="custom-dropdown-item" data-val="day" onclick="window.selectEnvOption('time-select', 'day', '☀️ 낮 (스카이 블루)', event)">☀️ 낮 (스카이 블루)</div>
+                            <div class="custom-dropdown-item" data-val="evening" onclick="window.selectEnvOption('time-select', 'evening', '🌇 저녁 (코랄빛 노을)', event)">🌇 저녁 (코랄빛 노을)</div>
+                            <div class="custom-dropdown-item" data-val="night" onclick="window.selectEnvOption('time-select', 'night', '🌌 밤 (오로라 심해)', event)">🌌 밤 (오로라 심해)</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="env-panel-area" style="margin-bottom:25px;">
+                <div class="env-panel-area" style="margin-bottom:25px; position:relative; z-index:10;">
                     <label class="env-label" style="color:#f7a37f;">⛅ 날씨 효과</label>
-                    <select id="weather-select" class="env-select-box">
+                    <select id="weather-select" class="env-select-box" style="display:none !important;">
                         <option value="auto">📍 자동 (현재 위치 기반)</option>
                         <option value="clear">☀️ 맑음 (평온한 바다)</option>
                         <option value="rain">🌧️ 비 (비 내리는 바다)</option>
                         <option value="snow">❄️ 눈 (눈 내리는 바다)</option>
                     </select>
+                    <div class="custom-dropdown env-custom-dropdown" id="weather-select-dropdown" style="width:100%;">
+                        <button type="button" class="custom-dropdown-trigger env-dropdown-trigger weather-theme-trigger" onclick="window.toggleCustomDropdown('weather-select-dropdown', event)">
+                            <span class="custom-dropdown-arrow" style="color:#f7a37f;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                            <span class="custom-dropdown-label" id="weather-select-label">📍 자동 (현재 위치 기반)</span>
+                            <span class="custom-dropdown-arrow" style="color:#f7a37f;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </span>
+                        </button>
+                        <div class="custom-dropdown-menu">
+                            <div class="custom-dropdown-item selected" data-val="auto" onclick="window.selectEnvOption('weather-select', 'auto', '📍 자동 (현재 위치 기반)', event)">📍 자동 (현재 위치 기반)</div>
+                            <div class="custom-dropdown-item" data-val="clear" onclick="window.selectEnvOption('weather-select', 'clear', '☀️ 맑음 (평온한 바다)', event)">☀️ 맑음 (평온한 바다)</div>
+                            <div class="custom-dropdown-item" data-val="rain" onclick="window.selectEnvOption('weather-select', 'rain', '🌧️ 비 (비 내리는 바다)', event)">🌧️ 비 (비 내리는 바다)</div>
+                            <div class="custom-dropdown-item" data-val="snow" onclick="window.selectEnvOption('weather-select', 'snow', '❄️ 눈 (눈 내리는 바다)', event)">❄️ 눈 (눈 내리는 바다)</div>
+                        </div>
+                    </div>
                 </div>
                 <div style="display:flex; gap:10px; justify-content:center;">
                     <button onclick="window.applyEnvironmentSettings()" style="flex:1; background:linear-gradient(135deg, rgba(0,180,216,0.3), rgba(0,119,182,0.4)); border-color:#00b4d8; color:#fff; font-weight:bold;">설정 적용</button>
@@ -1671,10 +1759,39 @@ window.openEnvironmentSettingsModal = function() {
         `;
         document.body.appendChild(modal);
     }
-    document.getElementById('time-select').value = window.manualTimeOverride || 'auto';
-    document.getElementById('weather-select').value = window.manualWeatherOverride || 'auto';
+    const timeVal = window.manualTimeOverride || 'auto';
+    const weatherVal = window.manualWeatherOverride || 'auto';
+    const timeSelect = document.getElementById('time-select');
+    const weatherSelect = document.getElementById('weather-select');
+    if (timeSelect) {
+        timeSelect.value = timeVal;
+        const opt = timeSelect.querySelector(`option[value="${timeVal}"]`);
+        if (opt && document.getElementById('time-select-label')) document.getElementById('time-select-label').innerText = opt.text;
+        document.querySelectorAll('#time-select-dropdown .custom-dropdown-item').forEach(el => el.classList.toggle('selected', el.getAttribute('data-val') === timeVal));
+    }
+    if (weatherSelect) {
+        weatherSelect.value = weatherVal;
+        const opt = weatherSelect.querySelector(`option[value="${weatherVal}"]`);
+        if (opt && document.getElementById('weather-select-label')) document.getElementById('weather-select-label').innerText = opt.text;
+        document.querySelectorAll('#weather-select-dropdown .custom-dropdown-item').forEach(el => el.classList.toggle('selected', el.getAttribute('data-val') === weatherVal));
+    }
     modal.style.display = 'flex';
     syncModalScrollLock();
+};
+
+window.selectEnvOption = function(selectId, val, labelText, e) {
+    if (e) e.stopPropagation();
+    const sel = document.getElementById(selectId);
+    if (sel) sel.value = val;
+    const lbl = document.getElementById(selectId + '-label');
+    if (lbl) lbl.innerText = labelText;
+    const dd = document.getElementById(selectId + '-dropdown');
+    if (dd) {
+        dd.classList.remove('open');
+        dd.querySelectorAll('.custom-dropdown-item').forEach(item => {
+            item.classList.toggle('selected', item.getAttribute('data-val') === val);
+        });
+    }
 };
 
 window.applyEnvironmentSettings = function() {

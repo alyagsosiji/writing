@@ -165,11 +165,27 @@
                     </div>
                     
                     <div id="author-filter-container" class="author-filter-container" style="display: none;">
-                        <select id="author-filter" onchange="window.handleSearch()">
+                        <select id="author-filter" onchange="window.handleSearch()" style="display: none !important;">
                             <option value="all">전체 기록자 보기</option>
                             <option value="아시">아시 님</option>
                             <option value="하은">하은 님</option>
                         </select>
+                        <div class="custom-dropdown" id="author-filter-dropdown">
+                            <button type="button" class="custom-dropdown-trigger" onclick="window.toggleCustomDropdown('author-filter-dropdown', event)">
+                                <span class="custom-dropdown-arrow">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </span>
+                                <span class="custom-dropdown-label" id="author-filter-label">전체 기록자 보기</span>
+                                <span class="custom-dropdown-arrow">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </span>
+                            </button>
+                            <div class="custom-dropdown-menu">
+                                <div class="custom-dropdown-item selected" data-val="all" onclick="window.selectAuthorFilterOption('all', '전체 기록자 보기', event)">전체 기록자 보기</div>
+                                <div class="custom-dropdown-item" data-val="아시" onclick="window.selectAuthorFilterOption('아시', '아시 님', event)">아시 님</div>
+                                <div class="custom-dropdown-item" data-val="하은" onclick="window.selectAuthorFilterOption('하은', '하은 님', event)">하은 님</div>
+                            </div>
+                        </div>
                         <button type="button" id="bookmark-filter-btn" class="bookmark-filter-btn" onclick="window.toggleBookmarkFilter()">
                             🔖 책갈피 모아보기
                         </button>
