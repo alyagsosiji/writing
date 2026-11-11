@@ -475,9 +475,11 @@ function escapeHtml(text) {
 
 function highlightSearchKeyword(text, keyword) {
     const escaped = escapeHtml(text);
-    if (!keyword) return escaped;
-    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    return escaped.replace(regex, match => `<span style="background: rgba(144, 224, 239, 0.28); color: #fff; border-radius: 3px; padding: 0 3px;">${match}</span>`);
+    if (!keyword || !keyword.trim()) return escaped;
+    const cleanKeyword = keyword.trim();
+    const escapedKeyword = escapeHtml(cleanKeyword);
+    const regex = new RegExp(escapedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return escaped.replace(regex, match => `<span style="background: rgba(0, 180, 216, 0.35); color: #fff; border-radius: 4px; padding: 1px 4px; font-weight: 600; text-shadow: 0 0 6px rgba(0, 180, 216, 0.5);">${match}</span>`);
 }
 
 function showSystemAlert(message, callback) {
@@ -803,7 +805,7 @@ function renderUI(isAppend = false) {
             } else if (currentView === 'horizons') {
                 subtitleText = `<span style="color:#e9d5ff; font-size:1.02rem; font-weight:500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
             } else {
-                subtitleText = `수평선 너머 바다 위에 띄워진 편지들.<br><span style="color:#ffd4ba; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
+                subtitleText = `<span style="color: #ffd4ba; font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
             }
 
             let selectHtml = `

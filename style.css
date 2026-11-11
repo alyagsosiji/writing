@@ -49,7 +49,8 @@ html, body {
     color: #f1f5f9;
     overflow-x: hidden;
     scroll-behavior: smooth;
-    -webkit-font-smoothing: subpixel-antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
 }
 
@@ -534,8 +535,8 @@ input[type="checkbox"] {
 }
 .post-card h3 {
     font-family: 'Gowun Batang', 'Noto Serif KR', serif;
-    color: #ffffff; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.02em;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: #ffffff; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.01em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; word-break: keep-all;
     flex: 1; min-width: 0; margin: 0;
 }
 .card-bookmark-btn {
@@ -546,11 +547,12 @@ input[type="checkbox"] {
 .card-bookmark-btn:hover { color: #fde68a; background: transparent; box-shadow: none !important; }
 
 .post-content-area {
-    font-family: 'Gowun Batang', 'Noto Serif KR', 'Apple SD Gothic Neo', sans-serif;
-    color: #dbe4f0; line-height: 1.88; letter-spacing: 0.025em; word-spacing: 0.04em; font-size: 0.95rem;
-    white-space: pre-wrap; text-align: left; word-break: break-word; overflow-wrap: anywhere;
-    max-height: 9.4em; overflow: hidden; margin-bottom: 16px; flex-grow: 1;
-    width: 100%; min-width: 0;
+    font-family: 'Gowun Batang', 'Noto Serif KR', serif;
+    color: #dbe4f0; line-height: 1.85; letter-spacing: 0.015em; font-size: 0.95rem;
+    white-space: pre-line; text-align: left; word-break: keep-all; overflow-wrap: break-word;
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+    max-height: calc(1.85em * 5); overflow: hidden; text-overflow: ellipsis;
+    margin-bottom: 16px; flex-grow: 1; width: 100%; min-width: 0;
     transform: none !important;
 }
 .posts-grid-view .post-content-area,
@@ -561,8 +563,8 @@ input[type="checkbox"] {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     white-space: pre-line !important;
-    line-height: 1.88 !important;
-    max-height: 7.52em !important;
+    line-height: 1.85 !important;
+    max-height: calc(1.85em * 4) !important;
     margin-bottom: 16px !important;
 }
 
@@ -659,15 +661,15 @@ input[type="checkbox"] {
 .detail-popup-body { text-align: left; margin-bottom: 14px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 #detail-text {
     font-family: 'Gowun Batang', 'Noto Serif KR', serif;
-    color: #e8eff7; white-space: pre-wrap; max-height: 54vh; overflow-y: auto;
-    padding: 8px 12px 8px 4px; text-align: left; word-break: break-word;
-    font-size: 1.03rem; line-height: 2.15; letter-spacing: 0.035em; word-spacing: 0.06em;
+    color: #edf2f9; white-space: pre-wrap; max-height: 64vh; overflow-y: auto;
+    padding: 10px 16px 14px 16px; text-align: left; word-break: keep-all; overflow-wrap: break-word;
+    font-size: 1.03rem; line-height: 1.92; letter-spacing: 0.015em;
     overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y;
     scroll-behavior: smooth;
 }
-#detail-text.reader-font-sm { font-size: 0.94rem; line-height: 2.05; letter-spacing: 0.03em; }
-#detail-text.reader-font-md { font-size: 1.03rem; line-height: 2.15; letter-spacing: 0.035em; }
-#detail-text.reader-font-lg { font-size: 1.15rem; line-height: 2.25; letter-spacing: 0.04em; }
+#detail-text.reader-font-sm { font-size: 0.94rem; line-height: 1.82; letter-spacing: 0.01em; }
+#detail-text.reader-font-md { font-size: 1.03rem; line-height: 1.92; letter-spacing: 0.015em; }
+#detail-text.reader-font-lg { font-size: 1.15rem; line-height: 2.02; letter-spacing: 0.02em; }
 
 .detail-nav-bar {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
@@ -810,8 +812,28 @@ footer::after {
         min-width: 0;
     }
     .post-card h3 { font-size: 1.08rem; }
-    .post-content-area { font-size: 0.9rem; line-height: 1.68; }
+    .post-content-area {
+        font-size: 0.91rem;
+        line-height: 1.76;
+        max-height: calc(1.76em * 5);
+        margin-bottom: 14px;
+    }
+    .posts-grid-view .post-content-area,
+    .post-content-area.grid-text-clamp {
+        line-height: 1.76 !important;
+        max-height: calc(1.76em * 4) !important;
+        margin-bottom: 14px !important;
+    }
     .modal-content { padding: 22px 18px; }
+    #detail-text {
+        max-height: 58vh;
+        padding: 8px 10px 12px 10px;
+        font-size: 0.98rem;
+        line-height: 1.85;
+    }
+    #detail-text.reader-font-sm { font-size: 0.9rem; line-height: 1.78; }
+    #detail-text.reader-font-md { font-size: 0.98rem; line-height: 1.85; }
+    #detail-text.reader-font-lg { font-size: 1.08rem; line-height: 1.95; }
 }
 
 .weather-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 1.5s; }
