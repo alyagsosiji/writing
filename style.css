@@ -231,6 +231,7 @@ header .main-title {
     font-size: 3.1rem; font-weight: 700; letter-spacing: 8px; margin-right: -8px; margin-bottom: 14px;
     background: linear-gradient(135deg, #ffffff 15%, #90e0ef 50%, #f7a37f 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 4px 15px rgba(0, 180, 216, 0.22));
     transition: font-size 0.3s ease, margin-bottom 0.3s ease, letter-spacing 0.3s ease;
 }
 header .subtitle {
@@ -244,23 +245,30 @@ header .subtitle {
 .view-tab-container { display: flex; justify-content: center; gap: 12px; margin-top: 32px; flex-wrap: wrap; transition: margin-top 0.3s ease; }
 .tab-btn {
     background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #e2e8f0; border-radius: 30px; padding: 10px 24px; font-size: 0.9rem; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+    color: #e2e8f0; border-radius: 30px; padding: 10px 24px; font-size: 0.9rem; cursor: pointer; transition: all 0.25s ease;
 }
 .tab-btn:hover { color: #fff; border-color: rgba(0, 180, 216, 0.45); }
 .tab-btn.active {
     background: linear-gradient(135deg, rgba(0, 180, 216, 0.22), rgba(247, 163, 127, 0.1));
     border-color: #00b4d8; color: #00b4d8;
+    box-shadow: 0 0 16px rgba(0, 180, 216, 0.25);
 }
 
 button {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
     color: #e2e8f0; border: 1px solid rgba(0, 180, 216, 0.22);
     padding: 8px 22px; border-radius: 20px; cursor: pointer;
-    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease; font-size: 0.85rem;
+    transition: all 0.25s ease; font-size: 0.85rem;
 }
-button:hover { border-color: #00b4d8; color: #fff; background: rgba(0, 180, 216, 0.12); }
+button:hover {
+    border-color: #00b4d8; color: #fff; background: rgba(0, 180, 216, 0.14);
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.35); transform: translateY(-1px);
+}
 .danger-btn { border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
-.danger-btn:hover { border-color: #ef4444; color: #fff; background: rgba(239, 68, 68, 0.15); }
+.danger-btn:hover {
+    border-color: #ef4444; color: #fff; background: rgba(239, 68, 68, 0.16);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+}
 .cancel-btn { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); color: #cbd5e1; }
 
 .centered-title {
@@ -523,22 +531,23 @@ input[type="checkbox"] {
 .post-card {
     background: #071429;
     border: 1px solid rgba(255, 255, 255, 0.08); padding: 26px; border-radius: 16px;
-    position: relative; transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1), border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); min-height: 250px;
     width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden;
     display: flex; flex-direction: column; justify-content: space-between; cursor: pointer;
-    transform: none !important; backface-visibility: visible !important; filter: none !important;
+    backface-visibility: visible !important;
 }
 .post-card:hover {
-    transform: none !important;
+    transform: translateY(-4px) !important;
     background: #0a1c38;
     border-color: rgba(144, 224, 239, 0.48);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 18px rgba(0, 180, 216, 0.18) !important;
-    filter: none !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 20px rgba(0, 180, 216, 0.2) !important;
 }
 .post-card *, .post-card:hover * {
     text-shadow: none !important;
     filter: none !important;
+    transform: none !important;
 }
 
 .card-title-row {
@@ -554,18 +563,26 @@ input[type="checkbox"] {
 .card-bookmark-btn {
     background: transparent; border: none; padding: 2px 6px; font-size: 1rem;
     color: #64748b; cursor: pointer; box-shadow: none !important; flex-shrink: 0;
+    transition: transform 0.2s ease, color 0.2s ease, filter 0.2s ease;
 }
-.card-bookmark-btn.bookmarked { color: #fbbf24; }
-.card-bookmark-btn:hover { color: #fde68a; background: transparent; box-shadow: none !important; }
+.card-bookmark-btn.bookmarked {
+    color: #fbbf24;
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5));
+}
+.card-bookmark-btn:hover {
+    color: #fde68a;
+    transform: scale(1.18);
+    background: transparent;
+    box-shadow: none !important;
+}
 
 .post-content-area {
     font-family: 'Gowun Batang', 'Noto Serif KR', serif;
     color: #dbe4f0; line-height: 1.85; letter-spacing: 0.015em; font-size: 0.95rem;
-    white-space: pre-line; text-align: left; word-break: keep-all; overflow-wrap: break-word;
+    white-space: pre-wrap; text-align: left; word-break: keep-all; overflow-wrap: break-word;
     display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
     max-height: calc(1.85em * 5); overflow: hidden; text-overflow: ellipsis;
     margin-bottom: 16px; flex-grow: 1; width: 100%; min-width: 0;
-    transform: none !important;
 }
 .posts-grid-view .post-content-area,
 .post-content-area.grid-text-clamp {
@@ -574,7 +591,7 @@ input[type="checkbox"] {
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    white-space: pre-line !important;
+    white-space: pre-wrap !important;
     line-height: 1.85 !important;
     max-height: calc(1.85em * 4) !important;
     margin-bottom: 16px !important;

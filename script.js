@@ -801,11 +801,11 @@ function renderUI(isAppend = false) {
         if (subtitleElem) {
             let subtitleText = '';
             if (currentView === 'posts') {
-                subtitleText = `<span style="color: #e0f7ff; font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
+                subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #b9efff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(144, 224, 239, 0.45)); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">아래 바다에 기록된 글들을 클릭하여 읽어주세요!</span><br><span style="color:#90e0ef; font-size:0.85rem; display:inline-block; margin-top:8px;">총 기록된 글 : ${allPosts.length}개</span>`;
             } else if (currentView === 'horizons') {
-                subtitleText = `<span style="color:#e9d5ff; font-size:1.02rem; font-weight:500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
+                subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #d8b4fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.45)); font-size: 1.02rem; font-weight: 500;">기록자만이 열람할 수 있는 비밀의 바다입니다.</span><br><span style="color:#c9a0ff; font-size:0.85rem; display:inline-block; margin-top:8px;">은밀한 기록 : ${allHorizons.length}개</span>`;
             } else {
-                subtitleText = `<span style="color: #ffd4ba; font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
+                subtitleText = `<span style="background: linear-gradient(120deg, #ffffff 0%, #fed7aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(251, 146, 60, 0.4)); font-size: 1.05rem; font-weight: 500; letter-spacing: 0.5px;">수평선 너머 바다 위에 띄워진 편지들</span><br><span style="color:#f7a37f; font-size:0.85rem; display:inline-block; margin-top:8px;">띄워진 편지 : ${allLetters.length}개</span>`;
             }
 
             let selectHtml = `
