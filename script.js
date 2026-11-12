@@ -182,7 +182,7 @@ function openSoundModal() {
                 <div style="margin-bottom:16px; background:rgba(255,255,255,0.04); padding:16px; border-radius:12px; text-align:left; border:1px solid rgba(255,255,255,0.08);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span style="color:#bae6fd; font-size:0.85rem; font-weight:bold;">🎵 배경 음악 (BGM)</span>
-                        <button id="btn-music-toggle" onclick="window.togglePlayPause()" style="padding:6px 14px; border-radius:8px; background:#0284c7; color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:0.8rem;">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
+                        <button id="btn-music-toggle" class="sound-toggle-btn music" onclick="window.togglePlayPause()">${isTrackPlaying ? '일시정지' : '음악 재생'}</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <input type="range" id="bgm-vol-slider" min="0" max="1" step="0.01" value="${bgmVolume}" oninput="window.setBgmVolume(this.value)" style="flex:1; accent-color:#38bdf8; cursor:pointer;">
@@ -192,7 +192,7 @@ function openSoundModal() {
                 <div style="margin-bottom:22px; background:rgba(255,255,255,0.04); padding:16px; border-radius:12px; text-align:left; border:1px solid rgba(255,255,255,0.08);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span style="color:#a7f3d0; font-size:0.85rem; font-weight:bold;">🌊 파도 소리 (ASMR)</span>
-                        <button id="btn-asmr-toggle" onclick="window.toggleAsmr()" style="padding:6px 14px; border-radius:8px; background:#059669; color:#fff; border:none; cursor:pointer; font-weight:bold; font-size:0.8rem;">${isAsmrPlaying ? '파도 끄기' : '파도 켜기'}</button>
+                        <button id="btn-asmr-toggle" class="sound-toggle-btn asmr" onclick="window.toggleAsmr()">${isAsmrPlaying ? '파도 끄기' : '파도 켜기'}</button>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px;">
                         <input type="range" id="asmr-vol-slider" min="0" max="1" step="0.01" value="${asmrVolume}" oninput="window.setAsmrVolume(this.value)" style="flex:1; accent-color:#34d399; cursor:pointer;">
@@ -303,7 +303,8 @@ function updateDetailBookmarkUI() {
     if (!btn || !currentDetailKey) return;
     const isMarked = bookmarkedIds.has(currentDetailKey);
     btn.classList.toggle('active', isMarked);
-    btn.innerText = isMarked ? '🔖 책갈피됨' : '🔖 책갈피';
+    btn.innerText = isMarked ? '🔖 책갈피됨' : '🔖 책갈피 안 됨';
+    btn.title = isMarked ? '책갈피 해제 (클릭 시 해제)' : '책갈피 등록 (클릭 시 등록)';
 }
 
 // 독서 모달 글자 크기 조절
@@ -969,7 +970,10 @@ function renderUI(isAppend = false) {
 
         const isMarked = bookmarkedIds.has(item.id);
         const bookmarkIconHtml = (currentView !== 'letters')
-            ? `<button type="button" class="card-bookmark-btn ${isMarked ? 'bookmarked' : ''}" onclick="window.toggleBookmark('${item.id}', event)" title="책갈피">🔖</button>`
+            ? `<button type="button" class="card-bookmark-btn ${isMarked ? 'bookmarked' : 'unbookmarked'}" onclick="window.toggleBookmark('${item.id}', event)" title="${isMarked ? '책갈피됨 (클릭 시 해제)' : '책갈피 안 됨 (클릭 시 등록)'}">${isMarked
+                ? `<svg class="bookmark-svg" viewBox="0 0 24 24" width="17" height="17" fill="#fbbf24" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`
+                : `<svg class="bookmark-svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>`
+            }</button>`
             : '';
 
         let safeContentHtml = '';
@@ -1350,7 +1354,7 @@ function renderAdminSettings() {
                     <div style="color:#e2e8f0; font-weight:bold; margin-bottom:5px;">🌊 바다 휴식 모드 (수신 차단)</div>
                     <div style="color:#94a3b8; font-size:0.78rem; line-height:1.6;">활성화 시, 일반 방문객들의 편지 수신 작성이 제한되고 안내 문구가 표시됩니다.</div>
                 </div>
-                <button onclick="window.toggleRestMode()" style="flex-shrink:0; padding:8px 14px; font-size:0.8rem; border-radius:8px; background:${isRestMode ? '#ef4444' : '#475569'}; color:#fff; border:none;">
+                <button onclick="window.toggleRestMode()" class="rest-mode-toggle-btn ${isRestMode ? 'active' : 'inactive'}">
                     ${isRestMode ? '휴식 중 (해제하기)' : '휴식 모드 켜기'}
                 </button>
             </div>
@@ -1479,9 +1483,9 @@ function loadBackupTimelineList() {
                         </div>
                     </div>
                     <div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">
-                        <button class="mgmt-btn" onclick="window.downloadBackupFile('${key}', 'txt')" title="텍스트 문서로 저장" style="font-size:0.75rem; padding:5px 9px; border-radius:6px; background:rgba(255,255,255,0.06);">TXT</button>
-                        <button class="mgmt-btn" onclick="window.downloadBackupFile('${key}', 'pdf')" title="PDF 문서로 인쇄 및 저장" style="font-size:0.75rem; padding:5px 9px; border-radius:6px; background:rgba(247,163,127,0.12); color:#ffd4ba; border-color:rgba(247,163,127,0.3);">PDF</button>
-                        <button class="backup-restore-btn" onclick="window.restoreFromTargetBackupPoint('${key}')" style="font-size:0.75rem; padding:5px 11px; border-radius:6px; background:#e76f51; color:#fff; border:none; cursor:pointer;">복구</button>
+                        <button class="backup-txt-btn" onclick="window.downloadBackupFile('${key}', 'txt')" title="텍스트 문서로 저장">TXT</button>
+                        <button class="backup-pdf-btn" onclick="window.downloadBackupFile('${key}', 'pdf')" title="PDF 문서로 인쇄 및 저장">PDF</button>
+                        <button class="backup-restore-btn" onclick="window.restoreFromTargetBackupPoint('${key}')" title="이 시점으로 데이터 복구">복구</button>
                     </div>
                 </div>
             `;
@@ -1827,7 +1831,7 @@ window.openEnvironmentSettingsModal = function() {
                     </div>
                 </div>
                 <div style="display:flex; gap:10px; justify-content:center;">
-                    <button onclick="window.applyEnvironmentSettings()" style="flex:1; background:linear-gradient(135deg, rgba(0,180,216,0.3), rgba(0,119,182,0.4)); border-color:#00b4d8; color:#fff; font-weight:bold;">설정 적용</button>
+                    <button onclick="window.applyEnvironmentSettings()" class="env-apply-btn">설정 적용</button>
                     <button onclick="document.getElementById('env-modal').style.display='none'; window.syncModalScrollLock();" class="cancel-btn" style="flex:1;">닫기</button>
                 </div>
             </div>

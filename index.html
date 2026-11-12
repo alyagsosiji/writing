@@ -297,7 +297,7 @@
                 </label>
                 
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
-                    <button onclick="window.triggerManualBackup()" class="mgmt-btn" style="height:30px; display:flex; align-items:center; margin:0; padding:0 12px; font-size:0.75rem; border-radius:6px; background:rgba(56,189,248,0.12); border:1px solid #38bdf8; color:#38bdf8; font-weight:bold;">✨ 수동 백업</button>
+                    <button onclick="window.triggerManualBackup()" class="manual-backup-btn">✨ 수동 백업</button>
                     <select id="backup-period-select" onchange="window.selectBackupsByPeriod(this.value)" style="height:30px; margin:0; width:auto; background:rgba(3,10,23,0.8); border:1px solid rgba(247,163,127,0.3); color:#fff; padding:0 10px; border-radius:6px; font-size:0.75rem; outline:none; cursor:pointer;">
                         <option value="">기간 선택</option>
                         <option value="7">7일 이전</option>
@@ -327,7 +327,7 @@
             <div class="detail-popup-header">
                 <div class="detail-header-top">
                     <h3 id="detail-title">제목</h3>
-                    <button type="button" id="detail-bookmark-btn" class="detail-bookmark-btn" onclick="window.toggleCurrentDetailBookmark()">🔖 책갈피</button>
+                    <button type="button" id="detail-bookmark-btn" class="detail-bookmark-btn" onclick="window.toggleCurrentDetailBookmark()" title="책갈피 등록 (클릭 시 등록)">🔖 책갈피 안 됨</button>
                 </div>
                 <div class="detail-meta-row">
                     <span id="detail-date" class="date">날짜</span>
