@@ -7,12 +7,11 @@ const NOTIFICATION_CONFIG = {
     letterTitle: "수평선 너머의 서재",
     letterBody: "새로운 편지가 수평선 너머, 바다 위로 띄워졌습니다.",
     icon: "글_하은.png",
-    badge: "글_하은.png",
+    badge: "멘헤라_하은.png",
     vibrate: [200, 100, 200]
 };
 
 const MY_MUSIC_LIST = [
-    { title: "Ethereal Horizon - KUSE.", src: "Ethereal Horizon.mp3" },
     { title: "Ethereal Horizon - KUSE.", src: "Ethereal Horizon.mp3" }
 ];
 
@@ -325,19 +324,13 @@ function injectRandomMemoryButton() {
     const btn = document.createElement('div');
     btn.id = 'random-memory-btn';
     btn.innerHTML = '🐚';
-    btn.title = "파도에 밀려온 과거의 조각 (필터를 기준으로 랜덤 글 뽑기)";
+    btn.title = "파도에 밀려온 과거의 조각 (현재 필터 기준으로 랜덤 글 뽑기)";
     btn.onclick = () => {
-        let filtered = allPosts;
-        if (searchAuthor !== 'all') {
-            filtered = filtered.filter(item => {
-                const author = item.author || "기록자";
-                return searchAuthor === "하은" ? author.includes("하은") : !author.includes("하은");
-            });
+        const targetPool = (currentView === 'letters') ? allPosts : getFilteredArray();
+        if (targetPool.length === 0) {
+            return showSystemAlert('현재 선택된 조건에 해당하는 기록이 바다에 존재하지 않습니다.');
         }
-        if (filtered.length === 0) {
-            return showSystemAlert(searchAuthor === 'all' ? '아직 바다에 기록된 추억이 없습니다.' : `현재 선택된 기록자(${searchAuthor} 님)의 글이 존재하지 않습니다.`);
-        }
-        const randomPost = filtered[Math.floor(Math.random() * filtered.length)];
+        const randomPost = targetPool[Math.floor(Math.random() * targetPool.length)];
         openDetailModal(randomPost.id);
     };
     document.body.appendChild(btn);
@@ -357,7 +350,7 @@ const secureConfig = {
     authDomain: "star-bock.firebaseapp.com",
     databaseURL: "https://star-bock-default-rtdb.firebaseio.com",
     projectId: "star-bock",
-    storageBucket: "star-bock.appspot.com",
+    storageBucket: "star-bock.firebasestorage.app",
     messagingSenderId: "351507784717",
     appId: "1:351507784717:web:e22bb5718c0ebfbd3ca144",
     measurementId: "G-3EM79479JT"
@@ -517,7 +510,10 @@ function highlightSearchKeyword(text, keyword) {
     return escaped.replace(regex, match => `<span style="background: rgba(0, 180, 216, 0.3); color: #ffffff; border-radius: 4px; padding: 1px 4px; font-weight: 600;">${match}</span>`);
 }
 
+let currentSystemCancelCallback = null;
+
 function showSystemAlert(message, callback) {
+    currentSystemCancelCallback = callback || null;
     const modalElem = document.getElementById('system-modal');
     if (document.getElementById('system-title')) document.getElementById('system-title').innerText = "안내";
     if (document.getElementById('system-message')) document.getElementById('system-message').innerText = message;
@@ -525,13 +521,19 @@ function showSystemAlert(message, callback) {
     if (btns) {
         btns.innerHTML = "";
         const okBtn = document.createElement('button'); okBtn.innerText = "확인";
-        okBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; syncModalScrollLock(); if (callback) callback(); };
+        okBtn.onclick = function() {
+            currentSystemCancelCallback = null;
+            if (modalElem) modalElem.style.display = 'none';
+            syncModalScrollLock();
+            if (callback) callback();
+        };
         btns.appendChild(okBtn);
     }
     if (modalElem) { modalElem.style.display = 'flex'; syncModalScrollLock(); }
 }
 
 function showSystemConfirm(message, onConfirm, onCancel) {
+    currentSystemCancelCallback = onCancel || null;
     const modalElem = document.getElementById('system-modal');
     if (document.getElementById('system-title')) document.getElementById('system-title').innerText = "확인";
     if (document.getElementById('system-message')) document.getElementById('system-message').innerText = message;
@@ -539,9 +541,19 @@ function showSystemConfirm(message, onConfirm, onCancel) {
     if (btns) {
         btns.innerHTML = "";
         const confirmBtn = document.createElement('button'); confirmBtn.innerText = "확인";
-        confirmBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; syncModalScrollLock(); if (onConfirm) onConfirm(); };
+        confirmBtn.onclick = function() {
+            currentSystemCancelCallback = null;
+            if (modalElem) modalElem.style.display = 'none';
+            syncModalScrollLock();
+            if (onConfirm) onConfirm();
+        };
         const cancelBtn = document.createElement('button'); cancelBtn.innerText = "취소"; cancelBtn.className = "cancel-btn";
-        cancelBtn.onclick = function() { if (modalElem) modalElem.style.display = 'none'; syncModalScrollLock(); if (onCancel) onCancel(); };
+        cancelBtn.onclick = function() {
+            currentSystemCancelCallback = null;
+            if (modalElem) modalElem.style.display = 'none';
+            syncModalScrollLock();
+            if (onCancel) onCancel();
+        };
         btns.appendChild(confirmBtn); btns.appendChild(cancelBtn);
     }
     if (modalElem) { modalElem.style.display = 'flex'; syncModalScrollLock(); }
@@ -624,6 +636,14 @@ window.submitPin = function() {
     }
 };
 
+window.closePinModal = function() {
+    const pinModal = document.getElementById('pin-modal');
+    if (pinModal) pinModal.style.display = 'none';
+    window.clearPin();
+    if (firebase.auth) firebase.auth().signOut();
+    syncModalScrollLock();
+};
+
 window.login = function() {
     const idElem = document.getElementById('admin-id');
     const pwElem = document.getElementById('admin-pw');
@@ -687,6 +707,9 @@ function updateUI() {
 }
 
 function switchView(view) {
+    if (editTargetKey && currentView !== view) {
+        cancelEdit();
+    }
     if (!isAdmin && (view === 'letters' || view === 'horizons')) { currentView = 'posts'; return; }
     currentView = view; currentPage = 1;
     const tabPosts = document.getElementById('tab-posts');
@@ -941,7 +964,7 @@ function renderUI(isAppend = false) {
         const formattedFullDate = formatTo24Hour(item.date);
         const displayDate = (currentView === 'posts' || currentView === 'horizons') ? `${escapeHtml(item.author || "기록자")} ㅣ ${formattedFullDate}` : formattedFullDate;
         const selectLetterCbHtml = (isAdmin && currentView === 'letters')
-            ? `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation();" style="margin-right:10px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle;">`
+            ? `<input type="checkbox" class="letter-checkbox" value="${item.id}" onclick="event.stopPropagation(); window.syncLetterSelectAll();" style="margin-right:10px; accent-color:#00b4d8; width:16px; height:16px; cursor:pointer; vertical-align:middle;">`
             : '';
 
         const isMarked = bookmarkedIds.has(item.id);
@@ -1093,6 +1116,8 @@ function savePost() {
         database.ref(targetNode + '/' + editTargetKey).update(postData).then(() => {
             showSystemAlert('기록이 수정되었습니다.'); clearDraftCacheStorage('post'); cancelEdit();
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('기록 수정 중 오류가 발생했습니다: ' + (err.message || err));
         }).finally(() => { isSubmitting = false; });
     } else {
         database.ref(targetNode).push(postData).then(() => {
@@ -1100,6 +1125,8 @@ function savePost() {
             clearDraftCacheStorage('post'); currentPage = 1;
             showSystemAlert(currentView === 'horizons' ? '수평선 너머에 은밀히 새겨졌습니다.' : '성공적으로 새겨졌습니다.');
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('기록 저장 중 오류가 발생했습니다: ' + (err.message || err));
         }).finally(() => { isSubmitting = false; });
     }
 }
@@ -1139,6 +1166,8 @@ function saveLetter() {
             if (document.getElementById('agree-terms')) document.getElementById('agree-terms').checked = false;
             clearDraftCacheStorage('letter'); showSystemAlert('편지가 바다 위로 안전하게 띄워졌습니다.'); currentPage = 1; renderUI();
             if (isAdmin) setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('편지를 띄우는 중 오류가 발생했습니다: ' + (err.message || err));
         }).finally(() => { isSubmitting = false; });
     });
 }
@@ -1181,6 +1210,8 @@ window.deletePost = function(key) {
         const targetNode = currentView === 'horizons' ? 'horizons' : 'posts';
         database.ref(targetNode + '/' + key).remove().then(() => {
             renderUI(); setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('기록 삭제 중 오류가 발생했습니다: ' + (err.message || err));
         });
     });
 };
@@ -1191,12 +1222,23 @@ window.deleteLetter = function(key) {
         if (currentDetailKey === key) closeDetailModal();
         database.ref('letters/' + key).remove().then(() => {
             renderUI(); setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('편지 삭제 중 오류가 발생했습니다: ' + (err.message || err));
         });
     });
 };
 
 window.toggleAllLetters = function(source) {
     document.querySelectorAll('.letter-checkbox').forEach(cb => cb.checked = source.checked);
+};
+
+window.syncLetterSelectAll = function() {
+    const all = document.querySelectorAll('.letter-checkbox');
+    const checked = document.querySelectorAll('.letter-checkbox:checked');
+    const selectAll = document.getElementById('letter-select-all');
+    if (selectAll) {
+        selectAll.checked = all.length > 0 && all.length === checked.length;
+    }
 };
 
 window.deleteSelectedLetters = function() {
@@ -1208,7 +1250,10 @@ window.deleteSelectedLetters = function() {
         keysToDelete.forEach(key => { batchUpdates['letters/' + key] = null; });
         database.ref().update(batchUpdates).then(() => {
             showSystemAlert('선택하신 편지 조각들이 완벽히 소멸되었습니다.');
+            if (document.getElementById('letter-select-all')) document.getElementById('letter-select-all').checked = false;
             setTimeout(() => window.executeCloudBackupEngine(true), 800);
+        }).catch(err => {
+            showSystemAlert('편지 일괄 삭제 중 오류가 발생했습니다: ' + (err.message || err));
         });
     });
 };
@@ -1217,10 +1262,29 @@ window.clearDatabase = function() {
     if (!isAdmin || !database) return;
     showSystemConfirm('🚨 모든 기록과 편지들이 사라집니다. 초기화할까요?', function() {
         setTimeout(() => {
-            showSystemConfirm('정말 소멸시킬까요?', function() {
-                Promise.all([database.ref('posts').remove(), database.ref('horizons').remove(), database.ref('letters').remove()]).then(() => {
-                    cancelEdit(); currentPage = 1; showSystemAlert('초기 상태가 되었습니다.');
-                });
+            showSystemConfirm('정말 소멸시킬까요? (초기화 직전 안전 백업이 자동 생성됩니다)', function() {
+                const proceedClear = () => {
+                    Promise.all([
+                        database.ref('posts').remove(),
+                        database.ref('horizons').remove(),
+                        database.ref('letters').remove()
+                    ]).then(() => {
+                        cancelEdit();
+                        currentPage = 1;
+                        bookmarkedIds.clear();
+                        saveBookmarksToStorage();
+                        renderUI();
+                        showSystemAlert('모든 데이터가 초기화되었습니다. (초기화 직전 백업 생성 완료)');
+                    }).catch(err => {
+                        showSystemAlert('초기화 중 오류가 발생했습니다: ' + (err.message || err));
+                    });
+                };
+
+                if (typeof window.executeCloudBackupEngine === 'function') {
+                    window.executeCloudBackupEngine(true).then(proceedClear).catch(() => proceedClear());
+                } else {
+                    proceedClear();
+                }
             });
         }, 150);
     });
@@ -1343,7 +1407,17 @@ function cleanExpiredBackupsTimeline() {
     });
 }
 
-window.toggleAllBackups = function(source) { document.querySelectorAll('.backup-checkbox').forEach(cb => cb.checked = source.checked); };
+window.toggleAllBackups = function(source) {
+    document.querySelectorAll('.backup-checkbox').forEach(cb => cb.checked = source.checked);
+};
+window.syncBackupSelectAll = function() {
+    const all = document.querySelectorAll('.backup-checkbox');
+    const checked = document.querySelectorAll('.backup-checkbox:checked');
+    const selectAll = document.getElementById('backup-select-all');
+    if (selectAll) {
+        selectAll.checked = all.length > 0 && all.length === checked.length;
+    }
+};
 window.selectBackupsByPeriod = function(days) {
     const checkboxes = document.querySelectorAll('.backup-checkbox');
     const selectAllCb = document.getElementById('backup-select-all');
@@ -1382,6 +1456,7 @@ function loadBackupTimelineList() {
     const loadingMsg = document.getElementById('backup-loading-msg');
     if (!container || !database) return;
     container.innerHTML = '';
+    if (document.getElementById('backup-select-all')) document.getElementById('backup-select-all').checked = false;
     if (loadingMsg) loadingMsg.style.display = 'block';
     const expirationThreshold = Date.now() - CONTEXT_RETENTION_PERIOD;
     database.ref('backupMeta').once('value').then((snapshot) => {
@@ -1397,7 +1472,7 @@ function loadBackupTimelineList() {
             el.innerHTML = `
                 <div style="display:flex; align-items:center; width:100%; justify-content:space-between; gap:10px;">
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" style="accent-color:#f7a37f; width:16px; height:16px; cursor:pointer;">
+                        <input type="checkbox" class="backup-checkbox" value="${key}" data-timestamp="${item.timestamp}" onchange="window.syncBackupSelectAll();" style="accent-color:#f7a37f; width:16px; height:16px; cursor:pointer;">
                         <div class="backup-info">
                             <div class="backup-time-title">${item.date} <span class="backup-badge-type ${badgeClass}">${item.type}</span></div>
                             <div class="backup-counts">기록된 글 ${item.pCount || 0}개 ㅣ 비밀 기록 ${item.hCount || 0}개 ㅣ 띄워진 편지 ${item.lCount || 0}개</div>
@@ -1429,20 +1504,23 @@ window.downloadBackupFile = function(key, format) {
         const letters = data.letters || {};
         const safeDateStr = (meta.date || key).replace(/[:.\s]/g, '_').replace(/__+/g, '_');
 
+        const postsList = Object.values(posts).sort((a, b) => (parseCustomDate(a.date) || 0) - (parseCustomDate(b.date) || 0));
+        const horizonsList = Object.values(horizons).sort((a, b) => (parseCustomDate(a.date) || 0) - (parseCustomDate(b.date) || 0));
+        const lettersList = Object.values(letters).sort((a, b) => (parseCustomDate(a.date) || 0) - (parseCustomDate(b.date) || 0));
+
         if (format === 'txt') {
             let txt = `======================================================\n`;
             txt += `  🌊 수평선 너머의 서재 - 데이터베이스 백업 리포트\n`;
             txt += `======================================================\n`;
             txt += `• 백업 일시 : ${meta.date}\n`;
             txt += `• 백업 유형 : ${meta.type} 스냅샷\n`;
-            txt += `• 통계 요약 : 기록 ${Object.keys(posts).length}편 / 비밀 ${Object.keys(horizons).length}편 / 편지 ${Object.keys(letters).length}통\n`;
+            txt += `• 통계 요약 : 기록 ${postsList.length}편 / 비밀 ${horizonsList.length}편 / 편지 ${lettersList.length}통\n`;
             txt += `======================================================\n\n\n`;
 
-            txt += `◈ [1] 바다의 기록 (총 ${Object.keys(posts).length}편)\n`;
+            txt += `◈ [1] 바다의 기록 (총 ${postsList.length}편)\n`;
             txt += `------------------------------------------------------\n`;
-            if (Object.keys(posts).length === 0) txt += `기록된 글이 없습니다.\n\n`;
-            Object.keys(posts).forEach((k, idx) => {
-                const p = posts[k];
+            if (postsList.length === 0) txt += `기록된 글이 없습니다.\n\n`;
+            postsList.forEach((p, idx) => {
                 const indentedContent = (p.content || '').split('\n').map(line => `    ${line}`).join('\n');
                 txt += `\n[${idx + 1}] 제목 : ${p.title}\n`;
                 txt += `    작성자 : ${p.author || '기록자'}  |  작성일시 : ${p.date}\n`;
@@ -1451,11 +1529,10 @@ window.downloadBackupFile = function(key, format) {
                 txt += `======================================================\n`;
             });
 
-            txt += `\n\n◈ [2] 수평선 너머 (비밀 공간 - 총 ${Object.keys(horizons).length}편)\n`;
+            txt += `\n\n◈ [2] 수평선 너머 (비밀 공간 - 총 ${horizonsList.length}편)\n`;
             txt += `------------------------------------------------------\n`;
-            if (Object.keys(horizons).length === 0) txt += `은밀한 기록이 없습니다.\n\n`;
-            Object.keys(horizons).forEach((k, idx) => {
-                const h = horizons[k];
+            if (horizonsList.length === 0) txt += `은밀한 기록이 없습니다.\n\n`;
+            horizonsList.forEach((h, idx) => {
                 const indentedContent = (h.content || '').split('\n').map(line => `    ${line}`).join('\n');
                 txt += `\n[${idx + 1}] 제목 : ${h.title}\n`;
                 txt += `    작성자 : ${h.author || '기록자'}  |  작성일시 : ${h.date}\n`;
@@ -1464,11 +1541,10 @@ window.downloadBackupFile = function(key, format) {
                 txt += `======================================================\n`;
             });
 
-            txt += `\n\n◈ [3] 띄워진 편지 (방문객 수신함 - 총 ${Object.keys(letters).length}통)\n`;
+            txt += `\n\n◈ [3] 띄워진 편지 (방문객 수신함 - 총 ${lettersList.length}통)\n`;
             txt += `------------------------------------------------------\n`;
-            if (Object.keys(letters).length === 0) txt += `수신된 편지가 없습니다.\n\n`;
-            Object.keys(letters).forEach((k, idx) => {
-                const l = letters[k];
+            if (lettersList.length === 0) txt += `수신된 편지가 없습니다.\n\n`;
+            lettersList.forEach((l, idx) => {
                 const indentedContent = (l.content || '').split('\n').map(line => `    ${line}`).join('\n');
                 txt += `\n[${idx + 1}] 제목 : ${l.title}\n`;
                 txt += `    발신일시 : ${l.date}  |  상태 : ${l.read ? '수거됨(읽음)' : '미열람'}\n`;
@@ -1545,27 +1621,24 @@ window.downloadBackupFile = function(key, format) {
                                     <div class="meta-box">
                                         <strong>백업 일시 :</strong> ${escapeHtml(meta.date)} &nbsp;|&nbsp;
                                         <strong>유형 :</strong> ${escapeHtml(meta.type)} 스냅샷 &nbsp;|&nbsp;
-                                        <strong>보존 데이터 :</strong> 글 ${Object.keys(posts).length}편 · 비밀 ${Object.keys(horizons).length}편 · 편지 ${Object.keys(letters).length}통
+                                        <strong>보존 데이터 :</strong> 글 ${postsList.length}편 · 비밀 ${horizonsList.length}편 · 편지 ${lettersList.length}통
                                     </div>
                                 </div>
                                 <div class="section-block">
-                                    <div class="section-title">1. 기록된 바다 (총 ${Object.keys(posts).length}편)</div>
+                                    <div class="section-title">1. 기록된 바다 (총 ${postsList.length}편)</div>
             `;
-            if (Object.keys(posts).length === 0) html += `<p class="empty-msg">기록된 글이 없습니다.</p>`;
-            Object.keys(posts).forEach((k, idx) => {
-                const p = posts[k];
+            if (postsList.length === 0) html += `<p class="empty-msg">기록된 글이 없습니다.</p>`;
+            postsList.forEach((p, idx) => {
                 html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(p.title)}</span><span class="item-meta">작성자: ${escapeHtml(p.author || '기록자')} | ${escapeHtml(p.date)}</span></div><div class="item-content">${escapeHtml(p.content)}</div></div>`;
             });
-            html += `</div><div class="section-block page-break"><div class="section-title secret">2. 수평선 너머 - 비밀 기록 (총 ${Object.keys(horizons).length}편)</div>`;
-            if (Object.keys(horizons).length === 0) html += `<p class="empty-msg">은밀한 기록이 없습니다.</p>`;
-            Object.keys(horizons).forEach((k, idx) => {
-                const h = horizons[k];
+            html += `</div><div class="section-block page-break"><div class="section-title secret">2. 수평선 너머 - 비밀 기록 (총 ${horizonsList.length}편)</div>`;
+            if (horizonsList.length === 0) html += `<p class="empty-msg">은밀한 기록이 없습니다.</p>`;
+            horizonsList.forEach((h, idx) => {
                 html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(h.title)}</span><span class="item-meta">작성자: ${escapeHtml(h.author || '기록자')} | ${escapeHtml(h.date)}</span></div><div class="item-content">${escapeHtml(h.content)}</div></div>`;
             });
-            html += `</div><div class="section-block page-break"><div class="section-title letter">3. 띄워진 편지 - 방문객 수신함 (총 ${Object.keys(letters).length}통)</div>`;
-            if (Object.keys(letters).length === 0) html += `<p class="empty-msg">수신된 편지가 없습니다.</p>`;
-            Object.keys(letters).forEach((k, idx) => {
-                const l = letters[k];
+            html += `</div><div class="section-block page-break"><div class="section-title letter">3. 띄워진 편지 - 방문객 수신함 (총 ${lettersList.length}통)</div>`;
+            if (lettersList.length === 0) html += `<p class="empty-msg">수신된 편지가 없습니다.</p>`;
+            lettersList.forEach((l, idx) => {
                 html += `<div class="item-card"><div class="item-header"><span class="item-title">#${idx + 1}. ${escapeHtml(l.title)}</span><span class="item-meta">발신일: ${escapeHtml(l.date)} | ${l.read ? '수거됨' : '미열람'}</span></div><div class="item-content">${escapeHtml(l.content)}</div></div>`;
             });
             html += `</div></td></tr></tbody></table></body></html>`;
@@ -1577,6 +1650,8 @@ window.downloadBackupFile = function(key, format) {
                 iframe.contentWindow.print();
             }, 600);
         }
+    }).catch(err => {
+        showSystemAlert("백업 파일 내보내기 중 오류가 발생했습니다: " + (err.message || err));
     });
 };
 
@@ -2038,14 +2113,71 @@ document.addEventListener('keydown', function(e) {
     const isCtrlOrCmd = e.ctrlKey || e.metaKey;
     const inInput = isEditableInput(e.target);
 
-    // (A) ESC 닫기 및 독서 모달 좌/우 방향키 이동
+    // (A-1) 1순위: 시스템 알림/확인 모달 (#system-modal) 열려있을 때 ESC 누르면 해당 모달만 닫고 취소 콜백 실행
+    const sysModal = document.getElementById('system-modal');
+    if (sysModal && (sysModal.style.display === 'flex' || sysModal.style.display === 'block')) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            sysModal.style.display = 'none';
+            const cb = currentSystemCancelCallback;
+            currentSystemCancelCallback = null;
+            syncModalScrollLock();
+            if (cb) cb();
+            return;
+        }
+    }
+
+    // (A-2) 2순위: 2차 인증 PIN 모달 (#pin-modal) 활성화 시 키보드 입력(0~9, Backspace, Enter, Escape) 지원
+    const pinModal = document.getElementById('pin-modal');
+    const isPinOpen = pinModal && (pinModal.style.display === 'flex' || pinModal.style.display === 'block');
+    if (isPinOpen) {
+        if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            window.inputPin(e.key);
+            return;
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            currentPin = currentPin.slice(0, -1);
+            if (document.getElementById('pin-display')) {
+                document.getElementById('pin-display').innerText = '●'.repeat(currentPin.length);
+            }
+            return;
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            window.submitPin();
+            return;
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            window.closePinModal();
+            return;
+        }
+    }
+
+    // (A-3) ESC 계층형 우선순위 순차 닫기: 서브 모달 -> 독서 상세 모달 순차 닫기
     if (e.key === 'Escape') {
-        closeModal(); closeDetailModal(); window.closeBackupModal(); window.closeDonationModal(); window.closeLibraryModal();
-        ['env-modal', 'sound-modal', 'system-modal'].forEach(id => {
-            const m = document.getElementById(id);
-            if (m) m.style.display = 'none';
-        });
-        syncModalScrollLock();
+        const subModals = [
+            { id: 'env-modal', close: () => { const m = document.getElementById('env-modal'); if (m) m.style.display = 'none'; syncModalScrollLock(); } },
+            { id: 'sound-modal', close: () => { const m = document.getElementById('sound-modal'); if (m) m.style.display = 'none'; syncModalScrollLock(); } },
+            { id: 'library-modal', close: window.closeLibraryModal },
+            { id: 'backup-modal', close: window.closeBackupModal },
+            { id: 'donation-modal', close: window.closeDonationModal },
+            { id: 'login-modal', close: window.closeModal }
+        ];
+        for (const sm of subModals) {
+            const el = document.getElementById(sm.id);
+            if (el && (el.style.display === 'flex' || el.style.display === 'block')) {
+                e.preventDefault();
+                sm.close();
+                return;
+            }
+        }
+
+        const detailModal = document.getElementById('detail-modal');
+        if (detailModal && (detailModal.style.display === 'flex' || detailModal.style.display === 'block')) {
+            e.preventDefault();
+            closeDetailModal();
+            return;
+        }
         return;
     }
     if (!inInput && currentDetailKey && document.getElementById('detail-modal')?.style.display === 'flex') {
